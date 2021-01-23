@@ -31,13 +31,15 @@ aeskey *resolve_sessionkey (uint32_t netid, uint32_t sid, uint32_t serial,
         log_warn ("Session <%08x-%08x> not found", sid, netid);
         return NULL;
     }
-    if (S->lastserial >= serial) {
+    if ((S->lastserial >= serial) &&
+        ((S->lastserial < 0xfffffff8) || (serial>8))) {
         log_warn ("Rejecting old serial <%i> for session <%08x-%08x> which"
                   " is currently <%i> at the session-level",
                   serial, sid, netid, S->lastserial);
         return NULL;
     }
-    if (S->host->lastserial >= serial) {
+    if ((S->host->lastserial >= serial) &&
+        ((S->host->lastserial < 0xfffffff8) || (serial>8))) {
         log_warn ("Rejecting old serial <%i> for session <%08x-%08x> which"
                   " is currently <%i> at the host-level",
                   serial, sid, netid, S->host->lastserial);
