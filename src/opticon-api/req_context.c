@@ -23,10 +23,10 @@ req_arg *req_arg_alloc (void) {
   */
 void req_arg_add_nocopy (req_arg *self, const char *a) {
     if (self->argc) {
-        self->argv = (char **) realloc (self->argv,
-                                 sizeof (req_arg) * (self->argc+1));
+        self->argv = (char **)
+            realloc (self->argv, sizeof (char *) * (self->argc+1));
     }
-    else self->argv = (char **) malloc (sizeof (req_arg));
+    else self->argv = (char **) malloc (sizeof (char *));
     self->argv[self->argc] = (char *) a;
     self->argc++;
 }
