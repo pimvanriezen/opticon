@@ -112,10 +112,14 @@ tenant *tenant_find (uuid tenantid, tenantlock lockt) {
         else {
             nt = tenant_alloc();
             nt->uuid = tenantid;
+            pthread_rwlock_unlock(&TENANTS.lock);
+            pthread_rwlock_wrlock(&TENANTS.lock);
+            t = TENANTS.last;
             t->next = nt;
             nt->prev = t;
             TENANTS.last = nt;
             t = nt;
+            // we'll unlock at the end of the function.
             break;
         }
     }
