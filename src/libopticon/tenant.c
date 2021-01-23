@@ -28,7 +28,8 @@ tenant *tenant_alloc (void) {
   * previously obtained through, e.g., tenant_find(), and
   * will have been properly locked. This function will first
   * put a write lock on neighbouring nodes, so we can safely
-  * manipulate their next/prev pointers.
+  * manipulate their next/prev pointers. If neighbouring nodes
+  * happen to be locked, the tenant is not actually deleted.
   */
 void tenant_delete (tenant *t) {
     if (! t) return;
@@ -47,7 +48,10 @@ void tenant_delete (tenant *t) {
     if (t->next) {
         if (pthread_rwlock_trywrlock (&t->next->lock) != 0) {
             // Back out of the deal.
-            if (t->prev) t->prev->next = t;
+            if (t->prev) {
+                t->prev->next = t;
+                pthread_rwlock_unlock (&t->prev->lock);
+            }
             else TENANTS.first = t;
             pthread_rwlock_unlock (&TENANTS.lock);
             return;
