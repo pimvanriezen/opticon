@@ -51,7 +51,7 @@ typedef struct watchadjust_s {
     struct watchadjust_s    *prev;
     watchadjusttype          type;
     meterid_t                id;
-    adjustdata               adjust[WATCH_CRIT];
+    adjustdata               adjust[WATCH_CRIT+1];
 } watchadjust;
 
 /** List header for a list of watchadjust objects */
