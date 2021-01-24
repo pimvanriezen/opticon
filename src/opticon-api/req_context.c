@@ -240,7 +240,7 @@ void req_write_response (struct MHD_Connection *conn,
     void *buf = (void *) ioport_get_buffer (out);
     size_t buflen = ioport_read_available (out);
     struct MHD_Response *response;
-    response = MHD_create_response_from_data (buflen, buf, 1, 1);
+    response = MHD_create_response_from_buffer (buflen, buf, MHD_RESPMEM_MUST_COPY);
     MHD_queue_response (conn, status, response);
     MHD_destroy_response (response);
 }
@@ -264,10 +264,8 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
         if (ctx->method & crsr->method_mask) {
             if (req_match_check (crsr, url, targ)) {
                 if (crsr->func) {
-                    if (crsr->func (ctx, targ, ctx->response,
-                                              &ctx->status)) {
-                        req_write_response (conn, ctx->response,
-                                            ctx->status, out, 0);
+                    if (crsr->func (ctx, targ, ctx->response, &ctx->status)) {
+                        req_write_response (conn, ctx->response, ctx->status, out, 0);
                         req_arg_free (targ);
                         ioport_close (out);
                         return;
@@ -275,8 +273,7 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
                 }
                 else if (crsr->textfunc) {
                     if (crsr->textfunc (ctx, targ, out, &ctx->status)) {
-                        req_write_response (conn, ctx->response,
-                                            ctx->status, out, 1);
+                        req_write_response (conn, ctx->response, ctx->status, out, 1);
                         req_arg_free (targ);
                         ioport_close (out);
                         return;

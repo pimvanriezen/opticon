@@ -23,20 +23,18 @@
 req_matchlist REQ_MATCHES;
 
 /** MHD callback function for setting the context headers */
-int enumerate_header (void *cls, enum MHD_ValueKind kind,
-                      const char *key, const char *value) {
+enum MHD_Result enumerate_header (void *cls, enum MHD_ValueKind kind,
+                                  const char *key, const char *value) {
     req_context *ctx = (req_context *) cls;
     req_context_set_header (ctx, key, value);
     return MHD_YES;
 }
 
 /** MHD callback function for handling a connection */
-int answer_to_connection (void *cls, struct MHD_Connection *connection,
-                          const char *url,
-                          const char *method, const char *version,
-                          const char *upload_data,
-                          size_t *upload_data_size,
-                          void **con_cls) {
+enum MHD_Result answer_to_connection (void *cls, struct MHD_Connection *connection,
+                                      const char *url, const char *method,
+                                      const char *version, const char *upload_data,
+                                      size_t *upload_data_size, void **con_cls) {
     /* Set up a context if we're at the first callback */
     req_context *ctx = *con_cls;
     if (ctx == NULL) {
