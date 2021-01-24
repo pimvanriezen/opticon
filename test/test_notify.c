@@ -7,6 +7,7 @@
 #include <libopticon/ioport_file.h>
 #include <libopticon/aes.h>
 #include <libopticon/log.h>
+#include <libopticon/var_dump.h>
 #include <assert.h>
 #include <stdio.h>
 
