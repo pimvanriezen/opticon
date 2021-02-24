@@ -137,12 +137,63 @@ int handle_external_token_openstack (req_context *ctx) {
     return retcode;;
 }
 
+int handle_external_token_unithost (req_context *ctx) {
+    if (! OPTIONS.unithost_url[0]) return 0;
+    char *url = (char *) malloc (strlen(OPTIONS.unithost_url)+40);
+    sprintf (url, "%s", OPTIONS.unithost_url);
+    int retcode = 0;
+    int i = 0;
+    var *hdr = var_alloc();
+    var_set_str_forkey (hdr, "X-Auth-Token", ctx->external_token);
+    var *data = var_alloc();
+    var *res = http_call ("GET", url, hdr, data, NULL, NULL);
+
+    if (ctx->auth_tenants) {
+        free (ctx->auth_tenants);
+        ctx->auth_tenants = NULL;
+    }
+
+    if (res) {
+        if (var_find_key (res, "tenant")) {
+            uuid u = var_get_uuid_forkey (res, "tenant");
+            ctx->auth_tenantcount = 1;
+            ctx->auth_tenants = malloc (sizeof (uuid));
+            ctx->auth_tenants[0] = u;
+            const char *strid = var_get_str_forkey (res, "tenant");
+            var *acc = var_find_key (res, "account");
+            if (acc) {
+                const char *idname = var_get_str_forkey (acc, "company");
+                if (! idname || (! idname[0])) {
+                    idname = var_get_str_forkey (acc, "contact");
+                }
+                var_set_str_forkey (ctx->auth_data, strid, idname);
+            }
+            retcode = 1;
+            ctx->userlevel = AUTH_USER;
+        }
+        var_free (res);
+    }
+    
+    log_info ("%s [UNITHOST  ] %03i CALL %s %s <%c%c...>",
+              ctx->remote, retcode, url,
+              retcode?"ACCEPT":"REJECT",
+              ctx->external_token[0], ctx->external_token[1]);
+    
+    free (url);
+    var_free (hdr);
+    var_free (data);
+    return retcode;;
+}
+
 int handle_external_token (req_context *ctx) {
     if (! ctx->external_token) return 0;
     if (! ctx->external_token[0]) return 0;
     if (! ctx->external_token[1]) return 0;
     if (OPTIONS.keystone_url && OPTIONS.keystone_url[0]) {
         return handle_external_token_openstack (ctx);
+    }
+    else if (OPTIONS.unithost_url && OPTIONS.unithost_url[0]) {
+        return handle_external_token_unithost (ctx);
     }
     else return 0;
 }
