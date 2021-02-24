@@ -95,9 +95,7 @@ int handle_external_token_openstack (req_context *ctx) {
     var *hdr = var_alloc();
     var_set_str_forkey (hdr, "X-Auth-Token", ctx->external_token);
     var *data = var_alloc();
-    var *res = http_call ("GET",
-                          "https://identity.stack.cloudvps.com/v2.0/tenants",
-                          hdr, data, NULL, NULL);
+    var *res = http_call ("GET", url, hdr, data, NULL, NULL);
 
     if (ctx->auth_tenants) {
         free (ctx->auth_tenants);
