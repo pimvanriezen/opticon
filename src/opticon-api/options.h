@@ -9,6 +9,7 @@ typedef struct apioptions_s {
     const char  *mconfpath;
     const char  *pidfile;
     const char  *keystone_url;
+    const char  *unithost_url;
     int          foreground;
     int          port;
     uuid         admintoken;

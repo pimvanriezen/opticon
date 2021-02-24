@@ -84,10 +84,7 @@ enum MHD_Result answer_to_connection (void *cls, struct MHD_Connection *connecti
     return MHD_YES;
 }
 
-int handle_openstack_token (req_context *ctx) {
-    if (! ctx->openstack_token) return 0;
-    if (! ctx->openstack_token[0]) return 0;
-    if (! ctx->openstack_token[1]) return 0;
+int handle_external_token_openstack (req_context *ctx) {
     if (! OPTIONS.keystone_url[0]) return 0;
     char *url = (char *) malloc (strlen(OPTIONS.keystone_url)+40);
     char l = OPTIONS.keystone_url[strlen(OPTIONS.keystone_url)-1];
@@ -96,7 +93,7 @@ int handle_openstack_token (req_context *ctx) {
     int retcode = 0;
     int i = 0;
     var *hdr = var_alloc();
-    var_set_str_forkey (hdr, "X-Auth-Token", ctx->openstack_token);
+    var_set_str_forkey (hdr, "X-Auth-Token", ctx->external_token);
     var *data = var_alloc();
     var *res = http_call ("GET",
                           "https://identity.stack.cloudvps.com/v2.0/tenants",
@@ -134,12 +131,22 @@ int handle_openstack_token (req_context *ctx) {
     log_info ("%s [KEYSTONE  ] %03i CALL %s %s <%c%c...>",
               ctx->remote, retcode, url,
               retcode?"ACCEPT":"REJECT",
-              ctx->openstack_token[0], ctx->openstack_token[1]);
+              ctx->external_token[0], ctx->external_token[1]);
     
     free (url);
     var_free (hdr);
     var_free (data);
     return retcode;;
+}
+
+int handle_external_token (req_context *ctx) {
+    if (! ctx->external_token) return 0;
+    if (! ctx->external_token[0]) return 0;
+    if (! ctx->external_token[1]) return 0;
+    if (OPTIONS.keystone_url && OPTIONS.keystone_url[0]) {
+        return handle_external_token_openstack (ctx);
+    }
+    else return 0;
 }
 
 /** Filter that croaks when no valid token was set */
@@ -159,8 +166,8 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
         }
         else ctx->userlevel = AUTH_USER;
     }
-    else if (ctx->openstack_token) {
-        tcache_node *cache = tokencache_lookup (ctx->openstack_token);
+    else if (ctx->external_token) {
+        tcache_node *cache = tokencache_lookup (ctx->external_token);
         if (cache) {
             if (ctx->auth_tenants) {
                 free (ctx->auth_tenants);
@@ -174,11 +181,11 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
             }
             return 0;
         }
-        if (! handle_openstack_token (ctx)) {
-            tokencache_store_invalid (ctx->openstack_token);
+        if (! handle_external_token (ctx)) {
+            tokencache_store_invalid (ctx->external_token);
             return err_unauthorized (ctx, a, out, status);
         }
-        tokencache_store_valid (ctx->openstack_token, ctx->auth_tenants,
+        tokencache_store_valid (ctx->external_token, ctx->auth_tenants,
                                 ctx->auth_tenantcount, ctx->userlevel);
         
     }
@@ -374,6 +381,12 @@ int conf_keystone_url (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/** Handle auth/unithost_url config */
+int conf_unithost_url (const char *id, var *v, updatetype tp) {
+    OPTIONS.unithost_url = var_get_str (v);
+    return 1;
+}
+
 /** Handle network/port config */
 int conf_port (const char *id, var *v, updatetype tp) {
     OPTIONS.port = var_get_int (v);
@@ -408,11 +421,15 @@ int main (int _argc, const char *_argv[]) {
     int argc = _argc;
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);
     if (! argv) return 1;
+    
+    OPTIONS.keystone_url = NULL;
+    OPTIONS.unithost_url = NULL;
 
     opticonf_add_reaction ("network/port", conf_port);
     opticonf_add_reaction ("auth/admin_token", conf_admin_token);
     opticonf_add_reaction ("auth/admin_host", conf_admin_host);
     opticonf_add_reaction ("auth/keystone_url", conf_keystone_url);
+    opticonf_add_reaction ("auth/unithost_url", conf_unithost_url);
     opticonf_add_reaction ("database/path", conf_dbpath);
     
     OPTIONS.conf = var_alloc();

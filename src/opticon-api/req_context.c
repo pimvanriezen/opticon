@@ -311,7 +311,7 @@ req_context *req_context_alloc (void) {
         memset (&self->tenantid, 0, sizeof (uuid));
         memset (&self->hostid, 0, sizeof (uuid));
         memset (&self->opticon_token, 0, sizeof (uuid));
-        self->openstack_token = NULL;
+        self->external_token = NULL;
     }
     return self;
 }
@@ -328,7 +328,7 @@ void req_context_free (req_context *self) {
     if (self->ctype) free (self->ctype);
     if (self->auth_tenants) free (self->auth_tenants);
     if (self->body) free (self->body);
-    if (self->openstack_token) free (self->openstack_token);
+    if (self->external_token) free (self->external_token);
     free (self);
 }
 
@@ -348,7 +348,7 @@ void req_context_set_header (req_context *self, const char *hdrname,
     
     /** Handle Openstack Token */
     if (strcmp (canon, "X-Auth-Token") == 0) {
-        self->openstack_token = strdup (hdrval);
+        self->external_token = strdup (hdrval);
     }
     else if (strcmp (canon, "X-Opticon-Token") == 0) {
         self->opticon_token = mkuuid (hdrval);
