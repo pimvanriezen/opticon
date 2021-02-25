@@ -28,7 +28,8 @@ typedef struct optinfo {
     int          json;
     const char  *api_url;
     const char  *keystone_url;
-    const char  *keystone_token;
+    const char  *unithost_url;
+    const char  *external_token;
     const char  *opticon_token;
     const char  *config_file;
     var         *conf;

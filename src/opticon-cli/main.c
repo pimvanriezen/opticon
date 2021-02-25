@@ -50,7 +50,8 @@ STRINGOPT(value)
 STRINGOPT(weight)
 STRINGOPT(api_url)
 STRINGOPT(keystone_url)
-STRINGOPT(keystone_token)
+STRINGOPT(unithost_url)
+STRINGOPT(external_token)
 STRINGOPT(opticon_token)
 STRINGOPT(config_file)
 
@@ -153,7 +154,7 @@ void write_cached_token (const char *token) {
     if (! f) return;
 
     var *cache = var_alloc();
-    var_set_str_forkey (cache, "keystone_token", token);
+    var_set_str_forkey (cache, "external_token", token);
     var_dump (cache, f);
     fclose (f);
     var_free (cache);
@@ -165,7 +166,7 @@ void write_cached_token (const char *token) {
 int load_cached_token (void) {
     char *home = getenv ("HOME");
     if (! home) return 0;
-    if (OPTIONS.keystone_token[0]) return 1;
+    if (OPTIONS.external_token[0]) return 1;
     struct stat st;
     time_t tnow = time (NULL);
     
@@ -175,16 +176,16 @@ int load_cached_token (void) {
     sprintf (path, "%s/.opticon-token-cache", home);
     if (var_load_json (cache, path)) {
         const char *token;
-        token = var_get_str_forkey (cache, "keystone_token");
+        token = var_get_str_forkey (cache, "external_token");
         
         if (token) {
             stat (path, &st);
             /* re-validate after an hour */
             if (tnow - st.st_mtime > 3600) {
-                OPTIONS.keystone_token = token;
+                OPTIONS.external_token = token;
                 var *vres = api_get_raw ("/token", 0);
                 if (vres) {
-                    OPTIONS.keystone_token = strdup (token);
+                    OPTIONS.external_token = strdup (token);
                     res = 1;
                     var_free (vres);
                     
@@ -192,11 +193,11 @@ int load_cached_token (void) {
                     write_cached_token (token);
                 }
                 else {
-                    OPTIONS.keystone_token = NULL;
+                    OPTIONS.external_token = NULL;
                 }
             }
             else {
-                OPTIONS.keystone_token = strdup (token);
+                OPTIONS.external_token = strdup (token);
                 res = 1;
             }
         }
@@ -267,7 +268,7 @@ int keystone_login (void) {
     var *res_tok = var_get_dict_forkey (res_xs, "token");
     const char *token = var_get_str_forkey (res_tok, "id");
     if (token) {
-        OPTIONS.keystone_token = strdup (token);
+        OPTIONS.external_token = strdup (token);
         write_cached_token (token);
     }
     var_free (hdr);
@@ -297,7 +298,8 @@ cliopt CLIOPT[] = {
     {"--weight","-W",OPT_VALUE,"1.0",set_weight},
     {"--api-url","-A",OPT_VALUE,"",set_api_url},
     {"--keystone-url","-X",OPT_VALUE,"",set_keystone_url},
-    {"--keystone-token","-K",OPT_VALUE,"",set_keystone_token},
+    {"--unithost-url","-U",OPT_VALUE,"",set_unithost_url},
+    {"--external-token","-K",OPT_VALUE,"",set_external_token},
     {"--opticon-token","-O",OPT_VALUE,"",set_opticon_token},
     {"--config-file","-c",OPT_VALUE,
             "/etc/opticon/opticon-cli.conf",set_config_file},
@@ -341,6 +343,12 @@ int conf_endpoint_keystone (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/** Set up the unithost endpoint from configuration */
+int conf_endpoint_unithost (const char *id, var *v, updatetype tp) {
+    OPTIONS.unithost_url = var_get_str(v);
+    return 1;
+}
+
 /** Set up the default --tenant argument from configuration.
   * No-op if an explicit --tenant flag was already provided.
   */
@@ -368,7 +376,8 @@ void usage (const char *cmdname) {
          "        --json\n"
          "        --config-file <file>\n"
          "        --opticon-token <token>\n"
-         "        --keystone-token <token>\n"
+         "        --external-token <token>\n"
+         "        --unithost-url <url>\n"
          "        --keystone-url <url>\n"
          "        --api-url <url>\n"
          "\n"
@@ -422,6 +431,7 @@ int main (int _argc, const char *_argv[]) {
     }
 
     opticonf_add_reaction ("endpoints/keystone", conf_endpoint_keystone);
+    opticonf_add_reaction ("endpoints/unithost", conf_endpoint_unithost);
     opticonf_add_reaction ("endpoints/opticon", conf_endpoint_api);
     opticonf_add_reaction ("defaults/tenant", conf_default_tenant);
     opticonf_add_reaction ("defaults/admin_token", conf_admin_token);
@@ -459,15 +469,16 @@ int main (int _argc, const char *_argv[]) {
         return 1;
     }
     
-    if (OPTIONS.keystone_url[0] == 0 && OPTIONS.opticon_token[0] == 0) {
-        fprintf (stderr, "%% No keystone endpoint or opticon token found\n");
+    if (OPTIONS.keystone_url[0] == 0 && OPTIONS.unithost_url[0] == 0 &&
+        OPTIONS.opticon_token[0] == 0) {
+        fprintf (stderr, "%% No authentication endpoint or opticon token found\n");
         return 1;
     }
 
     /* If no explicit keystone, or opticon token were defined, see if we
      * can find a cached keystone token. If that doesn't work, request
      * the user to log in. */
-    if (OPTIONS.keystone_token[0] == 0 && OPTIONS.opticon_token[0] == 0) {
+    if (OPTIONS.external_token[0] == 0 && OPTIONS.opticon_token[0] == 0) {
         if (! load_cached_token()) {
             if (! keystone_login()) return 1;
         }
