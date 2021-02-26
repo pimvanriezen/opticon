@@ -43,8 +43,8 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
     var *errinfo = var_alloc();
     
     /* Set token headers */
-    if (OPTIONS.keystone_token[0]) {
-        var_set_str_forkey (outhdr, "X-Auth-Token", OPTIONS.keystone_token);
+    if (OPTIONS.external_token[0]) {
+        var_set_str_forkey (outhdr, "X-Auth-Token", OPTIONS.external_token);
     }
     else if (OPTIONS.opticon_token[0]) {
         var_set_str_forkey (outhdr, "X-Opticon-Token", OPTIONS.opticon_token);
@@ -97,8 +97,8 @@ var *api_get_raw (const char *path, int exiterror) {
     var *data = var_alloc();
     
     /* Set up token headers */
-    if (OPTIONS.keystone_token[0]) {
-        var_set_str_forkey (outhdr, "X-Auth-Token", OPTIONS.keystone_token);
+    if (OPTIONS.external_token[0]) {
+        var_set_str_forkey (outhdr, "X-Auth-Token", OPTIONS.external_token);
     }
     else if (OPTIONS.opticon_token[0]) {
         var_set_str_forkey (outhdr, "X-Opticon-Token", OPTIONS.opticon_token);
