@@ -385,7 +385,7 @@ void overviewthread_run (thread *self) {
             sleep (t_next-t_now);
         }
         else {
-            log_error ("Overview round cannot keep up");
+            log_error ("Overview round cannot keep up: %is overdue",t_now-t_next);
         }
         t_next += 60;
         while (t_next < t_now) t_next += 60;
