@@ -207,7 +207,7 @@ var *runprobe_df (probe *self) {
                         var *mnt = var_add_dict (res_df);
                         if (strncmp (dev, "/dev/mapper", 11) == 0) {
                             char *ndev = malloc (strlen(dev) * sizeof(char));
-                            ndev[0] = "@";
+                            ndev[0] = '@';
                             strcpy (ndev+1, dev+12);
                             var_set_str_forkey (mnt, "device", ndev);
                             free (ndev);
