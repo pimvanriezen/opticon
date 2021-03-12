@@ -205,7 +205,16 @@ var *runprobe_df (probe *self) {
                     uint64_t sz = diskdevice_size_in_mb (dev);
                     if (sz) {
                         var *mnt = var_add_dict (res_df);
-                        var_set_str_forkey (mnt, "device", dev);
+                        if (strncmp (dev, "/dev/mapper", 11) == 0) {
+                            char *ndev = malloc (strlen(dev) * sizeof(char));
+                            ndev[0] = 1;
+                            strcpy (ndev+1, dev+12);
+                            var_set_str_forkey (mnt, "device", ndev);
+                            free (ndev);
+                        }
+                        else {
+                            var_set_str_forkey (mnt, "device", dev);
+                        }
                         var_set_int_forkey (mnt, "size", sz);
                         var_set_double_forkey (mnt, "pused", fs_used (mntat));
                         var_set_str_forkey (mnt, "mount", mntat);
