@@ -380,16 +380,16 @@ void overviewthread_run (thread *self) {
         }
         
         t_now = time (NULL);
-        if (t_now <= t_next) {
+        if (t_now < t_next) {
             log_debug ("Overview took %i seconds", 60-(t_next-t_now));
-            sleep (t_next-t_now);
+            sleep ((t_next-t_now)-1);
         }
         else {
             log_error ("Overview round cannot keep up: %is overdue",t_now-t_next);
         }
         t_next += 60;
         while (t_next < t_now) t_next += 60;
-        while ((t_next - t_now) > 60) t_next -= 60;
+        while ((t_next - t_now) > 70) t_next -= 60;
     }
 }
 
