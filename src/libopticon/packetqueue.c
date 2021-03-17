@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/errno.h>
 
 /** Producer thread for a packetqueue. Receives packets from the intransport
   * and puts them on the ringbuffer.
@@ -16,8 +17,8 @@ void packetqueue_run (thread *t) {
     while (1) {
         void *daddr = self->buffer[self->wpos].pkt;
         struct sockaddr_storage *saddr = &self->buffer[self->wpos].addr;
-        size_t sz;
-        if ((sz = intransport_recv (self->trans, daddr, 2048, saddr))) {
+        size_t sz = intransport_recv (self->trans, daddr, 2048, saddr);
+        if (sz > 0) {
             self->buffer[self->wpos].sz = sz;
             self->wpos++;
             if (self->wpos > self->sz) self->wpos -= self->sz;
@@ -30,6 +31,9 @@ void packetqueue_run (thread *t) {
                 errcnt++;
             }
             conditional_signal (self->cond);
+        }
+        else {
+            log_error ("Error receiving: %s", strerror(errno));
         }
     }
 }
