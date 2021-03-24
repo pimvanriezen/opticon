@@ -1,6 +1,7 @@
 #include <libopticon/defaults.h>
 #include <libopticon/daemon.h>
 #include <libopticon/log.h>
+#include <libopticon/popen.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <stdio.h>
@@ -88,6 +89,8 @@ int daemonize (const char *pidfilepath, int argc,
     struct passwd *pwd = NULL;
     FILE *pidfile;
     char pidbuf[128];
+    
+    popen_init();
     
     if (foreground) {
         (void) call (argc, argv);
