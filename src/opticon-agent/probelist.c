@@ -1,5 +1,6 @@
 #include <libopticon/var_parse.h>
 #include <libopticon/log.h>
+#include <libopticon/popen.h>
 #include "opticon-agent.h"
 #include "probes.h"
 #include <sys/select.h>
@@ -26,7 +27,7 @@ probe *probe_alloc (void) {
 var *runprobe_exec (probe *self) {
     char buffer[4096];
     buffer[0] = 0;
-    FILE *proc = popen (self->call, "r");
+    FILE *proc = popen_safe (self->call, "r");
     int procfd = fileno (proc);
     fd_set fds;
     struct timeval tv;
@@ -49,7 +50,7 @@ var *runprobe_exec (probe *self) {
             break;
         }
     }
-    int pret = pclose (proc);
+    int pret = pclose_safe (proc);
     int status = WEXITSTATUS (pret);
     var *res = var_alloc();
     
