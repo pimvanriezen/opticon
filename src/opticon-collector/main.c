@@ -597,6 +597,8 @@ int daemon_main (int argc, const char *argv[]) {
             /* Pointing it at itself will just move the cursor */
             ioport_write (pktbufport, pkt->pkt, pkt->sz);
             
+            log_debug ("Processing packet with size %i", pkt->sz);
+            
             /* Check packet version info */
             if (pkt->pkt[0] == 'o' && pkt->pkt[1] == '6') {
                 if (pkt->pkt[2] == 'a' && pkt->pkt[3] == '1') {
