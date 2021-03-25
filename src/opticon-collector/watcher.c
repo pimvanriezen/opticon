@@ -357,11 +357,13 @@ void overviewthread_run (thread *self) {
     tenant *tcrsr;
     time_t t_now = time (NULL);
     time_t t_next = (t_now+60)-((t_now+60)%60)+2;
+    time_t t_start;
     log_debug ("Overviewthread started");
     sleep (t_next - t_now);
     t_next += 60;
     
     while (1) {
+        t_start = time (NULL);
         tcrsr = tenant_first (TENANT_LOCK_READ);
         while (tcrsr) {
             var *overv = tenant_overview (tcrsr);
@@ -380,9 +382,10 @@ void overviewthread_run (thread *self) {
         }
         
         t_now = time (NULL);
+        if (t_next < t_now) t_next += 60;
         if (t_now < t_next) {
-            log_debug ("Overview took %i seconds", 60-(t_next-t_now));
-            sleep ((t_next-t_now)-1);
+            log_debug ("Overview took %i seconds", t_now - t_start);
+            sleep (t_next-t_now);
         }
         else {
             log_error ("Overview round cannot keep up: %is overdue",t_now-t_next);
