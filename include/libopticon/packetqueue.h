@@ -28,6 +28,7 @@ typedef struct packetqueue_s {
     intransport         *trans; /**< Transport used by the receive thread */
     pktbuf              *buffer; /**< Array of packet buffers */
     size_t               sz; /**< Number of elements in the array */
+    pthread_mutex_t      mutex; /**< Position mutex */
     volatile size_t      rpos; /**< Read cursor */
     volatile size_t      wpos; /**< Write cursor */
 } packetqueue;

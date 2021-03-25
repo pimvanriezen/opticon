@@ -12,6 +12,7 @@
   */
 void packetqueue_run (thread *t) {
     log_info ("Packetqueue started");
+    
     packetqueue *self = (packetqueue *) t;
     int errcnt = 0;
     while (1) {
@@ -19,9 +20,11 @@ void packetqueue_run (thread *t) {
         struct sockaddr_storage *saddr = &self->buffer[self->wpos].addr;
         size_t sz = intransport_recv (self->trans, daddr, 2048, saddr);
         if (sz > 0) {
+            pthread_mutex_lock (&self->mutex);
             self->buffer[self->wpos].sz = sz;
             self->wpos++;
             if (self->wpos > self->sz) self->wpos -= self->sz;
+            pthread_mutex_unlock (&self->mutex);
             int backlog = (self->wpos - self->rpos);
             if (backlog<0) backlog += self->sz;
             if (backlog > ((self->sz)/4)) {
@@ -43,12 +46,18 @@ void packetqueue_run (thread *t) {
   * \return The packetbuffer with received data.
   */
 pktbuf *packetqueue_waitpkt (packetqueue *self) {
-    while (self->rpos == self->wpos) {
-        conditional_wait (self->cond);
+    int havedata = 0;
+    while (! havedata) {
+        pthread_mutex_lock (&self->mutex);
+        if (self->rpos != self->wpos) havedata = 1;
+        pthread_mutex_unlock (&self->mutex);
+        if (! havedata) conditional_wait (self->cond);
     }
     pktbuf *res = self->buffer + self->rpos;
+    pthread_mutex_lock (&self->mutex);
     self->rpos++;
     if (self->rpos >= self->sz) self->rpos -= self->sz;
+    pthread_mutex_unlock (&self->mutex);
     return res;
 }
 
@@ -64,6 +73,7 @@ packetqueue *packetqueue_create (size_t qcount, intransport *producer) {
     self->cond = conditional_create();
     self->sz = qcount;
     self->rpos = self->wpos = 0;
+    pthread_mutex_init (&self->mutex, NULL);
     thread_init ((thread *) self, packetqueue_run, NULL);
     return self;
 }
