@@ -23,7 +23,7 @@ void packetqueue_run (thread *t) {
             pthread_mutex_lock (&self->mutex);
             self->buffer[self->wpos].sz = sz;
             self->wpos++;
-            if (self->wpos > self->sz) self->wpos -= self->sz;
+            if (self->wpos >= self->sz) self->wpos -= self->sz;
             pthread_mutex_unlock (&self->mutex);
             int backlog = (self->wpos - self->rpos);
             if (backlog<0) backlog += self->sz;
