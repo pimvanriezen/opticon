@@ -55,6 +55,10 @@ STRINGOPT(external_token)
 STRINGOPT(opticon_token)
 STRINGOPT(config_file)
 
+void __breakmex (void) {
+    sleep (1);
+}
+
 /** Handle --type */
 int set_type (const char *o, const char *v) {
     if ( (strcmp (v, "integer") == 0) ||
@@ -421,6 +425,7 @@ void usage (const char *cmdname) {
 
 /** Main, uses cliopt to do the dirty. */
 int main (int _argc, const char *_argv[]) {
+    const char *tstr;
     int argc = _argc;
     struct stat st;
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);
@@ -463,6 +468,15 @@ int main (int _argc, const char *_argv[]) {
     /* Throw the config at the handlers */
     opticonf_handle_config (OPTIONS.conf);
     
+    tstr = getenv ("OPTICON_TOKEN");
+    if (tstr) OPTIONS.opticon_token = getenv ("OPTICON_TOKEN");
+    
+    tstr = getenv ("OPTICON_EXTERNAL_TOKEN");
+    if (tstr) OPTIONS.external_token = getenv ("OPTICON_EXTERNAL_TOKEN");
+    
+    tstr = getenv ("OPTICON_TENANT");
+    if (tstr) OPTIONS.tenant = getenv ("OPTICON_TENANT");
+        
     /* Make sure we have the information we need */
     if (OPTIONS.api_url[0] == 0) {
         fprintf (stderr, "%% No opticon endpoint found\n");
@@ -471,6 +485,7 @@ int main (int _argc, const char *_argv[]) {
     
     if (OPTIONS.keystone_url[0] == 0 && OPTIONS.unithost_url[0] == 0 &&
         OPTIONS.opticon_token[0] == 0) {
+
         fprintf (stderr, "%% No authentication endpoint or opticon token found\n");
         return 1;
     }
