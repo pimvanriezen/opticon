@@ -781,8 +781,8 @@ int cmd_session_list (int argc, const char *argv[]) {
     
     printf ("---------------------------------------------"
             "-----------------------------------\n");
-    printf ("Session ID         Sender"
-            "                                 Last Refresh\n");
+    printf ("Session ID        Sender"
+            "                                  Last Refresh\n");
     
     var *v_session = var_get_array_forkey (v, "session");
     var *crsr = v_session->value.arr.first;
