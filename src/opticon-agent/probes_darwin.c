@@ -195,7 +195,7 @@ void run_top (thread *me) {
                 next++;
                 if (*next != ' ') continue;
                 next++;
-                TOP[1].numstuck = atoi (next);
+                TOP[1].numstuck = 0;
             }
             else if (memcmp (buf, "Networks: packets: ", 19) == 0) {
                 TOP[1].netin_pkt = atoi (buf+19);
@@ -302,12 +302,17 @@ var *runprobe_df (probe *self) {
         fgets (buffer, 1023, f);
         if (memcmp (buffer, "/dev", 4) != 0) continue;
         cpystr (device, buffer, 12);
+        
+        log_debug ("probe_df: --- found device %s", device);
+        
         crsr = buffer;
         while ((*crsr) && (! isspace (*crsr))) crsr++;
         if (! *crsr) continue;
         while ((*crsr) && (isspace (*crsr))) crsr++;
         if (! *crsr) continue;
         szkb = strtoull (crsr, &crsr, 10);
+        
+        log_debug ("probe_df:     szkb %llu", szkb);
 
         /* skip to used */ 
         while ((*crsr) && (! isspace (*crsr))) crsr++;
@@ -328,6 +333,8 @@ var *runprobe_df (probe *self) {
         if (! *crsr) continue;
         
         pused = atof (crsr);
+        
+        log_debug ("probe_df:     pused %f",pused);
 
         /* skip to iused */ 
         while ((*crsr) && (! isspace (*crsr))) crsr++;
@@ -354,6 +361,14 @@ var *runprobe_df (probe *self) {
         if (! *crsr) continue;
         
         cpystr (mount, crsr, 24);
+        
+        if (memcmp (mount, "/System/", 8) == 0) {
+            log_debug ("probe_df:    skip %s", mount);
+            continue;
+        }
+        
+        log_debug ("probe_df:     mount %s", mount);
+        
         var *node = var_add_dict (v_df);
         var_set_str_forkey (node, "device", device);
         var_set_int_forkey (node, "size", (uint32_t) (szkb/1024));
@@ -362,6 +377,7 @@ var *runprobe_df (probe *self) {
     }
     pclose (f);
     int cnt = var_get_count (v_df);
+    log_debug ("probe_df: --- probing filesystems");
     f = popen ("/sbin/mount","r");
     while (! feof (f)) {
         buffer[0] = 0;
@@ -370,6 +386,7 @@ var *runprobe_df (probe *self) {
         char *crsr = buffer;
         char *token;
         if ((token = strsep (&crsr, " "))) {
+            log_debug ("probe_df:     %s", token);
             for (int i=0; i<cnt; ++i) {
                 var *node = var_get_dict_atindex (v_df, i);
                 const char *devid = var_get_str_forkey (node, "device");
@@ -386,7 +403,7 @@ var *runprobe_df (probe *self) {
         }
     }
     pclose (f);
-    
+    log_debug ("probe_df: --- done");
     return res;
 }
 
