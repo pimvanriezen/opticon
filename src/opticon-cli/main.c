@@ -55,10 +55,6 @@ STRINGOPT(external_token)
 STRINGOPT(opticon_token)
 STRINGOPT(config_file)
 
-void __breakmex (void) {
-    sleep (1);
-}
-
 /** Handle --type */
 int set_type (const char *o, const char *v) {
     if ( (strcmp (v, "integer") == 0) ||
