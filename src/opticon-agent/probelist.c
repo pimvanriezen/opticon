@@ -92,6 +92,17 @@ void probe_run (thread *t) {
             pthread_mutex_unlock (&self->vlock);
             self->vcurrent = nvar;
             self->lastreply = time (NULL);
+            if (nvar->type != VAR_DICT) {
+                log_warn ("Probe <%s> returned non-dict-type %x",
+                          self->call, nvar->type);
+            }
+            else {
+                log_debug ("Probe <%s> returned tree with %i branches",
+                           self->call, nvar->arr->count);
+            }
+        }
+        else {
+            log_warn ("Probe <%s> received no data", self->call);
         }
 
         conditional_wait_fresh (&self->pulse);
