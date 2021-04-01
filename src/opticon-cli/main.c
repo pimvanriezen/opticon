@@ -334,7 +334,6 @@ clicmd CLICMD[] = {
 /** Set up the api endpoint from configuration */
 int conf_endpoint_api (const char *id, var *v, updatetype tp) {
     OPTIONS.api_url = var_get_str(v);
-    fprintf (stderr, "Set API URL: %s\n", OPTIONS.api_url);
     return 1;
 }
 
