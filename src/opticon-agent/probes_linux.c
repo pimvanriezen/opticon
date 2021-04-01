@@ -294,6 +294,7 @@ var *runprobe_distro (probe *self) {
         *buf = 0;
         fgets (buf, 255, F);
         if (*buf) distro = buf;
+        fclose (F);
     }
     
     if (distro && strlen (distro)) {
