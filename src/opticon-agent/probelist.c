@@ -98,7 +98,7 @@ void probe_run (thread *t) {
             }
             else {
                 log_debug ("Probe <%s> returned tree with %i branches",
-                           self->call, nvar->arr->count);
+                           self->call, nvar->value->arr->count);
             }
         }
         else {
