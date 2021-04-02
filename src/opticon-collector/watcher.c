@@ -98,7 +98,7 @@ double calculate_badness (meter *m, meterwatch *w,
                 }
                 if (meter_get_frac (m, i) > fracadj) {
                     log_debug ("badness: watch_frac_gt %f > %f: +%f",
-                               meter_get_frace (m,i), fracadj, w->badness);
+                               meter_get_frac (m,i), fracadj, w->badness);
                     res += w->badness;
                     if (w->trigger > *maxtrig) *maxtrig = w->trigger;
                 }
