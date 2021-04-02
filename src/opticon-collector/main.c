@@ -285,7 +285,7 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
         if (S->lastserial < auth->serial) {
             log_debug ("Renewing session <%08x-%08x> from <%s> serial <%i> "
                        "tenant <%s> host <%s>", auth->sessionid, netid,
-                      addrbuf, auth->serial, s_tenantid, s_hostid);
+                       addrbuf, auth->serial, s_tenantid, s_hostid);
             S->key = auth->sessionkey;
             S->lastcycle = tnow;
             S->lastserial = auth->serial;
@@ -358,7 +358,9 @@ void handle_host_metadata (host *H, var *meta) {
             watchadjust *adj = adjustlist_get (&H->adjust, mid_adjust);
             adj->type = atype;
             for (int i=0; i<3; ++i) {
-                var *v_level = var_get_dict_forkey (v_adjust, levels[i]);
+                var *v_level = var_find_key (v_adjust, levels[i]);
+                if (! v_level) continue;
+                if (v_level->type != VAR_DICT) continue;
                 
                 switch (atype) {
                     case WATCHADJUST_UINT:
