@@ -44,7 +44,10 @@ var *runprobe_net (probe *self) {
     var *res = var_alloc();
     
     F = fopen ("/proc/net/dev", "r");
-    if (! F) return res;
+    if (! F) {
+        log_warn ("probe_net: Can't read /proc/net/dev: %s", strerror(errno));
+        return res;
+    }
     var *res_net = var_get_dict_forkey (res, "net");
     
     fgets (buf, 255, F); /* skip first line */
@@ -67,6 +70,7 @@ var *runprobe_net (probe *self) {
         wordlist_free (args);
     }
     fclose (F);
+    log_debug ("probe_net: Data read");
     ti = time (NULL);
     if (ti == NETPROBE.lastrun) NETPROBE.lastrun--;
     
@@ -76,12 +80,16 @@ var *runprobe_net (probe *self) {
         diffout_kbits = totalout_kbits - NETPROBE.net_out_kbits;
         diffout_packets = totalout_packets - NETPROBE.net_out_packets;
         uint64_t tdiff = (ti - NETPROBE.lastrun);
-        log_debug ("diffs: %llu, %llu, %llu, %llu", diffin_kbits, diffin_packets,
+        log_debug ("probe_net: diffs: %llu, %llu, %llu, %llu",
+                   diffin_kbits, diffin_packets,
                    diffout_kbits, diffout_packets);
         var_set_int_forkey (res_net, "in_kbs", diffin_kbits / tdiff);
         var_set_int_forkey (res_net, "in_pps", diffin_packets / tdiff);
         var_set_int_forkey (res_net, "out_kbs", diffout_kbits / tdiff);
         var_set_int_forkey (res_net, "out_pps", diffout_packets / tdiff);
+    }
+    else {
+        log_debug ("probe_net: Skipping because no lastrun");
     }
     NETPROBE.net_in_kbits = totalin_kbits;
     NETPROBE.net_out_kbits = totalout_kbits;
