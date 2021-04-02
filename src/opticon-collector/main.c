@@ -359,9 +359,6 @@ void handle_host_metadata (host *H, var *meta) {
             adj->type = atype;
             for (int i=0; i<3; ++i) {
                 var *v_level = var_get_dict_forkey (v_adjust, levels[i]);
-                double v_weight = var_get_double_forkey (v_level, "weight");
-                if (v_weight < 0.0005) v_weight = 1.0;
-                adj->adjust[i+1].weight = v_weight;
                 
                 switch (atype) {
                     case WATCHADJUST_UINT:
@@ -387,8 +384,10 @@ void handle_host_metadata (host *H, var *meta) {
                         break;
                 }
                 if (atype != WATCHADJUST_NONE) {
-                    adj->adjust[i+1].weight =
-                        var_get_double_forkey (v_level, "weight");
+                    var *v_level = var_get_dict_forkey (v_adjust, levels[i]);
+                    double v_weight = var_get_double_forkey (v_level, "weight");
+                    if (v_weight < 0.0005) v_weight = 1.0;
+                    adj->adjust[i+1].weight = v_weight;
                 }
             }
             v_adjust = v_adjust->next;
