@@ -54,9 +54,6 @@ watchadjust *adjustlist_get (adjustlist *self, meterid_t id) {
     w = (watchadjust *) calloc (1, sizeof (watchadjust));
     w->type = WATCHADJUST_NONE;
     w->id = (id & MMASK_NAME);
-    w->adjust[WATCH_WARN].weight = 1.0;
-    w->adjust[WATCH_ALERT].weight = 1.0;
-    w->adjust[WATCH_CRIT].weight = 1.0;
     
     if (self->last) {
         w->prev = self->last;
