@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include "tproc.h"
 #include "wordlist.h"
+#include "opticon-agent.h"
 
 static int KMEMTOTAL = 1024;
 
