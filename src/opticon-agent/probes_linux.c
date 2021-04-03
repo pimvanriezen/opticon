@@ -8,6 +8,7 @@
 #include <pwd.h>
 #include <ctype.h>
 #include <libopticon/log.h>
+#include <libopticon/var.h>
 #include <errno.h>
 #include <stdint.h>
 #include "tproc.h"
