@@ -284,6 +284,7 @@ var *runprobe_distro (probe *self) {
     FILE *F;
     char buf[256];
     char *distro = NULL;
+    char *c;
     var *res = var_alloc();
     
     F = fopen ("/etc/lsb-release","r");
@@ -300,14 +301,32 @@ var *runprobe_distro (probe *self) {
     }
     else {
         F = fopen ("/etc/redhat-release","r");
-        if (! F) {
-            log_debug ("No distro files found");
-            return res;
+        if (F) {
+            *buf = 0;
+            fgets (buf, 255, F);
+            if (*buf) distro = buf;
+            fclose (F);
         }
-        *buf = 0;
-        fgets (buf, 255, F);
-        if (*buf) distro = buf;
-        fclose (F);
+        else {
+            F = fopen ("/etc/version_info","r");
+            if (! F) {
+                log_debug ("No distro files found");
+                return res;
+            }
+            while (! feof (F)) {
+                *buf = 0;
+                fgets (buf, 255, F);
+                if (strncmp (buf, "* ",2) == 0) {
+                    c = distro = buf+2;
+                    while (*c) {
+                        if (*c == '_') *c = ' ';
+                        c++;
+                    }
+                    break;
+                }
+            }
+            fclose (F);
+        }
     }
     
     if (distro && strlen (distro)) {
