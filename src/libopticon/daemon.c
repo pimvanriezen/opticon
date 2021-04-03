@@ -114,8 +114,11 @@ int daemonize (const char *pidfilepath, int argc,
     if (geteuid() == 0) {
         pwd = getpwnam (default_service_user);
         if (! pwd) {
-            log_error ("User %s not found", default_service_user);
-            return 0;
+            pwd = getpwnam ("nobody");
+            if (! pwd) {
+                log_error ("No suitable non-root user found");
+                return 0;
+            }
         }
     
         svcuid = pwd->pw_uid;

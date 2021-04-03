@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <libopticon/log.h>
 #include <errno.h>
+#include <stdint.h>
 #include "tproc.h"
 #include "wordlist.h"
 
