@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <libopticon/log.h>
 #include <libopticon/var.h>
+#include <libopticon/thread.h>
 #include <errno.h>
 #include <stdint.h>
 #include "tproc.h"
