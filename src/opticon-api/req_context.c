@@ -184,7 +184,10 @@ int req_match_check (req_match *self, const char *url, req_arg *arg) {
             
             /* Reject invalid UUID / timespec */
             if (matchtp == 'U' && validch != 32) return 0;
-            if (matchtp == 'T' && validch != 12) return 0;
+            
+            /* 123456789 123456 7890
+            /* 2021-04-01T11:38 :00Z */
+            if (matchtp == 'T' && (validch < 16 || validch > 20)) return 0;
             
             /* Copy the url-part to the argument list */
             size_t elmsize = curl-curl_start;
