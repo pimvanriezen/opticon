@@ -191,7 +191,7 @@ void summaryinfo_populate (summaryinfo *into, var *v_summary) {
   * \return Pointer to the key, or NULL if resolving failed.
   */
 aeskey *resolve_tenantkey (uuid tenantid, uint32_t serial) {
-    tenant *T = tenant_find (tenantid, TENANT_LOCK_WRITE);
+    tenant *T = NULL;
     
     var *meta;
     const char *b64;
@@ -201,7 +201,6 @@ aeskey *resolve_tenantkey (uuid tenantid, uint32_t serial) {
     if (! db_open (APP.db, tenantid, NULL)) {
         // FIXME remove tenant
         log_error ("(resolve_tenantkey) Packet for unknown tenantid");
-        tenant_delete (T);
         return NULL;
     }
     
@@ -209,9 +208,10 @@ aeskey *resolve_tenantkey (uuid tenantid, uint32_t serial) {
     if (! (meta = db_get_metadata (APP.db))) {
         log_error ("(resolve_tenantkey) Error reading metadata");
         db_close (APP.db);
-        tenant_done (T);
         return NULL;
     }
+    
+    T = tenant_find (tenantid, TENANT_LOCK_WRITE);
     
     /* Find the 'key' metavalue */
     if ((b64 = var_get_str_forkey (meta, "key"))) {
