@@ -316,6 +316,7 @@ var *runprobe_distro (probe *self) {
             while (! feof (F)) {
                 *buf = 0;
                 fgets (buf, 255, F);
+                buf[255] = 0;
                 if (strncmp (buf, "* ",2) == 0) {
                     c = distro = buf+2;
                     while (*c) {

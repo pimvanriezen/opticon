@@ -199,7 +199,7 @@ var *get_default_meterdef (void) {
     return PARSED_DEFMETERS;
 }
 
-static var *PARSED_DEFSUMMARY;
+static var *PARSED_DEFSUMMARY = NULL;
 
 var *get_default_summarydef (void) {
     if (! PARSED_DEFSUMMARY) {
