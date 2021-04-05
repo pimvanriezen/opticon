@@ -176,10 +176,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
         int rcpu = (cpu+5.0) / 10;
         printf ("%-31s %-8s %6.2f %8" PRIu64 " %6.2f %% -[",
                 shortname, hstat, load, netio, cpu);
-        for (int i=0; i<10; i++) {
-            if (i< rcpu) printf ("#");
-            else printf (" ");
-        }
+        print_bar (10, 100, cpu);
         printf ("]+\n");
         crsr = crsr->next;
     }

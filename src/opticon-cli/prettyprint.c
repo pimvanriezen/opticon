@@ -18,6 +18,23 @@
 static const char *PENDING_HDR = NULL;
 static var *MDEF = NULL;
 
+void print_bar (int width, double max, double v) {
+    double prop = max/width;
+    const char *bars[9] = {
+        " ","▏","▎","▍","▌","▋","▊","▉","█"
+    };
+    
+    for (int i=0; i<width; ++i) {
+        if (((i+1)*prop) <= v) {
+            puts (bars[8]);
+        }
+        else {
+            double diff = (v - (i*prop)) / prop * 8;
+            puts (bars[(int) diff]);
+        }
+    }
+}
+
 /** Display function for host-show section headers */
 void print_hdr (const char *hdr) {
     const char *mins = "-----------------------------------------------"
