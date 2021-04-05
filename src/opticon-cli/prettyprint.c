@@ -27,14 +27,14 @@ void print_bar (int width, double max, double v) {
     
     for (int i=0; i<width; ++i) {
         if ((i+1) <= (v/prop)) {
-            puts (bars[8]);
+            printf ("%s", bars[8]);
         }
         else if (i > (v/prop)) {
-            puts (".");
+            putc (" ");
         }
         else {
             double diff = ((i+1) - (v/prop)) * 8;
-            puts (bars[(int) (8-diff)]);
+            printf ("%s", bars[(int) (8-diff)]);
         }
     }
 }
