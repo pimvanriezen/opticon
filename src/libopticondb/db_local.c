@@ -879,11 +879,13 @@ uint32_t localdb_offset_next (uint32_t i) {
 }
 
 /** Utility function that opens and mmaps a graph file. */
-graphdata *localdb_open_graph (localdb *self, const char *id, const char *v) {
+graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
+                               const char *v) {
     graphdata *res = NULL;
     int initialize=0;
     struct stat st;
     char uuidstr[40];
+    uuid2str (hostid, uuidstr);
     size_t keylen = strlen (id) + strlen (v) + 2;
     char *graphpath = (char *) malloc (strlen(self->path)+40+keylen+8);
     
@@ -896,7 +898,7 @@ graphdata *localdb_open_graph (localdb *self, const char *id, const char *v) {
     free (graphpath);
     if (self->graphfd < 0) return NULL;
     
-    res = mmap (NULL, sizeof (graphdata), PROT_READ|PROT_WRITE,
+    res = mmap (0, sizeof (graphdata), PROT_READ|PROT_WRITE,
                 MAP_PRIVATE, self->graphfd, 0);
     if (res == MAP_FAILED) {
         log_error ("mmap error: %s", strerror(errno));
@@ -924,7 +926,7 @@ void localdb_close_graph (localdb *self, graphdata *data) {
 int localdb_set_graph (db *d, uuid hostid, const char *id, const char *key,
                        double val) {
     localdb *self = (localdb *) d;
-    graphdata *graph = localdb_open_graph (self, id, key);
+    graphdata *graph = localdb_open_graph (self, hostid, id, key);
     if (! graph) return 0;
     
     uint32_t offnow = localdb_graph_offset (time(NULL));
@@ -956,7 +958,7 @@ double *localdb_get_graph (db *d, uuid hostid, const char *id,
     double samplesize = ((double)interval)/(numsamples*300.0);
     if (samplesize < 1.0) return NULL;
     
-    graphdata *graph = localdb_open_graph (self, id, key);
+    graphdata *graph = localdb_open_graph (self, hostid, id, key);
     if (! graph) return NULL;
 
     int pos = 0;
