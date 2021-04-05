@@ -187,7 +187,7 @@ void watchthread_handle_graph (host *host, graphlist *list) {
     graphtarget *tgt = graphlist_begin (list);
     while (tgt) {
         double val = 0.0;
-        meter *m = host_find_meter (host, tgt->id);
+        meter *m = host_find_meter_name (host, tgt->id);
         if (m) {
             switch (m->id & MMASK_TYPE) {
                 case MTYPE_INT:
@@ -195,7 +195,7 @@ void watchthread_handle_graph (host *host, graphlist *list) {
                     break;
                     
                 case MTYPE_FRAC:
-                    val = *(m->d.frac);
+                    val = m->d.frac[0];
                     break;
             }
         }
