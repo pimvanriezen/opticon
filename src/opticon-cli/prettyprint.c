@@ -30,7 +30,7 @@ void print_bar (int width, double max, double v) {
             printf ("%s", bars[8]);
         }
         else if (i > (v/prop)) {
-            putc (" ");
+            printf (" ");
         }
         else {
             double diff = ((i+1) - (v/prop)) * 8;
