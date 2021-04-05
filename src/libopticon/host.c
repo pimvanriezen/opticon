@@ -14,6 +14,7 @@ host *host_alloc (void) {
     res->first = NULL;
     res->last = NULL;
     res->tenant = NULL;
+    res->graphlist = NULL;
     res->status = 0;
     res->lastserial = 0;
     res->badness = 0.0;
