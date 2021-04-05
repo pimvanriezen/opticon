@@ -761,6 +761,7 @@ int main (int _argc, const char *_argv[]) {
     opticonf_add_reaction ("network", conf_network);
     opticonf_add_reaction ("database/path", conf_db_path);
     opticonf_add_reaction ("meter", conf_meters);
+    opticonf_add_reaction ("graph", conf_graph);
     
     APP.transport = intransport_create_udp();
     APP.codec = codec_create_pkt();
@@ -775,6 +776,10 @@ int main (int _argc, const char *_argv[]) {
     var *defsummary = get_default_summarydef();
     sprintf (defsummary->id, "summary");
     var_link (defsummary, APP.conf);
+    
+    var *defgraph = get_default_graphs();
+    sprintf (defgraph->id, "graph");
+    var_link (defgraph, APP.conf);
     
     /* Load other meters from meter.conf */
     if (! var_load_json (defmeters, APP.mconfpath)) {
