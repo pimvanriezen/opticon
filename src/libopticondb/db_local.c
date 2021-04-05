@@ -897,7 +897,11 @@ graphdata *localdb_open_graph (localdb *self, const char *id, const char *v) {
     if (self->graphfd < 0) return NULL;
     
     res = mmap (NULL, sizeof (graphdata), PROT_READ|PROT_WRITE,
-                MAP_SHARED, self->graphfd, 0);
+                MAP_PRIVATE, self->graphfd, 0);
+    if (res == MAP_FAILED) {
+        log_error ("mmap error: %s", strerror(errno));
+        return NULL;
+    }
                 
     if (initialize) {
         log_debug ("graph: initialize");
