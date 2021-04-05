@@ -892,7 +892,7 @@ graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
     sprintf (graphpath, "%s%s.%s.%s.graph", self->path, uuidstr, id, v);
     if (stat (graphpath, &st) != 0) initialize=1;
     
-    log_debug ("graph: open/create %s", graphpath);
+    if (initialize) log_debug ("graph: create %s", graphpath);
     
     self->graphfd = open (graphpath, O_RDWR | O_CREAT);
     if (initialize) fchmod (self->graphfd, 0660);
@@ -907,14 +907,13 @@ graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
     }
     
     res = mmap (0, sizeof (graphdata), PROT_READ|PROT_WRITE,
-                MAP_PRIVATE, self->graphfd, 0);
+                MAP_SHARED, self->graphfd, 0);
     if (res == MAP_FAILED) {
         log_error ("mmap error: %s", strerror(errno));
         return NULL;
     }
                 
     if (initialize) {
-        log_debug ("graph: initialize");
         res->writepos = localdb_graph_offset (time(NULL));
         res->accumulator = 0.0;
         res->count = 0;
