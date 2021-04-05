@@ -792,7 +792,7 @@ var *localdb_get_hostmeta (db *d, uuid hostid) {
     
     uuid2str (hostid, uuidstr);
     char *metapath = (char *) malloc (strlen (self->path) + 64);
-    sprintf (metapath, "%s%s.metadata", self->path, uuidstr);
+    sprintf (metapath, "%s%s/metadata.json", self->path, uuidstr);
     if (stat (metapath, &st) != 0) {
         free (metapath);
         return var_alloc();
@@ -827,7 +827,7 @@ time_t localdb_get_hostmeta_changed (db *d, uuid hostid) {
     char uuidstr[40];
     uuid2str (hostid, uuidstr);
     char *metapath = (char *) malloc (strlen (self->path) + 64);
-    sprintf (metapath, "%s%s.metadata", self->path, uuidstr);
+    sprintf (metapath, "%s%s/metadata.json", self->path, uuidstr);
     if (stat (metapath, &st) != 0) return 0;
     free (metapath);
     return st.st_mtime;
@@ -843,8 +843,8 @@ int localdb_set_hostmeta (db *d, uuid hostid, var *v) {
 
     char *metapath = (char *) malloc (strlen (self->path) + 64);
     char *tmppath = (char *) malloc (strlen (self->path) + 64);
-    sprintf (metapath, "%s%s.metadata", self->path, uuidstr);
-    sprintf (tmppath, "%s%s.metadata.new", self->path, uuidstr);
+    sprintf (metapath, "%s%s/metadata.json", self->path, uuidstr);
+    sprintf (tmppath, "%s%s/metadata.json.new", self->path, uuidstr);
     F = fopen (tmppath, "w");
     if (F) {
         res = var_dump (v, F);
@@ -889,7 +889,7 @@ graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
     size_t keylen = strlen (id) + strlen (v) + 2;
     char *graphpath = (char *) malloc (strlen(self->path)+40+keylen+8);
     
-    sprintf (graphpath, "%s%s.%s.%s.graph", self->path, uuidstr, id, v);
+    sprintf (graphpath, "%s%s/graph.%s.%s.dat", self->path, uuidstr, id, v);
     if (stat (graphpath, &st) != 0) initialize=1;
     
     if (initialize) log_debug ("graph: create %s", graphpath);
