@@ -1079,6 +1079,8 @@ db *localdb_create (const char *prefix) {
     self->db.set_summary = localdb_set_summary;
     self->db.get_overview = localdb_get_overview;
     self->db.set_overview = localdb_set_overview;
+    self->db.set_graph = localdb_set_graph;
+    self->db.get_graph = localdb_get_graph;
     self->db.remove_host = localdb_remove_host;
     self->db.close = localdb_close;
     self->db.list_tenants = localdb_list_tenants;
