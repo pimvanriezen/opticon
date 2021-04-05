@@ -199,8 +199,11 @@ void watchthread_handle_graph (host *host, graphlist *list) {
                     break;
             }
         }
-        db_set_graph (APP.writedb, host->uuid, tgt->graph_id,
-                      tgt->datum_id, val);
+        if (db_open (APP.writedb, host->tenant->uuid, NULL)) {
+            db_set_graph (APP.writedb, host->uuid, tgt->graph_id,
+                          tgt->datum_id, val);
+            db_close (APP.writedb);
+        }
         
         tgt = graphlist_next (list, tgt);
     }
