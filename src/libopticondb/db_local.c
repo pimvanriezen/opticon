@@ -890,6 +890,8 @@ graphdata *localdb_open_graph (localdb *self, const char *id, const char *v) {
     sprintf (graphpath, "%s%s.%s.%s.graph", self->path, uuidstr, id, v);
     if (stat (graphpath, &st) != 0) initialize=1;
     
+    log_debug ("graph: open/ceeate %s", graphpath);
+    
     self->graphfd = open (graphpath, O_RDWR | O_CREAT);
     free (graphpath);
     if (self->graphfd < 0) return NULL;
@@ -898,6 +900,7 @@ graphdata *localdb_open_graph (localdb *self, const char *id, const char *v) {
                 MAP_SHARED, self->graphfd, 0);
                 
     if (initialize) {
+        log_debug ("graph: initialize");
         res->writepos = localdb_graph_offset (time(NULL));
         res->accumulator = 0.0;
         res->count = 0;
