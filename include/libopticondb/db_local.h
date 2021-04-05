@@ -13,7 +13,17 @@ typedef struct localdb_s {
     char            *path; /** Access path for opened handle */
     char            *pathprefix; /** Global prefix for databases */
     codec           *codec; /** Codec reference (for reuse) */
+    int              graphfd; /** Filedescriptor for graph */
 } localdb;
+
+#define GRAPHDATASZ (12*24*30)
+
+typedef struct graphdata_s {
+    uint32_t         writepos;
+    uint32_t         count;
+    double           accumulator;
+    double           data[GRAPHDATASZ];
+} graphdata;
 
 /* ============================= FUNCTIONS ============================= */
 

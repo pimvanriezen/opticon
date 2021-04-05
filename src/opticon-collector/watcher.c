@@ -183,6 +183,29 @@ double calculate_badness (meter *m, meterwatch *w,
     return res;
 }
 
+void watchthread_handle_graph (host *host, graphlist *list) {
+    graphtarget *tgt = graphlist_begin (list);
+    while (tgt) {
+        double val = 0.0;
+        meter *m = host_find_meter (host, tgt->id);
+        if (m) {
+            switch (m->id & MMASK_TYPE) {
+                case MTYPE_INT:
+                    val = (double) *(m->d.u64);
+                    break;
+                    
+                case MTYPE_FRAC:
+                    val = *(m->d.frac);
+                    break;
+            }
+        }
+        db_set_graph (APP.writedb, host->uuid, tgt->graph_id,
+                      tgt->datum_id, val);
+        
+        tgt = graphlist_next (list, tgt);
+    }
+}
+
 /** Inspect a host's metering data to determine its current status
   * and problems, then write it to disk.
   * \param host The host to inspect.
@@ -194,6 +217,7 @@ void watchthread_handle_host (host *host) {
     meter *m = host->first;
     meterwatch *w;
     watchadjust *adj = NULL;
+    graphtarget *gt = NULL;
     watchtrigger maxtrigger = WATCH_NONE;
     char label[16];
     char uuidstr[40];
@@ -211,7 +235,8 @@ void watchthread_handle_host (host *host) {
     if ((tnow - host->lastmodified) > 80) {
         if (strcmp (ostatus.str, "STALE") != 0) {
             uuid2str (host->uuid, uuidstr);
-            log_info ("Status change host <%s> %s -> STALE", uuidstr, ostatus.str);
+            log_info ("Status change host <%s> %s -> STALE",
+                      uuidstr, ostatus.str);
             tenant_set_notification (host->tenant, true, "STALE", host->uuid);
         }
         meter_set_str (m_status, 0, "STALE");
@@ -257,6 +282,10 @@ void watchthread_handle_host (host *host) {
       
             if (m->badness) problemcount++;
             totalbadness += m->badness;
+            
+            handled = 0;
+            
+            
             m = m->next;
         }
     
@@ -327,9 +356,11 @@ void watchthread_handle_host (host *host) {
     
         if (strcmp (nstatus, ostatus.str) != 0) {
             uuid2str (host->uuid, uuidstr);
-            log_info ("Status change host <%s> %s -> %s", uuidstr, ostatus.str, nstatus);
+            log_info ("Status change host <%s> %s -> %s", uuidstr, ostatus.str,
+                      nstatus);
             bool isproblem = (host->badness>= 80.0);
-            tenant_set_notification (host->tenant, isproblem, nstatus, host->uuid);
+            tenant_set_notification (host->tenant, isproblem, nstatus,
+                                     host->uuid);
         }
     
         meter_set_str (m_status, 0, nstatus);
@@ -339,6 +370,14 @@ void watchthread_handle_host (host *host) {
     if (db_open (APP.writedb, host->tenant->uuid, NULL)) {
         db_save_record (APP.writedb, tnow, host);
         db_close (APP.writedb);
+    }
+    
+    if (host->graphlist) {
+        watchthread_handle_graph (host, host->graphlist);
+    }
+    
+    if (APP.graphlist) {
+        watchthread_handle_graph (host, APP.graphlist);
     }
     
     pthread_rwlock_unlock (&host->lock);
@@ -374,6 +413,7 @@ void overviewthread_run (thread *self) {
                 db_set_overview (APP.overviewdb, overv);
                 db_close (APP.overviewdb);
             }
+            var_free (overv);
             
             var *n = tenant_check_notification (tcrsr);
             if (n) {
@@ -418,16 +458,14 @@ void watchthread_run (thread *self) {
                 watchthread_handle_host (hcrsr);
                 hcrsr = hcrsr->next;
             }
-            var *overv = tenant_overview (tcrsr);
+            
             var *tally = summaryinfo_tally_round (&tcrsr->summ);
             if (db_open (APP.writedb, tcrsr->uuid, NULL)) {
                 db_set_summary (APP.writedb, tally);
-                db_set_overview (APP.writedb, overv);
                 db_close (APP.writedb);
             }
             
             var_free (tally);
-            var_free (overv);
             tcrsr = tenant_next (tcrsr, TENANT_LOCK_READ);
         }
         

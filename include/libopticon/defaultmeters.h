@@ -5,5 +5,6 @@
 
 var *get_default_meterdef (void);
 var *get_default_summarydef (void);
+var *get_default_graphs (void);
 
 #endif

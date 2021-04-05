@@ -186,6 +186,42 @@ static const char *DEFMETERS =
 "        description: \"Remote IP\""
 "    }";
 
+const char *DEFGRAPHS =
+"   pcpu {"
+"       graph: cpu"
+"       datum: usage"
+"       title: \"CPU Usage\""
+"       unit: \"%\""
+"       color: \"blue\""
+"   }"
+"   net/in_kbs {"
+"       graph: net"
+"       datum: input"
+"       title: \"Bandwidth In\""
+"       unit: \"Kb/s\""
+"       color: \"cyan\""
+"   }"
+"   net/out_kbs {"
+"       graph: net"
+"       datum: output"
+"       title: \"Bandwidth Out\""
+"       unit: \"Kb/s\""
+"       color: \"blue\""
+"   }"
+"   io/rdops {"
+"       graph: io"
+"       datum: read"
+"       title: \"Read Operations\""
+"       unit: \"iops\""
+"       color: \"green\""
+"   }"
+"   io/wrops {"
+"       graph: io"
+"       datum: write"
+"       title: \"Write Operations\""
+"       unit: \"iops\""
+"       color: \"red\""
+"   }";
 
 static var *PARSED_DEFMETERS = NULL;
 
@@ -209,4 +245,16 @@ var *get_default_summarydef (void) {
         }
     }
     return PARSED_DEFSUMMARY;
+}
+
+static var *PARSED_DEFGRAPHS = NULL;
+
+var *get_default_graphs (void) {
+    if (! PARSED_DEFGRAPHS) {
+        PARSED_DEFGRAPHS = var_alloc();
+        if (! var_parse_json (PARSED_DEFGRAPHS, DEFGRAPHS)) {
+            log_error ("Parse error (defgraphs): %s", parse_error());
+        }
+    }
+    return PARSED_DEFGRAPHS;
 }

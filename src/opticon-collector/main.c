@@ -339,6 +339,15 @@ void handle_host_metadata (host *H, var *meta) {
                alert{ val: 50.0, weight: 1.0 }
            }
        }
+       graph {
+           pcpu {
+               graph: cpu
+               datum: usage
+               title: "CPU Usage"
+               unit: "%"
+               color: "blue"
+           }
+       }
     */
     
     char *tstr;
@@ -394,6 +403,17 @@ void handle_host_metadata (host *H, var *meta) {
             }
             v_adjust = v_adjust->next;
         }
+    }
+    
+    var *v_graph = var_get_dict_forkey (meta, "graph");
+    int graphcount = var_get_count (v_graph);
+    if (graphcount) {
+        graphlist *oldlist = H->graphlist;
+        graphlist *newlist = graphlist_create();
+        graphlist_make (newlist, v_graph);
+        
+        H->graphlist = newlist;
+        graphlist_free (oldlist);
     }
 }
 
@@ -707,6 +727,13 @@ int conf_meters (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+int conf_graph (const char *id, var *v, updatetype tp) {
+    if (tp == UPDATE_REMOVE) return 0;
+    APP.graphlist = graphlist_create();
+    graphlist_make (APP.graphlist, v);
+    return 1;
+}
+
 appcontext APP; /**< Global application context */
 
 /** Command line options */
@@ -764,7 +791,6 @@ int main (int _argc, const char *_argv[]) {
     }
     
     opticonf_handle_config (APP.conf);
-    
     log_info ("Configuration loaded");
     
     if (! intransport_setlistenport (APP.transport, APP.listenaddr, 

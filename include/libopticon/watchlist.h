@@ -2,6 +2,7 @@
 #define _WATCHLIST_H 1
 
 #include <libopticon/meter.h>
+#include <libopticon/var.h>
 #include <pthread.h>
 
 /* =============================== TYPES =============================== */
@@ -80,6 +81,23 @@ typedef struct watchlist_s {
     pthread_mutex_t      mutex;
 } watchlist;
 
+typedef struct graphtarget_s {
+    struct graphtarget_s    *next; /**< List neighbour */
+    struct graphtarget_s    *prev; /**< List neighbour */
+    meterid_t                id;
+    char                    *graph_id;
+    char                    *datum_id;
+    char                    *title;
+    char                    *unit;
+    char                    *color;
+} graphtarget;
+
+typedef struct graphlist_s {
+    graphtarget         *first;
+    graphtarget         *last;
+    pthread_mutex_t      mutex;
+} graphlist;
+
 /* ============================= FUNCTIONS ============================= */
 
 void         watchlist_init (watchlist *);
@@ -95,5 +113,16 @@ void         adjustlist_init (adjustlist *);
 void         adjustlist_clear (adjustlist *);
 watchadjust *adjustlist_find (adjustlist *, meterid_t id);
 watchadjust *adjustlist_get (adjustlist *, meterid_t id);
+
+graphlist   *graphlist_create (void);
+void         graphlist_free (graphlist *);
+void         graphlist_clear (graphlist *);
+void         graphlist_add (graphlist *, meterid_t, const char *,
+                            const char *, const char *, const char *,
+                            const char *);
+void         graphlist_make (graphlist *, var *);
+graphtarget *graphlist_begin (graphlist *);
+graphtarget *graphlist_next (graphlist *, graphtarget *);
+void         graphlist_break (graphlist *);
 
 #endif

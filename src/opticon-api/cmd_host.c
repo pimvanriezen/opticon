@@ -6,6 +6,7 @@
 #include <libopticon/codec_json.h>
 #include <libopticon/var_dump.h>
 #include <libopticon/hash.h>
+#include <libopticon/timestr.h>
 #include <microhttpd.h>
 #include "req_context.h"
 #include "cmd.h"
@@ -225,9 +226,9 @@ int cmd_host_get_time (req_context *ctx, req_arg *a,
         db_free (DB);
         return 0;
     }
-    if (!JSONCODEC) JSONCODEC= codec_create_json();
+    if (!JSONCODEC) JSONCODEC = codec_create_json();
     host *h = host_alloc();
-    time_t tnow = time (NULL);
+    time_t tnow = parse_timestr (a->argv[2]);
     
     h->uuid = ctx->hostid;
     if (db_get_record (DB, tnow, h)) {
@@ -240,7 +241,12 @@ int cmd_host_get_time (req_context *ctx, req_arg *a,
     
     host_delete (h);
     db_free (DB);
-    return 0;
+    var *err = var_alloc();
+    var_set_str_forkey (err, "error", "Record not found");
+    var_write (err, outio);
+    var_free (err);
+    *status = 404;
+    return 1;
 }
 
 int cmd_list_sessions (req_context *ctx, req_arg *a, var *env, int *status) {

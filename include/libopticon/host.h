@@ -21,6 +21,7 @@ typedef struct host_s {
     double               badness; /**< accumulated badness */
     status_t             status; /**< current status (if relevant */
     adjustlist           adjust; /**< meterwatch adjustments */
+    graphlist           *graphlist; /**< graphlist adjustments */
     time_t               lastmetasync; /**< Time of last metadata sync-in*/
     meter               *first; /**< first connected meter */
     meter               *last; /**< last connected meter */

@@ -179,6 +179,23 @@ int db_set_overview (db *d, var *v) {
     return d->set_overview (d, v);
 }
 
+/** Write a datapoint for a host graph
+  * \param d The database handle
+  * \param hostid The id of the host the graph is for.
+  * \param id The id of the graph
+  * \param key The key of the datapoint
+  * \param val The value to write
+  */
+int db_set_graph (db *d, uuid hostid, const char *id, const char *key, 
+                  double val) {
+    return d->set_graph (d, hostid, id, key, val);
+}
+
+double *db_get_graph (db *d, uuid hostid, const char *id, const char *key,
+                      time_t interval, int numsamples) {
+    return d->get_graph (d, hostid, id, key, interval, numsamples);
+}
+
 /** Close a database handle
   * \param d The handle to close
   */

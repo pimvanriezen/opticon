@@ -8,9 +8,12 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#include <sys/mman.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
+#include <math.h>
 
 #define LOCALDB_OFFS_INVALID 0xffffffffffffffffULL
 #define LOCALDB_FLAG_NOCREATE 0x0000001
@@ -861,6 +864,122 @@ int localdb_set_hostmeta (db *d, uuid hostid, var *v) {
     }
     free (metapath);
     free (tmppath);
+    return res;
+}
+
+/** Converts a timestamp to an offset in a graph file. A graph file is always
+    30 days worth of 5 minute samples. */
+uint32_t localdb_graph_offset (time_t ti) {
+    uint32_t clipped = (uint32_t) (ti % (30 * 86400));
+    return (clipped / 300);
+}
+
+uint32_t localdb_offset_next (uint32_t i) {
+    return ((i+1) % GRAPHDATASZ);
+}
+
+/** Utility function that opens and mmaps a graph file. */
+graphdata *localdb_open_graph (localdb *self, const char *id, const char *v) {
+    graphdata *res = NULL;
+    int initialize=0;
+    struct stat st;
+    char uuidstr[40];
+    size_t keylen = strlen (id) + strlen (v) + 2;
+    char *graphpath = (char *) malloc (strlen(self->path)+40+keylen+8);
+    
+    sprintf (graphpath, "%s%s.%s.%s.graph", self->path, uuidstr, id, v);
+    if (stat (graphpath, &st) != 0) initialize=1;
+    
+    self->graphfd = open (graphpath, O_RDWR | O_CREAT);
+    free (graphpath);
+    if (self->graphfd < 0) return NULL;
+    
+    res = mmap (NULL, sizeof (graphdata), PROT_READ|PROT_WRITE,
+                MAP_SHARED, self->graphfd, 0);
+                
+    if (initialize) {
+        res->writepos = localdb_graph_offset (time(NULL));
+        res->accumulator = 0.0;
+        res->count = 0;
+        for (int i=0; i<GRAPHDATASZ; ++i) res->data[i] = 0.0;
+    }
+    
+    return res;
+}
+
+/** Utility function that closes a previously opened graph file. */
+void localdb_close_graph (localdb *self, graphdata *data) {
+    munmap (data, sizeof(graphdata));
+    close (self->graphfd);
+    self->graphfd = -1;
+}
+
+int localdb_set_graph (db *d, uuid hostid, const char *id, const char *key,
+                       double val) {
+    localdb *self = (localdb *) d;
+    graphdata *graph = localdb_open_graph (self, id, key);
+    if (! graph) return 0;
+    
+    uint32_t offnow = localdb_graph_offset (time(NULL));
+    if (offnow != graph->writepos) {
+        graph->writepos = offnow;
+        graph->accumulator = 0.0;
+        graph->count = 0;
+    }
+    
+    graph->count++;
+    graph->accumulator += val;
+    
+    graph->data[graph->writepos] = graph->accumulator / graph->count;
+    localdb_close_graph (self, graph);
+    return 1;
+}
+
+double *localdb_get_graph (db *d, uuid hostid, const char *id,
+                           const char *key, time_t interval,
+                           int numsamples) {
+    localdb *self = (localdb *) d;
+    if (! numsamples) return NULL;
+                           
+    time_t t_end = time (NULL);
+    time_t t_start = t_end - interval;
+    uint32_t offs_start = localdb_graph_offset (t_start);
+    uint32_t offs_end = localdb_graph_offset (t_end);
+    
+    double samplesize = ((double)interval)/(numsamples*300.0);
+    if (samplesize < 1.0) return NULL;
+    
+    graphdata *graph = localdb_open_graph (self, id, key);
+    if (! graph) return NULL;
+
+    int pos = 0;
+    double *res = (double *) malloc ((numsamples+1) * sizeof (double));
+    uint32_t crsr = offs_start;
+    double offs_next = offs_start + samplesize;
+    
+    time_t t_now = t_start;
+    
+    while (pos < numsamples) {
+        double ra = 0.0;
+        double rc = 0.0;
+        while (localdb_offset_next(crsr) != (uint32_t) offs_next) {
+            ra += graph->data[crsr];
+            rc += 1.0;
+            crsr = localdb_offset_next(crsr);
+        }
+        crsr = localdb_offset_next(crsr);
+        double diff = offs_next - floor(offs_next);
+        ra += graph->data[crsr] * diff;
+        rc += diff;
+        if (rc <= 0.0) rc = 1.0;
+        res[pos] = ra / rc;
+        rc = 1.0 - diff;
+        ra = graph->data[crsr] * rc;
+        offs_next += interval;
+        pos++;
+    }
+    
+    localdb_close_graph (self, graph);
     return res;
 }
 
