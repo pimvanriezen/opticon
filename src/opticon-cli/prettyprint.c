@@ -29,7 +29,7 @@ void print_bar (int width, double max, double v) {
             puts (bars[8]);
         }
         else {
-            double diff = (v - (i*prop)) / prop * 8;
+            double diff = ((v - (i*prop)) / prop) * 8;
             puts (bars[(int) diff]);
         }
     }
