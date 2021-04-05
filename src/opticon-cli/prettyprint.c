@@ -30,11 +30,11 @@ void print_bar (int width, double max, double v) {
             puts (bars[8]);
         }
         else if (i > (v/prop)) {
-            puts (" ");
+            puts (".");
         }
         else {
             double diff = ((i+1) - (v/prop)) * 8;
-            puts (bars[(int) diff]);
+            puts (bars[(int) (8-diff)]);
         }
     }
 }
