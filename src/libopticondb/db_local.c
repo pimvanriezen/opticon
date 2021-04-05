@@ -892,11 +892,19 @@ graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
     sprintf (graphpath, "%s%s.%s.%s.graph", self->path, uuidstr, id, v);
     if (stat (graphpath, &st) != 0) initialize=1;
     
-    log_debug ("graph: open/ceeate %s", graphpath);
+    log_debug ("graph: open/create %s", graphpath);
     
     self->graphfd = open (graphpath, O_RDWR | O_CREAT);
+    if (initialize) fchmod (self->graphfd, 0660);
+    
     free (graphpath);
     if (self->graphfd < 0) return NULL;
+    
+    if (initialize) {
+        for (uint32_t i=0; i<sizeof(graphdata); ++i) {
+            write (self->graphfd, "", 1);
+        }
+    }
     
     res = mmap (0, sizeof (graphdata), PROT_READ|PROT_WRITE,
                 MAP_PRIVATE, self->graphfd, 0);
