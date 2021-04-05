@@ -29,6 +29,9 @@ void print_bar (int width, double max, double v) {
         if ((i+1) <= (v/prop)) {
             puts (bars[8]);
         }
+        else if (i > (v/prop)) {
+            puts (" ");
+        }
         else {
             double diff = ((i+1) - (v/prop)) * 8;
             puts (bars[(int) diff]);
