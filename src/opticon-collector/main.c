@@ -346,6 +346,7 @@ void handle_host_metadata (host *H, var *meta) {
                title: "CPU Usage"
                unit: "%"
                color: "blue"
+               max: 100.0
            }
        }
     */

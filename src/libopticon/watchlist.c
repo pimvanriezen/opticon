@@ -141,7 +141,7 @@ void graphlist_clear (graphlist *self) {
 /** Add a target to a graphlist */
 void graphlist_add (graphlist *self, meterid_t id, const char *graph,
                     const char *datum, const char *title, const char *unit,
-                    const char *color) {
+                    const char *color, double max) {
     graphtarget *res = (graphtarget *) malloc (sizeof (graphtarget));
     res->next = res->prev = NULL;
     res->id = id;
@@ -150,6 +150,7 @@ void graphlist_add (graphlist *self, meterid_t id, const char *graph,
     res->title = title ? strdup (title) : NULL;
     res->unit = unit ? strdup (unit) : NULL;
     res->color = color ? strdup (color) : NULL;
+    res->max = max;
     
     pthread_mutex_lock (&self->mutex);
     if (self->last) {
@@ -174,7 +175,8 @@ void graphlist_make (graphlist *self, var *def) {
                        var_get_str_forkey (crsr, "datum"),
                        var_get_str_forkey (crsr, "title"),
                        var_get_str_forkey (crsr, "unit"),
-                       var_get_str_forkey (crsr, "color"));
+                       var_get_str_forkey (crsr, "color"),
+                       var_get_double_forkey (crsr, "max"));
         
         crsr = crsr->next;               
     }

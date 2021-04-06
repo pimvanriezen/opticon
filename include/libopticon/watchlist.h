@@ -90,6 +90,7 @@ typedef struct graphtarget_s {
     char                    *title;
     char                    *unit;
     char                    *color;
+    double                   max;
 } graphtarget;
 
 typedef struct graphlist_s {
@@ -119,7 +120,7 @@ void         graphlist_free (graphlist *);
 void         graphlist_clear (graphlist *);
 void         graphlist_add (graphlist *, meterid_t, const char *,
                             const char *, const char *, const char *,
-                            const char *);
+                            const char *, double);
 void         graphlist_make (graphlist *, var *);
 graphtarget *graphlist_begin (graphlist *);
 graphtarget *graphlist_next (graphlist *, graphtarget *);

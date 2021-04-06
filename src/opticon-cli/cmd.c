@@ -254,6 +254,7 @@ int cmd_meter_list (int argc, const char *argv[]) {
                 const char *type = var_get_str_forkey (crsr, "type");
                 const char *unit = var_get_str_forkey (crsr, "unit");
                 const char *org = var_get_str_forkey (crsr, "origin");
+                double max = var_get_double_forkey (crsr, "max");
             
                 if (!desc) desc = "-";
                 if (!unit) unit = "";

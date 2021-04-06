@@ -193,6 +193,7 @@ const char *DEFGRAPHS =
 "       title: \"CPU Usage\""
 "       unit: \"%\""
 "       color: \"blue\""
+"       max: 100.0"
 "   }"
 "   net/in_kbs {"
 "       graph: net"
@@ -200,6 +201,7 @@ const char *DEFGRAPHS =
 "       title: \"Bandwidth In\""
 "       unit: \"Kb/s\""
 "       color: \"cyan\""
+"       max: 500.0"
 "   }"
 "   net/out_kbs {"
 "       graph: net"
@@ -207,6 +209,7 @@ const char *DEFGRAPHS =
 "       title: \"Bandwidth Out\""
 "       unit: \"Kb/s\""
 "       color: \"blue\""
+"       max: 500.0"
 "   }"
 "   io/rdops {"
 "       graph: io"
@@ -214,6 +217,7 @@ const char *DEFGRAPHS =
 "       title: \"Read Operations\""
 "       unit: \"iops\""
 "       color: \"green\""
+"       max: 100.0"
 "   }"
 "   io/wrops {"
 "       graph: io"
@@ -221,6 +225,7 @@ const char *DEFGRAPHS =
 "       title: \"Write Operations\""
 "       unit: \"iops\""
 "       color: \"red\""
+"       max: 100.0"
 "   }";
 
 static var *PARSED_DEFMETERS = NULL;
