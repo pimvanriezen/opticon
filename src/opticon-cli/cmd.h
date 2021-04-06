@@ -26,6 +26,7 @@ typedef struct optinfo {
     const char  *weight;
     time_t       time;
     int          json;
+    int          watch;
     const char  *api_url;
     const char  *keystone_url;
     const char  *unithost_url;
