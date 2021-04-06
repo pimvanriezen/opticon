@@ -252,6 +252,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
         col++;
     }
     printf ("\n");
+    print_line();
     
     var *node = arr->value.arr.first;
     while (node) {
