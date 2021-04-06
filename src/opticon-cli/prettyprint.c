@@ -189,7 +189,9 @@ void print_values (var *apires, const char *pfx) {
                 break;
             
             case VAR_STR:
-                print_value (name, "%s", var_get_str(crsr));
+                sprintf (valbuf, "\033[38;5;28m%s\033[0m",
+                         var_get_str(crsr));
+                print_value (name, "%s", valbuf);
                 break;
             
             case VAR_INT:
