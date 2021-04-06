@@ -545,7 +545,7 @@ int cmd_host_list (int argc, const char *argv[]) {
             start[10] = ' ';
             end[10] = ' ';
 
-            printf ("\033[2m%s\033[0m \033[1m%4" PRIu64 "\033[0m %s %s  %s\n",
+            printf ("\033[38;5;28m%s\033[0m \033[1m%4" PRIu64 "\033[0m %s %s  %s\n",
                     var_get_str_forkey (crsr, "id"),
                     usage, unit, start, end);
             crsr = crsr->next;
@@ -770,7 +770,7 @@ int cmd_session_list (int argc, const char *argv[]) {
     var *v_session = var_get_array_forkey (v, "session");
     var *crsr = v_session->value.arr.first;
     while (crsr) {
-        printf ("\033[2m%08x-%08x\033[0m \033[1m%-39s\033[0m %s\n",
+        printf ("\033[38;5;28m%08x-%08x\033[0m \033[1m%-39s\033[0m %s\n",
                 (uint32_t) (var_get_int_forkey (crsr, "sessid")),
                 (uint32_t) (var_get_int_forkey (crsr, "addr")),
                 var_get_str_forkey (crsr, "remote"),
