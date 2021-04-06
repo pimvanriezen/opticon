@@ -243,27 +243,17 @@ void print_table (var *arr, const char **hdr, const char **fld,
     const char *coltbl[] = { "\033[38;5;185m",
                              "\033[38;5;28m" };
     
-    int widacc = 0;
-    
     while (hdr[col]) {
-        strcpy (fmt, "\033[4m%");
+        strcpy (fmt, "%");
         if (align[col] == CA_L) strcat (fmt, "-");
         if (wid[col]) {
             sprintf (fmt+strlen(fmt), "%i", wid[col]);
-            widacc += wid[col]+1;
-        }
-        else {
-            widacc += strlen(hdr[col])+1;
         }
         strcat (fmt, "s ");
         printf (fmt, hdr[col]);
         col++;
     }
-    if (widacc < 80) {
-        sprintf (fmt, "%%%is", 80-widacc);
-        printf (fmt, " ");
-    }
-    printf ("\033[0m\n");
+    printf ("\n");
     
     var *node = arr->value.arr.first;
     while (node) {
