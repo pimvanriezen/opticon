@@ -34,7 +34,7 @@ const char *decorate_status (const char *st) {
     else if (strcmp (st, "ALERT") == 0) color=88;
     else if (strcmp (st, "CRIT") == 0) color=124;
     
-    sprintf (statustxt, "\033[48;5;%im\033[1m %5s \033[0m", color, st);
+    sprintf (statustxt, "\033[48;5;%im\033[1m %-5s \033[0m", color, st);
     return statustxt;
 }
 
