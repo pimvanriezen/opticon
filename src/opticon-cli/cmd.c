@@ -606,8 +606,8 @@ int cmd_get_record (int argc, const char *argv[]) {
     #define Vdone(x) var_delete_key(apires,x)
     /* -------------------------------------------------------------*/
     print_hdr ("HOST");
-    print_value ("UUID", "%s", OPTIONS.host);
-    print_value ("Hostname", "%s", Vstr("hostname"));
+    print_value ("UUID", "\033[38;5;28m%s\033[0m", OPTIONS.host);
+    print_value ("Hostname", "\033[38;5;185m%s\033[0m", Vstr("hostname"));
     print_value ("Address", "%s", VDstr("agent","ip"));
     print_value ("Status", "%s", decorate_status(Vstr("status")));
     
