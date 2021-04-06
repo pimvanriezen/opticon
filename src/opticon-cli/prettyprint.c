@@ -18,6 +18,12 @@
 static const char *PENDING_HDR = NULL;
 static var *MDEF = NULL;
 
+void print_line (void) {
+    printf ("────────────────────────────────────"
+            "────────────────────────────────────"
+            "────────\n");
+}
+
 void print_bar (int width, double max, double v) {
     if (! width) width = 1;
     double prop = max/width;
@@ -49,14 +55,19 @@ void print_hdr (const char *hdr) {
     
     int minspos = strlen(mins) - 73;
     const char *crsr = hdr;
-    printf ("---( ");
+    printf ("───( ");
     while (*crsr) {
         putc (toupper (*crsr), stdout);
         minspos++;
         crsr++;
     }
     printf (" )");
-    printf ("%s", mins + minspos);
+    
+    crsr = mins+minspos;
+    while (*crsr) {
+        printf ("─");
+        crsr++;
+    }
     putc ('\n', stdout);
 }
 

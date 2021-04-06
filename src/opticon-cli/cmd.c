@@ -32,8 +32,7 @@ int cmd_tenant_list (int argc, const char *argv[]) {
     }
     else {
         printf ("UUID                                 Hosts  Name\n");
-        printf ("---------------------------------------------"
-                "-----------------------------------\n");
+        print_line();
 
         var *res_tenant = var_get_array_forkey (res, "tenant");
         if (var_get_count (res_tenant)) {
@@ -46,8 +45,7 @@ int cmd_tenant_list (int argc, const char *argv[]) {
                 crsr = crsr->next;
             }
         }
-        printf ("----------------------------------------------"
-                "----------------------------------\n");
+        print_line();
     }
     var_free (res);
     return 0;
@@ -155,8 +153,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
 
     printf ("Name                            Status     "
             "Load  Net i/o      CPU\n");
-    printf ("---------------------------------------------"
-            "-----------------------------------\n");
+    print_line();
     
     var *ov_dict = var_get_dict_forkey (ov, "overview");
     if (! var_get_count (ov_dict)) return 0;
@@ -182,8 +179,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
         crsr = crsr->next;
     }
     var_free (ov);
-    printf ("---------------------------------------------"
-            "-----------------------------------\n");
+    print_line();
     return 0;
 }    
     
@@ -251,8 +247,7 @@ int cmd_meter_list (int argc, const char *argv[]) {
         var *res_meter = var_get_dict_forkey (apires, "meter");
         if (var_get_count (res_meter)) {
             printf ("From     Meter        Type      Unit    Description\n");
-            printf ("----------------------------------------"
-                    "----------------------------------------\n");
+            print_line();
             var *crsr = res_meter->value.arr.first;
             while (crsr) {
                 const char *desc = var_get_str_forkey (crsr, "description");
@@ -268,8 +263,7 @@ int cmd_meter_list (int argc, const char *argv[]) {
                         type, unit, desc);
                 crsr = crsr->next;
             }
-            printf ("---------------------------------------------"
-                    "-----------------------------------\n");
+            print_line();
         }
     }
     var_free (apires);
@@ -418,9 +412,8 @@ int cmd_watcher_list (int argc, const char *argv[]) {
     }
 
     printf ("From     Meter        Trigger   Match                  "
-            "Value             Weight\n"
-            "-------------------------------------------------------"
-            "-------------------------\n");
+            "Value             Weight\n");
+    print_line();
 
     var *apiwatch = var_get_dict_forkey (apires, "watcher");
     if (var_get_count (apiwatch)) {
@@ -434,8 +427,7 @@ int cmd_watcher_list (int argc, const char *argv[]) {
                         var_get_dict_forkey (crsr, "critical"));
             crsr = crsr->next;
         }
-        printf ("---------------------------------------------"
-                "-----------------------------------\n");
+        print_line();
     }
     var_free (apires);
     return 0;
@@ -494,17 +486,15 @@ int cmd_tenant_create (int argc, const char *argv[]) {
     var *apires = api_call ("POST", req, "/%s", OPTIONS.tenant);
     if (apires) {
         var *r = var_get_dict_forkey (apires, "tenant");
-        printf ("Tenant created:\n"
-                "---------------------------------------------"
-                "-----------------------------------\n"
-                "     Name: %s\n"
+        printf ("Tenant created:\n");
+        print_line();
+        printf ("     Name: %s\n"
                 "     UUID: %s\n"
-                "  AES Key: %s\n"
-                "---------------------------------------------"
-                "-----------------------------------\n",
+                "  AES Key: %s\n",
                 var_get_str_forkey (r, "name"),
                 OPTIONS.tenant,
                 var_get_str_forkey (r, "key"));
+        print_line();
     }
     
     var_free (req);
@@ -533,8 +523,7 @@ int cmd_host_list (int argc, const char *argv[]) {
     if (var_get_count (v_hosts)) {
         printf ("UUID                                    Size "
                 "First record      Last record\n");
-        printf ("---------------------------------------------"
-                "-----------------------------------\n");
+        print_line();
         var *crsr = v_hosts->value.arr.first;
         
         while (crsr) {
@@ -561,8 +550,7 @@ int cmd_host_list (int argc, const char *argv[]) {
                     usage, unit, start, end);
             crsr = crsr->next;
         }
-        printf ("---------------------------------------------"
-                "-----------------------------------\n");
+        print_line();
     }
 
     var_free (apires);
@@ -758,9 +746,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     
     /** Print any remaining table data */
     print_tables (apires);
-        
-    printf ("---------------------------------------------"
-            "-----------------------------------\n");
+    print_line();
 
     var_free (apires);
     print_done();
@@ -776,9 +762,8 @@ int cmd_session_list (int argc, const char *argv[]) {
         var_free (v);
         return 0;
     }
-    
-    printf ("---------------------------------------------"
-            "-----------------------------------\n");
+
+    print_line();    
     printf ("Session ID        Sender"
             "                                  Last Refresh\n");
     
@@ -792,9 +777,7 @@ int cmd_session_list (int argc, const char *argv[]) {
                 var_get_str_forkey (crsr, "lastcycle"));
         crsr = crsr->next;
     }
-
-    printf ("---------------------------------------------"
-            "-----------------------------------\n");
+    print_line();
 
     var_free (v);
     return 0;
