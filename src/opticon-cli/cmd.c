@@ -608,7 +608,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     print_hdr ("HOST");
     print_value ("UUID", "\033[38;5;28m%s\033[0m", OPTIONS.host);
     print_value ("Hostname", "\033[38;5;185m%s\033[0m", Vstr("hostname"));
-    print_value ("Address", "%s", VDstr("agent","ip"));
+    print_value ("Address", "\033[1m%s\033[0m", VDstr("agent","ip"));
     print_value ("Status", "%s", decorate_status(Vstr("status")));
     
     print_array ("Problems", Arr("problems"));
