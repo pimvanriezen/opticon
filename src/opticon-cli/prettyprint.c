@@ -255,7 +255,8 @@ void print_table (var *arr, const char **hdr, const char **fld,
             int isbold = 0;
             switch (typ[col]) {
                 case VAR_STR:
-                    strncpy (buf, var_get_str_forkey (node, fld[col]),512);
+                    snprintf (buf, 512, "\033[38;5;28m%s\033[0m",
+                              var_get_str_forkey (node, fld[col]));
                     buf[512] = 0;
                     break;
                 
