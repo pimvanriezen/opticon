@@ -100,10 +100,10 @@ void print_value (const char *key, const char *fmt, ...) {
 
     const char *dots = "......................";
     int dotspos = strlen(dots) - 18;
-    printf ("%s", key);
+    printf ("%s\033[2m", key);
     dotspos += strlen (key);
     if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
-    printf (": ");
+    printf (": \033[0m");
     printf ("%s", val);
     printf ("\n");
 }
