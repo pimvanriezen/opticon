@@ -40,6 +40,7 @@ STRINGOPT(path)
 STRINGOPT(host)
 STRINGOPT(hostname)
 FLAGOPT(json)
+FLAGOPT(watch)
 STRINGOPT(name)
 STRINGOPT(meter)
 STRINGOPT(description)
@@ -73,7 +74,7 @@ int set_time (const char *o, const char *v) {
     time_t tnow = time (NULL);
     
     if (strcmp (v, "now") == 0) {
-        OPTIONS.time = tnow;
+        OPTIONS.time = 0;
         return 1;
     }
     
@@ -108,7 +109,7 @@ int set_time (const char *o, const char *v) {
     
     /* yyyy-mm-ddThh:mm */
     if (strlen (v) == 16 && v[4] == '-' && v[7] == '-' &&
-        v[10] == 'H' && v[13] == ':') {
+        v[10] == 'T' && v[13] == ':') {
         tm.tm_year = atoi (v) - 1900;
         tm.tm_mon = atoi (v+5) - 1;
         tm.tm_mday = atoi (v+8);
@@ -287,6 +288,7 @@ cliopt CLIOPT[] = {
     {"--time","-T",OPT_VALUE,"now",set_time},
     {"--path","-p",OPT_VALUE,"/var/opticon/db",set_path},
     {"--json","-j",OPT_FLAG,NULL,set_json},
+    {"--watch","-w",OPT_FLAG,NULL,set_watch},
     {"--name","-n",OPT_VALUE,"",set_name},
     {"--meter","-m",OPT_VALUE,"",set_meter},
     {"--type","-Y",OPT_VALUE,"integer",set_type},
@@ -380,6 +382,7 @@ void usage (const char *cmdname) {
          "        --unithost-url <url>\n"
          "        --keystone-url <url>\n"
          "        --api-url <url>\n"
+         "        --watch\n"
          "\n"
          "  Commands:\n"
          "        tenant-list\n"
@@ -525,5 +528,11 @@ int main (int _argc, const char *_argv[]) {
     
     /* Dispatch command */
     const char *cmd = argv[1];
+    
+    while (OPTIONS.watch) {
+        printf ("\033[2J\033[H");
+        cliopt_runcommand (CLICMD, cmd, argc, argv);
+        sleep (15);
+    }
     return cliopt_runcommand (CLICMD, cmd, argc, argv);
 }
