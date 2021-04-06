@@ -151,9 +151,9 @@ int cmd_host_overview (int argc, const char *argv[]) {
     var *ov = api_get ("/%s/host/overview", OPTIONS.tenant);
     if (! var_get_count (ov)) return 0;
 
-    printf ("Name                           Status    "
-            "Load  Net i/o      CPU\n");
-    print_line();
+    print_hdr ("OVERVIEW");
+    printf ("NAME                           STATUS    "
+            "LOAD  NET I/O      CPU\n");
     
     var *ov_dict = var_get_dict_forkey (ov, "overview");
     if (! var_get_count (ov_dict)) return 0;
@@ -521,9 +521,9 @@ int cmd_host_list (int argc, const char *argv[]) {
     
     var *v_hosts = var_get_array_forkey (apires, "host");
     if (var_get_count (v_hosts)) {
-        printf ("UUID                                    Size "
-                "First record      Last record\n");
-        print_line();
+        print_hdr ("HOSTS");
+        printf ("UUID                                    SIZE "
+                "FIRST             LAST\n");
         var *crsr = v_hosts->value.arr.first;
         
         while (crsr) {
@@ -763,9 +763,9 @@ int cmd_session_list (int argc, const char *argv[]) {
         return 0;
     }
 
-    printf ("Session ID        Sender"
-            "                                  Last Refresh\n");
-    print_line();    
+    print_hdr ("SESSIONS");
+    printf ("ID                SENDER"
+            "                                  LAST REFRESH\n");
     
     var *v_session = var_get_array_forkey (v, "session");
     var *crsr = v_session->value.arr.first;
