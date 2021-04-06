@@ -25,6 +25,7 @@ void print_bar (int width, double max, double v) {
         " ","▏","▎","▍","▌","▋","▊","▉","█"
     };
     
+    printf ("\033[38;5;214m");
     for (int i=0; i<width; ++i) {
         if ((i+1) <= (v/prop)) {
             printf ("%s", bars[8]);
@@ -37,6 +38,7 @@ void print_bar (int width, double max, double v) {
             printf ("%s", bars[(int) (8-diff)]);
         }
     }
+    printf ("\033[0m");
 }
 
 /** Display function for host-show section headers */
