@@ -15,6 +15,7 @@
 
 #include "cmd.h"
 #include "api.h"
+#include "prettyprint.h"
 
 optinfo OPTIONS;
 
@@ -532,6 +533,7 @@ int main (int _argc, const char *_argv[]) {
     while (OPTIONS.watch) {
         printf ("\033[2J\033[H");
         cliopt_runcommand (CLICMD, cmd, argc, argv);
+        clear_pending_header();
         sleep (15);
     }
     return cliopt_runcommand (CLICMD, cmd, argc, argv);

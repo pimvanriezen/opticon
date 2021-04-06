@@ -26,6 +26,10 @@ void print_line (void) {
 
 static char *statustxt = NULL;
 
+void clear_pending_header (void) {
+    PENDING_HDR = NULL;
+}
+
 const char *decorate_status (const char *st) {
     if (! statustxt) statustxt = (char *) malloc (1024);
     int color = 245;
