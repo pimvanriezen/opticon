@@ -244,15 +244,14 @@ void print_table (var *arr, const char **hdr, const char **fld,
                              "\033[38;5;28m" };
     
     while (hdr[col]) {
-        strcpy (fmt, "%");
+        strcpy (fmt, "\033[4m%");
         if (align[col] == CA_L) strcat (fmt, "-");
         if (wid[col]) sprintf (fmt+strlen(fmt), "%i", wid[col]);
-        strcat (fmt, "s ");
+        strcat (fmt, "s \033[0m");
         printf (fmt, hdr[col]);
         col++;
     }
     printf ("\n");
-    print_line();
     
     var *node = arr->value.arr.first;
     while (node) {
