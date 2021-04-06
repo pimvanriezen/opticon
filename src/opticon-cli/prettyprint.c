@@ -69,13 +69,13 @@ void print_hdr (const char *hdr) {
     
     int minspos = strlen(mins) - 73;
     const char *crsr = hdr;
-    printf ("\033[2m───( \033[0m");
+    printf ("\033[2m───( \033[0m\033[38;5;45m");
     while (*crsr) {
         putc (toupper (*crsr), stdout);
         minspos++;
         crsr++;
     }
-    printf ("\033[2m )");
+    printf ("\033[0m\033[2m )");
     
     crsr = mins+minspos;
     while (*crsr) {
