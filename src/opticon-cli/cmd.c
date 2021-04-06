@@ -153,7 +153,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
 
     print_hdr ("OVERVIEW");
     printf ("NAME                           STATUS    "
-            "LOAD  NET I/O      CPU\n");
+            "LOAD  NET I/O      CPU      GRAPH\n");
     
     var *ov_dict = var_get_dict_forkey (ov, "overview");
     if (! var_get_count (ov_dict)) return 0;
