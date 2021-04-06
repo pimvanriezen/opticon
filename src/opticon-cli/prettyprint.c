@@ -102,8 +102,8 @@ void print_gauge_value (const char *key, const char *unit, double val,
     dotspos += strlen (key);
     if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
     printf (": ");
-    printf ("\033[1m%6.2f \033[0m%-29s-|",val, unit);
-    print_bar (20, max, val);
+    printf ("\033[1m%6.2f \033[0m%-23s-|",val, unit);
+    print_bar (25, max, val);
     printf ("|+\n");
 }
 
