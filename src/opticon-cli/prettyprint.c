@@ -19,9 +19,9 @@ static const char *PENDING_HDR = NULL;
 static var *MDEF = NULL;
 
 void print_line (void) {
-    printf ("╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+    printf ("\033[1m╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
             "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
-            "╌╌╌╌╌╌╌╌\n");
+            "╌╌╌╌╌╌╌╌\033[0m\n");
 }
 
 static char *statustxt = NULL;
