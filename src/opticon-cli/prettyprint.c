@@ -19,9 +19,9 @@ static const char *PENDING_HDR = NULL;
 static var *MDEF = NULL;
 
 void print_line (void) {
-    printf ("┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
-            "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
-            "┈┈┈┈┈┈┈┈\n");
+    printf ("╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+            "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+            "╌╌╌╌╌╌╌╌\n");
 }
 
 static char *statustxt = NULL;
@@ -69,7 +69,7 @@ void print_hdr (const char *hdr) {
     
     int minspos = strlen(mins) - 73;
     const char *crsr = hdr;
-    printf ("\033[1m┈┈┈( \033[0m\033[38;5;45m");
+    printf ("\033[1m╌╌╌( \033[0m\033[38;5;45m");
     while (*crsr) {
         putc (toupper (*crsr), stdout);
         minspos++;
@@ -79,7 +79,7 @@ void print_hdr (const char *hdr) {
     
     crsr = mins+minspos;
     while (*crsr) {
-        printf ("┈");
+        printf ("╌");
         crsr++;
     }
     printf ("\033[0m\n");
