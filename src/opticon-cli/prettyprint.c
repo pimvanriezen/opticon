@@ -82,7 +82,7 @@ void print_hdr (const char *hdr) {
         printf ("─");
         crsr++;
     }
-    putc ('\033[0m\n', stdout);
+    printf ("\033[0m\n");
 }
 
 /** Display function for host-show data */
