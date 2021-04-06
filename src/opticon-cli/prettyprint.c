@@ -69,20 +69,20 @@ void print_hdr (const char *hdr) {
     
     int minspos = strlen(mins) - 73;
     const char *crsr = hdr;
-    printf ("───( ");
+    printf ("\033[2m───( \033[0m");
     while (*crsr) {
         putc (toupper (*crsr), stdout);
         minspos++;
         crsr++;
     }
-    printf (" )");
+    printf ("\033[2m )");
     
     crsr = mins+minspos;
     while (*crsr) {
         printf ("─");
         crsr++;
     }
-    putc ('\n', stdout);
+    putc ('\033[0m\n', stdout);
 }
 
 /** Display function for host-show data */
@@ -243,13 +243,25 @@ void print_table (var *arr, const char **hdr, const char **fld,
     const char *coltbl[] = { "\033[38;5;185m",
                              "\033[38;5;28m" };
     
+    int widacc = 0;
+    
     while (hdr[col]) {
         strcpy (fmt, "\033[4m%");
         if (align[col] == CA_L) strcat (fmt, "-");
-        if (wid[col]) sprintf (fmt+strlen(fmt), "%i", wid[col]);
+        if (wid[col]) {
+            sprintf (fmt+strlen(fmt), "%i", wid[col]);
+            widacc += wid[col]+1;
+        }
+        else {
+            widacc += strlen(hdr[col])+1;
+        }
         strcat (fmt, "s \033[0m");
         printf (fmt, hdr[col]);
         col++;
+    }
+    if (widacc < 80) {
+        sprintf (fmt, "%%%is", 80-widacc);
+        printf (fmt, " ");
     }
     printf ("\n");
     
