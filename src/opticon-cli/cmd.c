@@ -637,11 +637,11 @@ int cmd_get_record (int argc, const char *argv[]) {
                  u_mins, (u_mins==1)?"":"s", u_sec, (u_sec==1)?"":"s");
     }
     
-    print_value ("Uptime","%s",uptimestr);
-    print_value ("OS/Hardware","%s %s (%s)", VDstr("os","kernel"),
-                 VDstr("os","version"), VDstr("os","arch"));
+    print_value ("Uptime","\033[38;5;28m%s\033[0m",uptimestr);
+    print_value ("OS/Hardware","\033[38;5;28m%s %s \033[0m(%s)",
+                 VDstr("os","kernel"), VDstr("os","version"), VDstr("os","arch"));
     const char *dist = VDstr("os","distro");
-    if (dist) print_value ("Distribution", "%s", dist);
+    if (dist) print_value ("Distribution", "\033[38;5;28m%s\033[0m", dist);
     Vdone("os");
     
     /* -------------------------------------------------------------*/
