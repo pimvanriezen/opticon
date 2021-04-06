@@ -141,7 +141,8 @@ void print_array (const char *key, var *arr) {
                 break;
             
             case VAR_STR:
-                strncat (out, var_get_str (crsr), 4096);
+                snprintf (out+strlen(out), 4095-strlen(out),
+                          "\033[38;5;28m%s\033[0m", var_get_str (crsr));
                 break;
             
             default:
