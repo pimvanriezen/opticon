@@ -171,7 +171,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
         netio += var_get_int_forkey (crsr, "net/out_kbs");
         double cpu = var_get_double_forkey (crsr, "pcpu");
         int rcpu = (cpu+5.0) / 10;
-        printf ("%-30s %s %6.2f %8" PRIu64
+        printf ("\033[38;5;214m%-30s\033[0m %s %6.2f %8" PRIu64
                 " \033[1m%6.2f\033[0m %% -|",
                 shortname, decorate_status(hstat), load, netio, cpu);
         print_bar (12, 100, cpu);
@@ -607,7 +607,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     /* -------------------------------------------------------------*/
     print_hdr ("HOST");
     print_value ("UUID", "%s", OPTIONS.host);
-    print_value ("Hostname", "%s", Vstr("hostname"));
+    print_value ("Hostname", "\033[38;5;214m%s\033[0m", Vstr("hostname"));
     print_value ("Address", "%s", VDstr("agent","ip"));
     print_value ("Status", "%s", decorate_status(Vstr("status")));
     
