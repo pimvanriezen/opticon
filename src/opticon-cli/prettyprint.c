@@ -256,6 +256,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
     var *node = arr->value.arr.first;
     while (node) {
         col = 0;
+        colorsdone = 0;
         while (hdr[col]) {
             int isbold = 0;
             int iscolor = 0;
@@ -307,8 +308,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
             else {
                 tsuffx[0] = 0;
             }
-            strcpy (fmt, isbold ? "\033[1m" : "");
-            strcpy (fmt, iscolor ? coltbl[colorsdone&1] : "");
+            strcpy (fmt, isbold ? "\033[1m" : iscolor ? coltbl[colorsdone&1] : "");
             strcat (fmt, "%");
             if (align[col] == CA_L) strcat (fmt, "-");
             if (wid[col]) {
