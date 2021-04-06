@@ -255,15 +255,15 @@ void print_table (var *arr, const char **hdr, const char **fld,
         else {
             widacc += strlen(hdr[col])+1;
         }
-        strcat (fmt, "s \033[0m");
+        strcat (fmt, "s ");
         printf (fmt, hdr[col]);
         col++;
     }
     if (widacc < 80) {
         sprintf (fmt, "%%%is", 80-widacc);
-        printf (fmt, "....");
+        printf (fmt, " ");
     }
-    printf ("\n");
+    printf ("\033[0m\n");
     
     var *node = arr->value.arr.first;
     while (node) {
