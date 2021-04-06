@@ -174,7 +174,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
         netio += var_get_int_forkey (crsr, "net/out_kbs");
         double cpu = var_get_double_forkey (crsr, "pcpu");
         int rcpu = (cpu+5.0) / 10;
-        printf ("%-31s \033[1m%-8s\033-0m %6.2f %8" PRIu64
+        printf ("%-31s \033[1m%-8s\033[0m %6.2f %8" PRIu64
                 " \033[1m%6.2f\033[0m %% -|",
                 shortname, hstat, load, netio, cpu);
         print_bar (10, 100, cpu);
