@@ -261,7 +261,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
     }
     if (widacc < 80) {
         sprintf (fmt, "%%%is", 80-widacc);
-        printf (fmt, " ");
+        printf (fmt, "....");
     }
     printf ("\n");
     
