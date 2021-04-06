@@ -103,7 +103,7 @@ void print_value (const char *key, const char *fmt, ...) {
     printf ("%s\033[2m", key);
     dotspos += strlen (key);
     if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
-    printf (": \033[0m");
+    printf ("\033[0m: ");
     printf ("%s", val);
     printf ("\n");
 }
@@ -112,10 +112,10 @@ void print_gauge_value (const char *key, const char *unit, double val,
                         double max) {
     const char *dots = "......................";
     int dotspos = strlen(dots) - 18;
-    printf ("%s", key);
+    printf ("%s\033[2m", key);
     dotspos += strlen (key);
     if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
-    printf (": ");
+    printf ("\033[0m: ");
     printf ("\033[1m%6.2f \033[0m%-23s-|",val, unit);
     print_bar (25, max, val);
     printf ("|+\n");
