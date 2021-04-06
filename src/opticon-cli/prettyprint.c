@@ -24,6 +24,20 @@ void print_line (void) {
             "────────\n");
 }
 
+static char *statustxt = NULL;
+
+const char *decorate_status (const char *st) {
+    if (! statustxt) statustxt = (char *) malloc (1024);
+    int color = 245;
+    if (strcmp (st, "OK") == 0) color=22;
+    else if (strcmp (st, "WARN") == 0) color=202;
+    else if (strcmp (st, "ALERT") == 0) color=88;
+    else if (strcmp (st, "CRIT") == 0) color=124;
+    
+    sprintf (statustxt, "\033[48;5;%im\033[1m %5s \033[0m", color, st);
+    return statustxt;
+}
+
 void print_bar (int width, double max, double v) {
     if (! width) width = 1;
     double prop = max/width;

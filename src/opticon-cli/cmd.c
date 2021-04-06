@@ -609,7 +609,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     print_value ("UUID", "%s", OPTIONS.host);
     print_value ("Hostname", "%s", Vstr("hostname"));
     print_value ("Address", "%s", VDstr("agent","ip"));
-    print_value ("Status", "\033[1m%s\033[0m", Vstr("status"));
+    print_value ("Status", "%s", decorate_status(Vstr("status")));
     
     print_array ("Problems", Arr("problems"));
     

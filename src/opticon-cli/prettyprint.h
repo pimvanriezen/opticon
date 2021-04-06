@@ -10,6 +10,7 @@ typedef enum {
     CA_R
 } columnalign;
 
+const char *decorate_status (const char *);
 void print_line (void);
 void print_bar (int, double, double);
 void print_hdr (const char *);
