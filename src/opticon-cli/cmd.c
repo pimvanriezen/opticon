@@ -151,7 +151,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
     var *ov = api_get ("/%s/host/overview", OPTIONS.tenant);
     if (! var_get_count (ov)) return 0;
 
-    printf ("Name                            Status     "
+    printf ("Name                           Status    "
             "Load  Net i/o      CPU\n");
     print_line();
     
@@ -171,10 +171,10 @@ int cmd_host_overview (int argc, const char *argv[]) {
         netio += var_get_int_forkey (crsr, "net/out_kbs");
         double cpu = var_get_double_forkey (crsr, "pcpu");
         int rcpu = (cpu+5.0) / 10;
-        printf ("%-31s \033[1m%-8s\033[0m %6.2f %8" PRIu64
+        printf ("%-30s %s %6.2f %8" PRIu64
                 " \033[1m%6.2f\033[0m %% -|",
-                shortname, hstat, load, netio, cpu);
-        print_bar (10, 100, cpu);
+                shortname, decorate_status(hstat), load, netio, cpu);
+        print_bar (12, 100, cpu);
         printf ("|+\n");
         crsr = crsr->next;
     }
