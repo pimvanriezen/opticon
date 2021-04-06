@@ -238,6 +238,11 @@ void print_table (var *arr, const char **hdr, const char **fld,
     char tsuffx[64];
     
     int col = 0;
+    int colorsdone = 0;
+    
+    const char *coltbl[] = { "\033[38;5;185m",
+                             "\033[38;5;28m" };
+    
     while (hdr[col]) {
         strcpy (fmt, "%");
         if (align[col] == CA_L) strcat (fmt, "-");
@@ -253,11 +258,12 @@ void print_table (var *arr, const char **hdr, const char **fld,
         col = 0;
         while (hdr[col]) {
             int isbold = 0;
+            int iscolor = 0;
             switch (typ[col]) {
                 case VAR_STR:
-                    snprintf (buf, 512, "\033[38;5;28m%s\033[0m",
-                              var_get_str_forkey (node, fld[col]));
+                    strncpy (buf, var_get_str_forkey (node, fld[col]),512);
                     buf[512] = 0;
+                    iscolor = 1;
                     break;
                 
                 case VAR_INT:
@@ -302,13 +308,15 @@ void print_table (var *arr, const char **hdr, const char **fld,
                 tsuffx[0] = 0;
             }
             strcpy (fmt, isbold ? "\033[1m" : "");
+            strcpy (fmt, iscolor ? coltbl[colorsdone&1] : "");
             strcat (fmt, "%");
             if (align[col] == CA_L) strcat (fmt, "-");
             if (wid[col]) {
                 sprintf (fmt+strlen(fmt),"%i",wid[col]-sufwidth);
             }
             strcat (fmt, "s");
-            if (isbold) strcat (fmt, "\033[0m");
+            if (isbold || iscolor) strcat (fmt, "\033[0m");
+            if (iscolor) colorsdone++;
             strcat (fmt, tsuffx);
             strcat (fmt, " ");
             printf (fmt, buf);
