@@ -94,6 +94,19 @@ void print_value (const char *key, const char *fmt, ...) {
     printf ("\n");
 }
 
+void print_gauge_value (const char *key, const char *unit, double val,
+                        double max) {
+    const char *dots = "......................";
+    int dotspos = strlen(dots) - 18;
+    printf ("%s", key);
+    dotspos += strlen (key);
+    if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
+    printf (": ");
+    printf ("\033[1m%6.2f \033[0m%-30s-|",val, unit);
+    print_bar (20, max, val);
+    printf ("|+\n");
+}
+
 /** Print out an array as a comma-separated list */
 void print_array (const char *key, var *arr) {
     char out[4096];

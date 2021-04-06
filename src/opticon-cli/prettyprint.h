@@ -14,6 +14,7 @@ void print_line (void);
 void print_bar (int, double, double);
 void print_hdr (const char *);
 void print_value (const char *, const char *, ...);
+void print_gauge_value (const char *, const char *, double, double);
 void print_array (const char *key, var *arr);
 void print_values (var *apires, const char *pfx);
 void print_table (var *arr, const char **hdr, const char **fld,

@@ -679,6 +679,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     }
     
     
+    print_gauge_value ("CPU", cpubuf, pcpu, 100);
     print_value ("CPU", "%-40s %s", cpubuf, meter);
     if (iowait>0.001) print_value ("CPU iowait", 
                                    "\033[1m%6.2f %%\033[0m", iowait);
