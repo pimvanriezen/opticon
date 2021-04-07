@@ -930,6 +930,12 @@ void localdb_close_graph (localdb *self, graphdata *data) {
     self->graphfd = -1;
 }
 
+/** Add a datum to a specific graph for a specific host.
+  * \param d The database handle
+  * \param hostid The uuid of the host
+  * \param id The id of the graph
+  * \param key The id of the datum
+  * \param val The value to store */
 int localdb_set_graph (db *d, uuid hostid, const char *id, const char *key,
                        double val) {
     localdb *self = (localdb *) d;
@@ -951,6 +957,16 @@ int localdb_set_graph (db *d, uuid hostid, const char *id, const char *key,
     return 1;
 }
 
+/** Get graph data for a specific graph/datum for a specific host. Returns an
+  * array of double values.
+  * \param d The database handle
+  * \param hostid The uuid of the host
+  * \param id The id of the graph
+  * \param key The id of the datum
+  * \param interval The time period to inspect (in seconds, but highest resolution
+  *                 is five minutes)
+  * \param numsamples The number of samples to return in the dataset.
+  */
 double *localdb_get_graph (db *d, uuid hostid, const char *id,
                            const char *key, time_t interval,
                            int numsamples) {
