@@ -44,6 +44,8 @@ int cmd_host_delete_watcher (req_context *, req_arg *, var *, int *);
 int cmd_host_get_range (req_context *, req_arg *, var *, int *);
 int cmd_host_get_time (req_context *, req_arg *, ioport *, int *);
 int cmd_list_sessions (req_context *, req_arg *, var *, int *);
+int cmd_host_list_graphs (req_context *, req_arg *, var *, int *);
+int cmd_host_get_graph (req_context *, req_arg *, var *, int *);
 int cmd_dancing_bears (req_context *, req_arg *, var *, int *);
 #endif
 

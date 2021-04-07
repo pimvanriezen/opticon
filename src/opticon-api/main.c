@@ -343,7 +343,7 @@ void setup_matches (void) {
     _P_ ("/%U/host/%U/watcher/%S",    REQ_DELETE, cmd_host_delete_watcher);
     _P_ ("/%U/host/%U/watcher/%S/%S", REQ_DELETE, cmd_host_delete_watcher);
     _P_ ("/%U/host/%U/range/%T/%T",   REQ_GET,    cmd_host_get_range);
-    _T_ ("/%U/host/%U/graph",         REQ_GET,    cmd_host_list_graphs);
+    _P_ ("/%U/host/%U/graph",         REQ_GET,    cmd_host_list_graphs);
     _P_ ("/%U/host/%U/graph/%S/%S/%i/%i",
                                       REQ_GET,    cmd_host_get_graph);
     _T_ ("/%U/host/%U/time/%T",       REQ_GET,    cmd_host_get_time);
@@ -396,6 +396,7 @@ int set_mconfpath (const char *i, const char *v) {
 
 int set_gconfpath (const char *i, const char *v) {
     OPTIONS.gconfpath = v;
+    return 1;
 }
 
 /** Set up pidfile path */
@@ -475,7 +476,7 @@ cliopt CLIOPT[] = {
     {"--meter-config-path","-m",OPT_VALUE,
         "/etc/opticon/opticon-meter.conf", set_mconfpath},
     {"--graph-config-path","-g",OPT_VALUE,
-        "/etc/opticon/opticon-graph.conf", set_gconfpath};
+        "/etc/opticon/opticon-graph.conf", set_gconfpath},
     {NULL,NULL,0,NULL,NULL}
 };
 

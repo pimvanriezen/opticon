@@ -265,6 +265,121 @@ int cmd_list_sessions (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+void add_graphdefs (var *into, var *from) {
+    if (from->type != VAR_DICT) return;
+    var *fcrsr = from->value.arr.first;
+    while (fcrsr) {
+        const char *graph_id = var_get_str_forkey (fcrsr, "graph");
+        const char *datum_id = var_get_str_forkey (fcrsr, "datum");
+        if (graph_id && datum_id) {
+            var *crsr = var_get_dict_forkey (into, graph_id);
+            crsr = var_get_dict_forkey (crsr, datum_id);
+            var_copy (crsr, fcrsr);
+            var_set_str_forkey (crsr, "meter", fcrsr->id);
+        }
+        fcrsr = fcrsr->next;
+    }
+}
+
+var *collect_graphdefs (uuid tenant, uuid host) {
+    var *res = var_alloc();
+    add_graphdefs (res, OPTIONS.gconf);
+    /* FIXME: Add host meters */
+    return res;
+}
+
+/** GET /$TENANT/host/$HOST/graph */
+int cmd_host_list_graphs (req_context *ctx, req_arg *a, var *env,
+                          int *status) {
+    var *res = collect_graphdefs (ctx->tenantid, ctx->hostid);
+    if (! res) {
+        *status = 500;
+        return err_generic (env, "Could not collect graphs");
+    }
+    strcpy (res->id, "graph");
+    var_link (res, env);
+    *status = 200;
+    return 1;    
+}
+
+int cmd_host_get_graph (req_context *ctx, req_arg *a, var *env,
+                        int *status) {
+    if (a->argc < 6) {
+        *status = 500;
+        return err_generic (env, "Invalid argument list");
+    }
+    
+    var *def = collect_graphdefs (ctx->tenantid, ctx->hostid);
+    
+    const char *arg_graph_id = a->argv[2];
+    const char *arg_datum_id = a->argv[3];
+    int timespan = atoi (a->argv[4]);
+    int numsamples = atoi (a->argv[5]);
+    
+    if ( (! numsamples) ||
+         (! timespan) ||
+         (timespan/numsamples < 300) ) {
+        *status = 400;
+        var_free (def);
+        return err_generic (env, "Invalid specification");
+    }
+
+    var *graph = var_find_key (def, arg_graph_id);
+    if (graph == NULL || graph->type != VAR_DICT) {
+        *status = 404;
+        var_free (def);
+        return err_generic (env, "Graph not found");
+    }
+    var *datum = var_find_key (def, arg_datum_id);
+    if (datum == NULL || datum->type != VAR_DICT) {
+        *status = 404;
+        var_free (def);
+        return err_generic (env, "Datum not found");
+    }
+    
+    double max = var_get_double_forkey (datum, "max");
+    const char *title = var_get_str_forkey (datum, "title");
+    const char *unit = var_get_str_forkey (datum, "unit");
+    const char *color = var_get_str_forkey (datum, "color");
+    const char *meter = var_get_str_forkey (datum, "meter");
+    
+    db *DB = localdb_create (OPTIONS.dbpath);
+    if (! db_open (DB, ctx->tenantid, NULL)) {
+        db_free (DB);
+        var_free (def);
+        *status = 500;
+        return err_generic (env, "Could not open database for tenant");
+    }
+    
+    double *data = db_get_graph (DB, ctx->hostid, arg_graph_id,
+                                 arg_datum_id, timespan, numsamples);
+    if (! data) {
+        db_free (DB);
+        var_free (def);
+        *status = 500;
+        return err_generic (env, "Error getting graph data");
+    }
+    
+    var *arr = var_get_array_forkey (env, "data");
+    for (int i=0; i<numsamples;++i) {
+        double d = data[i];
+        if (d > max) max = d;
+        var_add_double (arr, d);
+    }
+    
+    var_set_double_forkey (env, "max", max);
+    if (title) var_set_str_forkey (env, "title", title);
+    if (unit) var_set_str_forkey (env, "unit", unit);
+    if (color) var_set_str_forkey (env, "color", color);
+    if (meter) var_set_str_forkey (env, "meter", meter);
+    
+    db_free (DB);
+    var_free (def);
+    
+    *status = 200;
+    return 1;
+}
+
 int cmd_dancing_bears (req_context *ctx, req_arg *a, var *env, int *status) {
     const char *B = "    _--_     _--_    _--_     _--_     "
                     "_--_     _--_     _--_     _--_\n"
@@ -303,3 +418,4 @@ int cmd_dancing_bears (req_context *ctx, req_arg *a, var *env, int *status) {
     *status = 200;
     return 1;
 }
+
