@@ -96,9 +96,17 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
         }
     }
     
-    double r = 120;
-    double g = 140;
-    double b = 200;
+    double r = 0;
+    double g = 215;
+    double b = 255;
+    
+    double Tr = 145;
+    double Tg = 200;
+    double Tb = 145;
+    
+    double dr = (Tr-r) / (height-1);
+    double dg = (Tg-g) / (height-1);
+    double db = (Tb-b) / (height-1);
     
     double gr = 60;
     
@@ -110,10 +118,12 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
         for (x=0; x<width; ++x) {
             printf ("%s", bars[map[x+(y*width)]]);
         }
-        r = r *1.1;
-        g = g *1.08;
-        b = b *1.1;
+        
+        r = r + dr;
+        g = g + dg;
+        b = b + db;
         gr = gr *0.96;
+        
         printf ("\033[0m\n");
     }
     
