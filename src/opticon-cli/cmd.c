@@ -747,6 +747,12 @@ int cmd_get_record (int argc, const char *argv[]) {
     
     /** Print any remaining table data */
     print_tables (apires);
+    
+    print_line();
+    printf ("    %-36s    %-36s", "Network in", "Network out");
+    cmd_print_graph ("net","input", 4);
+    printf ("\033[6A");
+    cmd_print_graph ("net","output", 44);
     print_line();
 
     var_free (apires);
@@ -784,10 +790,39 @@ int cmd_session_list (int argc, const char *argv[]) {
     return 0;
 }
 
+void cmd_print_graph (const char *graph_id, const char *datum_id, int indent) {
+    var *apires = api_get ("/%s/host/%s/graph/%s/%s/21600/32",
+                           OPTIONS.tenant, OPTIONS.host,
+                           graph_id, datum_id);
+    if (! apires) {
+        printf ("\033[%iC", indent);
+        printf ("no graphic\n\n\n\n\n\n");
+        return;
+    }
+    
+    double max = var_get_double_forkey (apires, "max");
+    var *arr = var_get_array_forkey (apires, "data");
+    if (! arr) {
+        printf ("\033[%iC", indent);
+        printf ("no graphic\n\n\n\n\n\n");
+        var_free (apires);
+        return;
+    }
+    
+    double dat[32];
+    for (int i=0; i<32; ++i) {
+        dat[i] = var_get_double_atindex (arr, i);
+    }
+    
+    var_free (apires);
+    print_graph (32, 6, indent, max, dat);
+}
+
 /** The dancing-bears command */
 int cmd_bears (int argc, const char *argv[]) {
     var *v = api_get ("/obligatory-dancing-bears");
     puts (var_get_str_forkey (v,"bear"));
     var_free (v);
+    
     return 0;
 }

@@ -65,6 +65,51 @@ void print_bar (int width, double max, double v) {
     printf ("\033[0m");
 }
 
+void print_graph (int width, int height, int ind, double minmax, double *data) {
+    const char *bars[9] = {" ","▁","▂","▃","▄","▅","▆","▇","█"};
+    char *map = (char *) malloc (width*height);
+    
+    double max = minmax;
+    int i=0;
+    int x=0;
+    int y=0;
+    
+    for (i=0; i<width; ++i) {
+        if (data[i] > max) max = data[i];
+    }
+    
+    for (x=0; x<width; ++x) {
+        int scaled = (data[x] * height / max) * 8;
+        int plotted = 0;
+        for (y=height-1;y>=0;--y) {
+            if ((scaled - plotted) >= 8) {
+                map[x+(y*width)] = 8;
+                plotted += 8;
+            }
+            else if (scaled > plotted) {
+                map[x+(y*width)] = scaled-plotted;
+                plotted += (scaled-plotted);
+            }
+            else {
+                map[x+(y*width)] = 0;
+            }
+        }
+    }
+    
+    printf ("map written\n");
+    
+    for (y=0; y<height; ++y) {
+        printf ("\033[%iC", ind);
+        printf ("\033[38;5;45m\033[48;5;239m");
+        for (x=0; x<width; ++x) {
+            printf ("%s", bars[map[x+(y*width)]]);
+        }
+        printf ("\033[0m\n");
+    }
+    
+    free (map);    
+}
+
 /** Display function for host-show section headers */
 void print_hdr (const char *hdr) {
     const char *mins = "-----------------------------------------------"

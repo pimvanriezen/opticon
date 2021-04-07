@@ -14,6 +14,7 @@ void clear_pending_header (void);
 const char *decorate_status (const char *);
 void print_line (void);
 void print_bar (int, double, double);
+void print_graph (int, int, int, double, double *);
 void print_hdr (const char *);
 void print_value (const char *, const char *, ...);
 void print_gauge_value (const char *, const char *, double, double);

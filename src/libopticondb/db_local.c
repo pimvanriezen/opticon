@@ -992,11 +992,9 @@ double *localdb_get_graph (db *d, uuid hostid, const char *id,
     time_t t_now = t_start;
     
     while (pos < numsamples) {
-        log_debug ("dbg 1: crsr=%i offs_next=%.2f pos=%i",crsr,offs_next,pos);
         double ra = 0.0;
         double rc = 0.0;
         while (localdb_offset_next(crsr) != ((uint32_t)offs_next)%(30*86400)) {
-            log_debug ("dbg 2: crsr=%i offs_next=%.2f pos=%i",crsr,offs_next,pos);
             ra += graph->data[crsr];
             rc += 1.0;
             crsr = localdb_offset_next(crsr);
