@@ -373,6 +373,7 @@ int cmd_host_get_graph (req_context *ctx, req_arg *a, var *env,
     if (color) var_set_str_forkey (env, "color", color);
     if (meter) var_set_str_forkey (env, "meter", meter);
     
+    free (data);
     db_free (DB);
     var_free (def);
     
