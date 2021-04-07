@@ -102,7 +102,7 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     double r = 80;
     double g = 130;
     double b = 200;
-    double gr = 150;
+    double gr = 90;
     
     for (y=0; y<height; ++y) {
         printf ("\033[%iC", ind);
