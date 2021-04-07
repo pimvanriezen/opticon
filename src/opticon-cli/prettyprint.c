@@ -105,13 +105,13 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     
     for (y=0; y<height; ++y) {
         printf ("\033[%iC", ind);
-        printf ("\033[38;2;%.0f;%.0f;%.0fm\033[48;5;239m", r, g, b);
+        printf ("\033[38;2;%.0f;%.0f;%.0fm\033[48;5;239m", r, g, (b<255)?b:50);
         for (x=0; x<width; ++x) {
             printf ("%s", bars[map[x+(y*width)]]);
         }
-        r = r *1.02;
-        g = g *1.02;
-        b = b *1.02;
+        r = r *1.1;
+        g = g *1.08;
+        b = b *1.1;
         printf ("\033[0m\n");
     }
     
