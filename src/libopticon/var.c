@@ -229,6 +229,7 @@ var *var_find_key (var *self, const char *key) {
     while (c) {
         if (c->hashcode == 0 || (c->hashcode == hash)) {
             if (strcmp (c->id, key) == 0) return c;
+            if (c->hashcode == 0) c->hashcode = hash_token (c->id);
         }
         c = c->next;
     }
