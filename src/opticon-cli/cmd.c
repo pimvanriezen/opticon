@@ -833,7 +833,7 @@ void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
     if (!title) title = "Untitled";
     
     printf ("\033[%iC%s", indent, title);
-    if (unit && unit[0]=='%') {
+    if (unit && unit[0]!='%') {
         printf (" (max %.1f %s)", max, unit);
     }
     printf ("\n");
