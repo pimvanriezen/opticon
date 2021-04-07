@@ -281,6 +281,7 @@ void add_graphdefs (var *into, var *from) {
     }
 }
 
+/** Gets graph definitions out of (default) config and host metadata */
 var *collect_graphdefs (uuid tenant, uuid host) {
     var *res = var_alloc();
     add_graphdefs (res, OPTIONS.gconf);
@@ -302,6 +303,7 @@ int cmd_host_list_graphs (req_context *ctx, req_arg *a, var *env,
     return 1;    
 }
 
+/** GET /$TENANT/host/$HOST/graph/$graph/$datum/$timespan/$numsamples */
 int cmd_host_get_graph (req_context *ctx, req_arg *a, var *env,
                         int *status) {
     if (a->argc < 6) {
@@ -330,7 +332,7 @@ int cmd_host_get_graph (req_context *ctx, req_arg *a, var *env,
         var_free (def);
         return err_generic (env, "Graph not found");
     }
-    var *datum = var_find_key (def, arg_datum_id);
+    var *datum = var_find_key (graph, arg_datum_id);
     if (datum == NULL || datum->type != VAR_DICT) {
         *status = 404;
         var_free (def);
