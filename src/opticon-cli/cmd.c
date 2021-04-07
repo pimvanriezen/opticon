@@ -708,59 +708,62 @@ int cmd_get_record (int argc, const char *argv[]) {
 
     print_values (apires, NULL);
     
-    /* -------------------------------------------------------------*/
-    print_hdr ("PROCESS LIST");
+    if (! OPTIONS.showgraphs) {
+        /* -------------------------------------------------------------*/
+        print_hdr ("PROCESS LIST");
     
-    const char *top_hdr[] = {"USER","PID","CPU","MEM","NAME",NULL};
-    const char *top_fld[] = {"user","pid","pcpu","pmem","name",NULL};
-    columnalign top_align[] = {CA_L, CA_R, CA_R, CA_R, CA_L, CA_NULL};
-    vartype top_tp[] =
-        {VAR_STR,VAR_INT,VAR_DOUBLE,VAR_DOUBLE,VAR_STR,VAR_NULL};
-    int top_wid[] = {15, 7, 9, 9, 0, 0};
-    int top_div[] = {0, 0, 0, 0, 0, 0};
-    const char *top_suf[] = {"",""," %", " %", "", NULL};
+        const char *top_hdr[] = {"USER","PID","CPU","MEM","NAME",NULL};
+        const char *top_fld[] = {"user","pid","pcpu","pmem","name",NULL};
+        columnalign top_align[] = {CA_L, CA_R, CA_R, CA_R, CA_L, CA_NULL};
+        vartype top_tp[] =
+            {VAR_STR,VAR_INT,VAR_DOUBLE,VAR_DOUBLE,VAR_STR,VAR_NULL};
+        int top_wid[] = {15, 7, 9, 9, 0, 0};
+        int top_div[] = {0, 0, 0, 0, 0, 0};
+        const char *top_suf[] = {"",""," %", " %", "", NULL};
     
-    var *v_top = var_get_array_forkey (apires, "top");
-    print_table (v_top, top_hdr, top_fld, 
-                 top_align, top_tp, top_wid, top_suf, top_div);
+        var *v_top = var_get_array_forkey (apires, "top");
+        print_table (v_top, top_hdr, top_fld, 
+                     top_align, top_tp, top_wid, top_suf, top_div);
     
-    Vdone("top");
-    /* -------------------------------------------------------------*/
-    print_hdr ("STORAGE");
+        Vdone("top");
+        /* -------------------------------------------------------------*/
+        print_hdr ("STORAGE");
     
-    const char *df_hdr[] = {"DEVICE","SIZE","FS","USED","MOUNTPOINT",NULL};
-    const char *df_fld[] = {"device","size","fs","pused","mount",NULL};
-    columnalign df_aln[] = {CA_L,CA_R,CA_L,CA_R,CA_L,CA_NULL};
-    vartype df_tp[] = {VAR_STR,VAR_INT,VAR_STR,VAR_DOUBLE,VAR_STR,VAR_NULL};
-    int df_wid[] = {15, 14, 6, 8, 0};
-    int df_div[] = {0, (1024), 0, 0, 0, 0};
-    const char *df_suf[] = {""," GB", "", " %", "", ""};
+        const char *df_hdr[] = {"DEVICE","SIZE","FS","USED","MOUNTPOINT",NULL};
+        const char *df_fld[] = {"device","size","fs","pused","mount",NULL};
+        columnalign df_aln[] = {CA_L,CA_R,CA_L,CA_R,CA_L,CA_NULL};
+        vartype df_tp[] = {VAR_STR,VAR_INT,VAR_STR,VAR_DOUBLE,VAR_STR,VAR_NULL};
+        int df_wid[] = {15, 14, 6, 8, 0};
+        int df_div[] = {0, (1024), 0, 0, 0, 0};
+        const char *df_suf[] = {""," GB", "", " %", "", ""};
     
-    var *v_df = var_get_array_forkey (apires, "df");
+        var *v_df = var_get_array_forkey (apires, "df");
     
-    /*print_generic_table (v_df);*/
+        /*print_generic_table (v_df);*/
     
-    print_table (v_df, df_hdr, df_fld,
-                 df_aln, df_tp, df_wid, df_suf, df_div);
+        print_table (v_df, df_hdr, df_fld,
+                     df_aln, df_tp, df_wid, df_suf, df_div);
     
-    Vdone("df");
+        Vdone("df");
     
-    /** Print any remaining table data */
-    print_tables (apires);
-    
-    print_line();
-    printf ("  CPU Usage:\n");
-    cmd_print_graph ("cpu","usage", 76, 2);
-    printf ("\033[2m  12    ^     ^      ^     ^     ^      6     ^     "
-              "^      ^     ^     ^     0\033[0m\n");
-    printf ("  %-37s  %-37s\n", "Network in", "Network out");
-    cmd_print_graph ("net","input", 37, 2);
-    printf ("\033[6A");
-    cmd_print_graph ("net","output", 37, 41);
-    printf ("\033[2m"
-            "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
-            "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  "
-            "\033[0m\n");
+        /** Print any remaining table data */
+        print_tables (apires);
+    }
+    else {
+        print_hdr("GRAPHS");
+        printf ("  CPU Usage:\n");
+        cmd_print_graph ("cpu","usage", 76, 2);
+        printf ("\033[2m  12    ^     ^      ^     ^     ^      6     ^     "
+                  "^      ^     ^     ^     0\033[0m\n");
+        printf ("  %-37s  %-37s\n", "Network in", "Network out");
+        cmd_print_graph ("net","input", 37, 2);
+        printf ("\033[6A");
+        cmd_print_graph ("net","output", 37, 41);
+        printf ("\033[2m"
+                "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
+                "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  "
+                "\033[0m\n");
+    }
     print_line();
 
     var_free (apires);

@@ -42,6 +42,7 @@ STRINGOPT(host)
 STRINGOPT(hostname)
 FLAGOPT(json)
 FLAGOPT(watch)
+FLAGOPT(showgraphs)
 STRINGOPT(name)
 STRINGOPT(meter)
 STRINGOPT(description)
@@ -289,6 +290,7 @@ cliopt CLIOPT[] = {
     {"--time","-T",OPT_VALUE,"now",set_time},
     {"--path","-p",OPT_VALUE,"/var/opticon/db",set_path},
     {"--json","-j",OPT_FLAG,NULL,set_json},
+    {"--graphs","-g",OPT_FLAG,NULL,set_showgraphs},
     {"--watch","-w",OPT_FLAG,NULL,set_watch},
     {"--name","-n",OPT_VALUE,"",set_name},
     {"--meter","-m",OPT_VALUE,"",set_meter},

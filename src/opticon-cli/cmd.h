@@ -27,6 +27,7 @@ typedef struct optinfo {
     time_t       time;
     int          json;
     int          watch;
+    int          showgraphs;
     const char  *api_url;
     const char  *keystone_url;
     const char  *unithost_url;
