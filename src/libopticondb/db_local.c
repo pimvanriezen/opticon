@@ -1009,7 +1009,7 @@ double *localdb_get_graph (db *d, uuid hostid, const char *id,
         res[pos] = ra / rc;
         rc = 1.0 - diff;
         ra = graph->data[crsr] * rc;
-        offs_next += interval;
+        offs_next += samplesize;
         pos++;
     }
     
