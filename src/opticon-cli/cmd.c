@@ -751,22 +751,20 @@ int cmd_get_record (int argc, const char *argv[]) {
     }
     else {
         print_hdr("GRAPHS");
-        printf ("  CPU Usage:\n");
         cmd_print_graph ("cpu","usage", 76, 2);
         printf ("\033[2m  12    ^     ^      ^     ^     ^      6     ^     "
                   "^      ^     ^     ^     0\033[0m\n");
-        printf ("  %-37s  %-37s\n", "Network in", "Network out");
+
         cmd_print_graph ("net","input", 37, 2);
-        printf ("\033[6A");
+        printf ("\033[7A");
         cmd_print_graph ("net","output", 37, 41);
         printf ("\033[2m"
                 "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
                 "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  "
                 "\033[0m\n");
 
-        printf ("  %-37s  %-37s\n", "Disk read", "Disk write");
         cmd_print_graph ("io","read", 37, 2);
-        printf ("\033[6A");
+        printf ("\033[7A");
         cmd_print_graph ("io","write", 37, 41);
         printf ("\033[2m"
                 "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
@@ -810,14 +808,14 @@ int cmd_session_list (int argc, const char *argv[]) {
     return 0;
 }
 
-void cmd_print_graph (const char *graph_id, const char *datum_id,
-                      int width, int indent) {
+void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
+                      int indent) {
     var *apires = api_get ("/%s/host/%s/graph/%s/%s/43200/%i",
                            OPTIONS.tenant, OPTIONS.host,
                            graph_id, datum_id, width);
     if (! apires) {
         printf ("\033[%iC", indent);
-        printf ("no graphic\n\n\n\n\n\n");
+        printf ("%s: no graphic\n\n\n\n\n\n\n", datum_id);
         return;
     }
     
@@ -825,11 +823,21 @@ void cmd_print_graph (const char *graph_id, const char *datum_id,
     var *arr = var_get_array_forkey (apires, "data");
     if (! arr) {
         printf ("\033[%iC", indent);
-        printf ("no graphic\n\n\n\n\n\n");
+        printf ("%s: no graphic\n\n\n\n\n\n\n", datum_id);
         var_free (apires);
         return;
     }
     
+    const char *title = var_get_str_forkey (apires, "title");
+    const char *unit = var_get_str_forkey (apires, "unit");
+    if (!title) title = "Untitled";
+    
+    printf ("\033[%iC%s", indent, title);
+    if (unit && unit[0]=='%') {
+        printf (" (max %.1f %s)", max, unit);
+    }
+    printf ("\n");
+
     double *dat = (double *) malloc (width*sizeof(double));
     for (int i=0; i<width; ++i) {
         dat[i] = var_get_double_atindex (arr, i);
