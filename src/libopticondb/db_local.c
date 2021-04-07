@@ -1011,7 +1011,7 @@ double *localdb_get_graph (db *d, uuid hostid, const char *id,
             ra = graph->data[crsr] * rc;
         }
         else {
-            ra += graph_data[crsr];
+            ra += graph->data[crsr];
             rc += 1;
             res[pos] = ra / rc;
             rc = 0.0;
