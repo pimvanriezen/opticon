@@ -763,6 +763,15 @@ int cmd_get_record (int argc, const char *argv[]) {
                 "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
                 "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  "
                 "\033[0m\n");
+
+        printf ("  %-37s  %-37s\n", "Disk read", "Disk write");
+        cmd_print_graph ("io","read", 37, 2);
+        printf ("\033[6A");
+        cmd_print_graph ("io","write", 37, 41);
+        printf ("\033[2m"
+                "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
+                "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  "
+                "\033[0m\n");
     }
     print_line();
 
