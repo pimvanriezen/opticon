@@ -749,7 +749,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     print_tables (apires);
     
     print_line();
-    printf ("    CPU Usage:");
+    printf ("    CPU Usage:\n");
     cmd_print_graph ("cpu","usage", 72, 4);
     printf ("\n");
     printf ("    %-36s    %-36s\n", "Network in", "Network out");
