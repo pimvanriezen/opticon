@@ -758,8 +758,8 @@ int cmd_get_record (int argc, const char *argv[]) {
     printf ("\033[6A");
     cmd_print_graph ("net","output", 36, 42);
     printf ("\033[2m"
-            "    ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^    "
-            "    ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  "
+            "  ^ ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  "
+            "  ^ ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  "
             "\033[0m\n");
     print_line();
 
