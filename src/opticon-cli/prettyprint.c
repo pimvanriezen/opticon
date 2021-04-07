@@ -100,7 +100,7 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     if (!color) color="5;44";
     
     double r = 80;
-    double g = 150;
+    double g = 130;
     double b = 200;
     
     for (y=0; y<height; ++y) {
