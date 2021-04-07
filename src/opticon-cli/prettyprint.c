@@ -109,9 +109,9 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
         for (x=0; x<width; ++x) {
             printf ("%s", bars[map[x+(y*width)]]);
         }
-        r = r *0.9;
-        g = g *0.9;
-        b = b *0.9;
+        r = r *1.1;
+        g = g *1.1;
+        b = b *1.1;
         printf ("\033[0m\n");
     }
     
