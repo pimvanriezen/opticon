@@ -795,7 +795,7 @@ int cmd_session_list (int argc, const char *argv[]) {
 
 void cmd_print_graph (const char *graph_id, const char *datum_id,
                       int width, int indent) {
-    var *apires = api_get ("/%s/host/%s/graph/%s/%s/21600/%i",
+    var *apires = api_get ("/%s/host/%s/graph/%s/%s/43200/%i",
                            OPTIONS.tenant, OPTIONS.host,
                            graph_id, datum_id, width);
     if (! apires) {
