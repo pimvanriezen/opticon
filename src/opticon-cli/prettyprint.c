@@ -99,9 +99,10 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     const char *color = getenv("OPTICON_GRAPHCOLOR");
     if (!color) color="5;44";
     
-    double r = 80;
-    double g = 130;
+    double r = 140;
+    double g = 165;
     double b = 200;
+    
     double gr = 60;
     
     for (y=0; y<height; ++y) {
