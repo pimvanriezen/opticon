@@ -96,8 +96,6 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
         }
     }
     
-    printf ("map written\n");
-    
     for (y=0; y<height; ++y) {
         printf ("\033[%iC", ind);
         printf ("\033[38;5;45m\033[48;5;239m");
