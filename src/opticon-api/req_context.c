@@ -154,7 +154,7 @@ int req_match_check (req_match *self, const char *url, req_arg *arg) {
         else if (*cmatch == '%') {
             char matchtp = cmatch[1];
             int validch = 0;
-            assert (strchr ("sUT", matchtp));
+            assert (strchr ("sSUTi", matchtp));
             curl_start = curl;
             cmatch++;
             
@@ -164,7 +164,20 @@ int req_match_check (req_match *self, const char *url, req_arg *arg) {
             while (*curl && *curl != '/') {
                 /* Make sure we're getting valid data for the type */
                 switch (matchtp) {
-                    case 's': break;
+                    case 's': 
+                        validch++;
+                        break;
+                    
+                    case 'S':
+                        if (! strchr ("0123456789_-."
+                                      "abcdefghijklmnopqrstuvwxyz"
+                                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                                      *curl)) {
+                            return 0;
+                        }
+                        validch++;
+                        break;
+                    
                     case 'U':
                         if (!strchr ("0123456789abcdef-", *curl)) {
                             return 0;
@@ -178,6 +191,13 @@ int req_match_check (req_match *self, const char *url, req_arg *arg) {
                         }
                         if (*curl>='0' && *curl<='9') validch++;
                         break;
+                    
+                    case 'i':
+                        if (! strchr ("0123456789", *curl)) {
+                            return 0;
+                        }
+                        validch++;
+                        break;
                 }
                 curl++;
             }
@@ -185,9 +205,12 @@ int req_match_check (req_match *self, const char *url, req_arg *arg) {
             /* Reject invalid UUID / timespec */
             if (matchtp == 'U' && validch != 32) return 0;
             
-            /* 123456789 123456 7890
-            /* 2021-04-01T11:38 :00Z */
-            if (matchtp == 'T' && (validch < 16 || validch > 20)) return 0;
+            /* 123456789 1234
+            /* 20210401113800 */
+            if (matchtp == 'T' && (validch < 12 || validch > 14)) return 0;
+            
+            /* Don't permit empty url fields */
+            if (validch < 1) return 0;
             
             /* Copy the url-part to the argument list */
             size_t elmsize = curl-curl_start;
