@@ -100,9 +100,9 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     double g = 215;
     double b = 255;
     
-    double Tr = 145;
+    double Tr = 80;
     double Tg = 200;
-    double Tb = 145;
+    double Tb = 80;
     
     double dr = (Tr-r) / (height);
     double dg = (Tg-g) / (height);
