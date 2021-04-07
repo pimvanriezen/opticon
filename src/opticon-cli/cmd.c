@@ -750,12 +750,12 @@ int cmd_get_record (int argc, const char *argv[]) {
     
     print_line();
     printf ("    CPU Usage:\n");
-    cmd_print_graph ("cpu","usage", 72, 4);
+    cmd_print_graph ("cpu","usage", 76, 2);
     printf ("\n");
-    printf ("    %-36s    %-36s\n", "Network in", "Network out");
-    cmd_print_graph ("net","input", 32, 4);
+    printf ("  %-36s  %-36s\n", "Network in", "Network out");
+    cmd_print_graph ("net","input", 36, 2);
     printf ("\033[6A");
-    cmd_print_graph ("net","output", 32, 44);
+    cmd_print_graph ("net","output", 36, 42);
     print_line();
 
     var_free (apires);
