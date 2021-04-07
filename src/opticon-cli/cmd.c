@@ -749,10 +749,13 @@ int cmd_get_record (int argc, const char *argv[]) {
     print_tables (apires);
     
     print_line();
+    printf ("    CPU Usage:");
+    cmd_print_graph ("cpu","usage", 72, 4);
+    printf ("\n");
     printf ("    %-36s    %-36s\n", "Network in", "Network out");
-    cmd_print_graph ("net","input", 4);
+    cmd_print_graph ("net","input", 32, 4);
     printf ("\033[6A");
-    cmd_print_graph ("net","output", 44);
+    cmd_print_graph ("net","output", 32, 44);
     print_line();
 
     var_free (apires);
@@ -790,10 +793,11 @@ int cmd_session_list (int argc, const char *argv[]) {
     return 0;
 }
 
-void cmd_print_graph (const char *graph_id, const char *datum_id, int indent) {
-    var *apires = api_get ("/%s/host/%s/graph/%s/%s/21600/32",
+void cmd_print_graph (const char *graph_id, const char *datum_id,
+                      int width, int indent) {
+    var *apires = api_get ("/%s/host/%s/graph/%s/%s/21600/%i",
                            OPTIONS.tenant, OPTIONS.host,
-                           graph_id, datum_id);
+                           graph_id, datum_id, width);
     if (! apires) {
         printf ("\033[%iC", indent);
         printf ("no graphic\n\n\n\n\n\n");
@@ -809,13 +813,13 @@ void cmd_print_graph (const char *graph_id, const char *datum_id, int indent) {
         return;
     }
     
-    double dat[32];
-    for (int i=0; i<32; ++i) {
+    double *dat = (double *) malloc (width*sizeof(double));
+    for (int i=0; i<width; ++i) {
         dat[i] = var_get_double_atindex (arr, i);
     }
     
     var_free (apires);
-    print_graph (32, 6, indent, max, dat);
+    print_graph (width, 6, indent, max, dat);
 }
 
 /** The dancing-bears command */
