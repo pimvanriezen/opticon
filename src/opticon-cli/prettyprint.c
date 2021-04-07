@@ -98,7 +98,7 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     
     for (y=0; y<height; ++y) {
         printf ("\033[%iC", ind);
-        printf ("\033[38;5;45m\033[48;5;239m");
+        printf ("\033[38;5;37m\033[48;5;239m");
         for (x=0; x<width; ++x) {
             printf ("%s", bars[map[x+(y*width)]]);
         }
