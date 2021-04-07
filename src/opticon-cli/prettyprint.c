@@ -96,14 +96,11 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
         }
     }
     
-    const char *color = getenv("OPTICON_GRAPHCOLOR");
-    if (!color) color="5;44";
-    
     double r = 120;
     double g = 140;
     double b = 200;
     
-    double gr = 60;
+    double gr = 40;
     
     for (y=0; y<height; ++y) {
         printf ("\033[%iC", ind);
