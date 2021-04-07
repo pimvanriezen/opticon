@@ -749,7 +749,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     print_tables (apires);
     
     print_line();
-    printf ("    %-36s    %-36s", "Network in", "Network out");
+    printf ("    %-36s    %-36s\n", "Network in", "Network out");
     cmd_print_graph ("net","input", 4);
     printf ("\033[6A");
     cmd_print_graph ("net","output", 44);
