@@ -115,7 +115,7 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
         r = r *1.1;
         g = g *1.08;
         b = b *1.1;
-        gr = gr *0.98;
+        gr = gr *0.96;
         printf ("\033[0m\n");
     }
     
