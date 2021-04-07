@@ -753,13 +753,13 @@ int cmd_get_record (int argc, const char *argv[]) {
     cmd_print_graph ("cpu","usage", 76, 2);
     printf ("\033[2m  ^     ^     ^      ^     ^     ^      ^     ^     "
               "^      ^     ^     ^     ^\033[0m\n");
-    printf ("  %-36s    %-36s\n", "Network in", "Network out");
-    cmd_print_graph ("net","input", 36, 2);
+    printf ("  %-37s    %-37s\n", "Network in", "Network out");
+    cmd_print_graph ("net","input", 37, 2);
     printf ("\033[6A");
-    cmd_print_graph ("net","output", 36, 42);
+    cmd_print_graph ("net","output", 37, 41);
     printf ("\033[2m"
-            "  ^ ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  "
-            "  ^ ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  "
+            "  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  "
+            "  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  "
             "\033[0m\n");
     print_line();
 
