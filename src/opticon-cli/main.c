@@ -387,7 +387,8 @@ void usage (const char *cmdname) {
          "\n"
          "  Commands:\n"
          "        tenant-list\n"
-         "        tenant-create        [--tenant <uuid>] [--key <base64>] [--name <name>]\n"
+         "        tenant-create        [--tenant <uuid>] [--key <base64>] "
+                                                        "[--name <name>]\n"
          "        tenant-delete         --tenant <uuid>\n"
          "        tenant-get-metadata   --tenant <uuid>\n"
          "        tenant-set-metadata   --tenant <uuid> <key> <value>\n"
@@ -395,8 +396,10 @@ void usage (const char *cmdname) {
          "        tenant-get-quota      --tenant <uuid>\n"
          "        tenant-get-summary    --tenant <uuid>\n"
          "        meter-list            --tenant <uuid>\n"
-         "        meter-create          --tenant <uuid> --meter <meterid> --type <TYPE>\n"
-         "                             [--description <description>] [--unit <unitstr>]\n"
+         "        meter-create          --tenant <uuid> --meter <meterid> "
+                                                       "--type <TYPE>\n"
+         "                             [--description <description>] "
+                                      "[--unit <unitstr>]\n"
          "        meter-delete          --tenant <uuid> --meter <meterid>\n"
          "        watcher-list          --tenant <uuid> [--host <uuid>]\n"
          "        watcher-set           --tenant <uuid> [--host <uuid>]\n"
@@ -408,7 +411,8 @@ void usage (const char *cmdname) {
          "                              --meter <meterid>\n"
          "        host-list             --tenant <uuid>\n"
          "        host-overview         --tenant <uuid>\n"
-         "        host-show             --tenant <uuid> --host <host> [--time <TIMESPEC>]\n"
+         "        host-show             --tenant <uuid> --host <host> "
+                                                      "[--time <TIMESPEC>]\n"
          "        host-delete           --tenant <uuid> --host <uuid>\n"
          "\n"
          "  TYPE:\n"
@@ -486,7 +490,8 @@ int main (int _argc, const char *_argv[]) {
     if (OPTIONS.keystone_url[0] == 0 && OPTIONS.unithost_url[0] == 0 &&
         OPTIONS.opticon_token[0] == 0) {
 
-        fprintf (stderr, "%% No authentication endpoint or opticon token found\n");
+        fprintf (stderr, "%% No authentication endpoint or opticon "
+                         "token found\n");
         return 1;
     }
 

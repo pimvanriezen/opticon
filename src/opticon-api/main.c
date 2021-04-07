@@ -320,15 +320,15 @@ void setup_matches (void) {
     _P_ ("/%U/meta",                  REQ_UPDATE, cmd_tenant_set_meta);
     _P_ ("/%U/meta",                  REQ_ANY,    err_method_not_allowed);
     _P_ ("/%U/meter",                 REQ_GET,    cmd_tenant_list_meters);
-    _P_ ("/%U/meter/%s",              REQ_UPDATE, cmd_tenant_set_meter);
-    _P_ ("/%U/meter/%s/%s",           REQ_UPDATE, cmd_tenant_set_meter);
-    _P_ ("/%U/meter/%s",              REQ_DELETE, cmd_tenant_delete_meter);
-    _P_ ("/%U/meter/%s/%s",           REQ_DELETE, cmd_tenant_delete_meter);
+    _P_ ("/%U/meter/%S",              REQ_UPDATE, cmd_tenant_set_meter);
+    _P_ ("/%U/meter/%S/%S",           REQ_UPDATE, cmd_tenant_set_meter);
+    _P_ ("/%U/meter/%S",              REQ_DELETE, cmd_tenant_delete_meter);
+    _P_ ("/%U/meter/%S/%S",           REQ_DELETE, cmd_tenant_delete_meter);
     _P_ ("/%U/watcher",               REQ_GET,    cmd_tenant_list_watchers);
-    _P_ ("/%U/watcher/%s",            REQ_UPDATE, cmd_tenant_set_watcher);
-    _P_ ("/%U/watcher/%s/%s",         REQ_UPDATE, cmd_tenant_set_watcher);
-    _P_ ("/%U/watcher/%s",            REQ_DELETE, cmd_tenant_delete_watcher);
-    _P_ ("/%U/watcher/%s/%s",         REQ_DELETE, cmd_tenant_delete_watcher);
+    _P_ ("/%U/watcher/%S",            REQ_UPDATE, cmd_tenant_set_watcher);
+    _P_ ("/%U/watcher/%S/%S",         REQ_UPDATE, cmd_tenant_set_watcher);
+    _P_ ("/%U/watcher/%S",            REQ_DELETE, cmd_tenant_delete_watcher);
+    _P_ ("/%U/watcher/%S/%S",         REQ_DELETE, cmd_tenant_delete_watcher);
     _P_ ("/%U/host",                  REQ_GET,    cmd_tenant_list_hosts);
     _P_ ("/%U/host",                  REQ_ANY,    err_method_not_allowed);
     _P_ ("/%U/host/overview",         REQ_GET,    cmd_host_overview);
@@ -338,11 +338,14 @@ void setup_matches (void) {
     _P_ ("/%U/host/%U",               REQ_ANY,    err_method_not_allowed);
     _P_ ("/%U/host/%U/watcher",       REQ_GET,    cmd_host_list_watchers);
     _P_ ("/%U/host/%U/watcher",       REQ_ANY,    err_method_not_allowed);
-    _P_ ("/%U/host/%U/watcher/%s",    REQ_UPDATE, cmd_host_set_watcher);
-    _P_ ("/%U/host/%U/watcher/%s/%s", REQ_UPDATE, cmd_host_set_watcher);
-    _P_ ("/%U/host/%U/watcher/%s",    REQ_DELETE, cmd_host_delete_watcher);
-    _P_ ("/%U/host/%U/watcher/%s/%s", REQ_DELETE, cmd_host_delete_watcher);
+    _P_ ("/%U/host/%U/watcher/%S",    REQ_UPDATE, cmd_host_set_watcher);
+    _P_ ("/%U/host/%U/watcher/%S/%S", REQ_UPDATE, cmd_host_set_watcher);
+    _P_ ("/%U/host/%U/watcher/%S",    REQ_DELETE, cmd_host_delete_watcher);
+    _P_ ("/%U/host/%U/watcher/%S/%S", REQ_DELETE, cmd_host_delete_watcher);
     _P_ ("/%U/host/%U/range/%T/%T",   REQ_GET,    cmd_host_get_range);
+    _T_ ("/%U/host/%U/graph",         REQ_GET,    cmd_host_list_graphs);
+    _P_ ("/%U/host/%U/graph/%S/%S/%i/%i",
+                                      REQ_GET,    cmd_host_get_graph);
     _T_ ("/%U/host/%U/time/%T",       REQ_GET,    cmd_host_get_time);
     _P_ ("*",                         REQ_GET,    err_not_found);
     _P_ ("*",                         REQ_ANY,    err_method_not_allowed);
@@ -389,6 +392,10 @@ int set_confpath (const char *i, const char *v) {
 int set_mconfpath (const char *i, const char *v) {
     OPTIONS.mconfpath = v;
     return 1;
+}
+
+int set_gconfpath (const char *i, const char *v) {
+    OPTIONS.gconfpath = v;
 }
 
 /** Set up pidfile path */
@@ -467,6 +474,8 @@ cliopt CLIOPT[] = {
         "/etc/opticon/opticon-api.conf", set_confpath},
     {"--meter-config-path","-m",OPT_VALUE,
         "/etc/opticon/opticon-meter.conf", set_mconfpath},
+    {"--graph-config-path","-g",OPT_VALUE,
+        "/etc/opticon/opticon-graph.conf", set_gconfpath};
     {NULL,NULL,0,NULL,NULL}
 };
 
@@ -492,6 +501,12 @@ int main (int _argc, const char *_argv[]) {
         log_error ("Error loading %s: %s\n",
                    OPTIONS.confpath, parse_error());
         return 1;
+    }
+    
+    OPTIONS.gconf = get_default_graphs();
+    if (! var_load_json (OPTIONS.gconf, OPTIONS.gconfpath)) {
+        log_warn ("Error loading graph config %s: %s",
+                  OPTIONS.gconfpath, parse_error());
     }
 
     OPTIONS.mconf = get_default_meterdef();
