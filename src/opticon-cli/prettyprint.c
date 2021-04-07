@@ -99,12 +99,19 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     const char *color = getenv("OPTICON_GRAPHCOLOR");
     if (!color) color="5;44";
     
+    double r = 80;
+    double g = 150;
+    double b = 200;
+    
     for (y=0; y<height; ++y) {
         printf ("\033[%iC", ind);
-        printf ("\033[38;%sm\033[48;5;239m", color);
+        printf ("\033[38;2;%.0f;%.0f;%.0fm\033[48;5;239m", r, g, b);
         for (x=0; x<width; ++x) {
             printf ("%s", bars[map[x+(y*width)]]);
         }
+        r = r *0.9;
+        g = g *0.9;
+        b = b *0.9;
         printf ("\033[0m\n");
     }
     
