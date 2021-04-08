@@ -25,6 +25,7 @@ void print_line (void) {
 }
 
 static char *statustxt = NULL;
+static int statusline = 0;
 
 void clear_pending_header (void) {
     PENDING_HDR = NULL;
@@ -33,11 +34,12 @@ void clear_pending_header (void) {
 const char *decorate_status (const char *st) {
     if (! statustxt) statustxt = (char *) malloc (1024);
     int color = 245;
-    if (strcmp (st, "OK") == 0) color=22;
-    else if (strcmp (st, "WARN") == 0) color=202;
-    else if (strcmp (st, "ALERT") == 0) color=88;
-    else if (strcmp (st, "CRIT") == 0) color=124;
+    if (strcmp (st, "OK") == 0) color = (statusline&1) ? 28 : 22;
+    else if (strcmp (st, "WARN") == 0) color = (statusline&1) ? 166 : 202;
+    else if (strcmp (st, "ALERT") == 0) color = (statusline&1) ? 89 : 88;
+    else if (strcmp (st, "CRIT") == 0) color = (statusline&1) ? 25 : 24;
     
+    statusline++;
     sprintf (statustxt, "\033[48;5;%im\033[1m %-5s \033[0m", color, st);
     return statustxt;
 }
