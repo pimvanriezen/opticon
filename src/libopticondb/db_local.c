@@ -73,7 +73,10 @@ FILE *localdb_open_dbfile (localdb *ctx, uuid hostid, datestamp dt, int flags) {
     uuid2str (hostid, uuidstr);
     sprintf (dbpath, "%s/%s/%u.db", ctx->path, uuidstr, dt);
     if (flags & LOCALDB_FLAG_NOCREATE) {
-        if (stat (dbpath, &st) != 0) return NULL;
+        if (stat (dbpath, &st) != 0) {
+            free (dbpath);
+            return NULL;
+        }
     }
     FILE *res = fopen (dbpath, "a+");
     if (! res) {
@@ -99,7 +102,10 @@ FILE *localdb_open_indexfile (localdb *ctx, uuid hostid, datestamp dt, int flags
     uuid2str (hostid, uuidstr);
     sprintf (dbpath, "%s/%s/%u.idx", ctx->path, uuidstr, dt);
     if (flags & LOCALDB_FLAG_NOCREATE) {
-        if (stat (dbpath, &st) != 0) return NULL;
+        if (stat (dbpath, &st) != 0) {
+            free (dbpath);
+            return NULL;
+        }
     }
     FILE *res = fopen (dbpath, "a+");
     if (! res) {
@@ -399,7 +405,10 @@ int localdb_get_usage (db *dbctx, usage_info *into, uuid hostid) {
         }
     }
     closedir (D);
-    if (!earliest) return 0;
+    if (!earliest) {
+        free (dbpath);
+        return 0;
+    }
     
     FILE *F = localdb_open_indexfile(self, hostid, earliest, 0);
     if (F) {
@@ -418,6 +427,7 @@ int localdb_get_usage (db *dbctx, usage_info *into, uuid hostid) {
         into->bytes = szsum;
         into->earliest = t_earliest;
         into->last = t_latest;
+        free (dbpath);
         return 1;
     }
     free (dbpath);
@@ -799,7 +809,7 @@ var *localdb_get_hostmeta (db *d, uuid hostid) {
     }
     F = fopen (metapath, "r");
     if (! F) {
-        log_debug ("Could open stat: %s\n", metapath);
+        log_debug ("Could open hostmeta: %s\n", metapath);
         free (metapath);
         return var_alloc();
     }
@@ -878,6 +888,90 @@ uint32_t localdb_offset_next (uint32_t i) {
     return ((i+1) % GRAPHDATASZ);
 }
 
+hostloghandle *localdb_open_log (localdb *self, uuid hostid) {
+    struct stat st;
+    int initialize=0;
+    char uuidstr[40];
+    char *logpath = (char *) malloc (strlen(self->path)+64);
+    
+    hostloghandle *res = malloc (sizeof (hostloghandle));
+    res->fd = -1;
+    res->data = NULL;
+    
+    uuid2str (hostid, uuidstr);
+    sprintf (logpath, "%s%s/host.log", self->path, uuidstr);
+    if (stat (logpath, &st) != 0) initialize=1;
+    res->fd = open (logpath, O_RDWR | O_CREAT);
+    
+    free (logpath);
+    if (res->fd < 0) return res;
+    
+    if (initialize) {
+        const char *blockdata = "\0\0\0\0\0\0\0\0";
+        log_debug ("log: create %s", logpath);
+        for (uint32_t i=0; i<sizeof(hostlogdata); i+=8) {
+            write (res->fd, blockdata, 8);
+        }
+    }
+    
+    res->data = mmap (0, sizeof (hostlogdata), PROT_READ|PROT_WRITE,
+                      MAP_SHARED, res->fd, 0);
+    if (res->data == MAP_FAILED) {
+        log_error ("mmap error: %s", strerror(errno));
+        res->data = NULL;
+        close (res->fd);
+        res->fd = -1;
+    }
+    
+    return res;
+}
+
+void localdb_close_log (hostloghandle *hdl) {
+    if (hdl->data) munmap (hdl->data, sizeof (hostlogdata));
+    if (hdl->fd >= 0) close (hdl->fd);
+    free (hdl);
+}
+
+void localdb_write_log (db *d, uuid hostid, const char *subsystem,
+                        const char *msg) {
+    localdb *self = (localdb *) d;
+    hostloghandle *log;
+    char message[240];
+    strncpy (message, msg, 240);
+    message[239] = 0;
+    
+    log = localdb_open_log (self, hostid);
+    if (log) {
+        uint32_t wpos = log->data->writepos;
+        log->data->writepos = (wpos+1) % 63;
+        log->data->rec[wpos].when = time (NULL);
+        memcpy (log->data->rec[wpos].message, message, 240);
+        strncpy (log->data->rec[wpos].subsystem, subsystem, 11);
+        localdb_close_log (log);
+    }
+}
+
+var *localdb_get_log (db *d, uuid hostid) {
+    localdb *self = (localdb *) d;
+    hostloghandle *log = localdb_open_log (self, hostid);
+    var *res = var_alloc();
+    if (log) {
+        uint32_t rpos = (log->data->writepos-1) % 63;
+        while (rpos != log->data->writepos) {        
+            hostlogrecord *irec = &log->data->rec[rpos];
+            if (irec->when) {
+                var *orec = var_add_dict (res);
+                var_set_unixtime_forkey (orec, "when", irec->when);
+                var_set_str_forkey (orec, "subsystem", irec->subsystem);
+                var_set_str_forkey (orec, "message", irec->message);
+            }
+            rpos = (rpos-1) % 63;
+        }
+        localdb_close_log (log);
+    }
+    return res;
+}
+
 /** Utility function that opens and mmaps a graph file. */
 graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
                                const char *v) {
@@ -901,8 +995,9 @@ graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
     if (self->graphfd < 0) return NULL;
     
     if (initialize) {
-        for (uint32_t i=0; i<sizeof(graphdata); ++i) {
-            write (self->graphfd, "", 1);
+        const char *blockdata = "\0\0\0\0\0\0\0\0";
+        for (uint32_t i=0; i<sizeof(graphdata); i+=8) {
+            write (self->graphfd, blockdata, 8);
         }
     }
     
@@ -1118,6 +1213,8 @@ db *localdb_create (const char *prefix) {
     self->db.set_overview = localdb_set_overview;
     self->db.set_graph = localdb_set_graph;
     self->db.get_graph = localdb_get_graph;
+    self->db.write_log = localdb_write_log;
+    self->db.get_log = localdb_get_log;
     self->db.remove_host = localdb_remove_host;
     self->db.close = localdb_close;
     self->db.list_tenants = localdb_list_tenants;

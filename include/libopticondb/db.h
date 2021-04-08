@@ -37,6 +37,9 @@ typedef double *(*get_graph_f)(struct db_s *, uuid, const char *,
                                const char *, time_t, int);
 typedef int (*set_graph_f)(struct db_s *, uuid, const char *,
                            const char *, double);
+typedef var *(*get_log_f)(struct db_s *, uuid);
+typedef void (*write_log_f)(struct db_s *, uuid, const char *,
+                            const char *);
 typedef int (*remove_host_f)(struct db_s *, uuid);
 typedef void (*close_db_f)(struct db_s *);
 typedef uuid *(*list_tenants_f)(struct db_s *, int *);
@@ -67,6 +70,8 @@ typedef struct db_s {
     set_metadata_f   set_overview; /** method */
     get_graph_f      get_graph; /** Method */
     set_graph_f      set_graph; /** Method */
+    get_log_f        get_log; /** Method */
+    write_log_f      write_log; /** Method */
     remove_host_f    remove_host; /** method */
     close_db_f       close; /** Method */
     list_tenants_f   list_tenants; /** Unbound method */
@@ -102,10 +107,13 @@ var         *db_get_summary (db *d);
 int          db_set_summary (db *d, var *v);
 var         *db_get_overview (db *d);
 int          db_set_overview (db *d, var *v);
-double      *db_get_graph (db *d, uuid hostid, const char *id, const char *key,
-                           time_t span, int sz);
-int          db_set_graph (db *d, uuid hostid, const char *id, const char *key,
-                           double value);
+double      *db_get_graph (db *d, uuid hostid, const char *id,
+                           const char *key, time_t span, int sz);
+int          db_set_graph (db *d, uuid hostid, const char *id,
+                           const char *key, double value);
+var         *db_get_log (db *d, uuid hostid);
+void         db_write_log (db *d, uuid hostid, const char *subsystem,
+                           const char *fmt, ...);
 int          db_remove_host (db *d, uuid hostid);
 void         db_close (db *d);
 void         db_free (db *d);

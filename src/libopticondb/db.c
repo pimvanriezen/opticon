@@ -1,4 +1,5 @@
 #include <libopticondb/db.h>
+#include <stdarg.h>
 
 /** Open the database for a specific tenant.
   * \param d The database handle
@@ -191,9 +192,45 @@ int db_set_graph (db *d, uuid hostid, const char *id, const char *key,
     return d->set_graph (d, hostid, id, key, val);
 }
 
+/** Get a subsampling of graph data
+  * \param d The database handle
+  * \param hostid The id of the host we want a graph from.
+  * \param id The graph id
+  * \param key The datum id
+  * \param interval Time span from now backwards to investigate
+  * \param numsamples Number of samples to return
+  * \return Allocated array with (numsamples) doubles.
+  */
 double *db_get_graph (db *d, uuid hostid, const char *id, const char *key,
                       time_t interval, int numsamples) {
     return d->get_graph (d, hostid, id, key, interval, numsamples);
+}
+
+/** Get all log data for a host formatted in var
+  * \param d The database handle
+  * \param hostid The hostid to get the log for.
+  * \return Allocated var object.
+  */
+var *db_get_log (db *d, uuid hostid) {
+    return d->get_log (d, hostid);
+}
+
+/** Write a new log entry for a host
+  * \param d The database handle
+  * \param hostid The hostid to log about
+  * \param subsystem The subsystem for the message
+  * \param fmt Printf-formatted message.
+  */
+void db_write_log (db *d, uuid hostid, const char *subsystem,
+                   const char *fmt, ...) {
+    char buffer[4096];
+    buffer[0] = 0;
+    va_list ap;
+    va_start (ap, fmt);
+    vsnprintf (buffer, 4096, fmt, ap);
+    va_end (ap);
+    buffer[4095] = 0;
+    d->write_log (d, hostid, subsystem, buffer);
 }
 
 /** Close a database handle

@@ -25,6 +25,23 @@ typedef struct graphdata_s {
     double           data[GRAPHDATASZ];
 } graphdata;
 
+typedef struct hostlogrecord_s {
+    time_t           when;
+    char             subsystem[12];
+    char             message[240];
+} hostlogrecord;
+
+typedef struct hostlogdata_s {
+    uint32_t         writepos;
+    uint32_t         padding[63];
+    hostlogrecord    rec[63];
+} hostlogdata;
+
+typedef struct hostloghandle_s {
+    int              fd;
+    hostlogdata     *data;
+} hostloghandle;
+
 /* ============================= FUNCTIONS ============================= */
 
 datestamp    time2date (time_t in);
