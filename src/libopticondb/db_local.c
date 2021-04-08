@@ -694,6 +694,7 @@ uuid *localdb_list_hosts (db *d, int *outsz) {
     return res;
 }
 
+/** Implementation for db_get_tenantdata */
 var *localdb_get_tenantdata (db *d, const char *suffx) {
     localdb *self = (localdb *) d;
     struct stat st;
@@ -884,10 +885,12 @@ uint32_t localdb_graph_offset (time_t ti) {
     return (clipped / 300);
 }
 
+/** Calculate next offset in graph data */
 uint32_t localdb_offset_next (uint32_t i) {
     return ((i+1) % GRAPHDATASZ);
 }
 
+/** Maps a host's logfile into memory, returning a handle */
 hostloghandle *localdb_open_log (localdb *self, uuid hostid) {
     struct stat st;
     int initialize=0;
@@ -926,12 +929,14 @@ hostloghandle *localdb_open_log (localdb *self, uuid hostid) {
     return res;
 }
 
+/** Unmaps a previously opened log */
 void localdb_close_log (hostloghandle *hdl) {
     if (hdl->data) munmap (hdl->data, sizeof (hostlogdata));
     if (hdl->fd >= 0) close (hdl->fd);
     free (hdl);
 }
 
+/** Implementation for db_write_log() */
 void localdb_write_log (db *d, uuid hostid, const char *subsystem,
                         const char *msg) {
     localdb *self = (localdb *) d;
@@ -951,6 +956,7 @@ void localdb_write_log (db *d, uuid hostid, const char *subsystem,
     }
 }
 
+/** Implementation for db_get_log() */
 var *localdb_get_log (db *d, uuid hostid) {
     localdb *self = (localdb *) d;
     hostloghandle *log = localdb_open_log (self, hostid);
@@ -1025,12 +1031,7 @@ void localdb_close_graph (localdb *self, graphdata *data) {
     self->graphfd = -1;
 }
 
-/** Add a datum to a specific graph for a specific host.
-  * \param d The database handle
-  * \param hostid The uuid of the host
-  * \param id The id of the graph
-  * \param key The id of the datum
-  * \param val The value to store */
+/** Implementation for db_set_graph() */
 int localdb_set_graph (db *d, uuid hostid, const char *id, const char *key,
                        double val) {
     localdb *self = (localdb *) d;
@@ -1052,16 +1053,7 @@ int localdb_set_graph (db *d, uuid hostid, const char *id, const char *key,
     return 1;
 }
 
-/** Get graph data for a specific graph/datum for a specific host. Returns an
-  * array of double values.
-  * \param d The database handle
-  * \param hostid The uuid of the host
-  * \param id The id of the graph
-  * \param key The id of the datum
-  * \param interval The time period to inspect (in seconds, but highest resolution
-  *                 is five minutes)
-  * \param numsamples The number of samples to return in the dataset.
-  */
+/** Implementation for db_get_graph() */
 double *localdb_get_graph (db *d, uuid hostid, const char *id,
                            const char *key, time_t interval,
                            int numsamples) {
