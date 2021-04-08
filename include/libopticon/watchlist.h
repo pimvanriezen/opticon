@@ -81,16 +81,17 @@ typedef struct watchlist_s {
     pthread_mutex_t      mutex;
 } watchlist;
 
+/** Represents a meter-value that should be summarized into a graph file */
 typedef struct graphtarget_s {
     struct graphtarget_s    *next; /**< List neighbour */
     struct graphtarget_s    *prev; /**< List neighbour */
-    meterid_t                id;
-    char                    *graph_id;
-    char                    *datum_id;
-    char                    *title;
-    char                    *unit;
-    char                    *color;
-    double                   max;
+    meterid_t                id; /**< Meter-id to match */
+    char                    *graph_id; /**< The id of the graph */
+    char                    *datum_id; /**< The id of the datum */
+    char                    *title; /**< Title for the data */
+    char                    *unit; /**< Data unit */
+    char                    *color; /**< Color specification */
+    double                   max; /**< Minimum maximum value to report */
 } graphtarget;
 
 typedef struct graphlist_s {

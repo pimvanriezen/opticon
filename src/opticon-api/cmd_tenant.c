@@ -64,8 +64,10 @@ var *collect_meterdefs (uuid tenant, uuid host, int watchonly) {
             tvar = var_find_key (tc, triggers[tr]);
             if (tvar) {
                 var *ctrig = var_get_dict_forkey (cc, triggers[tr]);
-                var_copy (ctrig, tvar);
-                var_set_str_forkey (ctrig, "origin", "tenant");
+                if (ctrig) {
+                    var_copy (ctrig, tvar);
+                    var_set_str_forkey (ctrig, "origin", "tenant");
+                }
             }
         }
         tc = tc->next;
@@ -76,6 +78,10 @@ var *collect_meterdefs (uuid tenant, uuid host, int watchonly) {
     }
     while (watchonly && hc) {
         var *cc = var_get_dict_forkey (cmeters, hc->id);
+        if (! cc) {
+            hc = hc->next;
+            continue;
+        }
         tstr = var_get_str_forkey (hc, "type");
         if (! tstr) {
             log_error ("(collect_meterdefs) No type set for meter "
