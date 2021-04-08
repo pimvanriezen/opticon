@@ -843,8 +843,11 @@ void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
         dat[i] = var_get_double_atindex (arr, i);
     }
     
+    int height = 6;
+    if (width > 40) height = 8;
+    
     var_free (apires);
-    print_graph (width, 6, indent, max, dat);
+    print_graph (width, height, indent, max, dat);
 }
 
 /** The dancing-bears command */
