@@ -29,6 +29,7 @@ static int statusline = 0;
 
 void clear_pending_header (void) {
     PENDING_HDR = NULL;
+    statusline = 0;
 }
 
 const char *decorate_status (const char *st) {
