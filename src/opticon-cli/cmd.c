@@ -546,7 +546,8 @@ int cmd_host_list (int argc, const char *argv[]) {
             start[10] = ' ';
             end[10] = ' ';
 
-            printf ("\033[38;5;28m%s\033[0m \033[1m%4" PRIu64 "\033[0m %s %s  %s\n",
+            printf ("\033[38;5;28m%s\033[0m \033[1m%4" PRIu64
+                    "\033[0m %s %s  %s\n",
                     var_get_str_forkey (crsr, "id"),
                     usage, unit, start, end);
             crsr = crsr->next;
@@ -627,11 +628,13 @@ int cmd_get_record (int argc, const char *argv[]) {
     uint64_t u_sec = uptime % 60;
     
     if (u_days) {
-        sprintf (uptimestr, "%" PRIu64 " day%s, %" PRIu64 ":%02" PRIu64 ":%02" PRIu64 "", u_days,
-                 (u_days==1)?"":"s", u_hours, u_mins, u_sec);
+        sprintf (uptimestr, "%" PRIu64 " day%s, %" PRIu64 ":%02" PRIu64
+                 ":%02" PRIu64 "", u_days, (u_days==1)?"":"s",
+                 u_hours, u_mins, u_sec);
     }
     else if (u_hours) {
-        sprintf (uptimestr, "%" PRIu64 ":%02" PRIu64 ":%02" PRIu64, u_hours, u_mins, u_sec);
+        sprintf (uptimestr, "%" PRIu64 ":%02" PRIu64 ":%02"
+                 PRIu64, u_hours, u_mins, u_sec);
     }
     else {
         sprintf (uptimestr, "%" PRIu64 " minute%s, %" PRIu64 " second%s",
@@ -640,7 +643,8 @@ int cmd_get_record (int argc, const char *argv[]) {
     
     print_value ("Uptime","\033[38;5;28m%s\033[0m",uptimestr);
     print_value ("OS/Hardware","\033[38;5;28m%s %s \033[0m(%s)",
-                 VDstr("os","kernel"), VDstr("os","version"), VDstr("os","arch"));
+                 VDstr("os","kernel"), VDstr("os","version"),
+                 VDstr("os","arch"));
     const char *dist = VDstr("os","distro");
     if (dist) print_value ("Distribution", "\033[38;5;28m%s\033[0m", dist);
     Vdone("os");
@@ -815,7 +819,7 @@ void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
                            graph_id, datum_id, width);
     if (! apires) {
         printf ("\033[%iC", indent);
-        printf ("%s: no graphic\n\n\n\n\n\n\n", datum_id);
+        printf ("%s: no graph\n\n\n\n\n\n\n", datum_id);
         return;
     }
     
@@ -823,7 +827,7 @@ void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
     var *arr = var_get_array_forkey (apires, "data");
     if (! arr) {
         printf ("\033[%iC", indent);
-        printf ("%s: no graphic\n\n\n\n\n\n\n", datum_id);
+        printf ("%s: no graph\n\n\n\n\n\n\n", datum_id);
         var_free (apires);
         return;
     }
