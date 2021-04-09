@@ -240,6 +240,9 @@ void watchthread_handle_host (host *host) {
             uuid2str (host->uuid, uuidstr);
             log_info ("Status change host <%s> %s -> STALE",
                       uuidstr, ostatus.str);
+            db_open (APP.writedb, host->tenant->uuid, NULL);
+            db_write_log (APP.writedb, host->uuid, "watcher", "Host went STALE");
+            db_close (APP.writedb);
             tenant_set_notification (host->tenant, true, "STALE", host->uuid);
         }
         meter_set_str (m_status, 0, "STALE");
@@ -359,8 +362,14 @@ void watchthread_handle_host (host *host) {
     
         if (strcmp (nstatus, ostatus.str) != 0) {
             uuid2str (host->uuid, uuidstr);
-            log_info ("Status change host <%s> %s -> %s", uuidstr, ostatus.str,
-                      nstatus);
+            log_info ("Status change host <%s> %s -> %s", uuidstr,
+                      ostatus.str, nstatus);
+                      
+            db_open (APP.writedb, host->tenant->uuid, NULL);
+            db_write_log (APP.writedb, host->uuid, "watcher",
+                          "Status change %s -> %s", ostatus.str, nstatus);
+            db_close (APP.writedb);
+            
             bool isproblem = (host->badness>= 80.0);
             tenant_set_notification (host->tenant, isproblem, nstatus,
                                      host->uuid);
