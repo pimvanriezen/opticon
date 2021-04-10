@@ -5,13 +5,17 @@
 
 tenantlist TENANTS;
 
+/*/ ======================================================================= /*/
 /** Initialize the tenant list */
+/*/ ======================================================================= /*/
 void tenant_init (void) {
     TENANTS.first = TENANTS.last = NULL;
     pthread_rwlock_init (&TENANTS.lock, NULL);
 }
 
+/*/ ======================================================================= /*/
 /** Allocate a tenant object */
+/*/ ======================================================================= /*/
 tenant *tenant_alloc (void) {
     tenant *res = (tenant *) malloc (sizeof(tenant));
     res->first = res->last = NULL;
@@ -24,13 +28,14 @@ tenant *tenant_alloc (void) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Delete a tenant. This tenant is assumed to have been
   * previously obtained through, e.g., tenant_find(), and
   * will have been properly locked. This function will first
   * put a write lock on neighbouring nodes, so we can safely
   * manipulate their next/prev pointers. If neighbouring nodes
-  * happen to be locked, the tenant is not actually deleted.
-  */
+  * happen to be locked, the tenant is not actually deleted. */
+/*/ ======================================================================= /*/
 void tenant_delete (tenant *t) {
     if (! t) return;
     pthread_rwlock_wrlock (&TENANTS.lock);
@@ -79,8 +84,10 @@ void tenant_delete (tenant *t) {
     free (t);
 }
 
+/*/ ======================================================================= /*/
 /** Find a tenant in the list by id, or create one if it doesn't
     exist yet. */
+/*/ ======================================================================= /*/
 tenant *tenant_find (uuid tenantid, tenantlock lockt) {
     pthread_rwlock_rdlock (&TENANTS.lock);
     tenant *nt;
@@ -135,9 +142,10 @@ tenant *tenant_find (uuid tenantid, tenantlock lockt) {
     return t;
 }
 
+/*/ ======================================================================= /*/
 /** Get a pointer to the first tenant. It will be locked with the
-  * required lock type.
-  */
+  * required lock type. */
+/*/ ======================================================================= /*/
 tenant *tenant_first (tenantlock lockt) {
     tenant *res = NULL;
     pthread_rwlock_rdlock (&TENANTS.lock);
@@ -154,6 +162,10 @@ tenant *tenant_first (tenantlock lockt) {
     return res;
 }
 
+/*/ ======================================================================= /*/
+/** Get a pointer to the next tenant, it will be locked with the required
+  * lock type. */
+/*/ ======================================================================= /*/
 tenant *tenant_next (tenant *t, tenantlock lockt) {
     if (! t) return NULL;
     pthread_rwlock_rdlock (&TENANTS.lock);
@@ -170,19 +182,26 @@ tenant *tenant_next (tenant *t, tenantlock lockt) {
     pthread_rwlock_unlock (&TENANTS.lock);
     return next;
 }
-
+/*/ ======================================================================= /*/
+/** Explicitly releases the lock on a tenant, normally called if there's
+  * no more need to call tenant_next(). */
+/*/ ======================================================================= /*/
 void tenant_done (tenant *t) {
     if (t) pthread_rwlock_unlock (&t->lock);
 }
 
+/*/ ======================================================================= /*/
 /** Create a new tenant */
+/*/ ======================================================================= /*/
 tenant *tenant_create (uuid tenantid, aeskey key) {
     tenant *t = tenant_find (tenantid, TENANT_LOCK_WRITE);
     t->key = key;
     return t;
 }
 
+/*/ ======================================================================= /*/
 /** Set notification status for a host */
+/*/ ======================================================================= /*/
 void tenant_set_notification (tenant *self, bool isproblem,
                               const char *status, uuid hostid) {
     if (! self) return;
@@ -218,7 +237,9 @@ void tenant_set_notification (tenant *self, bool isproblem,
     }
 }
 
+/*/ ======================================================================= /*/
 /** Check and handle outstanding notifications for a tenant */
+/*/ ======================================================================= /*/
 var *tenant_check_notification (tenant *self) {
     if (notifylist_check_actionable (&self->notify)) {
         var *env = var_alloc();

@@ -9,7 +9,9 @@
 #include <libopticon/log.h>
 #include "req_context.h"
 
+/*/ ======================================================================= /*/
 /** Allocate a request argument list */
+/*/ ======================================================================= /*/
 req_arg *req_arg_alloc (void) {
     req_arg *self = (req_arg *) malloc (sizeof (req_arg));
     self->argc = 0;
@@ -17,10 +19,11 @@ req_arg *req_arg_alloc (void) {
     return self;
 }
 
+/*/ ======================================================================= /*/
 /** Add a preallocated string to an argument list.
   * \param self The list
-  * \param a The string to add
-  */
+  * \param a The string to add */
+/*/ ======================================================================= /*/
 void req_arg_add_nocopy (req_arg *self, const char *a) {
     if (self->argc) {
         self->argv = (char **)
@@ -31,17 +34,19 @@ void req_arg_add_nocopy (req_arg *self, const char *a) {
     self->argc++;
 }
 
+/*/ ======================================================================= /*/
 /** Allocate and copy a string, adding it to an argument list.
   * \param self The list
-  * \param a The string to add
-  */
+  * \param a The string to add */
+/*/ ======================================================================= /*/
 void req_arg_add (req_arg *self, const char *a) {
     req_arg_add_nocopy (self, strdup (a));
 }
 
+/*/ ======================================================================= /*/
 /** Remove the top element of an argument list.
-  * \param self The list
-  */
+  * \param self The list */
+/*/ ======================================================================= /*/
 void req_arg_remove_top (req_arg *self) {
     if (self->argc < 1) return;
     if (self->argc == 1) {
@@ -56,30 +61,37 @@ void req_arg_remove_top (req_arg *self) {
     self->argc--;
 }
 
+/*/ ======================================================================= /*/
 /** Clear an argument list */
+/*/ ======================================================================= /*/
 void req_arg_clear (req_arg *self) {
     for (int i=0; i<self->argc; ++i) free (self->argv[i]);
     self->argc = 0;
     self->argv = NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Clear and deallocate an argument list */
+/*/ ======================================================================= /*/
 void req_arg_free (req_arg *self) {
     req_arg_clear (self);
     free (self);
 }
 
+/*/ ======================================================================= /*/
 /** Initialize a matchlist header */
+/*/ ======================================================================= /*/
 void req_matchlist_init (req_matchlist *self) {
     self->first = self->last = NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Add a match definition to a matchlist.
   * \param self The list
   * \param s The match definition
   * \param mmask The mask of methods caught
-  * \param f The function to call
-  */
+  * \param f The function to call */
+/*/ ======================================================================= /*/
 void req_matchlist_add (req_matchlist *self, const char *s,
                         req_method mmask, path_f f) {
     req_match *m = (req_match *) malloc (sizeof (req_match));
@@ -99,13 +111,14 @@ void req_matchlist_add (req_matchlist *self, const char *s,
     }
 }
 
+/*/ ======================================================================= /*/
 /** Add a match definition to a matchlist with a text-based
   * handler function.
   * \param self The list
   * \param s The match definition
   * \param mmask The mask of methods caught
-  * \param f The function to call
-  */
+  * \param f The function to call */
+/*/ ======================================================================= /*/
 void req_matchlist_add_text (req_matchlist *self, const char *s,
                              req_method mmask, path_text_f f) {
     req_match *m = (req_match *) malloc (sizeof (req_match));
@@ -125,12 +138,13 @@ void req_matchlist_add_text (req_matchlist *self, const char *s,
     }
 }
 
+/*/ ======================================================================= /*/
 /** Check a url against a req_match definition.
   * \param self The match definition
   * \param url The url string
   * \param arg Caught arguments are stored here.
-  * \return 1 On match, 0 on fail.
-  */
+  * \return 1 On match, 0 on fail. */
+/*/ ======================================================================= /*/
 int req_match_check (req_match *self, const char *url, req_arg *arg) {
     req_arg_clear (arg);
     
@@ -239,6 +253,9 @@ int req_match_check (req_match *self, const char *url, req_arg *arg) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Generates a response for a server error */
+/*/ ======================================================================= /*/
 int err_server_error (req_context *ctx, req_arg *arg,
                       var *out, int *status) {
     var_set_str_forkey (out, "error", "Internal Server Error");
@@ -246,14 +263,15 @@ int err_server_error (req_context *ctx, req_arg *arg,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Utility function for sending either JSON-encoded or straight
   * data to the client.
   * \param conn The MHD connection handler.
   * \param res JSON data, if any.
   * \param status HTTP status code to use
   * \param out The ioport to use (may already contain data)
-  * \param txt If 1, skip JSON encoding, send out ioport as-is.
-  */
+  * \param txt If 1, skip JSON encoding, send out ioport as-is. */
+/*/ ======================================================================= /*/
 void req_write_response (struct MHD_Connection *conn,
                          var *res, int status, ioport *out, int txt) {
     /* if no text data was sent into the ioport, encode the
@@ -271,12 +289,14 @@ void req_write_response (struct MHD_Connection *conn,
     MHD_destroy_response (response);
 }
 
+/*/ ======================================================================= /*/
 /** Take a request context and connection and shop it around inside
   * a request matchlist.
   * \param self The matchlist
   * \param url The URL string
   * \param ctx The request context
   * \param connection The microhttp connection */
+/*/ ======================================================================= /*/
 void req_matchlist_dispatch (req_matchlist *self, const char *url,
                              req_context *ctx,
                              struct MHD_Connection *conn) {
@@ -318,7 +338,9 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
     ioport_close (out);
 }
 
+/*/ ======================================================================= /*/
 /** Allocate a request context object */
+/*/ ======================================================================= /*/
 req_context *req_context_alloc (void) {
     req_context *self = (req_context *) malloc (sizeof (req_context));
     if (self) {
@@ -342,7 +364,9 @@ req_context *req_context_alloc (void) {
     return self;
 }
 
+/*/ ======================================================================= /*/
 /** Deallocate a request context object and all its child structures */
+/*/ ======================================================================= /*/
 void req_context_free (req_context *self) {
     var_free (self->headers);
     var_free (self->bodyjson);
@@ -358,7 +382,9 @@ void req_context_free (req_context *self) {
     free (self);
 }
 
+/*/ ======================================================================= /*/
 /** Set a header inside the request context */
+/*/ ======================================================================= /*/
 void req_context_set_header (req_context *self, const char *hdrname,
                              const char *hdrval) {
     char *canon = strdup (hdrname);
@@ -386,14 +412,18 @@ void req_context_set_header (req_context *self, const char *hdrname,
     free (canon);
 }
 
+/*/ ======================================================================= /*/
 /** Parse the loaded body data inside the request context as JSON */
+/*/ ======================================================================= /*/
 int req_context_parse_body (req_context *self) {
     if (! self->body) return 1;
     if (strcasecmp (self->ctype, "application/json") != 0) return 0;
     return var_parse_json (self->bodyjson, self->body);
 }
 
+/*/ ======================================================================= /*/
 /** Internal function for sizing the body data buffer */
+/*/ ======================================================================= /*/
 static size_t mkallocsz (size_t target) {
     if (target < 4096) return 4096;
     if (target < 8192) return 8192;
@@ -402,7 +432,9 @@ static size_t mkallocsz (size_t target) {
     return target + 4096;
 }
 
+/*/ ======================================================================= /*/
 /** Handle uploaded data */
+/*/ ======================================================================= /*/
 void req_context_append_body (req_context *self, const char *dt, size_t sz) {
     if (! self->body) {
         self->bodyalloc = mkallocsz (sz);
@@ -418,13 +450,17 @@ void req_context_append_body (req_context *self, const char *dt, size_t sz) {
     self->body[self->bodysz] = 0;
 }
 
+/*/ ======================================================================= /*/
 /** Set the url */
+/*/ ======================================================================= /*/
 void req_context_set_url (req_context *self, const char *url) {
     if (self->url) free (self->url);
     self->url = strdup (url);
 }
 
+/*/ ======================================================================= /*/
 /** Set the request method */
+/*/ ======================================================================= /*/
 void req_context_set_method (req_context *self, const char *mth) {
     req_method m = REQ_OTHER;
     if (strcasecmp (mth, "get") == 0) m = REQ_GET;

@@ -16,14 +16,15 @@
 #include <syslog.h>
 #include <signal.h>
 
+/*/ ======================================================================= /*/
 /** Look up a session by netid and sessionid. If it's a valid session,
   * return its current AES session key.
   * \param netid The host's netid (32 bit ip-derived).
   * \param sid The session-id.
   * \param serial Serial-number of packet being handled.
   * \param blob Pointer for giving back the session.
-  * \return The key, or NULL if resolving failed, or session was invalid.
-  */
+  * \return The key, or NULL if resolving failed, or session was invalid. */
+/*/ ======================================================================= /*/
 aeskey *resolve_sessionkey (uint32_t netid, uint32_t sid, uint32_t serial,
                             void **blob) {
     session *S = session_find (netid, sid);
@@ -50,14 +51,15 @@ aeskey *resolve_sessionkey (uint32_t netid, uint32_t sid, uint32_t serial,
     return &S->key;
 }
 
+/*/ ======================================================================= /*/
 /** Add a meterwatch to a (tenant's) watchlist, with a var object
   * as configuration; helper for watchlist_populate().
   * \param w The watchlist to add to.
   * \param id The meterid to match
   * \param mtp The metertype to match
   * \param v Metadata, dict with: cmp, weight, val.
-  * \param vweight The unweighted 'badness' (depending on alert/warning).
-  */
+  * \param vweight The unweighted 'badness' (depending on alert/warning). */
+/*/ ======================================================================= /*/
 void make_watcher (watchlist *w, meterid_t id, metertype_t mtp,
                    var *v, double vweight, watchtrigger tr) {
     const char *cmp = var_get_str_forkey (v, "cmp");
@@ -95,11 +97,12 @@ void make_watcher (watchlist *w, meterid_t id, metertype_t mtp,
     }
 }
 
+/*/ ======================================================================= /*/
 /** Populate a watchlist out of a meter definition stored in some
   * variables.
   * \param w The watchlist to populate.
-  * \param v_meters The meter definitions.
-  */
+  * \param v_meters The meter definitions. */
+/*/ ======================================================================= /*/
 void watchlist_populate (watchlist *w, var *v_meters) {
     pthread_mutex_lock (&w->mutex);
     watchlist_clear (w);
@@ -142,9 +145,10 @@ void watchlist_populate (watchlist *w, var *v_meters) {
     pthread_mutex_unlock (&w->mutex);
 }
 
+/*/ ======================================================================= /*/
 /** Populate summaryinfo. Format:
-  * [ { id: cpu, meter: pcpu, type: frac, func: avg } ]
-  */
+  * [ { id: cpu, meter: pcpu, type: frac, func: avg } ] */
+/*/ ======================================================================= /*/
 void summaryinfo_populate (summaryinfo *into, var *v_summary) {
     pthread_mutex_lock (&into->mutex);
     summaryinfo_clear (into);
@@ -184,12 +188,13 @@ void summaryinfo_populate (summaryinfo *into, var *v_summary) {
     pthread_mutex_unlock (&into->mutex);
 }
 
+/*/ ======================================================================= /*/
 /** Look up a tenant in memory and in the database, do the necessary
   * bookkeeping, then returns the AES key for that tenant.
   * \param tenantid The tenant UUID.
   * \param serial Serial number of the auth packet we're dealing with.
-  * \return Pointer to the key, or NULL if resolving failed.
-  */
+  * \return Pointer to the key, or NULL if resolving failed. */
+/*/ ======================================================================= /*/
 aeskey *resolve_tenantkey (uuid tenantid, uint32_t serial) {
     tenant *T = NULL;
     
@@ -256,7 +261,9 @@ aeskey *resolve_tenantkey (uuid tenantid, uint32_t serial) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Handler for an auth packet */
+/*/ ======================================================================= /*/
 void handle_auth_packet (ioport *pktbuf, uint32_t netid,
                          struct sockaddr_storage *remote) {
     authinfo *auth = ioport_unwrap_authdata (pktbuf, resolve_tenantkey);
@@ -324,12 +331,13 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
     free (auth);
 }
 
+/*/ ======================================================================= /*/
 /** Goes over fresh host metadata to pick up any parts relevant
   * to the operation of opticon-collector. At this moment,
   * this is just the meterwatch adjustments.
   * \param H The host we're dealing with
-  * \param meta The fresh metadata
-  */
+  * \param meta The fresh metadata */
+/*/ ======================================================================= /*/
 void handle_host_metadata (host *H, var *meta) {
     /* layout of adjustment data:
        meter {
@@ -418,7 +426,9 @@ void handle_host_metadata (host *H, var *meta) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Handler for a meter packet */
+/*/ ======================================================================= /*/
 void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     session *S = NULL;
     ioport *unwrap;
@@ -428,7 +438,8 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     unwrap = ioport_unwrap_meterdata (netid, pktbuf,
                                       resolve_sessionkey, (void**) &S);
     if (! unwrap) {
-        log_debug ("Error unwrapping packet from <%08x>: %08x", netid, unwrap_errno);
+        log_debug ("Error unwrapping packet from <%08x>: %08x", netid,
+                   unwrap_errno);
         return;
     }
     if (! S) {
@@ -470,11 +481,12 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     ioport_close (unwrap);
 }
 
+/*/ ======================================================================= /*/
 /** Thread runner for the reaper. This thread goes over the tenant list,
   * figuring out how much storage they have in use. If this is over the
   * set quota, it starts culling days from the database starting at
-  * the earliest recorded date, until the tenant is under quota again.
-  */
+  * the earliest recorded date, until the tenant is under quota again. */
+/*/ ======================================================================= /*/
 void reaper_run (thread *self) {
     while (1) {
         sleep (10);
@@ -531,7 +543,8 @@ void reaper_run (thread *self) {
                         log_info ("Deleting records for ts=%i", 
                                   time2date(earliest));
                         for (int j=0; j<numhosts; ++j) {
-                            db_delete_host_date (APP.reaperdb, hosts[j], earliest);
+                            db_delete_host_date (APP.reaperdb, hosts[j],
+                                                 earliest);
                         }
                         --i;
                     }
@@ -549,8 +562,10 @@ void reaper_run (thread *self) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Thread runner for handling configuration reload requests.
   * This is done to keep the signal handler path clean. */
+/*/ ======================================================================= /*/
 void conf_reloader_run (thread *t) {
     conf_reloader *self = (conf_reloader *) t;
     while (1) {
@@ -565,7 +580,9 @@ void conf_reloader_run (thread *t) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Create the configuration reloader thread */
+/*/ ======================================================================= /*/
 conf_reloader *conf_reloader_create (void) {
     conf_reloader *self = (conf_reloader *) malloc (sizeof (conf_reloader));
     self->cond = conditional_create();
@@ -573,18 +590,24 @@ conf_reloader *conf_reloader_create (void) {
     return self;
 }
 
+/*/ ======================================================================= /*/
 /** Signal the configuration reloader thread to do a little jig */
+/*/ ======================================================================= /*/
 void conf_reloader_reload (conf_reloader *self) {
     conditional_signal (self->cond);
 }
 
+/*/ ======================================================================= /*/
 /** Signal handler for SIGHUP */
+/*/ ======================================================================= /*/
 void daemon_sighup_handler (int sig) {
     conf_reloader_reload (APP.reloader);
     signal (SIGHUP, daemon_sighup_handler);
 }
 
+/*/ ======================================================================= /*/
 /** Main loop. Waits for a packet, then handles it. */
+/*/ ======================================================================= /*/
 int daemon_main (int argc, const char *argv[]) {
     if (strcmp (APP.logpath, "@syslog") == 0) {
         log_open_syslog ("opticon-collector", APP.loglevel);
@@ -643,36 +666,49 @@ int daemon_main (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Set up foreground flag */
+/*/ ======================================================================= /*/
 int set_foreground (const char *i, const char *v) {
     APP.foreground = 1;
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set up configuration file path */
+/*/ ======================================================================= /*/
 int set_confpath (const char *i, const char *v) {
     APP.confpath = v;
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Set up meter configuration file path */
+/*/ ======================================================================= /*/
 int set_mconfpath (const char *i, const char *v) {
     APP.mconfpath = v;
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set up pidfile path */
+/*/ ======================================================================= /*/
 int set_pidfile (const char *i, const char *v) {
     APP.pidfile = v;
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set the logfile path, @syslog for logging to syslog */
+/*/ ======================================================================= /*/
 int set_logpath (const char *i, const char *v) {
     APP.logpath = v;
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle --loglevel */
+/*/ ======================================================================= /*/
 int set_loglevel (const char *i, const char *v) {
     if (strcmp (v, "CRIT") == 0) APP.loglevel = LOG_CRIT;
     else if (strcmp (v, "ERR") == 0) APP.loglevel = LOG_ERR;
@@ -683,7 +719,9 @@ int set_loglevel (const char *i, const char *v) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set up network configuration */
+/*/ ======================================================================= /*/
 int conf_network (const char *id, var *v, updatetype tp) {
     switch (tp) {
         case UPDATE_CHANGE:
@@ -705,7 +743,9 @@ int conf_network (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set up database path from configuration */
+/*/ ======================================================================= /*/
 int conf_db_path (const char *id, var *v, updatetype tp) {
     if (tp == UPDATE_REMOVE) return 0;
     if (tp == UPDATE_CHANGE) {
@@ -721,13 +761,18 @@ int conf_db_path (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set up watchlist from meter definitions */
+/*/ ======================================================================= /*/
 int conf_meters (const char *id, var *v, updatetype tp) {
     if (tp == UPDATE_REMOVE) return 0;
     watchlist_populate (&APP.watch, v);
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Set up global graph configuration */
+/*/ ======================================================================= /*/
 int conf_graph (const char *id, var *v, updatetype tp) {
     if (tp == UPDATE_REMOVE) return 0;
     APP.graphlist = graphlist_create();
@@ -737,7 +782,9 @@ int conf_graph (const char *id, var *v, updatetype tp) {
 
 appcontext APP; /**< Global application context */
 
+/*/ ======================================================================= /*/
 /** Command line options */
+/*/ ======================================================================= /*/
 cliopt CLIOPT[] = {
     {"--foreground","-f",OPT_FLAG,NULL,set_foreground},
     {"--pidfile","-p",OPT_VALUE,
@@ -751,9 +798,10 @@ cliopt CLIOPT[] = {
     {NULL,NULL,0,NULL,NULL}
 };
 
+/*/ ======================================================================= /*/
 /** Application main. Handles configuration and command line, sets up
-  * the application context APP and spawns daemon_main().
-  */
+  * the application context APP and spawns daemon_main(). */
+/*/ ======================================================================= /*/
 int main (int _argc, const char *_argv[]) {
     int argc = _argc;
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);

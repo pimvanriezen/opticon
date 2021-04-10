@@ -3,7 +3,9 @@
 #include <libopticon/defaults.h>
 #include <stdlib.h>
 
+/*/ ======================================================================= /*/
 /** Write out a meter value */
+/*/ ======================================================================= /*/
 int pktcodec_write_value (ioport *io, meter *m, uint8_t pos) {
     switch (m->id & MMASK_TYPE) {
         case MTYPE_INT:
@@ -17,7 +19,9 @@ int pktcodec_write_value (ioport *io, meter *m, uint8_t pos) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Encode host data in packet format */
+/*/ ======================================================================= /*/
 int pktcodec_encode_host (ioport *io, host *h) {
     meter *m = h->first;
     meterid_t id;
@@ -37,7 +41,9 @@ int pktcodec_encode_host (ioport *io, host *h) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Decode packet data into a host */
+/*/ ======================================================================= /*/
 int pktcodec_decode_host (ioport *io, host *h) {
     meterid_t mid;
     meterid_t pfx;
@@ -125,7 +131,9 @@ int pktcodec_decode_host (ioport *io, host *h) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Instantiate a packet codec */
+/*/ ======================================================================= /*/
 codec *codec_create_pkt (void) {
     codec *res = (codec *) malloc (sizeof (codec));
     if (! res) return res;

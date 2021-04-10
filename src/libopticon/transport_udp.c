@@ -2,7 +2,9 @@
 #include <string.h>
 #include <sys/socket.h>
 
+/*/ ======================================================================= /*/
 /** Implementation of outtransport_setremote() */
+/*/ ======================================================================= /*/
 int udp_outtransport_setremote (outtransport *t, const char *addr,
                                 int port) {
     udp_outtransport *self = (udp_outtransport *) t;
@@ -42,7 +44,9 @@ int udp_outtransport_setremote (outtransport *t, const char *addr,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation of outtransport_send() */
+/*/ ======================================================================= /*/
 int udp_outtransport_send (outtransport *t, void *data, size_t sz) {
     udp_outtransport *self = (udp_outtransport *) t;
     
@@ -55,14 +59,18 @@ int udp_outtransport_send (outtransport *t, void *data, size_t sz) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation of outtransport_close() */
+/*/ ======================================================================= /*/
 void udp_outtransport_close (outtransport *t) {
     udp_outtransport *self = (udp_outtransport *) t;
     if (self->peeraddr) free (self->peeraddr);
     if (self->sock > 0) close (self->sock);
 }
 
+/*/ ======================================================================= /*/
 /** Create a UDP outtransport */
+/*/ ======================================================================= /*/
 outtransport *outtransport_create_udp (void) {
     udp_outtransport *self = 
         (udp_outtransport *) malloc (sizeof (udp_outtransport));
@@ -74,7 +82,9 @@ outtransport *outtransport_create_udp (void) {
     return (outtransport *) self;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation of intransport_setlistenport() */
+/*/ ======================================================================= /*/
 int udp_intransport_setlistenport (intransport *t, const char *addr,
                                    int port) {
     udp_intransport *self = (udp_intransport *) t;
@@ -107,7 +117,9 @@ int udp_intransport_setlistenport (intransport *t, const char *addr,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation of intranspot_recv() */
+/*/ ======================================================================= /*/
 size_t udp_intransport_recv (intransport *t, void *into, size_t sz,
                              struct sockaddr_storage *client) {
     udp_intransport *self = (udp_intransport *) t;
@@ -117,14 +129,18 @@ size_t udp_intransport_recv (intransport *t, void *into, size_t sz,
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation of intransport_close() */
+/*/ ======================================================================= /*/
 void udp_intransport_close (intransport *t) {
     udp_intransport *self = (udp_intransport *) t;
     if (self->listenaddr) free (self->listenaddr);
     if (self->sock > 0) close (self->sock);
 }
 
+/*/ ======================================================================= /*/
 /** Create a UDP intransport */
+/*/ ======================================================================= /*/
 intransport *intransport_create_udp (void) {
     udp_intransport *self =
         (udp_intransport *) malloc (sizeof (udp_intransport));
