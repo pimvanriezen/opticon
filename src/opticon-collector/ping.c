@@ -1,3 +1,7 @@
+#include <libopticon/log.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
 #include "ping.h"
 
 /*/ ======================================================================= /*/
@@ -31,10 +35,26 @@ int ping_open_icmp6 (void) {
 /*/ ======================================================================= /*/
 uint32_t ping_sequence (void) {
     uint32_t res;
-    pthread_mutex_lock (&TARGETS.mutex);
+    pthread_mutex_lock (&PINGSTATE.mutex);
     res = PINGSTATE.sequence++;
-    pthread_mutex_unlock (&TARGETS.mutex);
+    pthread_mutex_unlock (&PINGSTATE.mutex);
     return res;
+}
+
+/*/ ======================================================================= /*/
+/** Take a micronap */
+/*/ ======================================================================= /*/
+void ping_msleep (uint32_t msec) {
+	struct timeval tv;
+	int sec, usec;
+	
+ 	sec = msec / 1000;
+	usec = 1000 * (msec - (1000 * sec));
+	
+	tv.tv_sec = sec;
+	tv.tv_usec = usec;
+	
+	select (0, NULL, NULL, NULL, &tv);
 }
 
 /*/ ======================================================================= /*/
@@ -70,20 +90,20 @@ int ping_compare_addr (struct sockaddr_storage *left,
     if (!left || !right) return 0;
     
     struct sockaddr_in6 *left6 = (struct sockaddr_in6 *) left;
-    strict sockaddr_in6 *right6 = (struct sockaddr_in6 *) right;
-    struct sockaddr_in *left4 = (struct sockaddr_in4 *) left;
-    strict sockaddr_in *right4 = (struct sockaddr_in4 *) right;
+    struct sockaddr_in6 *right6 = (struct sockaddr_in6 *) right;
+    struct sockaddr_in *left4 = (struct sockaddr_in *) left;
+    struct sockaddr_in *right4 = (struct sockaddr_in *) right;
     
     if (left->ss_family != right->ss_family) return 0;
     switch (left->ss_family) {
         case AF_INET:
-            if (memcmp (left4->sin_addr,right4->sin_addr, 4) == 0) {
+            if (memcmp (&left4->sin_addr,&right4->sin_addr, 4) == 0) {
                 return 1;
             }
             return 0;
         
         case AF_INET6:
-            if (memcmp (left6->sin6_addr,right6->sin6_addr, 16) == 0) {
+            if (memcmp (&left6->sin6_addr,&right6->sin6_addr, 16) == 0) {
                 return 1;
             }
             return 0;
@@ -98,23 +118,23 @@ int ping_compare_addr (struct sockaddr_storage *left,
     be accessed as root prior to daemonize() */
 /*/ ======================================================================= /*/
 void ping_init (void) {
-    pthread_mutex_init (&PINGSTATE.mutex);
+    pthread_mutex_init (&PINGSTATE.mutex, NULL);
     PINGSTATE.icmp = ping_open_icmp();
     PINGSTATE.icmp6 = ping_open_icmp6();
     PINGSTATE.sequence = (uint32_t) time(NULL);
     
-    targetlist_init (&PINGSTATE.v4);
-    targetlist_init (&PINGSTATE.v6);
+    pingtargetlist_init (&PINGSTATE.v4);
+    pingtargetlist_init (&PINGSTATE.v6);
 }
 
 /*/ ======================================================================= /*/
 /** Starts all ping-related threads */
 /*/ ======================================================================= /*/
 void ping_start (void) {
-    thread_create (ping_run_sender_v4);
-    thread_create (ping_run_sender_v6);
-    thread_create (ping_run_receiver_v4);
-    thread_create (ping_run_receiver_v6);
+    thread_create (ping_run_sender_v4, NULL);
+    thread_create (ping_run_sender_v6, NULL);
+    thread_create (ping_run_receiver_v4, NULL);
+    thread_create (ping_run_receiver_v6, NULL);
 }
 
 /*/ ======================================================================= /*/
@@ -137,7 +157,7 @@ void ping_run_sender_v4 (thread *self) {
     while (1) {
         list = pingtargetlist_all (&PINGSTATE.v4, &count);
         for (i=0; i<count; ++i) {
-            pingtarget *tgt = pingtarget_open (list[i]);
+            pingtarget *tgt = pingtarget_open (list+i);
             seq = ping_sequence();
             if (tgt->sequence) {
                 /* No ping reply for our last sequence has been sent,
@@ -145,20 +165,20 @@ void ping_run_sender_v4 (thread *self) {
                 pingtarget_write_loss (tgt);
             }
             tgt->sequence = seq;
-            gettimeofday (&tgt->tsent);
+            gettimeofday (&tgt->tsent, NULL);
 
             icp->icmp_type = ICMP_ECHO;
             icp->icmp_code = 0;
             icp->icmp_cksum = 0;
             icp->icmp_id = (seq & 0xffff0000) >> 16;
             icp->icmp_seq = (seq & 0x0000ffff);
-            icp->icmp_cksum = in_checksum (icp, PKTSIZE);        
+            icp->icmp_cksum = ping_checksum (icp, PKTSIZE);        
             
             size_t res = sendto (PINGSTATE.icmp, buf, PKTSIZE, 0,
-                                 (struct sockaddr *) list[i],
+                                 (struct sockaddr *) list+i,
                                  sizeof (struct sockaddr_in));
             pingtarget_close (tgt);
-            ping_usleep (20000 / count);
+            ping_msleep (20000 / count);
         }
         if (! count) sleep (5);
         free (list);
@@ -190,23 +210,29 @@ double ping_diff (struct timeval *then, struct timeval *now) {
 /** Thread that receives and processes ping replies from v4 hosts. */
 /*/ ======================================================================= /*/
 void ping_run_receiver_v4 (thread *self) {
-    ipv4pkt pkt;
+    uint8_t buf[1500];
     struct icmp *icp;
+    struct ip *ip;
     struct timeval tv;
     struct sockaddr_storage faddr;
     uint32_t in_seq;
     int rsz;
+    int hlen;
     
     faddr.ss_family = AF_INET;
     
     while (1) {
-        rsz = read (PINGSTATE.icmp, &pkt, 1500);
+        socklen_t fromlen = sizeof (struct sockaddr_storage);
+        rsz = recvfrom (PINGSTATE.icmp, (char*)buf, 1500, 0,
+                        (struct sockaddr *)&faddr, &fromlen);
         gettimeofday (&tv, NULL);
-        struct sockaddr_in *a = (struct sockaddr_in *) &faddr;
-        memcpy (&faddr->sin_addr.s_addr, pkt.ip.saddr;
+        
+        ip = (struct ip *) buf;
+        hlen = ip->ip_hl << 2;
+        icp = (struct icmp *)(buf + hlen);
+        
         pingtarget *tgt = pingtarget_open (&faddr);
         if (tgt) {
-            icp = &pkt.icp;
             in_seq = icp->icmp_seq;
             if ((tgt->sequence & 0xffff) == in_seq) {
                 tgt->sequence = 0;
@@ -229,9 +255,40 @@ void ping_run_receiver_v6 (thread *self) {
 /** Initializes a preallocated pingtargetlist. */
 /*/ ======================================================================= /*/
 void pingtargetlist_init (pingtargetlist *self) {
-    pthread_mutex_init (&self->mutex);
+    pthread_mutex_init (&self->mutex, NULL);
     self->count = 0;
     self->first = self->last = NULL;
+}
+
+/*/ ======================================================================= /*/
+/** Returns an array of all addresses on the list that should be pinged */
+/*/ ======================================================================= /*/
+struct sockaddr_storage *pingtargetlist_all (pingtargetlist *self,
+                                             uint32_t *count) {
+    struct sockaddr_storage *res;
+    uint32_t i = 0;
+    pingtarget *crsr;
+    
+    pthread_mutex_lock (&self->mutex);
+    *count = self->count;
+    res = calloc (*count, sizeof (struct sockaddr_storage));
+    crsr = self->first;
+    while (crsr && i<*count) {
+        memcpy (res+i, &crsr->remote, sizeof (struct sockaddr_storage));
+        i++;
+        crsr = crsr->next;
+    }
+    pthread_mutex_unlock (&self->mutex);
+    return res;
+}
+
+/*/ ======================================================================= /*/
+/** Unreserves a pingtarget, allowing it potentially to be deallocated */
+/*/ ======================================================================= /*/
+void pingtargetlist_release (pingtargetlist *self, pingtarget *tgt) {
+    pthread_mutex_lock (&self->mutex);
+    tgt->users--;
+    pthread_mutex_unlock (&self->mutex);
 }
 
 /*/ ======================================================================= /*/
@@ -241,7 +298,7 @@ void pingtargetlist_init (pingtargetlist *self) {
 pingtarget *pingtargetlist_get (pingtargetlist *self,
                                 struct sockaddr_storage *addr) {
     uint32_t id = pingtarget_makeid (addr);
-    pthead_mutex_lock (&self->mutex);
+    pthread_mutex_lock (&self->mutex);
     pingtarget *crsr = self->first;
     while (crsr) {
         if (crsr->id == id) {
@@ -271,44 +328,13 @@ pingtarget *pingtargetlist_get (pingtargetlist *self,
 }
 
 /*/ ======================================================================= /*/
-/** Returns an array of all addresses on the list that should be pinged */
-/*/ ======================================================================= /*/
-struct sockaddr_storage *pingtargetlist_all (pingtargetlist *self,
-                                             uint32_t *count) {
-    struct sockaddr_storage *res;
-    uint32_t i = 0;
-    pingtarget *crsr;
-    
-    pthread_mutex_lock (&self->mutex);
-    *count = self->count;
-    res = calloc (*count, sizeof (struct sockaddr_storage));
-    crsr = self->first;
-    while (crsr && i<*count) {
-        memcpy (res+i, &crsr->remote, sizeof (sockaddr_storage));
-        i++;
-        crsr = crsr->next;
-    }
-    pthead_mutex_unlock (&self->mutex);
-    return res;
-}
-
-/*/ ======================================================================= /*/
-/** Unreserves a pingtarget, allowing it potentially to be deallocated */
-/*/ ======================================================================= /*/
-void pingtargetlist_release (pingtargetlist *self, pingtarget *tgt) {
-    pthread_mutex_lock (&self->mutex);
-    tgt->users--;
-    pthread_mutex_unlock (&self->mutex);
-}
-
-/*/ ======================================================================= /*/
 /** Turns an IPv4 or IPv6 address into a 32bit id for lookups */
 /*/ ======================================================================= /*/
 uint32_t pingtarget_makeid (struct sockaddr_storage *remote) {
     size_t sz = sizeof (struct sockaddr_storage);
     size_t offs;
     uint8_t *addr;
-    uint8_t shifts = [0,24,8,16,12,20,4,18];
+    uint8_t shifts[8] = {0,24,8,16,12,20,4,18};
     uint32_t res = 0;
     
     if (remote->ss_family == AF_INET) {
@@ -325,7 +351,7 @@ uint32_t pingtarget_makeid (struct sockaddr_storage *remote) {
         addr = (uint8_t *) remote;
     }
     
-    for (offs=0; offs < sz; ++ofs) {
+    for (offs=0; offs < sz; ++offs) {
         res ^= (uint32_t) addr[offs] << shifts[offs&7];
     }
     return res;

@@ -2,10 +2,15 @@
 #define _OPTICON_PING_H 1
 
 #include <libopticon/thread.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/times.h>
 #include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
+#include <netinet/ip_var.h>
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -48,12 +53,6 @@ typedef struct pingstate_s {
     pingtargetlist           v6;
 } pingstate;
 
-typedef struct ipv4pkt_s {
-    struct iphdr ip;
-    struct icmp  icp;
-    char   buffer[1500];
-} ipv4pkt;
-
 extern pingstate PINGSTATE;
 
 void ping_init (void);
@@ -68,6 +67,7 @@ pingtarget *pingtargetlist_get (pingtargetlist *, struct sockaddr_storage *);
 struct sockaddr_storage *pingtargetlist_all (pingtargetlist *, uint32_t *);
 void pingtargetlist_release (pingtargetlist *, pingtarget *);
 
+uint32_t pingtarget_makeid (struct sockaddr_storage *addr);
 pingtarget *pingtarget_open (struct sockaddr_storage *addr);
 pingtarget *pingtarget_create (struct sockaddr_storage *addr);
 double pingtarget_get_rtt (pingtarget *self);
