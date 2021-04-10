@@ -24,7 +24,7 @@ typedef struct pingtarget_s {
     uint32_t                 id;
     uint32_t                 wpos;
     uint32_t                 users; /** Counter to prevent untimely
-                                        deallocation *.
+                                        deallocation */
     uint32_t                 sequence; /** Is 0 if no outstanding pings */
     time_t                   lastseen;
     double                   data[16]; /** Aim at 1 ping every 20s */
