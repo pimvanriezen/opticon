@@ -174,9 +174,19 @@ int ioport_write_encstring (ioport *io, const char *str) {
   */
 int ioport_write_encfrac (ioport *io, double d) {
     if (d <= 0.0) return ioport_write (io, "\0\0", 2);
-    if (d >= 255.999) {
-        return ioport_write_byte (io,255) &&
-               ioport_write_byte (io,255);
+    if (d >= 192.0) {
+        double wval = floor (d / 2.0);
+        int i=0;
+        
+        while ((wval>255.0) && (i<63)) {
+            wval = floor (wval / 2.0);
+        }
+        if (wval>255.0) {
+            return ioport_write_byte (io,255) &&
+                   ioport_write_byte (io,255);
+        }
+        return ioport_write_byte (io,192+i) &&
+               ioport_write_byte (io,(uint8_t) wval);
     }
     double fl = floor (d);
     double fr = (d - fl) * 255;
@@ -366,8 +376,20 @@ uint64_t ioport_read_encint (ioport *io) {
 /** Read an encoded fractional number from an ioport */
 double ioport_read_encfrac (ioport *io) {
     double res = 0;
-    res = ioport_read_byte (io);
-    res += ((double)ioport_read_byte(io))/256.0;
+    uint8_t intpart = ioport_read_byte (io);
+    if (intpart < 192) {
+        res = intpart;
+        res += ((double)ioport_read_byte(io))/256.0;
+    }
+    else {
+        res = ioport_read_byte(io);
+        if (res == 255 && intpart == 255) {
+            res = INFINITY; /* Round it up a little */
+        }
+        else {
+            res = res * (2 << (intpart-192));
+        }
+    }
     return res;
 }
 
