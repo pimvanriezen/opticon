@@ -4,18 +4,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*/ ======================================================================= /*/
 /** Initialize list header and thread lock for a watchlist.
-  * \param self The watchlist ot initialize.
-  */
+  * \param self The watchlist ot initialize. */
+/*/ ======================================================================= /*/
 void watchlist_init (watchlist *self) {
     self->first = self->last = NULL;
     pthread_mutex_init (&self->mutex, NULL);
 }
 
+/*/ ======================================================================= /*/
 /** Add a meterwatch to the list.
   * \param self The watchlist
-  * \param m The watcher to add.
-  */
+  * \param m The watcher to add. */
+/*/ ======================================================================= /*/
 void watchlist_add (watchlist *self, meterwatch *m) {
     if (self->last) {
         m->prev = self->last;
@@ -27,14 +29,15 @@ void watchlist_add (watchlist *self, meterwatch *m) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Create, and add, a new integer-based meterwatch to the watchlist.
   * \param self The watchlist
   * \param id The meterid to watch
   * \param tp The type of watcher
   * \param val The value to compare to
   * \param bad Weight/badness.
-  * \param trig Alert tigger level.
-  */
+  * \param trig Alert tigger level. */
+/*/ ======================================================================= /*/
 void watchlist_add_uint (watchlist *self, meterid_t id, watchtype tp,
                          uint64_t val, double bad, watchtrigger trig) {
     meterwatch *w = (meterwatch *) malloc (sizeof (meterwatch));
@@ -47,14 +50,15 @@ void watchlist_add_uint (watchlist *self, meterid_t id, watchtype tp,
     watchlist_add (self, w);
 }
 
+/*/ ======================================================================= /*/
 /** Create, and add, a new fractional-based meterwatch to the watchlist.
   * \param self The watchlist
   * \param id The meterid to watch
   * \param tp The type of watcher
   * \param val The value to compare to
   * \param bad Weight/badness.
-  * \param trig Alert tigger level.
-  */
+  * \param trig Alert tigger level. */
+/*/ ======================================================================= /*/
 void watchlist_add_frac (watchlist *self, meterid_t id, watchtype tp,
                          double val, double bad, watchtrigger trig) {
     meterwatch *w = (meterwatch *) malloc (sizeof (meterwatch));
@@ -67,14 +71,15 @@ void watchlist_add_frac (watchlist *self, meterid_t id, watchtype tp,
     watchlist_add (self, w);
 }
 
+/*/ ======================================================================= /*/
 /** Create, and add, a new string-based meterwatch to the watchlist.
   * \param self The watchlist
   * \param id The meterid to watch
   * \param tp The type of watcher
   * \param val The value to compare to
   * \param bad Weight/badness.
-  * \param trig Alert tigger level.
-  */
+  * \param trig Alert tigger level. */
+/*/ ======================================================================= /*/
 void watchlist_add_str (watchlist *self, meterid_t id, watchtype tp,
                         const char *val, double bad, watchtrigger trig) {
                         
@@ -89,9 +94,10 @@ void watchlist_add_str (watchlist *self, meterid_t id, watchtype tp,
     watchlist_add (self, w);
 }
 
+/*/ ======================================================================= /*/
 /** Remove, and deallocate, all meters associated with a watchlist.
-  * \param self The list to clear
-  */
+  * \param self The list to clear */
+/*/ ======================================================================= /*/
 void watchlist_clear (watchlist *self) {
     meterwatch *w;
     meterwatch *nw;
@@ -104,7 +110,9 @@ void watchlist_clear (watchlist *self) {
     self->first = self->last = NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Allocate and initialize a graphlist */
+/*/ ======================================================================= /*/
 graphlist *graphlist_create (void) {
     graphlist *self = (graphlist *) malloc (sizeof (graphlist));
     self->first = self->last = NULL;
@@ -112,13 +120,17 @@ graphlist *graphlist_create (void) {
     return self;
 }
 
+/*/ ======================================================================= /*/
 /** Clear and deallocate a graphlist */
+/*/ ======================================================================= /*/
 void graphlist_free (graphlist *self) {
     graphlist_clear (self);
     free (self);
 }
 
+/*/ ======================================================================= /*/
 /** Empty an existing graphlist */
+/*/ ======================================================================= /*/
 void graphlist_clear (graphlist *self) {
     graphtarget *crsr, *ncrsr;
     
@@ -138,7 +150,9 @@ void graphlist_clear (graphlist *self) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Add a target to a graphlist */
+/*/ ======================================================================= /*/
 void graphlist_add (graphlist *self, meterid_t id, const char *graph,
                     const char *datum, const char *title, const char *unit,
                     const char *color, double max) {
@@ -164,7 +178,9 @@ void graphlist_add (graphlist *self, meterid_t id, const char *graph,
     pthread_mutex_unlock (&self->mutex);
 }
 
+/*/ ======================================================================= /*/
 /** Build a graphlist from a var tree */
+/*/ ======================================================================= /*/
 void graphlist_make (graphlist *self, var *def) {
     graphlist_clear (self);
     var *crsr = def->value.arr.first;
@@ -182,14 +198,18 @@ void graphlist_make (graphlist *self, var *def) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Iterator for graphlist. Returns the first element. */
+/*/ ======================================================================= /*/
 graphtarget *graphlist_begin (graphlist *self) {
     if (! self->first) return NULL;
     pthread_mutex_lock (&self->mutex);
     return self->first;
 }
 
+/*/ ======================================================================= /*/
 /** Iterator for graphlist. Returns the next element, NULL if done */
+/*/ ======================================================================= /*/
 graphtarget *graphlist_next (graphlist *self, graphtarget *node) {
     if (! node->next) {
         pthread_mutex_unlock (&self->mutex);
@@ -198,7 +218,9 @@ graphtarget *graphlist_next (graphlist *self, graphtarget *node) {
     return node->next;
 }
 
+/*/ ======================================================================= /*/
 /** Interrupt a running iterator */
+/*/ ======================================================================= /*/
 void graphlist_break (graphlist *self) {
     pthread_mutex_unlock (&self->mutex);
 }

@@ -2,10 +2,11 @@
 
 static uint32_t IHASH = 0;
 
+/*/ ======================================================================= /*/
 /** Generic hash-function nicked from grace.
   * \param str The string to hash
-  * \return A 32 bit hashed guaranteed not 0.
-  */
+  * \return A 32 bit hashed guaranteed not 0. */
+/*/ ======================================================================= /*/
 uint32_t hash_token (const char *str) {
     uint32_t hash = 0;
     uint32_t i    = 0;

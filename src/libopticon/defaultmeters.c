@@ -3,6 +3,9 @@
 #include <libopticon/log.h>
 #include <assert.h>
 
+/*/ ======================================================================= /*/
+/** JSON text of default summary data */
+/*/ ======================================================================= /*/
 static const char *DEFSUMMARY =
 "   cpu { meter: pcpu, type: frac, func: avg }"
 "   warning { meter: status, type: string, func: count, match: WARN }"
@@ -12,6 +15,9 @@ static const char *DEFSUMMARY =
 "   netin { meter: net/in_kbs, type: int, func: total }"
 "   netout { meter: net/out_kbs, type: int, func: total }";
 
+/*/ ======================================================================= /*/
+/** JSON text of default meter data */
+/*/ ======================================================================= /*/
 static const char *DEFMETERS = 
 "    agent/ip {"
 "        type: string"
@@ -186,6 +192,9 @@ static const char *DEFMETERS =
 "        description: \"Remote IP\""
 "    }";
 
+/*/ ======================================================================= /*/
+/** JSON text of default graph data */
+/*/ ======================================================================= /*/
 const char *DEFGRAPHS =
 "   pcpu {"
 "       graph: cpu"
@@ -230,6 +239,9 @@ const char *DEFGRAPHS =
 
 static var *PARSED_DEFMETERS = NULL;
 
+/*/ ======================================================================= /*/
+/** Get default meter data as var object */
+/*/ ======================================================================= /*/
 var *get_default_meterdef (void) {
     if (! PARSED_DEFMETERS) {
         PARSED_DEFMETERS = var_alloc();
@@ -242,6 +254,9 @@ var *get_default_meterdef (void) {
 
 static var *PARSED_DEFSUMMARY = NULL;
 
+/*/ ======================================================================= /*/
+/** Get default summary data as var object */
+/*/ ======================================================================= /*/
 var *get_default_summarydef (void) {
     if (! PARSED_DEFSUMMARY) {
         PARSED_DEFSUMMARY = var_alloc();
@@ -254,6 +269,9 @@ var *get_default_summarydef (void) {
 
 static var *PARSED_DEFGRAPHS = NULL;
 
+/*/ ======================================================================= /*/
+/** Get default graph data as var object */
+/*/ ======================================================================= /*/
 var *get_default_graphs (void) {
     if (! PARSED_DEFGRAPHS) {
         PARSED_DEFGRAPHS = var_alloc();

@@ -1,12 +1,13 @@
 #include <libopticon/host_import.h>
 #include <libopticon/log.h>
 
+/*/ ======================================================================= /*/
 /** Changes an array of dictionaries from var data into a meter-style
   * 'dictionary of arrays'
   * \param h The host to write meters to.
   * \param prefix The name of the enveloping array.
-  * \param v The first array node.
-  */
+  * \param v The first array node. */
+/*/ ======================================================================= /*/
 static int dictarray_to_host (host *h, const char *prefix, var *v) {
     char tmpid[16];
     meterid_t mid;
@@ -71,6 +72,7 @@ static int dictarray_to_host (host *h, const char *prefix, var *v) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Convert JSON-structured data into meters. The provided data needs
   * to be restricted to the allowed forms:
   *   key:value
@@ -80,8 +82,8 @@ static int dictarray_to_host (host *h, const char *prefix, var *v) {
   *   key:[]
   * \param h The host to write meters to
   * \param val The data to parse
-  * \return 1 on success, 0 on failure.
-  */
+  * \return 1 on success, 0 on failure. */
+/*/ ======================================================================= /*/
 int host_import (host *h, var *val) {
     if (val->type != VAR_DICT) return 0;
     var *v = val->value.arr.first;

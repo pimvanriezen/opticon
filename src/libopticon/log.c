@@ -9,18 +9,24 @@
 
 loghandle *LOG = NULL;
 
+/*/ ======================================================================= /*/
 /** Implementation of log_write */
+/*/ ======================================================================= /*/
 void syslog_write (loghandle *h, int prio, const char *dt) {
     syslog (prio, "%s", dt);
 }
 
+/*/ ======================================================================= /*/
 /** Metadata for a logfile logger */
+/*/ ======================================================================= /*/
 typedef struct logfile_data_s {
     FILE *f;
     pthread_mutex_t mutex;
 } logfile_data;
 
+/*/ ======================================================================= /*/
 /** Implementaton of log_write for file-based logging */
+/*/ ======================================================================= /*/
 void logfile_write (loghandle *h, int prio, const char *dt) {
     logfile_data *d = (logfile_data *) h->data;
     const char *leveltext = NULL;
@@ -60,9 +66,10 @@ void logfile_write (loghandle *h, int prio, const char *dt) {
     pthread_mutex_unlock (&d->mutex);
 }
 
+/*/ ======================================================================= /*/
 /** Connect to syslog
-  * \param name Name of our program.
-  */
+  * \param name Name of our program. */
+/*/ ======================================================================= /*/
 void log_open_syslog (const char *name, int maxprio) {
     LOG = (loghandle *) malloc (sizeof (loghandle));
     LOG->write = syslog_write;
@@ -71,9 +78,10 @@ void log_open_syslog (const char *name, int maxprio) {
     openlog (name, 0, LOG_DAEMON);
 }
 
+/*/ ======================================================================= /*/
 /** Open a file-based logger.
-  * \param filename Full path to the file to write/append to.
-  */
+  * \param filename Full path to the file to write/append to. */
+/*/ ======================================================================= /*/
 void log_open_file (const char *filename, int maxprio) {
     LOG = (loghandle *) malloc (sizeof (loghandle));
     LOG->data = malloc (sizeof (logfile_data));
@@ -85,7 +93,9 @@ void log_open_file (const char *filename, int maxprio) {
     LOG->maxprio = maxprio;
 }
 
+/*/ ======================================================================= /*/
 /** Dispatcer of a message to either stderr, or the log handle. */
+/*/ ======================================================================= /*/
 void log_string (int prio, const char *str) {
     if (LOG) {
         if (prio <= LOG->maxprio) LOG->write (LOG, prio, str);
@@ -105,7 +115,9 @@ void log_string (int prio, const char *str) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Write a log message at the LOG_DEBUG level */
+/*/ ======================================================================= /*/
 void log_debug (const char *fmt, ...) {
     char buffer[4096];
     buffer[0] = 0;
@@ -116,7 +128,9 @@ void log_debug (const char *fmt, ...) {
     log_string (LOG_DEBUG, buffer);
 }
 
+/*/ ======================================================================= /*/
 /** Write a log message at the LOG_INFO level */
+/*/ ======================================================================= /*/
 void log_info (const char *fmt, ...) {
     char buffer[4096];
     buffer[0] = 0;
@@ -127,7 +141,9 @@ void log_info (const char *fmt, ...) {
     log_string (LOG_INFO, buffer);
 }
 
+/*/ ======================================================================= /*/
 /** Write a log message at the LOG_WARNING level */
+/*/ ======================================================================= /*/
 void log_warn (const char *fmt, ...) {
     char buffer[4096];
     buffer[0] = 0;
@@ -138,7 +154,9 @@ void log_warn (const char *fmt, ...) {
     log_string (LOG_WARNING, buffer);
 }
 
+/*/ ======================================================================= /*/
 /** Write a log message at the LOG_ERR level */
+/*/ ======================================================================= /*/
 void log_error (const char *fmt, ...) {
     char buffer[4096];
     buffer[0] = 0;

@@ -1,11 +1,12 @@
 #include <libopticon/compress.h>
 
+/*/ ======================================================================= /*/
 /** Compress data from a buffered ioport into another using
   * libz gzip compression.
   * \param in The input ioport
   * \param out The output ioport
-  * \return 1 on success, 0 on failure
-  */
+  * \return 1 on success, 0 on failure */
+/*/ ======================================================================= /*/
 int compress_data (ioport *in, ioport *out) {
     if (ioport_read_available (in) == 0) return 0;
     
@@ -36,11 +37,12 @@ int compress_data (ioport *in, ioport *out) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Decompress data from a buffered ioport into another.
   * \param in The input ioport
   * \param out The output ioport
-  * \return 1 on success, 0 on failure
-  */
+  * \return 1 on success, 0 on failure */
+/*/ ======================================================================= /*/
 int decompress_data (ioport *in, ioport *out) {
     if (ioport_read_available (in) == 0) return 0;
     

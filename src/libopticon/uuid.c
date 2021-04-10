@@ -5,19 +5,21 @@
 #include <fcntl.h>
 #include <libopticon/uuid.h>
 
+/*/ ======================================================================= /*/
 /** Compare two UUIDs.
   * \param first First UUID.
   * \param second Second UUID.
-  * \return 0 if they differ, 1 if they're the same.
-  */
+  * \return 0 if they differ, 1 if they're the same. */
+/*/ ======================================================================= /*/
 int uuidcmp (uuid first, uuid second) {
     return (first.msb == second.msb && first.lsb == second.lsb);
 }
 
+/*/ ======================================================================= /*/
 /** Turn a UUID string into a UUID value.
   * \param str The input string
-  * \return The UUID value.
-  */
+  * \return The UUID value. */
+/*/ ======================================================================= /*/
 uuid mkuuid (const char *str) {
     uuid res = {0,0};
     if (! str) return res;
@@ -51,6 +53,9 @@ uuid mkuuid (const char *str) {
     return res;
 }
 
+/*/ ======================================================================= /*/
+/** Checks if a string contains a valid uuid */
+/*/ ======================================================================= /*/
 int isuuid (const char *str) {
     int hexcnt = 0;
     int dashcnt = 0;
@@ -67,7 +72,9 @@ int isuuid (const char *str) {
     return (hexcnt == 32);
 }
 
+/*/ ======================================================================= /*/
 /** Generate a random uuid */
+/*/ ======================================================================= /*/
 uuid uuidgen (void) {
     uuid res = {0,0};
     int fdevr = open ("/dev/random",O_RDONLY);
@@ -76,13 +83,17 @@ uuid uuidgen (void) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Generate a nil uuid */
+/*/ ======================================================================= /*/
 uuid uuidnil (void) {
     uuid res = {0,0};
     return res;
 }
 
-/** Check whether a uuid is nil */
+/*/ ======================================================================= /*/
+/** Check whether a uuid is not nil */
+/*/ ======================================================================= /*/
 int uuidvalid (uuid u) {
     return (u.msb && u.lsb);
 }

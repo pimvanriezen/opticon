@@ -3,12 +3,13 @@
 #include <stdlib.h>
 #include <assert.h>
 
+/*/ ======================================================================= /*/
 /** Write out a meter value in JSON value format.
   * \param type The metertype to read and encode
   * \param m The meter
   * \param pos The array position within the meter
-  * \param into The ioport to use
-  */
+  * \param into The ioport to use */
+/*/ ======================================================================= /*/
 void jsoncodec_dump_val (metertype_t type, meter *m, int pos, ioport *into) {
     if (m->count > SZ_EMPTY_VAL) return;
     if (m->count == SZ_EMPTY_VAL) {
@@ -50,7 +51,9 @@ void jsoncodec_dump_val (metertype_t type, meter *m, int pos, ioport *into) {
     ioport_write (into, buf, strlen (buf));
 }
 
+/*/ ======================================================================= /*/
 /** Dumps a meter with a path element */
+/*/ ======================================================================= /*/
 void jsoncodec_dump_pathval (meter *m, int pos, ioport *into, int ind) {
     meter *mm = m;
     char buf[1024];
@@ -72,10 +75,11 @@ void jsoncodec_dump_pathval (meter *m, int pos, ioport *into, int ind) {
     ioport_write (into, "}", 1);
 }
 
+/*/ ======================================================================= /*/
 /** Write out a host's state as JSON data.
   * \param h The host object
-  * \param into ioport to use
-  */
+  * \param into ioport to use */
+/*/ ======================================================================= /*/
 int jsoncodec_encode_host (ioport *into, host *h) {
     char buffer[256];
     uint64_t pathbuffer[128];
@@ -162,13 +166,17 @@ int jsoncodec_encode_host (ioport *into, host *h) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Decode host data from JSON (not implemented) */
+/*/ ======================================================================= /*/
 int jsoncodec_decode_host (ioport *io, host *h) {
     fprintf (stderr, "%% JSON decoding not supported\n");
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Instantiate a JSON codec */
+/*/ ======================================================================= /*/
 codec *codec_create_json (void) {
     codec *res = (codec *) malloc (sizeof (codec));
     if (! res) return res;

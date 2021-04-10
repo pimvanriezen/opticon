@@ -4,7 +4,9 @@
 
 pathnode OPTICONF_ROOT;
 
+/*/ ======================================================================= /*/
 /** Allocate a pathnode */
+/*/ ======================================================================= /*/
 pathnode *pathnode_alloc (void) {
     pathnode *self = (pathnode *) malloc (sizeof (pathnode));
     if (! self) return NULL;
@@ -17,7 +19,9 @@ pathnode *pathnode_alloc (void) {
     return self;
 }
 
+/*/ ======================================================================= /*/
 /** Add a reaction to a pathnode */
+/*/ ======================================================================= /*/
 void pathnode_add_reaction (pathnode *self, reaction_f f) {
     if (self->rcount == 0) {
         self->reactions = (reaction_f *) malloc (sizeof (reaction_f));
@@ -32,8 +36,10 @@ void pathnode_add_reaction (pathnode *self, reaction_f f) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Find a pathnode that matches against a given id. Wildcards will
   * be honored. */
+/*/ ======================================================================= /*/
 pathnode *pathnode_find_match (pathnode *self, const char *id) {
     pathnode *res = self->first;
     if (! res) return NULL;
@@ -45,7 +51,9 @@ pathnode *pathnode_find_match (pathnode *self, const char *id) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Find or create a pathnode with a specific match string. */
+/*/ ======================================================================= /*/
 pathnode *pathnode_get_idmatch (pathnode *self, const char *id) {
     pathnode *res = self->first;
     while (res) {
@@ -68,13 +76,14 @@ pathnode *pathnode_get_idmatch (pathnode *self, const char *id) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Set up a configuration reaction to a specific configuration
   * path, separated by forward slashes. A path match against '*'
   * means that the reaction function will be called for each
   * child of the node.
   * \param path The slash-separated path match.
-  * \param f The reaction function to call.
-  */
+  * \param f The reaction function to call. */
+/*/ ======================================================================= /*/
 void opticonf_add_reaction (const char *path, reaction_f f) {
     pathnode *T = &OPTICONF_ROOT;
     char *oldstr, *tstr, *token;
@@ -86,7 +95,9 @@ void opticonf_add_reaction (const char *path, reaction_f f) {
     free (oldstr);
 }
 
+/*/ ======================================================================= /*/
 /** Internal handler for opticonf_handle_config(). */
+/*/ ======================================================================= /*/
 void opticonf_handle (var *conf, pathnode *path) {
     uint32_t gen = (conf->root) ? conf->root->generation : conf->generation;
     int c = var_get_count (conf);
@@ -118,9 +129,11 @@ void opticonf_handle (var *conf, pathnode *path) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Feed a configuration variable space to the reaction framework.
   * Consequent calls with the same space will only communicate
   * actual changes. */
+/*/ ======================================================================= /*/
 void opticonf_handle_config (var *conf) {
     pathnode *T = &OPTICONF_ROOT;
     opticonf_handle (conf, T);

@@ -3,10 +3,11 @@
 #include <libopticon/defaults.h>
 #include <assert.h>
 
+/*/ ======================================================================= /*/
 /** Allocate and initialize a host structure.
   * \return Pointer to the initialized struct. Caller is responsible for
-  *         freeing allocated memory.
-  */
+  *         freeing allocated memory. */
+/*/ ======================================================================= /*/
 host *host_alloc (void) {
     host *res = (host *) malloc (sizeof (host));
     res->prev = NULL;
@@ -26,10 +27,11 @@ host *host_alloc (void) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Find or create a host structure for a specified tenant. 
   * \param tenantid The UUID for the tenant.
-  * \param hostid The UUID for the host.
-  */
+  * \param hostid The UUID for the host. */
+/*/ ======================================================================= /*/
 host *host_find (uuid tenantid, uuid hostid) {
     host *h = NULL;
     host *nh = NULL;
@@ -67,10 +69,11 @@ host *host_find (uuid tenantid, uuid hostid) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Deallocate a host and its associated meters. Remove it from the
   * tenant, if it is associated with one. 
-  * \param h The host to delete
-  */
+  * \param h The host to delete */
+/*/ ======================================================================= /*/
 void host_delete (host *h) {
     meter *m, *nm;
     if (h->tenant) {
@@ -95,11 +98,12 @@ void host_delete (host *h) {
     free (h);
 }
 
+/*/ ======================================================================= /*/
 /** Figure out if a meter currently exists for a host.
   * \param host The host object
   * \param id The id of the meter
-  * \return 1 on success, 0 on failure
-  */
+  * \return 1 on success, 0 on failure */
+/*/ ======================================================================= /*/
 int host_has_meter (host *h, meterid_t id) {
     meterid_t rid = (id & (MMASK_TYPE | MMASK_NAME));
     meter *m = h->first;
@@ -114,7 +118,9 @@ int host_has_meter (host *h, meterid_t id) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Find a meter only by its name, regardless of type */
+/*/ ======================================================================= /*/
 meter *host_find_meter_name (host *h, meterid_t id) {
     meterid_t rid = (id & MMASK_NAME);
     meter *m = h->first;
@@ -125,7 +131,9 @@ meter *host_find_meter_name (host *h, meterid_t id) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
 /** look up a meter */
+/*/ ======================================================================= /*/
 meter *host_find_meter (host *h, meterid_t id) {
     meterid_t rid = (id & (MMASK_TYPE | MMASK_NAME));
     meter *m = h->first;
@@ -137,12 +145,13 @@ meter *host_find_meter (host *h, meterid_t id) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Get (or create) a specific meter for a host.
   * \param host The host structure.
   * \param id The meterid (label and type).
   * \return Pointer to the meter structure, which will be
-  *         linked into the host's meterlist.
-  */
+  *         linked into the host's meterlist. */
+/*/ ======================================================================= /*/
 meter *host_get_meter (host *h, meterid_t id) {
     meterid_t rid = (id & (MMASK_TYPE | MMASK_NAME));
     meter *m = h->first;
@@ -175,6 +184,9 @@ meter *host_get_meter (host *h, meterid_t id) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
+/** Look up a meter by prefix. */
+/*/ ======================================================================= /*/
 meter *host_find_prefix (host *h, meterid_t prefix, meter *prev) {
     meter *crsr = prev ? prev : h->first;
     meterid_t mask = id2mask (prefix);
@@ -191,7 +203,9 @@ meter *host_find_prefix (host *h, meterid_t prefix, meter *prev) {
 }
 
 
+/*/ ======================================================================= /*/
 /** Remove a meter from a host list and deallocate it */
+/*/ ======================================================================= /*/
 void host_delete_meter (host *h, meter *m) {
     if (m->prev) {
         if (m->next) {
@@ -221,15 +235,18 @@ void host_delete_meter (host *h, meter *m) {
     free (m);
 }
 
+/*/ ======================================================================= /*/
 /** Mark the beginning of a new update cycle. Saves the meters
-  * from constantly asking the kernel for the current time.
-  */
+  * from constantly asking the kernel for the current time. */
+/*/ ======================================================================= /*/
 void host_begin_update (host *h, time_t t) {
     h->lastmodified = t;
 }
 
+/*/ ======================================================================= /*/
 /** End an update round. Reaps any dangling meters that have been
     inactive for more than five minutes. */
+/*/ ======================================================================= /*/
 void host_end_update (host *h) {
     time_t last = h->lastmodified;
     meter *m = h->first;
@@ -245,7 +262,9 @@ void host_end_update (host *h) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Fill up a meter with integer values */
+/*/ ======================================================================= /*/
 meter *host_set_meter_uint (host *h, meterid_t id,
                             unsigned int cnt,
                             uint64_t *data) {
@@ -265,7 +284,9 @@ meter *host_set_meter_uint (host *h, meterid_t id,
     return m;
 }
 
+/*/ ======================================================================= /*/
 /** Fill up a meter with string values */
+/*/ ======================================================================= /*/
 meter *host_set_meter_str (host *h, meterid_t id,
                            unsigned int cnt,
                            const fstring *str) {

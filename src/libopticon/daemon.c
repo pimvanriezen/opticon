@@ -14,25 +14,27 @@
 static int WATCHDOG_EXIT; /**< Flag for exiting the respawn-loop */
 static pid_t SERVICE_PID; /**< Currently active pid for the service */
 
+/*/ ======================================================================= /*/
 /** Signal handler for the watchdog. Forwards bound signals. If a SIGTERM
   * is passed, the WATCHDOG_EXIT flag is flipped so that we stop
   * respawning.
-  * \param sig The signal to deliver.
-  */
+  * \param sig The signal to deliver. */
+/*/ ======================================================================= /*/
 void watchdog_sighandler (int sig) {
     if (sig == SIGTERM) WATCHDOG_EXIT=1;
     kill (SERVICE_PID, sig);
     signal (sig, watchdog_sighandler);
 }
 
+/*/ ======================================================================= /*/
 /** Implementation of the watchdog process, responsible for spawning,
   * and respawning, of the actual service process, and for forwarding
   * relevant signals sent to its pid (which is what ends up in the
   * pidfile).
   * \param argc The libc argc
   * \param argv The libc argv
-  * \param call The main function to run the service.
-  */
+  * \param call The main function to run the service. */
+/*/ ======================================================================= /*/
 void watchdog_main (int argc, const char *argv[], main_f call) {
     WATCHDOG_EXIT = 0;
     SERVICE_PID = 0;
@@ -68,6 +70,7 @@ void watchdog_main (int argc, const char *argv[], main_f call) {
     } while (! WATCHDOG_EXIT);
 }
 
+/*/ ======================================================================= /*/
 /** Fork the process into the background, with a watchdog guarding its
   * execution. If the --foreground flag is provided in argv[1], no 
   * daemonization will take place, and execution will be switched to
@@ -78,8 +81,8 @@ void watchdog_main (int argc, const char *argv[], main_f call) {
   * \param argc The libc argc
   * \param argv The libc argv
   * \param call The main function to run the service.
-  * \return 0 on failure, 1 on success (caller should exit).
-  */
+  * \return 0 on failure, 1 on success (caller should exit). */
+/*/ ======================================================================= /*/
 int daemonize (const char *pidfilepath, int argc,
                const char *argv[], main_f call, int foreground) {
     pid_t pwatchdog;

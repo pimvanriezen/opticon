@@ -3,7 +3,9 @@
 #include <libopticon/defaults.h>
 #include <assert.h>
 
+/*/ ======================================================================= /*/
 /** Allocate and initialize a meter structure. */
+/*/ ======================================================================= /*/
 meter *meter_alloc (void) {
     meter *res = (meter *) malloc (sizeof (meter));
     res->next = NULL;
@@ -16,7 +18,9 @@ meter *meter_alloc (void) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Get a specific indexed integer value out of a meter */
+/*/ ======================================================================= /*/
 uint64_t meter_get_uint (meter *m, unsigned int pos) {
     uint64_t res = 0ULL;
     
@@ -30,7 +34,9 @@ uint64_t meter_get_uint (meter *m, unsigned int pos) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Get a specific indexed fractional value out of a meter */
+/*/ ======================================================================= /*/
 double meter_get_frac (meter *m, unsigned int pos) {
     double res = 0.0;
     
@@ -44,7 +50,9 @@ double meter_get_frac (meter *m, unsigned int pos) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Get a string value out of a meter */
+/*/ ======================================================================= /*/
 fstring meter_get_str (meter *m, unsigned int pos) {
     fstring res = {""};
     
@@ -59,15 +67,23 @@ fstring meter_get_str (meter *m, unsigned int pos) {
     return res;
 }
 
+/*/ ======================================================================= /*/
+/** Mark a meter as empty */
+/*/ ======================================================================= /*/
 void meter_set_empty (meter *m) {
     meter_setcount (m, SZ_EMPTY_VAL);
 }
 
+/*/ ======================================================================= /*/
+/** Mark a meter as an empty array */
+/*/ ======================================================================= /*/
 void meter_set_empty_array (meter *m) {
     meter_setcount (m, SZ_EMPTY_ARRAY);
 }
 
+/*/ ======================================================================= /*/
 /** Initialize a meter to a specific set size */
+/*/ ======================================================================= /*/
 void meter_setcount (meter *m, unsigned int count) {
     int cnt = count ? count : 1;
     assert (cnt <= SZ_EMPTY_ARRAY);
@@ -110,7 +126,9 @@ void meter_setcount (meter *m, unsigned int count) {
     if (oldarray) free (oldarray);
 }
 
+/*/ ======================================================================= /*/
 /** Setter for a specific integer value inside a meter array */
+/*/ ======================================================================= /*/
 void meter_set_uint (meter *m, unsigned int pos, uint64_t val) {
     if (m->count >= SZ_EMPTY_VAL) return;
     if ((m->id & MMASK_TYPE) == MTYPE_INT &&
@@ -120,7 +138,9 @@ void meter_set_uint (meter *m, unsigned int pos, uint64_t val) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Setter for a specific fractional value inside a meter array */
+/*/ ======================================================================= /*/
 void meter_set_frac (meter *m, unsigned int pos, double val) {
     if (m->count >= SZ_EMPTY_VAL) return;
     if ((m->id & MMASK_TYPE) == MTYPE_FRAC &&
@@ -130,7 +150,9 @@ void meter_set_frac (meter *m, unsigned int pos, double val) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Setter for a specific string value inside a meter array */
+/*/ ======================================================================= /*/
 void meter_set_str (meter *m, unsigned int pos, const char *val) {
     if (m->count >= SZ_EMPTY_VAL) return;
     if ((m->id & MMASK_TYPE) == MTYPE_STR &&
@@ -141,7 +163,9 @@ void meter_set_str (meter *m, unsigned int pos, const char *val) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Find the next sibling for a meter with a path prefix */
+/*/ ======================================================================= /*/
 meter *meter_next_sibling (meter *m) {
     uint64_t mask = idhaspath (m->id);
     if (! mask) return NULL;

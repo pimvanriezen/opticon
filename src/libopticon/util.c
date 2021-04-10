@@ -26,11 +26,12 @@ uint64_t ASCIITABLE[] = {
     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 0, 0, 0, 0, 0
 };
 
+/*/ ======================================================================= /*/
 /** Construct a meterid.
   * \param label The meter's label (max 11 characters).
   * \param type The meter's type (MTYPE_INT, etc).
-  * \return A meterid_t value.
-  */
+  * \return A meterid_t value. */
+/*/ ======================================================================= /*/
 meterid_t makeid (const char *label, metertype_t type, int pos) {
     meterid_t res = (meterid_t) type;
     int bshift = 57;
@@ -46,7 +47,9 @@ meterid_t makeid (const char *label, metertype_t type, int pos) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Convert an id to a bitmask representing the non-0 caracters */
+/*/ ======================================================================= /*/
 meterid_t id2mask (meterid_t id) {
     meterid_t res = 0;
     int bshift = 57;
@@ -59,6 +62,7 @@ meterid_t id2mask (meterid_t id) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Determine whether one meterid is prefix for another one. The mask of the prefix
   * part of prefixfor should be provided pre-calculated.
   * Example: isidprefix ('top','top/pcpu', '***') would be true. With meterids in stead
@@ -66,8 +70,8 @@ meterid_t id2mask (meterid_t id) {
   * \param potential The potential prefix node
   * \param prefixfor The potential 'child' node
   * \param mask Mask for the prefix part of the potential child.
-  * \return 1 if matches, 0 if not.
-  */
+  * \return 1 if matches, 0 if not. */
+/*/ ======================================================================= /*/
 int idisprefix (meterid_t potential, meterid_t prefixfor, meterid_t mask) {
     if ((prefixfor&mask) != (potential&mask)) return 0;
     int bshift = 57;
@@ -82,10 +86,11 @@ int idisprefix (meterid_t potential, meterid_t prefixfor, meterid_t mask) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Get the prefix part of a meterid that has two levels, e.g. "top/pcpu".
   * \param id The potentially compound meterid.
-  * \return The prefix, or 0 if the meter was not compound.
-  */
+  * \return The prefix, or 0 if the meter was not compound. */
+/*/ ======================================================================= /*/
 meterid_t idgetprefix (meterid_t id) {
     if (! (id & MMASK_NAME)) return 0ULL;
     meterid_t res = 0ULL;
@@ -100,10 +105,11 @@ meterid_t idgetprefix (meterid_t id) {
     return 0ULL;
 }
 
+/*/ ======================================================================= /*/
 /** Extract an ASCII name from a meterid_t value.
   * \param id The meterid to parse.
-  * \param into String to copy the ASCII data into (minimum size of 12).
-  */
+  * \param into String to copy the ASCII data into (minimum size of 12). */
+/*/ ======================================================================= /*/
 void id2str (meterid_t id, char *into) {
     char *out = into;
     char *end = into;
@@ -122,12 +128,13 @@ void id2str (meterid_t id, char *into) {
     *(end+1) = 0;
 }
 
+/*/ ======================================================================= /*/
 /** Extract that 'object' name from a meterid with a path
   * separator in it. Note we only support one level of
   * hierarchy. This is used for json encoding.
   * \param id The meterid, e.g., <<foo/quux>>
-  * \param into The string to copy the id into.
-  */
+  * \param into The string to copy the id into. */
+/*/ ======================================================================= /*/
 void nodeid2str (meterid_t id, char *into) {
     char *out = into;
     char *end = into;
@@ -151,7 +158,9 @@ void nodeid2str (meterid_t id, char *into) {
     *(end+1) = 0;
 }
 
+/*/ ======================================================================= /*/
 /** returns the offset of a path separator, if any */
+/*/ ======================================================================= /*/
 uint64_t idhaspath (meterid_t id) {
     int res = 0;
     char t;
@@ -167,7 +176,9 @@ uint64_t idhaspath (meterid_t id) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** generate a bitmask for sz characters into a meterid */
+/*/ ======================================================================= /*/
 uint64_t idmask (int sz) {
     uint64_t mask = 0;
     int bshift = 57;
@@ -178,11 +189,12 @@ uint64_t idmask (int sz) {
     return mask;
 }
 
+/*/ ======================================================================= /*/
 /** Write out a UUID to a string in ASCII 
   * \param u The UUID
   * \param into String buffer for the result, should fit 36 characters plus
-  *             nul-terminator.
-  */
+  *             nul-terminator. */
+/*/ ======================================================================= /*/
 void uuid2str (uuid u, char *into) {
     sprintf (into, "%08llx-%04llx-%04llx-"
                    "%04llx-%012llx",
@@ -193,6 +205,9 @@ void uuid2str (uuid u, char *into) {
                    ((u.lsb & 0x0000ffffffffffff)));
 }
 
+/*/ ======================================================================= /*/
+/** Load a file as an allocated string. */
+/*/ ======================================================================= /*/
 char *load_file (const char *fn) {
     struct stat st;
     size_t sz;
@@ -216,6 +231,9 @@ char *load_file (const char *fn) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
+/** Convert an address to a string */
+/*/ ======================================================================= /*/
 void ip2str (struct sockaddr_storage *remote, char *addrbuf) {
     if (remote->ss_family == AF_INET) {
         struct sockaddr_in *in = (struct sockaddr_in *) remote;
@@ -227,6 +245,9 @@ void ip2str (struct sockaddr_storage *remote, char *addrbuf) {
     }
 }
 
+/*/ ======================================================================= /*/
+//* Convert a string to a parsed ipaddress */
+/*/ ======================================================================= /*/
 void str2ip (const char *addrbuf, struct sockaddr_storage *remote) {
     if (strchr (addrbuf, ':')) { /*v6*/
         remote->ss_family = AF_INET6;
@@ -240,6 +261,9 @@ void str2ip (const char *addrbuf, struct sockaddr_storage *remote) {
     }
 }
 
+/*/ ======================================================================= /*/
+/** Format a tm structure */
+/*/ ======================================================================= /*/
 static char *tm2str (struct tm *tm, int zulu) {
     /* 1234-67-90T23:56:89Z */
     char *res = (char*) malloc (24);
@@ -250,18 +274,27 @@ static char *tm2str (struct tm *tm, int zulu) {
     return res;
 }
 
+/*/ ======================================================================= /*/
+/** Format a timestamp */
+/*/ ======================================================================= /*/
 char *time2str (time_t ti) {
     struct tm tm;
     localtime_r (&ti, &tm);
     return tm2str (&tm, 0);
 }
 
+/*/ ======================================================================= /*/
+/** Format a UTC timestamp */
+/*/ ======================================================================= /*/
 char *time2utcstr (time_t ti) {
     struct tm tm;
     gmtime_r (&ti, &tm);
     return tm2str (&tm, 1);
 }
 
+/*/ ======================================================================= /*/
+/** Parse a time string */
+/*/ ======================================================================= /*/
 static void parsetime (const char *str, struct tm *into) {
     if (strlen (str)<18) return;
     into->tm_year = atoi (str) - 1900;
@@ -272,12 +305,18 @@ static void parsetime (const char *str, struct tm *into) {
     into->tm_sec = atoi (str+17);
 }
 
+/*/ ======================================================================= /*/
+/** Parse a time string into a time_t */
+/*/ ======================================================================= /*/
 time_t str2time (const char *tstr) {
     struct tm tm;
     parsetime (tstr, &tm);
     return mktime (&tm);
 }
 
+/*/ ======================================================================= /*/
+/** Parse a UTC time string into a time_t */
+/*/ ======================================================================= /*/
 time_t utcstr2time (const char *tstr) {
     struct tm tm;
     parsetime (tstr, &tm);
