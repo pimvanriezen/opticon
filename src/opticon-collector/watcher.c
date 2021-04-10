@@ -16,6 +16,11 @@
 
 watchlist WATCHERS;
 
+/*/ ======================================================================= /*/
+/** Writes host data to an overview dict
+    \param h The host to write out
+    \param ovdict The var object to write into, keyed by host-uuid. */
+/*/ ======================================================================= /*/
 void host_to_overview (host *h, var *ovdict) {
     char mid[16];
     char uuidstr[40];
@@ -58,6 +63,12 @@ void host_to_overview (host *h, var *ovdict) {
     }
 }
 
+/*/ ======================================================================= /*/
+/** Returns a dictionary of overview data for the tenant, keyed by the
+    uuid of each host.
+    \param t The tenant object,
+    \return Allocated var object (caller should free). */
+/*/ ======================================================================= /*/
 var *tenant_overview (tenant *t) {
     var *res = var_alloc();
     var *ov = var_get_dict_forkey (res, "overview");
@@ -69,12 +80,14 @@ var *tenant_overview (tenant *t) {
     return res;
 }
 
-/** Use a meterwatch definition to turn a meter value into a badness
+/*/ ======================================================================= /*/
+/** Uses a meterwatch definition to turn a meter value into a badness
   * number.
   * \param m The meter to inspect
   * \param w The meterwatch definition to use.
   * \return A badness number, accumulated for all array nodes.
   */
+/*/ ======================================================================= /*/
 double calculate_badness (meter *m, meterwatch *w, 
                           watchadjust *adj, watchtrigger *maxtrig) {
     double res = 0.0;
@@ -183,6 +196,11 @@ double calculate_badness (meter *m, meterwatch *w,
     return res;
 }
 
+/*/ ======================================================================= /*/
+/** Handles graphdata for a host.
+    \param host The host object.
+    \param list The graphlist to go through */
+/*/ ======================================================================= /*/
 void watchthread_handle_graph (host *host, graphlist *list) {
     graphtarget *tgt = graphlist_begin (list);
     while (tgt) {
@@ -209,10 +227,11 @@ void watchthread_handle_graph (host *host, graphlist *list) {
     }
 }
 
-/** Inspect a host's metering data to determine its current status
+/*/ ======================================================================= /*/
+/** Inspects a host's metering data to determine its current status
   * and problems, then write it to disk.
-  * \param host The host to inspect.
-  */
+  * \param host The host to inspect. */
+/*/ ======================================================================= /*/
 void watchthread_handle_host (host *host) {
     int problemcount = 0;
     double totalbadness = 0.0;
@@ -407,6 +426,10 @@ void watchthread_handle_host (host *host) {
     pthread_rwlock_unlock (&host->lock);
 }
 
+/*/ ======================================================================= /*/
+/** This thread oes over all tenants, once every minute, to gather their
+    overview data. */
+/*/ ======================================================================= /*/
 void overviewthread_run (thread *self) {
     tenant *tcrsr;
     time_t t_now = time (NULL);
@@ -451,7 +474,9 @@ void overviewthread_run (thread *self) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Main loop for the watchthread */
+/*/ ======================================================================= /*/
 void watchthread_run (thread *self) {
     tenant *tcrsr;
     host *hcrsr;

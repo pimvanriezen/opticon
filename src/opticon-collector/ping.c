@@ -1,6 +1,8 @@
 #include "ping.h"
 
+/*/ ======================================================================= /*/
 /** Opens a raw socket for ICMP datagrams */
+/*/ ======================================================================= /*/
 int ping_open_icmp (void) {
     int fd;
     struct protoent *proto;
@@ -17,21 +19,27 @@ int ping_open_icmp (void) {
     }
     return fd;
 }
-
+/*/ ======================================================================= /*/
 /** Opens a raw socket for ICMPv6 datagrams */
+/*/ ======================================================================= /*/
 int ping_open_icmp6 (void) {
     return -1;
 }
 
+/*/ ======================================================================= /*/
 /** Generates a new sequence number */
+/*/ ======================================================================= /*/
 uint32_t ping_sequence (void) {
     uint32_t res;
     pthread_mutex_lock (&TARGETS.mutex);
     res = PINGSTATE.sequence++;
     pthread_mutex_unlock (&TARGETS.mutex);
+    return res;
 }
 
+/*/ ======================================================================= /*/
 /** Calculates checksum for an icmp packet */
+/*/ ======================================================================= /*/
 unsigned short ping_checksum (void *buf, int len) {
     uint32_t sum = 0;
     uint16_t *buf_w = (uint16_t *) buf;
@@ -52,7 +60,9 @@ unsigned short ping_checksum (void *buf, int len) {
     return ~sum;
 }
 
+/*/ ======================================================================= /*/
 /** Compares two addresses */
+/*/ ======================================================================= /*/
 int ping_compare_addr (struct sockaddr_storage *left,
                        struct sockaddr_storage *right) {
     void *target = NULL;
@@ -83,8 +93,10 @@ int ping_compare_addr (struct sockaddr_storage *left,
     }
 }
 
+/*/ ======================================================================= /*/
 /** Initializes data structures, and opens any resources that need to
     be accessed as root prior to daemonize() */
+/*/ ======================================================================= /*/
 void ping_init (void) {
     pthread_mutex_init (&PINGSTATE.mutex);
     PINGSTATE.icmp = ping_open_icmp();
@@ -95,7 +107,9 @@ void ping_init (void) {
     targetlist_init (&PINGSTATE.v6);
 }
 
+/*/ ======================================================================= /*/
 /** Starts all ping-related threads */
+/*/ ======================================================================= /*/
 void ping_start (void) {
     thread_create (ping_run_sender_v4);
     thread_create (ping_run_sender_v6);
@@ -103,11 +117,13 @@ void ping_start (void) {
     thread_create (ping_run_receiver_v6);
 }
 
+/*/ ======================================================================= /*/
 /** Thread that sends a ping for every v4 host in the list every 20
     seconds */
+/*/ ======================================================================= /*/
 void ping_run_sender_v4 (thread *self) {
     struct sockaddr_storage *list;
-    char buf[PKTSIZE+1];
+    char buf[PKTSIZE];
     struct icmp *icp = (struct icmp *) buf;
     const char *fillstr = "o6pingv4";
     uint32_t count;
@@ -149,13 +165,17 @@ void ping_run_sender_v4 (thread *self) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Thread that sends a ping for every v6 host in the list every 20
     seconds */
+/*/ ======================================================================= /*/
 void ping_run_sender_v6 (thread *self) {
     while (1) sleep (60);
 }
 
+/*/ ======================================================================= /*/
 /** Calculates difference in milliseconds between two timevals. */
+/*/ ======================================================================= /*/
 double ping_diff (struct timeval *then, struct timeval *now) {
     int secdiff = now->tv_sec - then->tv_sec;
     int usecdiff = now->tv_usec - then->tv_usec;
@@ -166,7 +186,9 @@ double ping_diff (struct timeval *then, struct timeval *now) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Thread that receives and processes ping replies from v4 hosts. */
+/*/ ======================================================================= /*/
 void ping_run_receiver_v4 (thread *self) {
     ipv4pkt pkt;
     struct icmp *icp;
@@ -196,27 +218,32 @@ void ping_run_receiver_v4 (thread *self) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Thread that receives and processes ping replies from v6 hosts. */
+/*/ ======================================================================= /*/
 void ping_run_receiver_v6 (thread *self) {
     while (1) sleep (60);
 }
 
+/*/ ======================================================================= /*/
 /** Initializes a preallocated pingtargetlist. */
+/*/ ======================================================================= /*/
 void pingtargetlist_init (pingtargetlist *self) {
     pthread_mutex_init (&self->mutex);
     self->count = 0;
     self->first = self->last = NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Gets a target out of a targetlist with a specific address. If no target
     with the address exists, it is created. */
+/*/ ======================================================================= /*/
 pingtarget *pingtargetlist_get (pingtargetlist *self,
                                 struct sockaddr_storage *addr) {
     uint32_t id = pingtarget_makeid (addr);
     pthead_mutex_lock (&self->mutex);
     pingtarget *crsr = self->first;
     while (crsr) {
-        size_t sz = sizeof (struct sockaddr_storage);
         if (crsr->id == id) {
             if (ping_compare_addr (&crsr->remote, addr)) {
                 crsr->users++;
@@ -243,7 +270,9 @@ pingtarget *pingtargetlist_get (pingtargetlist *self,
     return crsr;
 }
 
+/*/ ======================================================================= /*/
 /** Returns an array of all addresses on the list that should be pinged */
+/*/ ======================================================================= /*/
 struct sockaddr_storage *pingtargetlist_all (pingtargetlist *self,
                                              uint32_t *count) {
     struct sockaddr_storage *res;
@@ -263,14 +292,18 @@ struct sockaddr_storage *pingtargetlist_all (pingtargetlist *self,
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Unreserves a pingtarget, allowing it potentially to be deallocated */
+/*/ ======================================================================= /*/
 void pingtargetlist_release (pingtargetlist *self, pingtarget *tgt) {
     pthread_mutex_lock (&self->mutex);
     tgt->users--;
     pthread_mutex_unlock (&self->mutex);
 }
 
+/*/ ======================================================================= /*/
 /** Turns an IPv4 or IPv6 address into a 32bit id for lookups */
+/*/ ======================================================================= /*/
 uint32_t pingtarget_makeid (struct sockaddr_storage *remote) {
     size_t sz = sizeof (struct sockaddr_storage);
     size_t offs;
@@ -298,8 +331,10 @@ uint32_t pingtarget_makeid (struct sockaddr_storage *remote) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Open a pingtarget from the right targetlist depending on
     address type. */
+/*/ ======================================================================= /*/
 pingtarget *pingtarget_open (struct sockaddr_storage *remote) {
     pingtargetlist *list = NULL;
     if (remote->ss_family == AF_INET) {
@@ -313,7 +348,9 @@ pingtarget *pingtarget_open (struct sockaddr_storage *remote) {
     return pingtargetlist_get (list, remote);
 }
 
+/*/ ======================================================================= /*/
 /** Allocates and initializes a pingtarget */
+/*/ ======================================================================= /*/
 pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     pingtarget *self = (pingtarget *) malloc (sizeof (pingtarget));
     self->next = self->prev = NULL;
@@ -328,7 +365,9 @@ pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     return self;
 }
 
+/*/ ======================================================================= /*/
 /** Calculates 5 minute rtt average from gathered data */
+/*/ ======================================================================= /*/
 double pingtarget_get_rtt (pingtarget *self) {
     uint8_t losscount = 0;
     uint8_t msrcount = 0;
@@ -347,7 +386,9 @@ double pingtarget_get_rtt (pingtarget *self) {
     return (total / msrcount);
 }
 
+/*/ ======================================================================= /*/
 /** Calculates 5 minute packet loss percentage from gathered data */
+/*/ ======================================================================= /*/
 double pingtarget_get_loss (pingtarget *self) {
     uint8_t losscount = 0;
     
@@ -358,18 +399,24 @@ double pingtarget_get_loss (pingtarget *self) {
     return (100.0 * (losscount / 16.0));
 }
 
+/*/ ======================================================================= /*/
 /** Releases an opened pingtarget */
+/*/ ======================================================================= /*/
 void pingtarget_close (pingtarget *self) {
     pingtargetlist_release (self->parent, self);
 }
 
+/*/ ======================================================================= /*/
 /** Writes a new rtt time to the target */
+/*/ ======================================================================= /*/
 void pingtarget_write (pingtarget *self, double rtt) {
     self->data[self->wpos] = rtt;
     self->wpos = (self->wpos+1) & 15;
 }
 
+/*/ ======================================================================= /*/
 /** Registers a lost reply packet for the target */
+/*/ ======================================================================= /*/
 void pingtarget_write_loss (pingtarget *self) {
     pingtarget_write (self, -1.0);
 }
