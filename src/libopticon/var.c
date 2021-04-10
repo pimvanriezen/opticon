@@ -4,7 +4,9 @@
 #include <string.h>
 #include <assert.h>
 
+/*/ ======================================================================= /*/
 /** Allocate a var object */
+/*/ ======================================================================= /*/
 var *var_alloc (void) {
     var *self = (var *) malloc (sizeof (var));
     if (! self) return NULL;
@@ -19,11 +21,12 @@ var *var_alloc (void) {
     return self;
 }
 
+/*/ ======================================================================= /*/
 /** Link a var into its parent (it is assumed to already have a unique
   * id.
   * \param self The fresh var object.
-  * \param parent The parent var to add this node to.
-  */
+  * \param parent The parent var to add this node to. */
+/*/ ======================================================================= /*/
 void var_link (var *self, var *parent) {
     if (! (self && parent)) return;
     
@@ -77,11 +80,12 @@ void var_link (var *self, var *parent) {
     parent->value.arr.count++;
 }
 
+/*/ ======================================================================= /*/
 /** Deep copy another var into one. The new structure will share no memory
   * with the original.
   * \param self The destination var
-  * \param orig The original var
-  */
+  * \param orig The original var */
+/*/ ======================================================================= /*/
 void var_copy (var *self, var *orig) {
     if (self->type == VAR_STR) {
         free (self->value.sval);
@@ -158,10 +162,11 @@ void var_copy (var *self, var *orig) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Unlink a var object from its parent structure. Deallocate all
   * memory associated with the var and any children.
-  * \param self The var to free.
-  */
+  * \param self The var to free. */
+/*/ ======================================================================= /*/
 void var_free (var *self) {
     if (self->parent) {
         if (self->prev) {
@@ -206,11 +211,12 @@ void var_free (var *self) {
     free (self);    
 }
 
+/*/ ======================================================================= /*/
 /** Find a key in a dictionary node.
   * \param self The dictionary var
   * \param key The key to lookup
-  * \return Pointer to the child var, or NULL if not found.
-  */
+  * \return Pointer to the child var, or NULL if not found. */
+/*/ ======================================================================= /*/
 var *var_find_key (var *self, const char *key) {
     if (! self) return NULL;
     if (! key) return NULL;
@@ -236,11 +242,12 @@ var *var_find_key (var *self, const char *key) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Find, or create, a dictionary node inside a dictionary var.
   * \param self The var to look into
   * \param key The key of the alleged/desired dict node.
-  * \return var The dict node, or NULL if we ran into a conflict.
-  */
+  * \return var The dict node, or NULL if we ran into a conflict. */
+/*/ ======================================================================= /*/
 var *var_get_dict_forkey (var *self, const char *key) {
     var *res = var_find_key (self, key);
     if (! res) {
@@ -258,11 +265,12 @@ var *var_get_dict_forkey (var *self, const char *key) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Find, or create, an array node inside a dictionary var.
   * \param self The var to look into
   * \param key The key of the alleged/desired dict node.
-  * \return var The dict node, or NULL if we ran into a conflict.
-  */
+  * \return var The dict node, or NULL if we ran into a conflict. */
+/*/ ======================================================================= /*/
 var *var_get_array_forkey (var *self, const char *key) {
     var *res = var_find_key (self, key);
     if (! res) {
@@ -280,12 +288,13 @@ var *var_get_array_forkey (var *self, const char *key) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Get an integer value out of a dict var.
   * \param self The dict
   * \param key The key inside the dict
   * \return The integer value, or 0 if it couldn't be resolved. Strings
-  *         will be autoconverted. PHP all the things.
-  */
+  *         will be autoconverted. PHP all the things. */
+/*/ ======================================================================= /*/
 uint64_t var_get_int_forkey (var *self, const char *key) {
     var *res = var_find_key (self, key);
     if (! res) return 0;
@@ -297,12 +306,13 @@ uint64_t var_get_int_forkey (var *self, const char *key) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Get a double value out of a dict var.
   * \param self The dict
   * \param key The key inside the dict
   * \return The double value, or 0.0 if it couldn't be resolved. Strings
-  *         will be autoconverted. PHP all the things.
-  */
+  *         will be autoconverted. PHP all the things. */
+/*/ ======================================================================= /*/
 double var_get_double_forkey (var *self, const char *key) {
     var *res = var_find_key (self, key);
     if (! res) return 0.0;
@@ -314,11 +324,13 @@ double var_get_double_forkey (var *self, const char *key) {
     return 0.0;
 }
 
+/*/ ======================================================================= /*/
 /** Get a string value out of a dict var.
   * \param self The dict
   * \param key The key of the string inside the dict.
-  * \return The string, or NULL if found incompatible/nonexistant. No ducktyping.
-  */
+  * \return The string, or NULL if found incompatible/nonexistant.
+  *         No ducktyping. */
+/*/ ======================================================================= /*/
 const char *var_get_str_forkey (var *self, const char *key) {
     var *res = var_find_key (self, key);
     if (! res) return NULL;
@@ -326,37 +338,42 @@ const char *var_get_str_forkey (var *self, const char *key) {
     return res->value.sval;
 }
 
+/*/ ======================================================================= /*/
 /** Get a uuid value out of a dict var. UUIDs are encoded as strings, not a
   * proper var type.
   * \param self The dictionary
   * \param key The key for the alleged UUID.
-  * \return The uuid, or uuidnil() if it couldn't be found or parsed.
-  */
+  * \return The uuid, or uuidnil() if it couldn't be found or parsed. */
+/*/ ======================================================================= /*/
 uuid var_get_uuid_forkey (var *self, const char *key) {
     return mkuuid (var_get_str_forkey (self, key));
 }
 
+/*/ ======================================================================= /*/
 /** Get a time value out of a dict var.
   * \param self The dictionary
-  * \param key Key for the time string or int.
-  */
+  * \param key Key for the time string or int. */
+/*/ ======================================================================= /*/
 time_t var_get_time_forkey (var *self, const char *key) {
     var *res = var_find_key (self, key);
     return res ? var_get_time (res) : 0;
 }
 
+/*/ ======================================================================= /*/
 /** Return the number of children of a keyed child-array or child-dict of
   * a dict variable.
   * \param self The parent dict
   * \param key The subkey
-  * \return Number of members, or -1 for inappropriate type.
-  */
+  * \return Number of members, or -1 for inappropriate type. */
+/*/ ======================================================================= /*/
 int var_get_count (var *self) {
     if (self->type != VAR_ARRAY && self->type != VAR_DICT) return -1;
     return self->value.arr.count;    
 }
 
+/*/ ======================================================================= /*/
 /** Get the direct int value of a var object. */
+/*/ ======================================================================= /*/
 uint64_t var_get_int (var *self) {
     if (self->type == VAR_STR) return strtoull (self->value.sval, NULL, 10);
     if (self->type == VAR_DOUBLE) return (uint64_t) self->value.dval;
@@ -364,7 +381,9 @@ uint64_t var_get_int (var *self) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Get the direct double value of a var object. */
+/*/ ======================================================================= /*/
 double var_get_double (var *self) {
     if (self->type == VAR_STR) return atof (self->value.sval);
     if (self->type == VAR_DOUBLE) return self->value.dval;
@@ -372,37 +391,43 @@ double var_get_double (var *self) {
     return 0.0;
 }
 
+/*/ ======================================================================= /*/
 /** Get the direct string value of a var object. */
+/*/ ======================================================================= /*/
 const char *var_get_str (var *self) {
     if (self->type == VAR_STR) return self->value.sval;
     return NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Parse the string value of a var object as a uuid */
+/*/ ======================================================================= /*/
 uuid var_get_uuid (var *self) {
     return mkuuid (var_get_str (self));
 }
 
+/*/ ======================================================================= /*/
 /** Extract the time out of a variable. There are two options here.
   * If the type is VAR_INT, the value is treated as a unix timestamp
   * and just typecast. If the type is VAR_STR, the value is parsed
   * as a UTC iso timestring.
   * \param self The var with the alleged time value
-  * \return Timestamp, 0 if none could be extracted.
-  */
+  * \return Timestamp, 0 if none could be extracted. */
+/*/ ======================================================================= /*/
 time_t var_get_time (var *self) {
     if (self->type == VAR_INT) return (time_t) var_get_int (self);
     if (self->type == VAR_STR) return utcstr2time (var_get_str (self));
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Lookup a var inside a parent by its array index. Uses smart caching
   * to make sequential lookups lightweight.
   * \param self The array-object
   * \param index The index within the array, -1 and down for accessing
                  from the last item down.
-  * \return The variable, or NULL if it couldn't be found.
-  */
+  * \return The variable, or NULL if it couldn't be found. */
+/*/ ======================================================================= /*/
 var *var_find_index (var *self, int index) {
     if (self->type != VAR_ARRAY && self->type != VAR_DICT) return NULL;
     var *res = NULL;
@@ -436,11 +461,12 @@ var *var_find_index (var *self, int index) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Lookup a dict var inside an array var.
   * \param self The array to look inside
   * \param idx The index (negative for measuring from the end).
-  * 'return The dict node, or NULL if it could not be arranged.
-  */
+  * 'return The dict node, or NULL if it could not be arranged. */
+/*/ ======================================================================= /*/
 var *var_get_dict_atindex (var *self, int idx) {
     var *res = var_find_index (self, idx);
     if (! res) return NULL;
@@ -458,11 +484,12 @@ var *var_get_dict_atindex (var *self, int idx) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Lookup an array var inside an array var.
   * \param self The array to look inside
   * \param idx The index (negative for measuring from the end).
-  * 'return The dict node, or NULL if it could not be arranged.
-  */
+  * 'return The dict node, or NULL if it could not be arranged. */
+/*/ ======================================================================= /*/
 var *var_get_array_atindex (var *self, int idx) {
     var *res = var_find_index (self, idx);
     if (! res) return NULL;
@@ -480,11 +507,12 @@ var *var_get_array_atindex (var *self, int idx) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Get the int value of a var inside an array var.
   * \param self The array
   * \param idx The array index (negative for measuring from the end).
-  * \return The integer value, failed lookups will yield 0.
-  */
+  * \return The integer value, failed lookups will yield 0. */
+/*/ ======================================================================= /*/
 uint64_t var_get_int_atindex (var *self, int idx) {
     var *res = var_find_index (self, idx);
     if (! res) return 0;
@@ -494,11 +522,12 @@ uint64_t var_get_int_atindex (var *self, int idx) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Get the double value of a var inside an array var.
   * \param self The array
   * \param idx The array index (negative for measuring from the end).
-  * \return The double value, failed lookups will yield 0.0.
-  */
+  * \return The double value, failed lookups will yield 0.0. */
+/*/ ======================================================================= /*/
 double var_get_double_atindex (var *self, int idx) {
     var *res = var_find_index (self, idx);
     if (! res) return 0;
@@ -508,11 +537,12 @@ double var_get_double_atindex (var *self, int idx) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Get the string value of a var inside an array var.
   * \param self The array
   * \param idx The array index (negative for measuring from the end).
-  * \return The string value, or NULL.
-  */
+  * \return The string value, or NULL. */
+/*/ ======================================================================= /*/
 const char *var_get_str_atindex (var *self, int idx) {
     var *res = var_find_index (self, idx);
     if (! res) return 0;
@@ -520,44 +550,48 @@ const char *var_get_str_atindex (var *self, int idx) {
     return res->value.sval;
 }
 
+/*/ ======================================================================= /*/
 /** Get a uuid parsed from the string value of a var inside an array var.
   * \param self The array
   * \param idx The array index (negative for measuring from the end).
-  * \return The uuid (or the nil uuid).
-  */
+  * \return The uuid (or the nil uuid). */
+/*/ ======================================================================= /*/
 uuid var_get_uuid_atindex (var *self, int idx) {
     var *res = var_find_index (self, idx);
     if (! res) return uuidnil();
     return var_get_uuid (res);
 }
 
+/*/ ======================================================================= /*/
 /** Get the time value of a var out of an array.
   * \param self The array
   * \param idx The array index
-  * \return The time value, or 0 on failure.
-  */
+  * \return The time value, or 0 on failure. */
+/*/ ======================================================================= /*/
 time_t var_get_time_atindex (var *self, int idx) {
     var *res = var_find_index (self, idx);
     return res ? var_get_time (res) : 0;
 }
 
+/*/ ======================================================================= /*/
 /** Increase the generation counter of a variable space. When a new versin
   * of the same structured document is loaded again, values that are set
   * will have their generation updated to the latest number. Values that
   * actually -change- in the process will also see their lastmodified
   * updated. Reflective code can use this information later to figure out
-  * what changed about a particular configuration.
-  */
+  * what changed about a particular configuration. */
+/*/ ======================================================================= /*/
 void var_new_generation (var *rootnode) {
     assert (rootnode->root == NULL);
     rootnode->generation++;
 }
 
+/*/ ======================================================================= /*/
 /** When everything interesting that can be done with the generational
-  * informational after a new round of loading has been done, we are potentially
+  * informational after a new round of loading has been done, we're potentially
   * left with zombie var-nodes that didn't get refreshed. This function will
-  * reap those stale nodes out of a variable space recursively.
-  */
+  * reap those stale nodes out of a variable space recursively. */
+/*/ ======================================================================= /*/
 void var_clean_generation (var *node) {
     uint32_t needgen = (node->root) ? node->root->generation : node->generation;
     if (node->type != VAR_DICT && node->type != VAR_ARRAY) return;
@@ -574,12 +608,13 @@ void var_clean_generation (var *node) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Get a hold of a keyed sub-var of a dictionary var, whether it exists
   * or not. Newly created nodes will initialize to type VAR_NULL.
   * \param self The parent dict.
   * \param key The key to look up.
-  * \return The var found or created.
-  */
+  * \return The var found or created. */
+/*/ ======================================================================= /*/
 var *var_get_or_make (var *self, const char *key, vartype tp) {
     var *res = var_find_key (self, key);
     if (! res) {
@@ -592,11 +627,12 @@ var *var_get_or_make (var *self, const char *key, vartype tp) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Update the generational data for a var. Will traverse up the tree in order
   * to get the generation and modified data set.
   * \param v The loaded object.
-  * \param is_updated 1 if lastmodified should be changed.
-  */
+  * \param is_updated 1 if lastmodified should be changed. */
+/*/ ======================================================================= /*/
 void var_update_gendata (var *v, int is_updated) {
     while (v) {
         if (! v->root) break;
@@ -610,29 +646,33 @@ void var_update_gendata (var *v, int is_updated) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Set the integer value of a dict-var sub-var.
   * \param self The dict.
   * \param key The key within the dict.
-  * \param val The value to set.
-  */
+  * \param val The value to set. */
+/*/ ======================================================================= /*/
 void var_set_int_forkey (var *self, const char *key, uint64_t val) {
     var *v = var_get_or_make (self, key, VAR_INT);
     if (! v) return;
     var_set_int (v, val);
 }
 
+/*/ ======================================================================= /*/
 /** Set the double value of a dict-var sub-var.
   * \param self The dict.
   * \param key The key within the dict.
-  * \param val The value to set.
-  */
+  * \param val The value to set. */
+/*/ ======================================================================= /*/
 void var_set_double_forkey (var *self, const char *key, double val) {
     var *v = var_get_or_make (self, key, VAR_DOUBLE);
     if (! v) return;
     var_set_double (v, val);
 }
 
+/*/ ======================================================================= /*/
 /** Set the direct integer value of a var */
+/*/ ======================================================================= /*/
 void var_set_int (var *v, uint64_t val) {
     int is_orig = 0;
     
@@ -651,7 +691,9 @@ void var_set_int (var *v, uint64_t val) {
     var_update_gendata (v, is_orig);
 }
 
+/*/ ======================================================================= /*/
 /** Set the direct double value of a var */
+/*/ ======================================================================= /*/
 void var_set_double (var *v, double val) {
     int is_orig = 0;
     
@@ -671,69 +713,81 @@ void var_set_double (var *v, double val) {
 }
 
 
+/*/ ======================================================================= /*/
 /** Set the string value of a dict-var sub-var.
   * \param self The dict.
   * \param key The key within the dict.
-  * \param val The value to set.
-  */
+  * \param val The value to set. */
+/*/ ======================================================================= /*/
 void var_set_str_forkey (var *self, const char *key, const char *val) {
     var *v = var_get_or_make (self, key, VAR_STR);
     if (! v) return;
     var_set_str (v, val);
 }
 
+/*/ ======================================================================= /*/
 /** Set the string value of a dict-var sub-var from a uuid.
   * \param self The dict.
   * \param key The key within the dict.
-  * \param val The value to set.
-  */
+  * \param val The value to set. */
+/*/ ======================================================================= /*/
 void var_set_uuid_forkey (var *self, const char *key, uuid val) {
     var *v = var_get_or_make (self, key, VAR_STR);
     if (! v) return;
     var_set_uuid (v, val);
 }
 
+/*/ ======================================================================= /*/
 /** Set a UTC/iso time string value inside a dict.
   * \param self The dictionary
   * \param key The key for the time string
-  * \param t The value to set it to.
-  */
+  * \param t The value to set it to. */
+/*/ ======================================================================= /*/
 void var_set_time_forkey (var *self, const char *key, time_t t) {
     var *v = var_get_or_make (self, key, VAR_STR);
     if (! v) return;
     var_set_time (v, t);
 }
 
+/*/ ======================================================================= /*/
 /** Set a unix time int value inside a dict.
   * \param self The dictionary
   * \param key The key for the time value
-  * \param t The value to set it to
-  */
+  * \param t The value to set it to */
+/*/ ======================================================================= /*/
 void var_set_unixtime_forkey (var *self, const char *key, time_t t) {
     var *v = var_get_or_make (self, key, VAR_INT);
     if (! v) return;
     var_set_int (v, (uint64_t) t);
 }
 
+/*/ ======================================================================= /*/
 /** Set up the var as a string with a uuid value. */
+/*/ ======================================================================= /*/
 void var_set_uuid (var *v, uuid u) {
     char buf[40];
     uuid2str (u, buf);
     var_set_str (v, buf);
 }
 
+/*/ ======================================================================= /*/
 /** Set up the var as a string with a UTC/iso time string */
+/*/ ======================================================================= /*/
 void var_set_time (var *v, time_t t) {
     char *str = time2utcstr (t);
     var_own_str (v, str);
 }
 
+/*/ ======================================================================= /*/
 /** Set up the var as an integer with a unix timestamp */
+/*/ ======================================================================= /*/
 void var_set_unixtime (var *v, time_t t) {
     var_set_int (v, (uint64_t) t);
 }
 
+/*/ ======================================================================= /*/
 /** Set the direct stringvalue of a var, taking ownership of the string. */
+/*/ ======================================================================= /*/
 void var_own_str (var *v, char *val) {
     if (v->type == VAR_NULL) {
         v->type = VAR_STR;
@@ -748,7 +802,9 @@ void var_own_str (var *v, char *val) {
     else free (val);
 }
 
+/*/ ======================================================================= /*/
 /** Set the direct string value of a var */
+/*/ ======================================================================= /*/
 void var_set_str (var *v, const char *val) {
     if (v->type == VAR_NULL) {
         v->type = VAR_STR;
@@ -767,7 +823,9 @@ void var_set_str (var *v, const char *val) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Remove a named member from a dict */
+/*/ ======================================================================= /*/
 void var_delete_key (var *v, const char *k) {
     if (v->type != VAR_DICT) return;
     var *node = var_find_key (v, k);
@@ -797,10 +855,11 @@ void var_delete_key (var *v, const char *k) {
     var_free (node);
 }
 
+/*/ ======================================================================= /*/
 /** Clear an array. Arrays are always reloaded in bulk (with all children
   * showing up with the last generation as the firstseen and lastmodified).
-  * \param v The array to clear.
-  */
+  * \param v The array to clear. */
+/*/ ======================================================================= /*/
 void var_clear_array (var *v) {
     if (v->type != VAR_ARRAY) return;
     var *c, *nc;
@@ -815,10 +874,11 @@ void var_clear_array (var *v) {
     var_update_gendata (v, 1);
 }
 
+/*/ ======================================================================= /*/
 /** Add an integer value to an array var.
   * \param self The array
-  * \param nval The integer to add.
-  */
+  * \param nval The integer to add. */
+/*/ ======================================================================= /*/
 void var_add_int (var *self, uint64_t nval) {
     if (self->type != VAR_ARRAY) return;
     var *nvar = var_alloc();
@@ -829,10 +889,11 @@ void var_add_int (var *self, uint64_t nval) {
     var_link (nvar, self);
 }
 
+/*/ ======================================================================= /*/
 /** Add a double value to an array var.
   * \param self The array
-  * \param nval The integer to add.
-  */
+  * \param nval The integer to add. */
+/*/ ======================================================================= /*/
 void var_add_double (var *self, double nval) {
     if (self->type != VAR_ARRAY) return;
     var *nvar = var_alloc();
@@ -843,17 +904,20 @@ void var_add_double (var *self, double nval) {
     var_link (nvar, self);
 }
 
+/*/ ======================================================================= /*/
 /** Add a string value to an array as a printed uuid.
   * \param self The array
-  * \param u The uuid
-  */
+  * \param u The uuid */
+/*/ ======================================================================= /*/
 void var_add_uuid (var *self, uuid u) {
     char buf[40];
     uuid2str (u, buf);
     var_add_str (self, buf);
 }
 
+/*/ ======================================================================= /*/
 /** Add a time string to array */
+/*/ ======================================================================= /*/
 void var_add_time (var *self, time_t t) {
     if (self->type != VAR_ARRAY) return;
     var *nvar = var_alloc();
@@ -861,7 +925,9 @@ void var_add_time (var *self, time_t t) {
     var_link (nvar, self);
 }
 
+/*/ ======================================================================= /*/
 /** Add a unix timestamp to array */
+/*/ ======================================================================= /*/
 void var_add_unixtime (var *self, time_t t) {
     if (self->type != VAR_ARRAY) return;
     var *nvar = var_alloc();
@@ -869,10 +935,11 @@ void var_add_unixtime (var *self, time_t t) {
     var_link (nvar, self);
 }
 
+/*/ ======================================================================= /*/
 /** Add a string value to an array var.
   * \param self The array
-  * \param nval The string to add (will be copied).
-  */
+  * \param nval The string to add (will be copied). */
+/*/ ======================================================================= /*/
 void var_add_str (var *self, const char *nval) {
     if (self->type != VAR_ARRAY) return;
     var *nvar = var_alloc();
@@ -883,10 +950,11 @@ void var_add_str (var *self, const char *nval) {
     var_link (nvar, self);
 }
 
+/*/ ======================================================================= /*/
 /** Add an empty array to an array var.
   * \param self The parent array.
-  * \return The new empty array (or NULL).
-  */
+  * \return The new empty array (or NULL). */
+/*/ ======================================================================= /*/
 var *var_add_array (var *self) {
     if (self->type == VAR_NULL) {
         self->type = VAR_ARRAY;
@@ -906,10 +974,11 @@ var *var_add_array (var *self) {
     return nvar;
 }
 
+/*/ ======================================================================= /*/
 /** Add an empty dictionary to an array var.
   * \param self The parent array.
-  * \return The new empty dictionary (or NULL).
-  */
+  * \return The new empty dictionary (or NULL). */
+/*/ ======================================================================= /*/
 var *var_add_dict (var *self) {
     if (self->type == VAR_NULL) {
         self->type = VAR_ARRAY;
