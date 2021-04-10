@@ -32,27 +32,27 @@ uint32_t ping_sequence (void) {
 }
 
 /** Calculates checksum for an icmp packet */
-int ping_checksum (unsigned short *buf, int len) {
-    register long sum = 0;
-    unsigned short answer = 0;
+unsigned short ping_checksum (void *buf, int len) {
+    uint32_t sum = 0;
+    uint16_t *buf_w = (uint16_t *) buf;
+    uint8_t *buf_b = (uint8_t *) buf;
     
-    while (len>1)
-    {
-        sum+= *buf++;
-        len -=2;
+    while (len>1) {
+        sum += *buf_w++;
+        len -= 2;
     }
     
-    if (len==1)
-    {
-        *(unsigned char *)(&answer) = *(unsigned char *)buf;
-        sum+= answer;
+    if (len==1) {
+        buf_b = (uint8_t *) buf_w;
+        sum += *buf_b;
     }
+    
     sum = (sum>>16) + (sum &0xffff);
     sum += (sum>>16);
-    answer = ~sum;
-    return answer;
+    return ~sum;
 }
 
+/** Compares two addresses */
 int ping_compare_addr (struct sockaddr_storage *left,
                        struct sockaddr_storage *right) {
     void *target = NULL;
@@ -107,7 +107,7 @@ void ping_start (void) {
     seconds */
 void ping_run_sender_v4 (thread *self) {
     struct sockaddr_storage *list;
-    char buf[PKTSIZE-1];
+    char buf[PKTSIZE+1];
     struct icmp *icp = (struct icmp *) buf;
     const char *fillstr = "o6pingv4";
     uint32_t count;
@@ -124,6 +124,8 @@ void ping_run_sender_v4 (thread *self) {
             pingtarget *tgt = pingtarget_open (list[i]);
             seq = ping_sequence();
             if (tgt->sequence) {
+                /* No ping reply for our last sequence has been sent,
+                   so we register that as a lost packet */
                 pingtarget_write_loss (tgt);
             }
             tgt->sequence = seq;
@@ -134,7 +136,7 @@ void ping_run_sender_v4 (thread *self) {
             icp->icmp_cksum = 0;
             icp->icmp_id = (seq & 0xffff0000) >> 16;
             icp->icmp_seq = (seq & 0x0000ffff);
-            icp->icmp_cksum = in_checksum ((unsigned short *) icp, PKTSIZE);        
+            icp->icmp_cksum = in_checksum (icp, PKTSIZE);        
             
             size_t res = sendto (PINGSTATE.icmp, buf, PKTSIZE, 0,
                                  (struct sockaddr *) list[i],
@@ -142,6 +144,7 @@ void ping_run_sender_v4 (thread *self) {
             pingtarget_close (tgt);
             ping_usleep (20000 / count);
         }
+        if (! count) sleep (5);
         free (list);
     }
 }
@@ -149,6 +152,7 @@ void ping_run_sender_v4 (thread *self) {
 /** Thread that sends a ping for every v6 host in the list every 20
     seconds */
 void ping_run_sender_v6 (thread *self) {
+    while (1) sleep (60);
 }
 
 /** Calculates difference in milliseconds between two timevals. */
@@ -194,6 +198,7 @@ void ping_run_receiver_v4 (thread *self) {
 
 /** Thread that receives and processes ping replies from v6 hosts. */
 void ping_run_receiver_v6 (thread *self) {
+    while (1) sleep (60);
 }
 
 /** Initializes a preallocated pingtargetlist. */
