@@ -186,29 +186,31 @@ void ping_run_sender_v4 (thread *self) {
         list = pingtargetlist_all (&PINGSTATE.v4, &count);
         for (i=0; i<count; ++i) {
             pingtarget *tgt = pingtarget_open (list+i);
-            seq = ping_sequence();
-            if (tgt->sequence) {
-                /* No ping reply for our last sequence has been sent,
-                   so we register that as a lost packet */
-                pingtarget_write_loss (tgt);
-                log_debug ("ping: Set loss for %08x\n", tgt->id);
-            }
-            tgt->sequence = seq;
-            gettimeofday (&tgt->tsent, NULL);
+            if (tgt) {
+                seq = ping_sequence();
+                if (tgt->sequence) {
+                    /* No ping reply for our last sequence has been sent,
+                       so we register that as a lost packet */
+                    pingtarget_write_loss (tgt);
+                    log_debug ("ping: Set loss for %08x\n", tgt->id);
+                }
+                tgt->sequence = seq;
+                gettimeofday (&tgt->tsent, NULL);
 
-            icp->icmp_type = ICMP_ECHO;
-            icp->icmp_code = 0;
-            icp->icmp_cksum = 0;
-            icp->icmp_id = (seq & 0xffff0000) >> 16;
-            icp->icmp_seq = (seq & 0x0000ffff);
-            icp->icmp_cksum = ping_checksum (icp, PKTSIZE);        
+                icp->icmp_type = ICMP_ECHO;
+                icp->icmp_code = 0;
+                icp->icmp_cksum = 0;
+                icp->icmp_id = (seq & 0xffff0000) >> 16;
+                icp->icmp_seq = (seq & 0x0000ffff);
+                icp->icmp_cksum = ping_checksum (icp, PKTSIZE);        
             
-            size_t res = sendto (PINGSTATE.icmp, buf, PKTSIZE, 0,
-                                 (struct sockaddr *) list+i,
-                                 sizeof (struct sockaddr_in));
+                size_t res = sendto (PINGSTATE.icmp, buf, PKTSIZE, 0,
+                                     (struct sockaddr *) list+i,
+                                     sizeof (struct sockaddr_in));
                                  
-            log_debug ("ping: Sent ping to %08x\n", tgt->id);
-            pingtarget_close (tgt);
+                log_debug ("ping: Sent ping to %08x\n", tgt->id);
+                pingtarget_close (tgt);
+            }
             ping_msleep (20000 / count);
         }
         if (! count) sleep (5);
@@ -402,7 +404,10 @@ pingtarget *pingtarget_open (struct sockaddr_storage *remote) {
         list = &PINGSTATE.v6;
     }
     
-    if (! list) return NULL;
+    if (! list) {
+        log_error ("Unknown target family: %02x", remote->ss_family);
+        return NULL;
+    }
     return pingtargetlist_get (list, remote);
 }
 
