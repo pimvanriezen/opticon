@@ -611,7 +611,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     print_value ("UUID", "\033[38;5;28m%s\033[0m", OPTIONS.host);
     print_value ("Hostname", "\033[38;5;185m%s\033[0m", Vstr("hostname"));
     print_value ("Address", "\033[1m%s\033[0m (rtt: \033[1m%.2f\033[0m ms, "
-                            "\033[1m%.0f\033[0m % loss)",
+                            "\033[1m%.0f\033[0m %% loss)",
                             VDstr("agent","ip"),
                             VDfrac("link","rtt"),
                             VDfrac("link","loss"));
