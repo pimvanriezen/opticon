@@ -47,16 +47,16 @@ uint32_t ping_sequence (void) {
 /** Take a micronap */
 /*/ ======================================================================= /*/
 void ping_msleep (uint32_t msec) {
-	struct timeval tv;
-	int sec, usec;
-	
- 	sec = msec / 1000;
-	usec = 1000 * (msec - (1000 * sec));
-	
-	tv.tv_sec = sec;
-	tv.tv_usec = usec;
-	
-	select (0, NULL, NULL, NULL, &tv);
+    struct timeval tv;
+    int sec, usec;
+
+    sec = msec / 1000;
+    usec = 1000 * (msec - (1000 * sec));
+
+    tv.tv_sec = sec;
+    tv.tv_usec = usec;
+
+    select (0, NULL, NULL, NULL, &tv);
 }
 
 /*/ ======================================================================= /*/
@@ -140,6 +140,32 @@ void ping_start (void) {
 }
 
 /*/ ======================================================================= /*/
+/** Convenience function for resolving an address to an rtt result */
+/*/ ======================================================================= /*/
+double ping_get_rtt (struct sockaddr_storage *addr) {
+    double res = 0.0;
+    pingtarget *tgt = pingtarget_open (addr);
+    if (tgt) {
+        res = pingtarget_get_rtt (tgt);
+        pingtarget_close (tgt);
+    }
+    return res;
+}
+
+/*/ ======================================================================= /*/
+/** Convenience function for resolving an address to a loss result */
+/*/ ======================================================================= /*/
+double ping_get_loss (struct sockaddr_storage *addr) {
+    double res = 0.0;
+    pingtarget *tgt = pingtarget_open (addr);
+    if (tgt) {
+        res = pingtarget_get_loss (tgt);
+        pingtarget_close (tgt);
+    }
+    return res;
+}
+
+/*/ ======================================================================= /*/
 /** Thread that sends a ping for every v4 host in the list every 20
     seconds */
 /*/ ======================================================================= /*/
@@ -165,6 +191,7 @@ void ping_run_sender_v4 (thread *self) {
                 /* No ping reply for our last sequence has been sent,
                    so we register that as a lost packet */
                 pingtarget_write_loss (tgt);
+                log_debug ("ping: Set loss for %08x\n", tgt->id);
             }
             tgt->sequence = seq;
             gettimeofday (&tgt->tsent, NULL);
@@ -179,6 +206,8 @@ void ping_run_sender_v4 (thread *self) {
             size_t res = sendto (PINGSTATE.icmp, buf, PKTSIZE, 0,
                                  (struct sockaddr *) list+i,
                                  sizeof (struct sockaddr_in));
+                                 
+            log_debug ("ping: Sent ping to %08x\n", tgt->id);
             pingtarget_close (tgt);
             ping_msleep (20000 / count);
         }
@@ -235,6 +264,7 @@ void ping_run_receiver_v4 (thread *self) {
         
         pingtarget *tgt = pingtarget_open (&faddr);
         if (tgt) {
+            log_debug ("ping: Got reply for %08x", tgt->id);
             in_seq = icp->icmp_seq;
             if ((tgt->sequence & 0xffff) == in_seq) {
                 tgt->sequence = 0;
@@ -390,6 +420,7 @@ pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     self->lastseen = 0;
     for (int i=0; i<16; ++i) self->data[i] = 0.0;
     memcpy (&self->remote, remote, sizeof(struct sockaddr_storage));
+    log_debug ("ping: Created target %08x", self->id);
     return self;
 }
 

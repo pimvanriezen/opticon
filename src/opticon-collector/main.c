@@ -1,4 +1,5 @@
 #include "opticon-collector.h"
+#include "ping.h"
 #include <libopticondb/db_local.h>
 #include <libopticon/auth.h>
 #include <libopticon/ioport.h>
@@ -476,6 +477,17 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
                     S->sessid, S->addr);
     }
     
+    meterid_t mid_rtt = makeid ("link/rtt",MTYPE_FRAC,0);
+    meterid_t mid_loss = makeid ("link/loss",MTYPE_FRAC,0);
+    meter *m_rtt = host_get_meter (H, mid_rtt);
+    meter *m_loss = host_get_meter (H, mid_loss);
+    
+    double rtt = ping_get_rtt (&S->remote);
+    double loss = ping_get_loss (&S->remote);
+    
+    meter_set_frac (m_rtt,0,rtt);
+    meter_set_frac (m_loss,0,loss);
+
     host_end_update (H);
     pthread_rwlock_unlock (&H->lock);
     ioport_close (unwrap);
@@ -619,6 +631,7 @@ int daemon_main (int argc, const char *argv[]) {
     log_info ("--- Opticon-collector ready for action ---");
 
     tenant_init();
+    ping_start();
     
     var *slist = db_get_global (APP.db, "sessions");
     if (slist) {
@@ -845,6 +858,7 @@ int main (int _argc, const char *_argv[]) {
     }
     
     opticonf_handle_config (APP.conf);
+    ping_init();
     log_info ("Configuration loaded");
     
     if (! intransport_setlistenport (APP.transport, APP.listenaddr, 

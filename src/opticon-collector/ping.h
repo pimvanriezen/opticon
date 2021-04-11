@@ -61,6 +61,8 @@ void ping_run_sender_v4 (thread *self);
 void ping_run_sender_v6 (thread *self);
 void ping_run_receiver_v4 (thread *self);
 void ping_run_receiver_v6 (thread *self);
+double ping_get_rtt (struct sockaddr_storage *addr);
+double ping_get_loss (struct sockaddr_storage *addr);
 
 void pingtargetlist_init (pingtargetlist *);
 pingtarget *pingtargetlist_get (pingtargetlist *, struct sockaddr_storage *);
