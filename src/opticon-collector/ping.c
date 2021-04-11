@@ -434,6 +434,7 @@ pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     self->users = 0;
     self->sequence = 0;
     self->lastseen = 0;
+    self->populated = false;
     for (int i=0; i<16; ++i) self->data[i] = 0.0;
     memcpy (&self->remote, remote, sizeof(struct sockaddr_storage));
     char addr[INET6_ADDRSTRLEN];
@@ -487,6 +488,11 @@ void pingtarget_close (pingtarget *self) {
 /** Writes a new rtt time to the target */
 /*/ ======================================================================= /*/
 void pingtarget_write (pingtarget *self, double rtt) {
+    if (! self->populated) {
+        for (uint32_t i=0; i<16; ++i) self->data[i] = rtt;
+        self->populated = true;
+        return;
+    }
     self->data[self->wpos] = rtt;
     self->wpos = (self->wpos+1) & 15;
 }

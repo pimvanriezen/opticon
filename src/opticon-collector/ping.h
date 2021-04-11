@@ -11,6 +11,7 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
@@ -34,6 +35,7 @@ typedef struct pingtarget_s {
     double                   data[16]; /** Aim at 1 ping every 20s */
     struct timeval           tsent;
     struct sockaddr_storage  remote;
+    bool                     populated;
 } pingtarget;
 
 typedef struct pingtargetlist_s {
