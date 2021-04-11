@@ -485,7 +485,9 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     double rtt = ping_get_rtt (&S->remote);
     double loss = ping_get_loss (&S->remote);
     
+    meter_setcount (m_rtt, 0);
     meter_set_frac (m_rtt,0,rtt);
+    meter_setcount (m_loss, 0);
     meter_set_frac (m_loss,0,loss);
 
     host_end_update (H);
