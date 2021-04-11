@@ -360,6 +360,7 @@ pingtarget *pingtargetlist_get (pingtargetlist *self,
     
     if (self->last) {
         crsr->prev = self->last;
+        self->last->next = crsr;
         self->last = crsr;
     }
     else {
