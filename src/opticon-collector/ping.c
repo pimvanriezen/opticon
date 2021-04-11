@@ -175,6 +175,7 @@ void ping_run_sender_v4 (thread *self) {
     char buf[PKTSIZE];
     struct icmp *icp = (struct icmp *) buf;
     const char *fillstr = "o6pingv4";
+    char addrstr[INET6_ADDRSTRLEN];
     uint32_t count;
     uint32_t i;
     uint32_t seq;
@@ -186,6 +187,7 @@ void ping_run_sender_v4 (thread *self) {
     while (1) {
         list = pingtargetlist_all (&PINGSTATE.v4, &count);
         for (i=0; i<count; ++i) {
+            ip2str (list+i, addrstr);
             pingtarget *tgt = pingtarget_open (list+i);
             if (tgt) {
                 seq = ping_sequence();
@@ -209,7 +211,7 @@ void ping_run_sender_v4 (thread *self) {
                                      (struct sockaddr *) (list+i),
                                      sizeof (struct sockaddr_in));
                                  
-                log_debug ("ping: Sent ping to %08x", tgt->id);
+                log_debug ("ping: Sent ping to %08x %s", tgt->id, addrstr);
                 pingtarget_close (tgt);
             }
             ping_msleep (20000 / count);
@@ -252,6 +254,7 @@ void ping_run_receiver_v4 (thread *self) {
     uint32_t in_seq;
     int rsz;
     int hlen;
+    char addrstr[INET6_ADDRSTRLEN];
     
     faddr.ss_family = AF_INET;
     
@@ -267,7 +270,8 @@ void ping_run_receiver_v4 (thread *self) {
         
         pingtarget *tgt = pingtarget_open (&faddr);
         if (tgt) {
-            log_debug ("ping: Got reply for %08x", tgt->id);
+            ip2str (&faddr, addrstr);
+            log_debug ("ping: Got reply from %08x %s", tgt->id, addrstr);
             in_seq = icp->icmp_seq;
             if ((tgt->sequence & 0xffff) == in_seq) {
                 tgt->sequence = 0;
