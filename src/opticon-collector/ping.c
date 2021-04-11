@@ -310,8 +310,8 @@ struct sockaddr_storage *pingtargetlist_all (pingtargetlist *self,
     while (crsr && i<*count) {
         memcpy (res+i, &crsr->remote, sizeof (struct sockaddr_storage));
         
-        char buf[64];
-        inet_ntop (crsr->remote.ss_family, &crsr->remote, buf, 63);
+        char buf[INET6_ADDRSTRLEN];
+        ip2str (&crsr->remote, buf);
         log_debug ("ping: add list: %08x %s", crsr->id, buf);
         
         i++;
@@ -430,8 +430,8 @@ pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     self->lastseen = 0;
     for (int i=0; i<16; ++i) self->data[i] = 0.0;
     memcpy (&self->remote, remote, sizeof(struct sockaddr_storage));
-    char addr[64];
-    inet_ntop (remote->ss_family, remote, addr, 63);
+    char addr[INET6_ADDRSTRLEN];
+    ip2str (remote, addr);
     log_debug ("ping: Created target %08x (%s)", self->id, addr);
     return self;
 }
