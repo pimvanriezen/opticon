@@ -211,7 +211,7 @@ void ping_run_sender_v4 (thread *self) {
                                      (struct sockaddr *) (list+i),
                                      sizeof (struct sockaddr_in));
                                  
-                log_debug ("ping: Sent ping to %08x %s", tgt->id, addrstr);
+                log_debug ("ping: Sent ping to %s", addrstr);
                 pingtarget_close (tgt);
             }
             ping_msleep (20000 / count);
@@ -271,11 +271,11 @@ void ping_run_receiver_v4 (thread *self) {
         pingtarget *tgt = pingtarget_open (&faddr);
         if (tgt) {
             ip2str (&faddr, addrstr);
-            log_debug ("ping: Got reply from %08x %s", tgt->id, addrstr);
             in_seq = icp->icmp_seq;
             if ((tgt->sequence & 0xffff) == in_seq) {
                 tgt->sequence = 0;
                 double delta = ping_diff (&tgt->tsent, &tv);
+                log_debug ("ping: Got reply from %s: %.2f ms", addrstr, delta);
                 pingtarget_write (tgt, delta);
             }
             pingtarget_close (tgt);
