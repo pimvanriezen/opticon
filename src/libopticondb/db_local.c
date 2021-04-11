@@ -906,10 +906,10 @@ hostloghandle *localdb_open_log (localdb *self, uuid hostid) {
     if (stat (logpath, &st) != 0) initialize=1;
     res->fd = open (logpath, O_RDWR | O_CREAT);
     
-    free (logpath);
     if (res->fd < 0) return res;
     
     if (initialize) {
+        fchmod (res->fd, 0660);
         const char *blockdata = "\0\0\0\0\0\0\0\0";
         log_debug ("log: create %s", logpath);
         for (uint32_t i=0; i<sizeof(hostlogdata); i+=8) {
@@ -917,6 +917,8 @@ hostloghandle *localdb_open_log (localdb *self, uuid hostid) {
         }
     }
     
+    free (logpath);
+
     res->data = mmap (0, sizeof (hostlogdata), PROT_READ|PROT_WRITE,
                       MAP_SHARED, res->fd, 0);
     if (res->data == MAP_FAILED) {
