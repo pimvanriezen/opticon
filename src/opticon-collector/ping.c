@@ -206,10 +206,10 @@ void ping_run_sender_v4 (thread *self) {
                 icp->icmp_cksum = ping_checksum (icp, PKTSIZE);        
             
                 size_t res = sendto (PINGSTATE.icmp, buf, PKTSIZE, 0,
-                                     (struct sockaddr *) list+i,
+                                     (struct sockaddr *) (list+i),
                                      sizeof (struct sockaddr_in));
                                  
-                log_debug ("ping: Sent ping to %08x\n", tgt->id);
+                log_debug ("ping: Sent ping to %08x", tgt->id);
                 pingtarget_close (tgt);
             }
             ping_msleep (20000 / count);
