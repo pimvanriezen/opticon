@@ -431,7 +431,7 @@ pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     for (int i=0; i<16; ++i) self->data[i] = 0.0;
     memcpy (&self->remote, remote, sizeof(struct sockaddr_storage));
     char addr[64];
-    inet_ntop (self->remote.ss_family, &self->remote, addr, 63);
+    inet_ntop (remote->ss_family, remote, addr, 63);
     log_debug ("ping: Created target %08x (%s)", self->id, addr);
     return self;
 }
