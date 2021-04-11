@@ -339,7 +339,7 @@ pingtarget *pingtargetlist_get (pingtargetlist *self,
                                 struct sockaddr_storage *addr) {
     if (! addr->ss_family) {
         log_debug ("pingtargetlist_get: no family");
-        return NULL'
+        return NULL;
     }
     uint32_t id = pingtarget_makeid (addr);
     pthread_mutex_lock (&self->mutex);
