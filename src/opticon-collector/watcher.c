@@ -1,4 +1,5 @@
 #include "opticon-collector.h"
+#include "ping.h"
 #include <pthread.h>
 #include <libopticondb/db_local.h>
 #include <libopticon/auth.h>
@@ -243,8 +244,28 @@ void watchthread_handle_host (host *host) {
     watchtrigger maxtrigger = WATCH_NONE;
     char label[16];
     char uuidstr[40];
+    struct sockaddr_storage addr;
     
     pthread_rwlock_wrlock (&host->lock);
+    
+    meterid_t mid_ip = makeid ("agent/ip",MTYPE_STR,0);
+    meter *m_ip = host_find_meter (host, mid_ip);
+    if (m_ip) {
+        fstring ipstr = meter_get_str (m_ip, 0);
+        if (ipstr.str[0]) {
+            str2ip (ipstr.str, &addr);
+            double rtt = ping_get_rtt (&addr);
+            double loss = ping_get_loss (&addr);
+            meterid_t mid_rtt = makeid ("link/rtt",MTYPE_FRAC,0);
+            meterid_t mid_loss = makeid ("link/loss",MTYPE_FRAC,0);
+            meter *m_rtt = host_get_meter (host, mid_rtt);
+            meter *m_loss = host_get_meter (host, mid_loss);
+            meter_setcount (m_rtt, 0);
+            meter_set_frac (m_rtt,0,rtt);
+            meter_setcount (m_loss, 0);
+            meter_set_frac (m_loss,0,loss);
+        }
+    }
 
     /* We'll store the status information as a meter itself */
     meterid_t mid_status = makeid ("status",MTYPE_STR,0);
