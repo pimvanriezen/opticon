@@ -301,7 +301,7 @@ var *runprobe_df (probe *self) {
         buffer[0] = 0;
         fgets (buffer, 1023, f);
         if (memcmp (buffer, "/dev", 4) != 0) continue;
-        cpystr (device, buffer, 12);
+        cpystr (device, buffer, 16);
         
         log_debug ("probe_df: --- found device %s", device);
         
@@ -374,6 +374,7 @@ var *runprobe_df (probe *self) {
         var_set_int_forkey (node, "size", (uint32_t) (szkb/1024));
         var_set_double_forkey (node, "pused", pused);
         var_set_str_forkey (node, "mount", mount);
+        var_set_str_forkey (node, "fs", "?");
     }
     pclose (f);
     int cnt = var_get_count (v_df);
@@ -391,8 +392,12 @@ var *runprobe_df (probe *self) {
                 var *node = var_get_dict_atindex (v_df, i);
                 const char *devid = var_get_str_forkey (node, "device");
                 if (strcmp (devid, token) == 0) {
+                    log_debug ("probe_df:     found match");
                     crsr = strchr (crsr, '(');
-                    if (! crsr) continue;
+                    if (! crsr) {
+                        log_debug ("probe_df:     format error");
+                        continue;
+                    }
                     crsr = crsr+1;
                     if ((token = strsep (&crsr, ","))) {
                         var_set_str_forkey (node, "fs", token);

@@ -195,6 +195,7 @@ void print_gauge_value (const char *key, const char *unit, double val,
 
 /** Print out an array as a comma-separated list */
 void print_array (const char *key, var *arr) {
+    const char *str;
     char out[4096];
     out[0] = 0;
     int cnt=0;
@@ -213,6 +214,8 @@ void print_array (const char *key, var *arr) {
                 break;
             
             case VAR_STR:
+                str = var_get_str (crsr);
+                if (! str) break;
                 snprintf (out+strlen(out), 4095-strlen(out),
                           "\033[38;5;28m%s\033[0m", var_get_str (crsr));
                 break;
@@ -328,6 +331,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
     printf ("\n");
     
     var *node = arr->value.arr.first;
+    const char *str;
     while (node) {
         col = 0;
         colorsdone = 0;
@@ -336,7 +340,9 @@ void print_table (var *arr, const char **hdr, const char **fld,
             int iscolor = 0;
             switch (typ[col]) {
                 case VAR_STR:
-                    strncpy (buf, var_get_str_forkey (node, fld[col]),512);
+                    str = var_get_str_forkey (node, fld[col]);
+                    if (! str) buf[0] = 0;
+                    else strncpy (buf, str, 512);
                     buf[512] = 0;
                     iscolor = 1;
                     break;
