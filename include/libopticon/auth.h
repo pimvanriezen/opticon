@@ -8,6 +8,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 
 /* =============================== TYPES =============================== */
@@ -25,6 +26,7 @@ typedef struct session_s {
     time_t                   lastcycle; /**< Time since last key cycle */
     struct sockaddr_storage  remote; /**< Last sen remote host */
     host                    *host; /**< Connected host */
+    bool                     expired;
 } session;
 
 /** Linked list head for sessions */
@@ -33,15 +35,21 @@ typedef struct sessionlist_s {
     session             *last; /**< This bucket's last session */
 } sessionlist;
 
+typedef struct sessiondb_s {
+    pthread_mutex_t      lock;
+    sessionlist          s[256];
+} sessiondb;
+
 /* ============================== GLOBALS ============================== */
 
-extern sessionlist SESSIONS[256];
+extern sessiondb SESSIONS;
 
 /* ============================= FUNCTIONS ============================= */
 
 void         sessionlist_init (void);
 var         *sessionlist_save (void);
 void         sessionlist_restore (var *);
+void         sessionlist_remove_tenant (uuid tenantid);
 session     *session_alloc (void);
 void         session_link (session *);
 

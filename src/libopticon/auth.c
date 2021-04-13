@@ -10,14 +10,15 @@
 #include <libopticon/var.h>
 #include <arpa/inet.h>
 
-sessionlist SESSIONS[256];
+sessiondb SESSIONS;
 
 /*/ ======================================================================= /*/
 /** Initialize session-related global storage. */
 /*/ ======================================================================= /*/
 void sessionlist_init (void) {
+    pthread_mutex_init (&SESSIONS.lock, NULL);
     for (int i=0; i<256; ++i) {
-        SESSIONS[i].first = SESSIONS[i].last = NULL;
+        SESSIONS.s[i].first = SESSIONS.s[i].last = NULL;
     }
 }
 
@@ -28,9 +29,14 @@ var *sessionlist_save (void) {
     var *v_root = var_alloc();
     var *v_session = var_get_array_forkey (v_root, "session");
     session *crsr;
+    pthread_mutex_lock (&SESSIONS.lock);
     for (int i=0; i<256; ++i) {
-        crsr = SESSIONS[i].first;
+        crsr = SESSIONS.s[i].first;
         while (crsr) {
+            if (crsr->expired) {
+                crsr = crsr->next;
+                continue;
+            }
             var *v_sess = var_add_dict (v_session);
             var_set_uuid_forkey (v_sess, "tenantid", crsr->tenantid);
             var_set_uuid_forkey (v_sess, "hostid", crsr->hostid);
@@ -47,7 +53,24 @@ var *sessionlist_save (void) {
             crsr = crsr->next;
         }
     }
+    pthread_mutex_unlock (&SESSIONS.lock);
     return v_root;
+}
+
+/*/ ======================================================================= /*/
+/** Invalidate all sessions for a given tenant id */
+/*/ ======================================================================= /*/
+void sessionlist_remove_tenant (uuid tenantid) {
+    session *crsr;
+    pthread_mutex_lock (&SESSIONS.lock);
+    for (int i=0; i<256; ++i) {
+        crsr = SESSIONS.s[i].first;
+        while (crsr) {
+            if (uuidcmp (crsr->tenantid, tenantid)) crsr->expired = true;
+            crsr = crsr->next;
+        }
+    }
+    pthread_mutex_unlock (&SESSIONS.lock);
 }
 
 /*/ ======================================================================= /*/
@@ -84,6 +107,7 @@ session *session_alloc (void) {
     bzero (res->key.data, 8);
     res->lastcycle = time (NULL);
     res->host = NULL;
+    res->expired = false;
     return res;
 }
 
@@ -96,15 +120,17 @@ void session_link (session *s) {
                      ((sid & 0x00ff0000) >> 16) ^
                      ((sid & 0x0000ff00) >> 8) ^
                      (sid & 0xff);
-    if (SESSIONS[bucket].first) {
+    pthread_mutex_lock (&SESSIONS.lock);
+    if (SESSIONS.s[bucket].first) {
         // link in at top.
-        s->next = SESSIONS[bucket].first;
-        SESSIONS[bucket].first->prev = s;
-        SESSIONS[bucket].first = s;
+        s->next = SESSIONS.s[bucket].first;
+        SESSIONS.s[bucket].first->prev = s;
+        SESSIONS.s[bucket].first = s;
     }
     else {
-        SESSIONS[bucket].first = SESSIONS[bucket].last = s;
+        SESSIONS.s[bucket].first = SESSIONS.s[bucket].last = s;
     }
+    pthread_mutex_unlock (&SESSIONS.lock);
 }
 
 /*/ ======================================================================= /*/
@@ -150,11 +176,18 @@ session *session_find (uint32_t addrpart, uint32_t sess_id) {
                      ((sid & 0x00ff0000) >> 16) ^
                      ((sid & 0x0000ff00) >> 8) ^
                      (sid & 0xff);
-    session *s = SESSIONS[bucket].first;
+    pthread_mutex_lock (&SESSIONS.lock);
+    session *s = SESSIONS.s[bucket].first;
     while (s) {
-        if (s->addr == addrpart && s->sessid == sess_id) return s;
+        if (s->addr == addrpart && s->sessid == sess_id) {
+            if (! s->expired) {
+                pthread_mutex_unlock (&SESSIONS.lock);
+                return s;
+            }
+        }
         s = s->next;
     }
+    pthread_mutex_unlock (&SESSIONS.lock);
     return NULL;
 }
 
@@ -164,11 +197,16 @@ session *session_find (uint32_t addrpart, uint32_t sess_id) {
 /*/ ======================================================================= /*/
 void session_expire (time_t cutoff) {
     session *s, *ns;
+    pthread_mutex_lock (&SESSIONS.lock);
     for (int i=0; i<=255; ++i) {
-        s = SESSIONS[i].first;
+        s = SESSIONS.s[i].first;
         while (s) {
             ns = s->next;
-            if (s->lastcycle < cutoff) {
+            if ((s->expired) || (s->lastcycle < cutoff)) {
+                if (! s->expired) {
+                    s->expired = true;
+                    continue;
+                }
                 log_info ("Expiring session %08x-%08x",s->sessid,s->addr);
                 if (s->prev) {
                     if (s->next) {
@@ -177,16 +215,16 @@ void session_expire (time_t cutoff) {
                     }
                     else {
                         s->prev->next = NULL;
-                        SESSIONS[i].last = s->prev;
+                        SESSIONS.s[i].last = s->prev;
                     }
                 }
                 else {
                     if (s->next) {
                         s->next->prev = NULL;
-                        SESSIONS[i].first = s->next;
+                        SESSIONS.s[i].first = s->next;
                     }
                     else {
-                        SESSIONS[i].first = SESSIONS[i].last = NULL;
+                        SESSIONS.s[i].first = SESSIONS.s[i].last = NULL;
                     }
                 }
                 
@@ -195,6 +233,7 @@ void session_expire (time_t cutoff) {
             s = ns;
         }
     }
+    pthread_mutex_unlock (&SESSIONS.lock);
 }
 
 /*/ ======================================================================= /*/

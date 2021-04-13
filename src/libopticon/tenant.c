@@ -1,6 +1,7 @@
 #include <libopticon/host.h>
 #include <libopticon/tenant.h>
 #include <libopticon/util.h>
+#include <libopticon/auth.h>
 #include <string.h>
 
 tenantlist TENANTS;
@@ -69,6 +70,8 @@ void tenant_delete (tenant *t) {
     if (t->next) pthread_rwlock_unlock (&t->next->lock);
     pthread_rwlock_unlock (&TENANTS.lock);
     pthread_rwlock_unlock (&t->lock);
+    
+    sessionlist_remove_tenant (t->uuid);
     
     host *h = t->first;
     host *nh;
