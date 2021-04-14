@@ -101,7 +101,7 @@ int main (int argc, const char *argv[]) {
     };
     
     tenant_init();
-    sessionlist_init();
+    sessiondb_init();
     
     aeskey tenantkey = aeskey_create();
     tenant *T = tenant_create (tenantid, tenantkey);
@@ -196,7 +196,7 @@ int main (int argc, const char *argv[]) {
     S = session_find (0x0a000001, 0x31337666);
     assert (S != NULL);
     
-    var *v = sessionlist_save();
+    var *v = sessiondb_save();
     var *vsessions = var_find_key (v, "session");
     assert (vsessions);
     var *vsess = var_get_dict_atindex (vsessions, 0);

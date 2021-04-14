@@ -37,7 +37,7 @@ int main (int argc, const char *argv[]) {
     uuid tenantid = mkuuid (stenantid);
     uuid hostid = mkuuid (shostid);
     tenant_init();
-    sessionlist_init();
+    sessiondb_init();
     
     aeskey tenantkey = aeskey_create();
     tenant *T = tenant_create (tenantid, tenantkey);
