@@ -71,7 +71,7 @@ void tenant_delete (tenant *t) {
     pthread_rwlock_unlock (&TENANTS.lock);
     pthread_rwlock_unlock (&t->lock);
     
-    sessionlist_remove_tenant (t->uuid);
+    sessiondb_remove_tenant (t->uuid);
     
     host *h = t->first;
     host *nh;

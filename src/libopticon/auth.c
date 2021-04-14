@@ -15,7 +15,7 @@ sessiondb SESSIONS;
 /*/ ======================================================================= /*/
 /** Initialize session-related global storage. */
 /*/ ======================================================================= /*/
-void sessionlist_init (void) {
+void sessiondb_init (void) {
     pthread_mutex_init (&SESSIONS.lock, NULL);
     for (int i=0; i<256; ++i) {
         SESSIONS.s[i].first = SESSIONS.s[i].last = NULL;
@@ -25,7 +25,7 @@ void sessionlist_init (void) {
 /*/ ======================================================================= /*/
 /** Encode the sessionlist ready for JSON export */
 /*/ ======================================================================= /*/
-var *sessionlist_save (void) {
+var *sessiondb_save (void) {
     var *v_root = var_alloc();
     var *v_session = var_get_array_forkey (v_root, "session");
     session *crsr;
@@ -60,7 +60,7 @@ var *sessionlist_save (void) {
 /*/ ======================================================================= /*/
 /** Invalidate all sessions for a given tenant id */
 /*/ ======================================================================= /*/
-void sessionlist_remove_tenant (uuid tenantid) {
+void sessiondb_remove_tenant (uuid tenantid) {
     session *crsr;
     pthread_mutex_lock (&SESSIONS.lock);
     for (int i=0; i<256; ++i) {
@@ -76,7 +76,7 @@ void sessionlist_remove_tenant (uuid tenantid) {
 /*/ ======================================================================= /*/
 /** Restore the sessionlist from imported JSON */
 /*/ ======================================================================= /*/
-void sessionlist_restore (var *list) {
+void sessiondb_restore (var *list) {
     var *v_session = var_get_array_forkey (list, "session");
     var *crsr = v_session->value.arr.first;
     while (crsr) {

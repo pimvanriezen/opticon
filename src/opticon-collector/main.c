@@ -326,7 +326,7 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
     
     /* Now's a good time to cut the dead wood */
     session_expire (tnow - 905);
-    var *vlist = sessionlist_save();
+    var *vlist = sessiondb_save();
     db_set_global (APP.db, "sessions", vlist);
     var_free (vlist);
     free (auth);
@@ -640,7 +640,7 @@ int daemon_main (int argc, const char *argv[]) {
     var *slist = db_get_global (APP.db, "sessions");
     if (slist) {
         log_info ("Restoring sessions");
-        sessionlist_restore (slist);
+        sessiondb_restore (slist);
         var_free (slist);
         session_expire (time(NULL) - 905);
     }

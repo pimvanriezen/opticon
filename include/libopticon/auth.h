@@ -46,13 +46,13 @@ extern sessiondb SESSIONS;
 
 /* ============================= FUNCTIONS ============================= */
 
-void         sessionlist_init (void);
-var         *sessionlist_save (void);
-void         sessionlist_restore (var *);
-void         sessionlist_remove_tenant (uuid tenantid);
+void         sessiondb_init (void);
+var         *sessiondb_save (void);
+void         sessiondb_restore (var *);
+void         sessiondb_remove_tenant (uuid tenantid);
+
 session     *session_alloc (void);
 void         session_link (session *);
-
 session     *session_register (uuid tenantid, uuid hostid, 
                                uint32_t addrpart, uint32_t sess_id,
                                aeskey sess_key, struct sockaddr_storage *);
