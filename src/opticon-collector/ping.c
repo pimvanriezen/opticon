@@ -207,11 +207,12 @@ void ping_run_sender_v4 (thread *self) {
                 icp->icmp_id = (seq & 0xffff0000) >> 16;
                 icp->icmp_seq = (seq & 0x0000ffff);
                 icp->icmp_cksum = ping_checksum (icp, PKTSIZE);        
-            
+                
                 size_t res = sendto (PINGSTATE.icmp, buf, PKTSIZE, 0,
                                      (struct sockaddr *) (list+i),
                                      sizeof (struct sockaddr_in));
-                                 
+                
+                gettimeofday (&tgt->tsent, NULL);
                 log_debug ("Sent ping to %s", addrstr);
                 pingtarget_close (tgt);
             }
