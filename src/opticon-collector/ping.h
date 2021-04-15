@@ -66,12 +66,13 @@ double ping_get_rtt (struct sockaddr_storage *addr);
 double ping_get_loss (struct sockaddr_storage *addr);
 
 void pingtargetlist_init (pingtargetlist *);
-pingtarget *pingtargetlist_get (pingtargetlist *, struct sockaddr_storage *);
+pingtarget *pingtargetlist_get (pingtargetlist *,
+                                struct sockaddr_storage *, bool);
 struct sockaddr_storage *pingtargetlist_all (pingtargetlist *, uint32_t *);
 void pingtargetlist_release (pingtargetlist *, pingtarget *);
 
 uint32_t pingtarget_makeid (struct sockaddr_storage *addr);
-pingtarget *pingtarget_open (struct sockaddr_storage *addr);
+pingtarget *pingtarget_open (struct sockaddr_storage *addr, bool create);
 pingtarget *pingtarget_create (struct sockaddr_storage *addr);
 double pingtarget_get_rtt (pingtarget *self);
 double pingtarget_get_loss (pingtarget *self);

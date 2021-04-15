@@ -145,7 +145,7 @@ void ping_start (void) {
 /*/ ======================================================================= /*/
 double ping_get_rtt (struct sockaddr_storage *addr) {
     double res = 0.0;
-    pingtarget *tgt = pingtarget_open (addr);
+    pingtarget *tgt = pingtarget_open (addr, true);
     if (tgt) {
         res = pingtarget_get_rtt (tgt);
         pingtarget_close (tgt);
@@ -158,7 +158,7 @@ double ping_get_rtt (struct sockaddr_storage *addr) {
 /*/ ======================================================================= /*/
 double ping_get_loss (struct sockaddr_storage *addr) {
     double res = 0.0;
-    pingtarget *tgt = pingtarget_open (addr);
+    pingtarget *tgt = pingtarget_open (addr, true);
     if (tgt) {
         res = pingtarget_get_loss (tgt);
         pingtarget_close (tgt);
@@ -190,7 +190,7 @@ void ping_run_sender_v4 (thread *self) {
         log_debug ("Pinging %i target%s", count, count==1?"":"s");
         for (i=0; i<count; ++i) {
             ip2str (list+i, addrstr);
-            pingtarget *tgt = pingtarget_open (list+i);
+            pingtarget *tgt = pingtarget_open (list+i, true);
             if (tgt) {
                 seq = ping_sequence();
                 if (tgt->sequence) {
@@ -272,7 +272,7 @@ void ping_run_receiver_v4 (thread *self) {
         hlen = ip->ip_hl << 2;
         icp = (struct icmp *)(buf + hlen);
         
-        pingtarget *tgt = pingtarget_open (&faddr);
+        pingtarget *tgt = pingtarget_open (&faddr, false);
         if (tgt) {
             ip2str (&faddr, addrstr);
             in_seq = icp->icmp_seq;
@@ -340,7 +340,8 @@ void pingtargetlist_release (pingtargetlist *self, pingtarget *tgt) {
     with the address exists, it is created. */
 /*/ ======================================================================= /*/
 pingtarget *pingtargetlist_get (pingtargetlist *self,
-                                struct sockaddr_storage *addr) {
+                                struct sockaddr_storage *addr,
+                                bool create) {
     if (! addr->ss_family) {
         log_debug ("pingtargetlist_get: no family");
         return NULL;
@@ -358,6 +359,8 @@ pingtarget *pingtargetlist_get (pingtargetlist *self,
         }
         crsr = crsr->next;
     }
+    
+    if (! create) return NULL;
     
     crsr = pingtarget_create (addr);
     crsr->parent = self;
@@ -410,7 +413,7 @@ uint32_t pingtarget_makeid (struct sockaddr_storage *remote) {
 /** Open a pingtarget from the right targetlist depending on
     address type. */
 /*/ ======================================================================= /*/
-pingtarget *pingtarget_open (struct sockaddr_storage *remote) {
+pingtarget *pingtarget_open (struct sockaddr_storage *remote, bool create) {
     pingtargetlist *list = NULL;
     if (remote->ss_family == AF_INET) {
         list = &PINGSTATE.v4;
@@ -423,7 +426,7 @@ pingtarget *pingtarget_open (struct sockaddr_storage *remote) {
         log_error ("Unknown target family: %02x", remote->ss_family);
         return NULL;
     }
-    return pingtargetlist_get (list, remote);
+    return pingtargetlist_get (list, remote, create);
 }
 
 /*/ ======================================================================= /*/
