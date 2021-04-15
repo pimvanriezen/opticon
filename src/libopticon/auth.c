@@ -147,6 +147,7 @@ session *session_register (uuid tenantid, uuid hostid,
     if ((s = session_find (addrpart, sess_id))) {
         s->lastcycle = time (NULL);
         s->key = sess_key;
+        memcpy (&s->remote, ss, sizeof (struct sockaddr_storage));
         return s;
     }
         

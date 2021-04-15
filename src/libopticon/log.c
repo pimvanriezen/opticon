@@ -1,4 +1,5 @@
 #include <libopticon/log.h>
+#include <libopticon/thread.h>
 #include <syslog.h>
 #include <stdio.h>
 #include <string.h>
@@ -97,8 +98,12 @@ void log_open_file (const char *filename, int maxprio) {
 /** Dispatcer of a message to either stderr, or the log handle. */
 /*/ ======================================================================= /*/
 void log_string (int prio, const char *str) {
+    thread *t = thread_current();
+    char buf[4160];
+    sprintf (buf, "[%s] %s", t ? t->name : "main", str);
+    
     if (LOG) {
-        if (prio <= LOG->maxprio) LOG->write (LOG, prio, str);
+        if (prio <= LOG->maxprio) LOG->write (LOG, prio, buf);
     }
     else {
         if (prio == LOG_ERR) {
@@ -111,7 +116,7 @@ void log_string (int prio, const char *str) {
             fprintf (stderr, "[WARN ] ");
         }
         else fprintf (stderr, "[INFO ] ");
-        fprintf (stderr, "%s\n", str);
+        fprintf (stderr, "%s\n", buf);
     }
 }
 

@@ -301,6 +301,8 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
         else {
             log_debug ("Rejecting Duplicate serial <%i> on auth from <%s>",
                         auth->serial, addrbuf);
+            free (auth);
+            return;
         }
     }
     else {
@@ -325,10 +327,12 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
     }
     
     /* Now's a good time to cut the dead wood */
+    log_debug ("Expiring sessions");
     session_expire (tnow - 905);
     var *vlist = sessiondb_save();
     db_set_global (APP.db, "sessions", vlist);
     var_free (vlist);
+    log_debug ("Saved sessions");
     free (auth);
 }
 
@@ -504,6 +508,7 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
   * the earliest recorded date, until the tenant is under quota again. */
 /*/ ======================================================================= /*/
 void reaper_run (thread *self) {
+    thread_setname (self, "quota");
     while (1) {
         sleep (10);
         int numtenants = 0;
@@ -583,6 +588,7 @@ void reaper_run (thread *self) {
   * This is done to keep the signal handler path clean. */
 /*/ ======================================================================= /*/
 void conf_reloader_run (thread *t) {
+    thread_setname (t, "reloader");
     conf_reloader *self = (conf_reloader *) t;
     while (1) {
         conditional_wait_fresh (self->cond);

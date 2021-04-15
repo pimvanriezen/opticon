@@ -1,6 +1,10 @@
 #include <libopticon/thread.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <string.h>
+#include <stdio.h>
+
+static pthread_key_t *TKEY = NULL;
 
 /*/ ======================================================================= /*/
 /** Post-cancel/post-exit cleanup routing. Will call the thread-defined
@@ -16,9 +20,14 @@ void thread_cleanup (void *dt) {
 /** Call a thread's run function */
 /*/ ======================================================================= /*/
 void *thread_spawn (void *dt) {
+    if (!TKEY) {
+        TKEY = malloc (sizeof (pthread_key_t));
+        pthread_key_create (TKEY, NULL);
+    }
     thread *self = (thread *) dt;
     self->isrunning = 1;
     pthread_cleanup_push (thread_cleanup, self);
+    pthread_setspecific (*TKEY, self);
     self->run (self);
     pthread_cleanup_pop(0);
     self->isrunning = 0;
@@ -27,9 +36,30 @@ void *thread_spawn (void *dt) {
 }
 
 /*/ ======================================================================= /*/
+/** Set a thread's name field */
+/*/ ======================================================================= /*/
+void thread_setname (thread *self, const char *nm) {
+    strncpy (self->name, nm, 15);
+    self->name[15] = 0;
+}
+
+/*/ ======================================================================= /*/
+/** Return pointer to the currently running thread, or NULL if not in a
+    thread */
+/*/ ======================================================================= /*/
+thread *thread_current (void) {
+    if (! TKEY) return NULL;
+    return (thread *) pthread_getspecific (*TKEY);
+}
+
+/*/ ======================================================================= /*/
 /** Allocate and spawn a thread */
 /*/ ======================================================================= /*/
 thread *thread_create (run_f run, cancel_f cancel) {
+    if (!TKEY) {
+        TKEY = malloc (sizeof (pthread_key_t));
+        pthread_key_create (TKEY, NULL);
+    }
     thread *self = (thread *) malloc (sizeof (thread));
     thread_init (self, run, cancel);
     return self;
@@ -115,6 +145,7 @@ void thread_init (thread *self, run_f run, cancel_f cancel) {
     self->cancel = cancel;
     self->isrunning = 0;
     self->cshutdown = conditional_create();
+    sprintf (self->name, "thread-%06llx", ((uint64_t)self) & 0xffffff);
     pthread_attr_init (&self->tattr);
     pthread_create (&self->thread, &self->tattr, thread_spawn, self);
 }

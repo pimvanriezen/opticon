@@ -452,6 +452,7 @@ void watchthread_handle_host (host *host) {
     overview data. */
 /*/ ======================================================================= /*/
 void overviewthread_run (thread *self) {
+    thread_setname (self, "overview");
     tenant *tcrsr;
     time_t t_now = time (NULL);
     time_t t_next = (t_now+60)-((t_now+60)%60)+2;
@@ -499,6 +500,7 @@ void overviewthread_run (thread *self) {
 /** Main loop for the watchthread */
 /*/ ======================================================================= /*/
 void watchthread_run (thread *self) {
+    thread_setname (self, "watcher");
     tenant *tcrsr;
     host *hcrsr;
     time_t t_now = time (NULL);

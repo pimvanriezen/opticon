@@ -785,6 +785,7 @@ static struct topthreadinfo_s {
 void run_top (thread *self) {
     FILE *F;
     char buf[256];
+    thread_setname (self, "top");
     
     procrun *p = (procrun *) malloc (sizeof (procrun));
     int i;

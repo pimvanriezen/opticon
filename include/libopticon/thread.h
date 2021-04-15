@@ -25,6 +25,7 @@ typedef struct thread_s {
     pthread_t        thread; /**< Pthread storage */
     int              isrunning; /**< 1 if thread is spawned */
     conditional     *cshutdown; /**< Conditional to poll for thread shutdown */
+    char             name[16];
 } thread;
 
 /* ============================= FUNCTIONS ============================= */
@@ -34,6 +35,8 @@ void         thread_init (thread *, run_f, cancel_f);
 thread      *thread_create (run_f, cancel_f);
 void         thread_free (thread *);
 void         thread_cancel (thread *);
+void         thread_setname (thread *, const char *);
+thread      *thread_current (void);
 
 conditional *conditional_create (void);
 void         conditional_free (conditional *);

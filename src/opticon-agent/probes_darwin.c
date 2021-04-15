@@ -116,6 +116,7 @@ void run_top (thread *me) {
     int count = 0;
     int offs_cmd, offs_cpu, offs_mem, offs_user;
     memset (TOP, 0, 2*sizeof(topinfo));
+    thread_setname (me, "top");
     FILE *f = popen ("/usr/bin/top -l 0 -o cpu -n 16 -c d -s 30", "r");
     if (! f) {
         log_error ("Could not open top probe");

@@ -171,6 +171,7 @@ double ping_get_loss (struct sockaddr_storage *addr) {
     seconds */
 /*/ ======================================================================= /*/
 void ping_run_sender_v4 (thread *self) {
+    thread_setname (self, "rtt-send-v4");
     struct sockaddr_storage *list;
     char buf[PKTSIZE];
     struct icmp *icp = (struct icmp *) buf;
@@ -195,7 +196,7 @@ void ping_run_sender_v4 (thread *self) {
                     /* No ping reply for our last sequence has been sent,
                        so we register that as a lost packet */
                     pingtarget_write_loss (tgt);
-                    log_debug ("ping: Set loss for %08x\n", tgt->id);
+                    log_debug ("Set loss for %08x\n", tgt->id);
                 }
                 tgt->sequence = seq;
                 gettimeofday (&tgt->tsent, NULL);
@@ -211,7 +212,7 @@ void ping_run_sender_v4 (thread *self) {
                                      (struct sockaddr *) (list+i),
                                      sizeof (struct sockaddr_in));
                                  
-                log_debug ("ping: Sent ping to %s", addrstr);
+                log_debug ("Sent ping to %s", addrstr);
                 pingtarget_close (tgt);
             }
             ping_msleep (20000 / count);
@@ -226,6 +227,7 @@ void ping_run_sender_v4 (thread *self) {
     seconds */
 /*/ ======================================================================= /*/
 void ping_run_sender_v6 (thread *self) {
+    thread_setname (self, "rtt-send-v6");
     while (1) sleep (60);
 }
 
@@ -246,6 +248,7 @@ double ping_diff (struct timeval *then, struct timeval *now) {
 /** Thread that receives and processes ping replies from v4 hosts. */
 /*/ ======================================================================= /*/
 void ping_run_receiver_v4 (thread *self) {
+    thread_setname (self, "rtt-recv-v4");
     uint8_t buf[1500];
     struct icmp *icp;
     struct ip *ip;
@@ -275,7 +278,7 @@ void ping_run_receiver_v4 (thread *self) {
             if ((tgt->sequence & 0xffff) == in_seq) {
                 tgt->sequence = 0;
                 double delta = ping_diff (&tgt->tsent, &tv);
-                log_debug ("ping: Got reply from %s: %.2f ms", addrstr, delta);
+                log_debug ("Got reply from %s: %.2f ms", addrstr, delta);
                 pingtarget_write (tgt, delta);
             }
             pingtarget_close (tgt);
@@ -287,6 +290,7 @@ void ping_run_receiver_v4 (thread *self) {
 /** Thread that receives and processes ping replies from v6 hosts. */
 /*/ ======================================================================= /*/
 void ping_run_receiver_v6 (thread *self) {
+    thread_setname (self, "rtt-recv-v6");
     while (1) sleep (60);
 }
 
@@ -317,7 +321,7 @@ struct sockaddr_storage *pingtargetlist_all (pingtargetlist *self,
         
         char buf[INET6_ADDRSTRLEN];
         ip2str (&crsr->remote, buf);
-        log_debug ("ping: add list: %08x %s", crsr->id, buf);
+        log_debug ("add list: %08x %s", crsr->id, buf);
         
         i++;
         crsr = crsr->next;
@@ -443,7 +447,7 @@ pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     memcpy (&self->remote, remote, sizeof(struct sockaddr_storage));
     char addr[INET6_ADDRSTRLEN];
     ip2str (remote, addr);
-    log_debug ("ping: Created target %08x (%s)", self->id, addr);
+    log_debug ("Created target %08x (%s)", self->id, addr);
     return self;
 }
 

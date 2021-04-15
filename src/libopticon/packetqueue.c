@@ -11,6 +11,7 @@
   * and puts them on the ringbuffer.
   */
 void packetqueue_run (thread *t) {
+    thread_setname (t, "packetq");
     log_info ("Packetqueue started");
     
     packetqueue *self = (packetqueue *) t;
