@@ -949,11 +949,13 @@ void localdb_write_log (db *d, uuid hostid, const char *subsystem,
     
     log = localdb_open_log (self, hostid);
     if (log) {
-        uint32_t wpos = log->data->writepos;
-        log->data->writepos = (wpos+1) % 63;
-        log->data->rec[wpos].when = time (NULL);
-        memcpy (log->data->rec[wpos].message, message, 240);
-        strncpy (log->data->rec[wpos].subsystem, subsystem, 11);
+        if (log->data) {
+            uint32_t wpos = log->data->writepos;
+            log->data->writepos = (wpos+1) % 63;
+            log->data->rec[wpos].when = time (NULL);
+            memcpy (log->data->rec[wpos].message, message, 240);
+            strncpy (log->data->rec[wpos].subsystem, subsystem, 11);
+        }
         localdb_close_log (log);
     }
 }
@@ -963,7 +965,7 @@ var *localdb_get_log (db *d, uuid hostid) {
     localdb *self = (localdb *) d;
     hostloghandle *log = localdb_open_log (self, hostid);
     var *res = var_alloc();
-    if (log) {
+    if (log && log->data) {
         uint32_t rpos = (log->data->writepos-1) % 63;
         while (rpos != log->data->writepos) {        
             hostlogrecord *irec = &log->data->rec[rpos];
@@ -975,8 +977,8 @@ var *localdb_get_log (db *d, uuid hostid) {
             }
             rpos = (rpos-1) % 63;
         }
-        localdb_close_log (log);
     }
+    if (log) localdb_close_log (log);
     return res;
 }
 

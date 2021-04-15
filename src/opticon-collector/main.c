@@ -486,16 +486,6 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     meter *m_rtt = host_get_meter (H, mid_rtt);
     meter *m_loss = host_get_meter (H, mid_loss);
     
-    if (S->remote.ss_family) {
-        double rtt = ping_get_rtt (&S->remote);
-        double loss = ping_get_loss (&S->remote);
-    
-        meter_setcount (m_rtt, 0);
-        meter_set_frac (m_rtt,0,rtt);
-        meter_setcount (m_loss, 0);
-        meter_set_frac (m_loss,0,loss);
-    }
-
     host_end_update (H);
     pthread_rwlock_unlock (&H->lock);
     ioport_close (unwrap);
