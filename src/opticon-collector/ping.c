@@ -187,6 +187,7 @@ void ping_run_sender_v4 (thread *self) {
     
     while (1) {
         list = pingtargetlist_all (&PINGSTATE.v4, &count);
+        log_debug ("Pinging %i target%s", count, count==1?"":"s");
         for (i=0; i<count; ++i) {
             ip2str (list+i, addrstr);
             pingtarget *tgt = pingtarget_open (list+i);
@@ -196,7 +197,7 @@ void ping_run_sender_v4 (thread *self) {
                     /* No ping reply for our last sequence has been sent,
                        so we register that as a lost packet */
                     pingtarget_write_loss (tgt);
-                    log_debug ("Set loss for %08x\n", tgt->id);
+                    log_debug ("Set loss for %s\n", addrstr);
                 }
                 tgt->sequence = seq;
                 gettimeofday (&tgt->tsent, NULL);
@@ -213,7 +214,6 @@ void ping_run_sender_v4 (thread *self) {
                                      sizeof (struct sockaddr_in));
                 
                 gettimeofday (&tgt->tsent, NULL);
-                log_debug ("Sent ping to %s", addrstr);
                 pingtarget_close (tgt);
             }
             ping_msleep (20000 / count);
@@ -319,11 +319,6 @@ struct sockaddr_storage *pingtargetlist_all (pingtargetlist *self,
     crsr = self->first;
     while (crsr && i<*count) {
         memcpy (res+i, &crsr->remote, sizeof (struct sockaddr_storage));
-        
-        char buf[INET6_ADDRSTRLEN];
-        ip2str (&crsr->remote, buf);
-        log_debug ("add list: %08x %s", crsr->id, buf);
-        
         i++;
         crsr = crsr->next;
     }
