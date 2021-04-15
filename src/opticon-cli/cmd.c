@@ -626,99 +626,99 @@ int cmd_get_record (int argc, const char *argv[]) {
     Vdone("status");
     Vdone("problems");
     
-    char uptimestr[128];
-    uint64_t uptime = Vint("uptime"); Vdone("uptime");
-    uint64_t u_days = uptime / 86400ULL;
-    uint64_t u_hours = (uptime - (86400 * u_days)) / 3600ULL;
-    uint64_t u_mins = (uptime - (86400 * u_days) - (3600 * u_hours)) / 60ULL;
-    uint64_t u_sec = uptime % 60;
-    
-    if (u_days) {
-        sprintf (uptimestr, "%" PRIu64 " day%s, %" PRIu64 ":%02" PRIu64
-                 ":%02" PRIu64 "", u_days, (u_days==1)?"":"s",
-                 u_hours, u_mins, u_sec);
-    }
-    else if (u_hours) {
-        sprintf (uptimestr, "%" PRIu64 ":%02" PRIu64 ":%02"
-                 PRIu64, u_hours, u_mins, u_sec);
-    }
-    else {
-        sprintf (uptimestr, "%" PRIu64 " minute%s, %" PRIu64 " second%s",
-                 u_mins, (u_mins==1)?"":"s", u_sec, (u_sec==1)?"":"s");
-    }
-    
-    print_value ("Uptime","\033[38;5;28m%s\033[0m",uptimestr);
-    print_value ("OS/Hardware","\033[38;5;28m%s %s \033[0m(%s)",
-                 VDstr("os","kernel"), VDstr("os","version"),
-                 VDstr("os","arch"));
-    const char *dist = VDstr("os","distro");
-    if (dist) print_value ("Distribution", "\033[38;5;28m%s\033[0m", dist);
-    Vdone("os");
-    
-    /* -------------------------------------------------------------*/
-    print_hdr ("RESOURCES");
-    print_value ("Processes","\033[1m%" PRIu64 "\033[0m "
-                             "(\033[1m%" PRIu64 "\033[0m running, "
-                             "\033[1m%" PRIu64 "\033[0m stuck)",
-                             VDint("proc","total"),
-                             VDint("proc","run"),
-                             VDint("proc","stuck"));
-    Vdone("proc");
- 
-     print_value ("Load Average", "\033[1m%6.2f\033[0m / "
-                                  "\033[1m%6.2f\033[0m / "
-                                  "\033[1m%6.2f\033[0m",
-                 VAfrac ("loadavg",0), VAfrac ("loadavg", 1),
-                 VAfrac ("loadavg",2));
-    Vdone ("loadavg");
-
-    char cpubuf[128];
-    sprintf (cpubuf, "\033[1m%6.2f \033[0m%%", Vfrac("pcpu"));
-    
-    char meter[32];
-    strcpy (meter, "-[                      ]+");
-    
-    double iowait = VDfrac("io","pwait");
-    double pcpu = Vfrac("pcpu"); Vdone("pcpu");
-    double level = 4.5;
-    
-    int pos = 2;
-    while (level < 100.0 && pos < 22) {
-        if (level < pcpu) meter[pos++] = '#';
-        else meter[pos++] = ' ';
-        level += 4.5;
-    }
-    
-    
-    print_gauge_value ("CPU", "%", pcpu, 100);
-    if (iowait>0.001) print_value ("CPU iowait", 
-                                   "\033[1m%6.2f \033[0m%%", iowait);
-    print_value ("Available RAM", "\033[1m%.2f\033[0m MB",
-                 ((double)VDint("mem","total"))/1024.0);
-    print_value ("Free RAM", "\033[1m%.2f\033[0m MB",
-                 ((double)VDint("mem","free"))/1024.0);
-    
-    print_value ("Network in/out", "\033[1m%i\033[0m Kb/s "
-                                   "(\033[1m%i\033[0m pps) / "
-                                   "\033[1m%i\033[0m Kb/s "
-                                   "(\033[1m%i\033[0m pps)",
-                                   VDint("net","in_kbs"),
-                                   VDint("net","in_pps"),
-                                   VDint("net","out_kbs"),
-                                   VDint("net","out_pps"));
-    
-    print_value ("Disk i/o", "\033[1m%i\033[0m rdops / "
-                             "\033[1m%i\033[0m wrops",
-                 VDint("io","rdops"), VDint("io","wrops"));
-    
-    Vdone("mem");
-    Vdone("net");
-    Vdone("io");
-    Vdone("badness");
-
-    print_values (apires, NULL);
-    
     if (! OPTIONS.showgraphs) {
+        char uptimestr[128];
+        uint64_t uptime = Vint("uptime"); Vdone("uptime");
+        uint64_t u_days = uptime / 86400ULL;
+        uint64_t u_hours = (uptime - (86400 * u_days)) / 3600ULL;
+        uint64_t u_mins = (uptime - (86400 * u_days) - (3600 * u_hours)) / 60ULL;
+        uint64_t u_sec = uptime % 60;
+    
+        if (u_days) {
+            sprintf (uptimestr, "%" PRIu64 " day%s, %" PRIu64 ":%02" PRIu64
+                     ":%02" PRIu64 "", u_days, (u_days==1)?"":"s",
+                     u_hours, u_mins, u_sec);
+        }
+        else if (u_hours) {
+            sprintf (uptimestr, "%" PRIu64 ":%02" PRIu64 ":%02"
+                     PRIu64, u_hours, u_mins, u_sec);
+        }
+        else {
+            sprintf (uptimestr, "%" PRIu64 " minute%s, %" PRIu64 " second%s",
+                     u_mins, (u_mins==1)?"":"s", u_sec, (u_sec==1)?"":"s");
+        }
+    
+        print_value ("Uptime","\033[38;5;28m%s\033[0m",uptimestr);
+        print_value ("OS/Hardware","\033[38;5;28m%s %s \033[0m(%s)",
+                     VDstr("os","kernel"), VDstr("os","version"),
+                     VDstr("os","arch"));
+        const char *dist = VDstr("os","distro");
+        if (dist) print_value ("Distribution", "\033[38;5;28m%s\033[0m", dist);
+        Vdone("os");
+    
+        /* -------------------------------------------------------------*/
+        print_hdr ("RESOURCES");
+        print_value ("Processes","\033[1m%" PRIu64 "\033[0m "
+                                 "(\033[1m%" PRIu64 "\033[0m running, "
+                                 "\033[1m%" PRIu64 "\033[0m stuck)",
+                                 VDint("proc","total"),
+                                 VDint("proc","run"),
+                                 VDint("proc","stuck"));
+        Vdone("proc");
+ 
+         print_value ("Load Average", "\033[1m%6.2f\033[0m / "
+                                      "\033[1m%6.2f\033[0m / "
+                                      "\033[1m%6.2f\033[0m",
+                     VAfrac ("loadavg",0), VAfrac ("loadavg", 1),
+                     VAfrac ("loadavg",2));
+        Vdone ("loadavg");
+
+        char cpubuf[128];
+        sprintf (cpubuf, "\033[1m%6.2f \033[0m%%", Vfrac("pcpu"));
+    
+        char meter[32];
+        strcpy (meter, "-[                      ]+");
+    
+        double iowait = VDfrac("io","pwait");
+        double pcpu = Vfrac("pcpu"); Vdone("pcpu");
+        double level = 4.5;
+    
+        int pos = 2;
+        while (level < 100.0 && pos < 22) {
+            if (level < pcpu) meter[pos++] = '#';
+            else meter[pos++] = ' ';
+            level += 4.5;
+        }
+    
+    
+        print_gauge_value ("CPU", "%", pcpu, 100);
+        if (iowait>0.001) print_value ("CPU iowait", 
+                                       "\033[1m%6.2f \033[0m%%", iowait);
+        print_value ("Available RAM", "\033[1m%.2f\033[0m MB",
+                     ((double)VDint("mem","total"))/1024.0);
+        print_value ("Free RAM", "\033[1m%.2f\033[0m MB",
+                     ((double)VDint("mem","free"))/1024.0);
+    
+        print_value ("Network in/out", "\033[1m%i\033[0m Kb/s "
+                                       "(\033[1m%i\033[0m pps) / "
+                                       "\033[1m%i\033[0m Kb/s "
+                                       "(\033[1m%i\033[0m pps)",
+                                       VDint("net","in_kbs"),
+                                       VDint("net","in_pps"),
+                                       VDint("net","out_kbs"),
+                                       VDint("net","out_pps"));
+    
+        print_value ("Disk i/o", "\033[1m%i\033[0m rdops / "
+                                 "\033[1m%i\033[0m wrops",
+                     VDint("io","rdops"), VDint("io","wrops"));
+    
+        Vdone("mem");
+        Vdone("net");
+        Vdone("io");
+        Vdone("badness");
+
+        print_values (apires, NULL);
+    
         /* -------------------------------------------------------------*/
         print_hdr ("PROCESS LIST");
     
