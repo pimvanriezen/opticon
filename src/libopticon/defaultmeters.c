@@ -226,7 +226,7 @@ const char *DEFGRAPHS =
 "       title: \"RTT\""
 "       unit: \"ms\""
 "       color: \"blue\""
-"       max: 25.0"
+"       max: 1.0"
 "   }"
 "   net/in_kbs {"
 "       graph: net"

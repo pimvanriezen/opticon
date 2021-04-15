@@ -765,6 +765,10 @@ int cmd_get_record (int argc, const char *argv[]) {
         printf ("\033[2m  12    ^     ^      ^     ^     ^      6     ^     "
                   "^      ^     ^     ^     0\033[0m\n");
 
+        print_hdr("GRAPHS");
+        cmd_print_graph ("link","rtt", 76, 2);
+        printf ("\033[2m  12    ^     ^      ^     ^     ^      6     ^     "
+                  "^      ^     ^     ^     0\033[0m\n");
         cmd_print_graph ("net","input", 37, 2);
         printf ("\033[7A");
         cmd_print_graph ("net","output", 37, 41);
