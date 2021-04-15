@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 
 static pthread_key_t *TKEY = NULL;
 
