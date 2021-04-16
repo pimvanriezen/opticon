@@ -121,6 +121,52 @@ FILE *localdb_open_indexfile (localdb *ctx, uuid hostid, datestamp dt, int flags
     return res;
 }
 
+FILE *localdb_open_current (localdb *ctx, uuid hostid, int flags) {
+    char uuidstr[40];
+    struct stat st;
+    char *dbpath = (char *) malloc (strlen (ctx->path) + 64);
+    if (! dbpath) return NULL;
+    
+    uuid2str (hostid, uuidstr);
+    sprintf (dbpath, "%s/%s/current.db.new", ctx->path, uuidstr);
+    if (flags & LOCALDB_FLAG_NOCREATE) {
+        if (stat (dbpath, &st) != 0) {
+            free (dbpath);
+            return NULL;
+        }
+    }
+    
+    FILE *res = fopen (dbpath, "w");
+    if (! res) {
+        sprintf (dbpath, "%s/%s", ctx->path, uuidstr);
+        if (mkdir (dbpath, 0750) != 0) {
+            free (dbpath);
+            return NULL;
+        }
+        sprintf (dbpath, "%s/%s/current.db.new", ctx->path, uuidstr);
+        res = fopen (dbpath, "w");
+    }
+    free (dbpath);
+    return res;
+}
+
+void localdb_done_current (localdb *ctx, uuid hostid) {
+    char uuidstr[40];
+    struct stat st;
+    char *newpath = (char *) malloc (strlen (ctx->path) + 64);
+    char *oldpath = (char *) malloc (strlen (ctx->path) + 64);
+    
+    if (! newpath) return;
+    if (! oldpath) { free (newpath); return; }
+    
+    uuid2str (hostid, uuidstr);
+    sprintf (oldpath, "%s/%s/current.db.new", ctx->path, uuidstr);
+    sprintf (newpath, "%s/%s/current.db", ctx->path, uuidstr);
+    rename (oldpath, newpath);
+    free (newpath);
+    free (oldpath);
+}
+
 /** Utility function for reading an encoded 64 bits integer out
   * of a FILE stream. This because setting up an iobuffer for
   * just this task stinks for the index.
@@ -311,19 +357,26 @@ int localdb_save_record (db *dbctx, time_t when, host *h) {
     datestamp dt = time2date (when);
     off_t dbpos = 0;
     
+    FILE *curf = localdb_open_current (self, h->uuid, 0);
+    if (! curf) return 0;
+
     FILE *dbf = localdb_open_dbfile (self, h->uuid, dt, 0);
-    if (! dbf) return 0;
+    if (! dbf) {
+        fclose (curf);
+        return 0;
+    }
     flock (fileno (dbf), LOCK_EX);
     
     FILE *ixf = localdb_open_indexfile (self, h->uuid, dt, 0);
     if (! ixf) {
         flock (fileno (dbf), LOCK_UN);
+        fclose (curf);
         fclose (dbf);
         return 0;
     }
     
     ioport *dbport = ioport_create_filewriter (dbf);
-    ioport *ixport = ioport_create_filewriter (ixf);
+    ioport *ixport = ioport_create_dualfilewriter (ixf, curf);
     
     fseek (dbf, 0, SEEK_END);
     fseek (ixf, 0, SEEK_END);
@@ -340,6 +393,8 @@ int localdb_save_record (db *dbctx, time_t when, host *h) {
     flock (fileno (dbf), LOCK_UN);
     fclose (dbf);
     fclose (ixf);
+    fclose (curf);
+    localdb_done_current (self, h->uuid);
     return 1;
 }
 
