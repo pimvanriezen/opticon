@@ -373,8 +373,8 @@ int localdb_save_record (db *dbctx, time_t when, host *h) {
         return 0;
     }
     
-    ioport *dbport = ioport_create_filewriter (dbf);
-    ioport *ixport = ioport_create_dualfilewriter (ixf, curf);
+    ioport *dbport = ioport_create_dualfilewriter (dbf,curf);
+    ioport *ixport = ioport_create_filewriter (ixf);
     
     fseek (dbf, 0, SEEK_END);
     fseek (ixf, 0, SEEK_END);
