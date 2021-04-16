@@ -293,8 +293,6 @@ int localdb_get_record (db *d, time_t when, host *into) {
     return res;
 }
 
-void __breakme (void) {}
-
 /** Implementation for db_get_value_range_int() */
 uint64_t *localdb_get_value_range_int (db *d, time_t start, time_t end,
                                        int numsamples, meterid_t key,
@@ -328,7 +326,7 @@ double *localdb_get_value_range_frac (db *d, time_t start, time_t end,
                                       int numsamples, meterid_t key,
                                       uint8_t arrayindex, host *h) {
     if (end <= start) return NULL;
-    if (numsamples <2) return NULL;
+    if (numsamples < 2) return NULL;
     if (numsamples > 1024) return NULL;
     double *res = (double *) malloc ((numsamples+1) * sizeof (double));
     uint64_t interval = end-start;
