@@ -531,6 +531,8 @@ void localdb_close (db *dbctx) {
 void localdb_free (db *dbctx) {
     localdb *self = (localdb *) dbctx;
     codec_release (self->codec);
+    free (self->pathprefix);
+    free (self);
 }
 
 /** Recurse over a directory structure fishing for uuids */

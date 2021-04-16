@@ -66,6 +66,7 @@ void req_arg_remove_top (req_arg *self) {
 /*/ ======================================================================= /*/
 void req_arg_clear (req_arg *self) {
     for (int i=0; i<self->argc; ++i) free (self->argv[i]);
+    if (self->argv) free (self->argv);
     self->argc = 0;
     self->argv = NULL;
 }
