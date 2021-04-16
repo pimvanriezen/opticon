@@ -248,7 +248,7 @@ void host_begin_update (host *h, time_t t) {
     inactive for more than five minutes. */
 /*/ ======================================================================= /*/
 void host_end_update (host *h) {
-    bool stale = false;
+    bool is_stale = false;
     time_t last = h->lastmodified;
     meterid_t mid_status = makeid("status",MTYPE_STR,0);
     meter *m_status = host_find_meter (h, mid_status);
@@ -258,11 +258,12 @@ void host_end_update (host *h) {
     
     /* Don't reap meters from STALE hosts */
     if (m_status) status = meter_get_str (m_status, 0);
-    if (strcmp (m_status, "STALE") == 0) return;
+    if (strcmp (m_status, "STALE") == 0) is_stale = true;;
     
     while (m) {
         nm = m->next;
-        if (m->lastmodified < last) {
+        if (is_stale) m->lastmodified = last;
+        else if (m->lastmodified < last) {
             if ((last - m->lastmodified) > default_meter_timeout) {
                 host_delete_meter (h, m);
             }
