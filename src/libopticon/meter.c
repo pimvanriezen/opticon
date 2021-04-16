@@ -10,7 +10,7 @@ meter *meter_alloc (void) {
     meter *res = (meter *) malloc (sizeof (meter));
     res->next = NULL;
     res->prev = NULL;
-    res->count = -1;
+    res->count = SZ_EMPTY_VAL;
     res->d.u64 = NULL;
     res->host = NULL;
     res->badness = 0.0;
