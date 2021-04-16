@@ -137,6 +137,8 @@ void ping_start (void) {
     thread_create (ping_run_sender_v4, NULL);
     thread_create (ping_run_sender_v6, NULL);
     thread_create (ping_run_receiver_v4, NULL);
+    thread_create (ping_run_receiver_v4, NULL);
+    thread_create (ping_run_receiver_v6, NULL);
     thread_create (ping_run_receiver_v6, NULL);
 }
 
