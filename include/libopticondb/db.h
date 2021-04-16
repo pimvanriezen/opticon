@@ -89,6 +89,7 @@ typedef struct db_s {
 /* ============================= FUNCTIONS ============================= */
 
 int          db_open (db *d, uuid tenant, var *extra);
+int          db_get_current (db *d, host *into);
 int          db_get_record (db *d, time_t when, host *into);
 uint64_t    *db_get_value_range_int (db *d, time_t start, time_t end,
                                      int numsamples, meterid_t key,

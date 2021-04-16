@@ -13,6 +13,7 @@ typedef struct apioptions_s {
     const char  *unithost_url;
     int          foreground;
     int          port;
+    int          autoexit;
     uuid         admintoken;
     const char  *adminhost;
     var         *conf;

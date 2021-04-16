@@ -374,6 +374,10 @@ int daemon_main (int argc, const char *argv[]) {
                                MHD_OPTION_PER_IP_CONNECTION_LIMIT, 
                                (unsigned int) 64,
                                MHD_OPTION_END);
+    if (OPTIONS.autoexit) {
+        sleep (60);
+        exit (0);
+    }
     while (1) sleep (60);
 }
 
@@ -391,6 +395,11 @@ int set_confpath (const char *i, const char *v) {
 
 int set_mconfpath (const char *i, const char *v) {
     OPTIONS.mconfpath = v;
+    return 1;
+}
+
+int set_autoexit (const char *i, const char *v) {
+    OPTIONS.autoexit = 1;
     return 1;
 }
 
@@ -467,6 +476,7 @@ apioptions OPTIONS;
 /** Command line flags */
 cliopt CLIOPT[] = {
     {"--foreground","-f",OPT_FLAG,NULL,set_foreground},
+    {"--autoexit","-x",OPT_FLAG,NULL,set_autoexit},
     {"--pidfile","-p",OPT_VALUE,
         "/var/run/opticon-api.pid", set_pidfile},
     {"--logfile","-l",OPT_VALUE, "@syslog", set_logpath},
