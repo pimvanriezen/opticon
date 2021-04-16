@@ -362,7 +362,10 @@ pingtarget *pingtargetlist_get (pingtargetlist *self,
         crsr = crsr->next;
     }
     
-    if (! create) return NULL;
+    if (! create) {
+        pthread_mutex_unlock (&self->mutex);
+        return NULL;
+    }
     
     crsr = pingtarget_create (addr);
     crsr->parent = self;
