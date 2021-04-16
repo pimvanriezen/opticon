@@ -41,10 +41,9 @@ int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     }
     if (!JSONCODEC) JSONCODEC= codec_create_json();
     host *h = host_alloc();
-    time_t tnow = time (NULL);
     
     h->uuid = ctx->hostid;
-    if (db_get_record (DB, tnow, h)) {
+    if (db_get_current (DB, h)) {
         codec_encode_host (JSONCODEC, outio, h);
         *status = 200;
         db_free (DB);
