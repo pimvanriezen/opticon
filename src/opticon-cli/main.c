@@ -539,12 +539,17 @@ int main (int _argc, const char *_argv[]) {
     
     /* Dispatch command */
     const char *cmd = argv[1];
+    time_t t_now = time(NULL);
+    time_t t_next = t_now;
+    
     
     while (OPTIONS.watch) {
         printf ("\033[2J\033[H");
         cliopt_runcommand (CLICMD, cmd, argc, argv);
         clear_pending_header();
-        sleep (15);
+        t_now = time(NULL);
+        while (t_next <= t_now) t_next = t_next + 15;
+        sleep (t_next - t_now);
         if (OPTIONS.flip) {
             OPTIONS.showgraphs = OPTIONS.showgraphs ? 0 : 1;
         }
