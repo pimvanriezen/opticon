@@ -248,9 +248,18 @@ void host_begin_update (host *h, time_t t) {
     inactive for more than five minutes. */
 /*/ ======================================================================= /*/
 void host_end_update (host *h) {
+    bool stale = false;
     time_t last = h->lastmodified;
+    meterid_t mid_status = makeid("status",MTYPE_STR,0);
+    meter *m_status = host_find_meter (h, mid_status);
     meter *m = h->first;
     meter *nm;
+    fstring status;
+    
+    /* Don't reap meters from STALE hosts */
+    if (m_status) status = meter_get_str (m_status, 0);
+    if (strcmp (m_status, "STALE") == 0) return;
+    
     while (m) {
         nm = m->next;
         if (m->lastmodified < last) {
