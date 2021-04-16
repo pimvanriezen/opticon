@@ -42,6 +42,7 @@ STRINGOPT(host)
 STRINGOPT(hostname)
 FLAGOPT(json)
 FLAGOPT(watch)
+FLAGOPT(flip)
 FLAGOPT(showgraphs)
 STRINGOPT(name)
 STRINGOPT(meter)
@@ -292,6 +293,7 @@ cliopt CLIOPT[] = {
     {"--json","-j",OPT_FLAG,NULL,set_json},
     {"--graphs","-g",OPT_FLAG,NULL,set_showgraphs},
     {"--watch","-w",OPT_FLAG,NULL,set_watch},
+    {"--flip","-f",OPT_FLAG,NULL,set_flip},
     {"--name","-n",OPT_VALUE,"",set_name},
     {"--meter","-m",OPT_VALUE,"",set_meter},
     {"--type","-Y",OPT_VALUE,"integer",set_type},
@@ -386,6 +388,7 @@ void usage (const char *cmdname) {
          "        --keystone-url <url>\n"
          "        --api-url <url>\n"
          "        --watch\n"
+         "        --flip\n"
          "\n"
          "  Commands:\n"
          "        tenant-list\n"
@@ -542,6 +545,9 @@ int main (int _argc, const char *_argv[]) {
         cliopt_runcommand (CLICMD, cmd, argc, argv);
         clear_pending_header();
         sleep (15);
+        if (OPTIONS.flip) {
+            OPTIONS.showgraphs = OPTIONS.showgraphs ? 0 : 1;
+        }
     }
     return cliopt_runcommand (CLICMD, cmd, argc, argv);
 }
