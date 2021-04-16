@@ -16,6 +16,14 @@ int db_open (db *d, uuid tenant, var *extra) {
     return 0;
 }
 
+/** Get the latest record for a host out of the database.
+  * \param d The database handle
+  * \param into The host to decode the meter data into. */
+int db_get_current (db *d, host *into) {
+    if (! d->opened) return 0;
+    return d->get_current (d, into);
+}
+
 /** Get a specific record out of the database.
   * \param d The database handle
   * \param when The timestamp (can be up to 90 seconds later than a record's

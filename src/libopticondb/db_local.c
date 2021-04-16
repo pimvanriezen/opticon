@@ -121,6 +121,7 @@ FILE *localdb_open_indexfile (localdb *ctx, uuid hostid, datestamp dt, int flags
     return res;
 }
 
+/** Open a host's current.db for writing */
 FILE *localdb_open_current (localdb *ctx, uuid hostid, int flags) {
     char uuidstr[40];
     struct stat st;
@@ -150,6 +151,21 @@ FILE *localdb_open_current (localdb *ctx, uuid hostid, int flags) {
     return res;
 }
 
+/** Open a host's current.db for reading */
+FILE *localdb_open_current_read (localdb *ctx, uuid hostid) {
+    char uuidstr[40];
+    struct stat st;
+    char *dbpath = (char *) malloc (strlen (ctx->path) + 64);
+    if (! dbpath) return NULL;
+    
+    uuid2str (hostid, uuidstr);
+    sprintf (dbpath, "%s/%s/current.db", ctx->path, uuidstr);
+    FILE *res = fopen (dbpath, "r");
+    free (dbpath);
+    return res;
+}
+
+/** Indicate that we're done writing to a host's current.db */
 void localdb_done_current (localdb *ctx, uuid hostid) {
     char uuidstr[40];
     struct stat st;
@@ -244,6 +260,23 @@ uint64_t localdb_find_index (FILE *fix, time_t ts) {
         lastmatch = localdb_read64 (fix);
     }
     return lastmatch;
+}
+
+/** Implementation for db_get_current() */
+int localdb_get_current (db *d, host *into) {
+    localdb *self = (localdb *) d;
+    FILE *curf = localdb_open_current_read (self, into->uuid);
+    ioport *dbport = ioport_create_filereader (curf);
+    uint64_t pad = ioport_read_u64 (dbport);
+    if (pad != 0) {
+        fclose (curf);
+        return 0;
+    }
+    (void) ioport_read_u64 (dbport);
+    int res = codec_decode_host (self->codec, dbport, into);
+    fclose (curf);
+    ioport_close (dbport);
+    return res;
 }
 
 /** Implementation for db_get_record() */
@@ -1244,6 +1277,7 @@ db *localdb_create (const char *prefix) {
     if (!self) return NULL;
     
     self->db.open = localdb_open;
+    self->db.get_current = localdb_get_current;
     self->db.get_record = localdb_get_record;
     self->db.get_value_range_int = localdb_get_value_range_int;
     self->db.get_value_range_frac = localdb_get_value_range_frac;
