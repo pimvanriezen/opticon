@@ -258,7 +258,7 @@ void host_end_update (host *h) {
     
     /* Don't reap meters from STALE hosts */
     if (m_status) status = meter_get_str (m_status, 0);
-    if (strcmp (m_status, "STALE") == 0) is_stale = true;
+    if (strcmp (status.str, "STALE") == 0) is_stale = true;
     
     while (m) {
         nm = m->next;
