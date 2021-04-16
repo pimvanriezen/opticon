@@ -207,7 +207,7 @@ void watchthread_handle_graph (host *host, graphlist *list) {
     while (tgt) {
         double val = 0.0;
         meter *m = host_find_meter_name (host, tgt->id);
-        if (m) {
+        if (m && (m->count < SZ_EMPTY_VAL)) {
             switch (m->id & MMASK_TYPE) {
                 case MTYPE_INT:
                     val = (double) *(m->d.u64);
