@@ -95,11 +95,6 @@ bool daemonize (const char *pidfilepath, int argc,
     
     popen_init();
     
-    if (foreground) {
-        (void) call (argc, argv);
-        return true;
-    }
-    
     /* Make sure we're not already running */
     pidfile = fopen (pidfilepath, "r");
     if (pidfile != NULL) {
@@ -135,6 +130,11 @@ bool daemonize (const char *pidfilepath, int argc,
         /* Drop root privileges */
         setregid (svcgid, svcgid);
         setreuid (svcuid, svcuid);
+    }
+    
+    if (foreground) {
+        (void) call (argc, argv);
+        return true;
     }
     
     /* Create an outer fork that allows us to detach from the group */
