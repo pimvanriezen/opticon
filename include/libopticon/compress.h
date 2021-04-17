@@ -4,10 +4,11 @@
 #include <libopticon/datatypes.h>
 #include <libopticon/ioport_buffer.h>
 #include <zlib.h>
+#include <stdbool.h>
 
 /* ============================= FUNCTIONS ============================= */
 
-int compress_data (ioport *in, ioport *out);
-int decompress_data (ioport *in, ioport *out);
+bool compress_data (ioport *in, ioport *out);
+bool decompress_data (ioport *in, ioport *out);
 
 #endif

@@ -6,9 +6,10 @@
   * 'dictionary of arrays'
   * \param h The host to write meters to.
   * \param prefix The name of the enveloping array.
-  * \param v The first array node. */
+  * \param v The first array node.
+  * \return true on success, false on failure */
 /*/ ======================================================================= /*/
-static int dictarray_to_host (host *h, const char *prefix, var *v) {
+static bool dictarray_to_host (host *h, const char *prefix, var *v) {
     char tmpid[16];
     meterid_t mid;
     meter *m;
@@ -21,7 +22,7 @@ static int dictarray_to_host (host *h, const char *prefix, var *v) {
         if (strlen (prefix) + strlen (curid) > 10) {
             log_error ("Error parsing meter result, label '%s/%s' too "
                        "long", prefix, curid);
-            return 0;
+            return false;
         }
         sprintf (tmpid, "%s/%s", prefix, curid);
 
@@ -43,7 +44,7 @@ static int dictarray_to_host (host *h, const char *prefix, var *v) {
             
             default:
                 log_error ("Unsupported subtype %i under '%s'", vv->type, tmpid);
-                return 0;
+                return false;
         }
 
         mid = makeid (tmpid, type, 0);
@@ -69,7 +70,7 @@ static int dictarray_to_host (host *h, const char *prefix, var *v) {
         }
         vv = vv->next;
     }
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/
@@ -82,9 +83,9 @@ static int dictarray_to_host (host *h, const char *prefix, var *v) {
   *   key:[]
   * \param h The host to write meters to
   * \param val The data to parse
-  * \return 1 on success, 0 on failure. */
+  * \return true on success, false on failure */
 /*/ ======================================================================= /*/
-int host_import (host *h, var *val) {
+bool host_import (host *h, var *val) {
     if (val->type != VAR_DICT) return 0;
     var *v = val->value.arr.first;
     int count;
@@ -94,7 +95,7 @@ int host_import (host *h, var *val) {
         if (strlen (v->id) > 11) {
             log_error ("Error parsing meter result, label '%s' too long",
                        v->id);
-            return 0;
+            return false;
         }
         meterid_t mid;
         meter *m;
@@ -124,7 +125,7 @@ int host_import (host *h, var *val) {
                     log_error ("Error parsing meter result, nested "
                                "array under '%s' not supported",
                                firstlevel);
-                    return 0;
+                    return false;
                 }
                 if (vv->type == VAR_DICT) {
                     dictarray_to_host (h, firstlevel, vv);
@@ -175,20 +176,20 @@ int host_import (host *h, var *val) {
                 if (strlen (vv->id) + strlen (firstlevel) > 10) {
                     log_error ("Error parsing meter result, label "
                                "'%s/%s' too long", firstlevel, v->id);
-                    return 0;
+                    return false;
                 }
                 sprintf (tmpid, "%s/%s", firstlevel, vv->id);
                 if (vv->type == VAR_ARRAY) {
                     log_error ("Error parsing meter result, array "
                                "under dict '%s' not supported",
                                firstlevel);
-                    return 0;
+                    return false;
                 }
                 if (vv->type == VAR_ARRAY) {
                     log_error ("Error parsing meter result, nested "
                                "dict under '%s' not supported",
                                firstlevel);
-                    return 0;
+                    return false;
                 }
                 if (vv->type == VAR_DOUBLE) {
                     mid = makeid (tmpid, MTYPE_FRAC,0);
@@ -214,5 +215,5 @@ int host_import (host *h, var *val) {
         
         v = v->next;
     }
-    return 1;
+    return true;
 }

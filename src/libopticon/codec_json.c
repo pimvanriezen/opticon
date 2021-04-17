@@ -80,7 +80,7 @@ void jsoncodec_dump_pathval (meter *m, int pos, ioport *into, int ind) {
   * \param h The host object
   * \param into ioport to use */
 /*/ ======================================================================= /*/
-int jsoncodec_encode_host (ioport *into, host *h) {
+bool jsoncodec_encode_host (ioport *into, host *h) {
     char buffer[256];
     uint64_t pathbuffer[128];
     int paths = 0;
@@ -104,7 +104,7 @@ int jsoncodec_encode_host (ioport *into, host *h) {
                 m = m->next;
                 continue;
             }
-            if (paths>127) return 1;
+            if (paths>127) return false;
             pathbuffer[paths++] = (m->id & pathmask);
         }
         
@@ -163,15 +163,15 @@ int jsoncodec_encode_host (ioport *into, host *h) {
         m=m->next;
     }
     ioport_write (into,"\n}\n",3);
-    return 0;
+    return true;
 }
 
 /*/ ======================================================================= /*/
 /** Decode host data from JSON (not implemented) */
 /*/ ======================================================================= /*/
-int jsoncodec_decode_host (ioport *io, host *h) {
+bool jsoncodec_decode_host (ioport *io, host *h) {
     fprintf (stderr, "%% JSON decoding not supported\n");
-    return 0;
+    return false;
 }
 
 /*/ ======================================================================= /*/

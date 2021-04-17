@@ -4,7 +4,8 @@
 #include <libopticon/datatypes.h>
 #include <libopticon/var.h>
 #include <libopticon/util.h>
+#include <stdbool.h>
 
-int host_import (host *, var *);
+bool host_import (host *, var *);
 
 #endif

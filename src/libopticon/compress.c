@@ -5,10 +5,10 @@
   * libz gzip compression.
   * \param in The input ioport
   * \param out The output ioport
-  * \return 1 on success, 0 on failure */
+  * \return true on success, false on failure */
 /*/ ======================================================================= /*/
-int compress_data (ioport *in, ioport *out) {
-    if (ioport_read_available (in) == 0) return 0;
+bool compress_data (ioport *in, ioport *out) {
+    if (ioport_read_available (in) == 0) return false;
     
     z_stream strm;
     strm.zalloc = Z_NULL;
@@ -21,7 +21,7 @@ int compress_data (ioport *in, ioport *out) {
     int r = deflateInit2 (&strm, Z_DEFAULT_COMPRESSION,
                           Z_DEFLATED, 15+16, 8,
                           Z_DEFAULT_STRATEGY);
-    if (r != Z_OK) return 0;
+    if (r != Z_OK) return false;
     
     int st;
     do {
@@ -31,20 +31,20 @@ int compress_data (ioport *in, ioport *out) {
     } while (st == Z_OK);
     
     deflateEnd (&strm);
-    if (st != Z_STREAM_END) return 0;
+    if (st != Z_STREAM_END) return false;
 
     ioport_write (out, ioport_get_buffer (out), strm.total_out);
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/
 /** Decompress data from a buffered ioport into another.
   * \param in The input ioport
   * \param out The output ioport
-  * \return 1 on success, 0 on failure */
+  * \return true on success, false on failure */
 /*/ ======================================================================= /*/
-int decompress_data (ioport *in, ioport *out) {
-    if (ioport_read_available (in) == 0) return 0;
+bool decompress_data (ioport *in, ioport *out) {
+    if (ioport_read_available (in) == 0) return false;
     
     z_stream strm;
     strm.zalloc = Z_NULL;
@@ -55,7 +55,7 @@ int decompress_data (ioport *in, ioport *out) {
     strm.avail_in = ioport_read_available (in);
     
     int r = inflateInit2 (&strm, 16+MAX_WBITS);
-    if (r != Z_OK) return 0;
+    if (r != Z_OK) return false;
     
     int st;
     do {
@@ -65,8 +65,8 @@ int decompress_data (ioport *in, ioport *out) {
     } while (st == Z_OK);
 
     inflateEnd (&strm);
-    if (st != Z_STREAM_END) return 0;
+    if (st != Z_STREAM_END) return false;
 
     ioport_write (out, ioport_get_buffer (out), strm.total_out);
-    return 1;
+    return true;
 }

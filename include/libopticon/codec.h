@@ -6,8 +6,8 @@
 
 /* =============================== TYPES =============================== */
 
-typedef int (*encode_host_func)(ioport *, host *);
-typedef int (*decode_host_func)(ioport *, host *);
+typedef bool (*encode_host_func)(ioport *, host *);
+typedef bool (*decode_host_func)(ioport *, host *);
 
 /** Instance (bunch of function pointers) */
 typedef struct codec_s {
@@ -18,7 +18,7 @@ typedef struct codec_s {
 /* ============================= FUNCTIONS ============================= */
 
 void         codec_release (codec *);
-int          codec_encode_host (codec *, ioport *, host *);
-int          codec_decode_host (codec *, ioport *, host *);
+bool         codec_encode_host (codec *, ioport *, host *);
+bool         codec_decode_host (codec *, ioport *, host *);
 
 #endif

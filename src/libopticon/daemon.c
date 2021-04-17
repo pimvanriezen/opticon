@@ -83,8 +83,8 @@ void watchdog_main (int argc, const char *argv[], main_f call) {
   * \param call The main function to run the service.
   * \return 0 on failure, 1 on success (caller should exit). */
 /*/ ======================================================================= /*/
-int daemonize (const char *pidfilepath, int argc,
-               const char *argv[], main_f call, int foreground) {
+bool daemonize (const char *pidfilepath, int argc,
+                const char *argv[], main_f call, int foreground) {
     pid_t pwatchdog;
     pid_t pwrapper;
     uid_t svcuid;
@@ -97,7 +97,7 @@ int daemonize (const char *pidfilepath, int argc,
     
     if (foreground) {
         (void) call (argc, argv);
-        return 1;
+        return true;
     }
     
     /* Make sure we're not already running */
@@ -109,7 +109,7 @@ int daemonize (const char *pidfilepath, int argc,
         pwatchdog = atoi (pidbuf);
         if (pwatchdog && (kill (pwatchdog, 0) == 0)) {
             log_error ("Already running");
-            return 0;
+            return false;
         }
     }
     
@@ -120,7 +120,7 @@ int daemonize (const char *pidfilepath, int argc,
             pwd = getpwnam ("nobody");
             if (! pwd) {
                 log_error ("No suitable non-root user found");
-                return 0;
+                return false;
             }
         }
     
@@ -173,7 +173,7 @@ int daemonize (const char *pidfilepath, int argc,
             break;
         
         default:
-            return 1;
+            return true;
     }
-    return 0;
+    return false;
 }

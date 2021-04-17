@@ -6,7 +6,7 @@
 /*/ ======================================================================= /*/
 /** Write out a meter value */
 /*/ ======================================================================= /*/
-int pktcodec_write_value (ioport *io, meter *m, uint8_t pos) {
+bool pktcodec_write_value (ioport *io, meter *m, uint8_t pos) {
     switch (m->id & MMASK_TYPE) {
         case MTYPE_INT:
             return ioport_write_encint (io, m->d.u64[pos]);
@@ -15,14 +15,14 @@ int pktcodec_write_value (ioport *io, meter *m, uint8_t pos) {
         case MTYPE_STR:
             return ioport_write_encstring (io, m->d.str[pos].str);
         default:
-            return 0;
+            return false;
     }
 }
 
 /*/ ======================================================================= /*/
 /** Encode host data in packet format */
 /*/ ======================================================================= /*/
-int pktcodec_encode_host (ioport *io, host *h) {
+bool pktcodec_encode_host (ioport *io, host *h) {
     meter *m = h->first;
     meterid_t id;
     uint64_t cnt;
@@ -30,21 +30,21 @@ int pktcodec_encode_host (ioport *io, host *h) {
         cnt = m->count;
         id = m->id | cnt;
         if (cnt == 0) cnt = 1;
-        if (! ioport_write_u64 (io, id)) return 0;
+        if (! ioport_write_u64 (io, id)) return false;
         if (cnt < SZ_EMPTY_VAL) {
             for (uint8_t i=0; i<cnt; ++i) {
-                if (! pktcodec_write_value (io, m, i)) return 0;
+                if (! pktcodec_write_value (io, m, i)) return false;
             }
         }
         m = m->next;
     }
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/
 /** Decode packet data into a host */
 /*/ ======================================================================= /*/
-int pktcodec_decode_host (ioport *io, host *h) {
+bool pktcodec_decode_host (ioport *io, host *h) {
     meterid_t mid;
     meterid_t pfx;
     meterid_t lastpfx = 0ULL;
@@ -124,11 +124,11 @@ int pktcodec_decode_host (ioport *io, host *h) {
                     break;
                 
                 default:
-                    return 0;
+                    return false;
             }
         }
     }
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/
