@@ -252,6 +252,8 @@ double ping_diff (struct timeval *then, struct timeval *now) {
 /*/ ======================================================================= /*/
 void ping_run_receiver_v4 (thread *self) {
     thread_setname (self, "rtt-recv-v4");
+    sched_param param;
+    int policy;
     uint8_t buf[1500];
     struct icmp *icp;
     struct ip *ip;
@@ -261,6 +263,12 @@ void ping_run_receiver_v4 (thread *self) {
     int rsz;
     int hlen;
     char addrstr[INET6_ADDRSTRLEN];
+    
+    if (! pthread_getschedparam (pthread_self(), &policy, &param)) {
+        param.sched_priority++;
+        pthread_setschedparam (pthread_self(), policy, &param);
+        log_debug ("Raised thread priority to %i", param.sched_priority);
+    }
     
     faddr.ss_family = AF_INET;
     
