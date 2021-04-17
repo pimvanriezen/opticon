@@ -111,7 +111,8 @@ double calculate_badness (meter *m, meterwatch *w,
                     }
                 }
                 if (meter_get_frac (m, i) > fracadj) {
-                    log_debug ("badness: watch_frac_gt %f > %f (orig %f): +%f",
+                    log_debug ("badness: watch_frac_gt %.1f > %.1f "
+                               "(orig %.1f): +%.1f",
                                meter_get_frac (m,i), fracadj,
                                w->dat.frac, w->badness);
                     res += w->badness;
@@ -128,6 +129,10 @@ double calculate_badness (meter *m, meterwatch *w,
                     }
                 }
                 if (meter_get_frac (m, i) < fracadj) {
+                    log_debug ("badness: watch_frac_lt %.1f < %.1f "
+                               "(orig %.1f): +%.1f",
+                               meter_get_frac (m,i), fracadj,
+                               w->dat.frac, w->badness);
                     res += w->badness;
                     if (w->trigger > *maxtrig) *maxtrig = w->trigger;
                 }
@@ -142,6 +147,8 @@ double calculate_badness (meter *m, meterwatch *w,
                     }
                 }
                 if (meter_get_uint (m, i) > intadj) {
+                    log_debug ("badness: watch_uint_gt %u > %u +%.1f",
+                               meter_get_uint (m, i), intadj, w->badness);
                     res += w->badness;
                     if (w->trigger > *maxtrig) *maxtrig = w->trigger;
                 }
@@ -156,6 +163,8 @@ double calculate_badness (meter *m, meterwatch *w,
                     }
                 }
                 if (meter_get_uint (m, i) < intadj) {
+                    log_debug ("badness: watch_uint_lt %u < %u +%.1f",
+                               meter_get_uint (m, i), intadj, w->badness);
                     res += w->badness;
                     if (w->trigger > *maxtrig) *maxtrig = w->trigger;
                 }
