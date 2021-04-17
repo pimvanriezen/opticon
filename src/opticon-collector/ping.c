@@ -218,9 +218,9 @@ void ping_run_sender_v4 (thread *self) {
                 gettimeofday (&tgt->tsent, NULL);
                 pingtarget_close (tgt);
             }
-            ping_msleep (20000 / count);
+            ping_msleep (10000 / count);
         }
-        if (! count) sleep (5);
+        if (! count) sleep (10);
         free (list);
     }
 }
@@ -455,7 +455,7 @@ pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     self->sequence = 0;
     self->lastseen = 0;
     self->populated = false;
-    for (int i=0; i<16; ++i) self->data[i] = 0.0;
+    for (int i=0; i<32; ++i) self->data[i] = 0.0;
     memcpy (&self->remote, remote, sizeof(struct sockaddr_storage));
     char addr[INET6_ADDRSTRLEN];
     ip2str (remote, addr);
@@ -471,7 +471,7 @@ double pingtarget_get_rtt (pingtarget *self) {
     uint8_t msrcount = 0;
     double total = 0.0;
     
-    for (int i=0; i<16; ++i) {
+    for (int i=0; i<32; ++i) {
         double c = self->data[i];
         if (c<0) losscount++;
         else {
@@ -490,11 +490,11 @@ double pingtarget_get_rtt (pingtarget *self) {
 double pingtarget_get_loss (pingtarget *self) {
     uint8_t losscount = 0;
     
-    for (int i=0; i<16; ++i) {
+    for (int i=0; i<32; ++i) {
         if (self->data[i]<0) losscount++;
     }
     
-    return (100.0 * (losscount / 16.0));
+    return (100.0 * (losscount / 32.0));
 }
 
 /*/ ======================================================================= /*/
@@ -509,12 +509,12 @@ void pingtarget_close (pingtarget *self) {
 /*/ ======================================================================= /*/
 void pingtarget_write (pingtarget *self, double rtt) {
     if (! self->populated) {
-        for (uint32_t i=0; i<16; ++i) self->data[i] = rtt;
+        for (uint32_t i=0; i<32; ++i) self->data[i] = rtt;
         self->populated = true;
         return;
     }
     self->data[self->wpos] = rtt;
-    self->wpos = (self->wpos+1) & 15;
+    self->wpos = (self->wpos+1) & 31;
 }
 
 /*/ ======================================================================= /*/

@@ -32,7 +32,7 @@ typedef struct pingtarget_s {
                                         deallocation */
     uint32_t                 sequence; /** Is 0 if no outstanding pings */
     time_t                   lastseen;
-    double                   data[16]; /** Aim at 1 ping every 20s */
+    double                   data[32]; /** Aim at 1 ping every 10s */
     struct timeval           tsent;
     struct sockaddr_storage  remote;
     bool                     populated;
