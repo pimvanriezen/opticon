@@ -10,10 +10,10 @@ typedef struct writerstorage_s {
 /*/ ======================================================================= /*/
 /** Write method of the filewriter ioport */
 /*/ ======================================================================= /*/
-int filewriter_write (ioport *io, const char *dat, size_t sz) {
+bool filewriter_write (ioport *io, const char *dat, size_t sz) {
     writerstorage *stor = (writerstorage *) io->storage;
     if (stor->sec) {
-        if (fwrite (dat, sz, 1, stor->sec) <= 0) return 0;
+        if (fwrite (dat, sz, 1, stor->sec) <= 0) return false;
     }
     return (fwrite (dat, sz, 1, stor->pri) > 0);
 }
@@ -21,8 +21,8 @@ int filewriter_write (ioport *io, const char *dat, size_t sz) {
 /*/ ======================================================================= /*/
 /** Read method of the filewriter ioport (defunct) */
 /*/ ======================================================================= /*/
-int filewriter_read (ioport *io, char *into, size_t sz) {
-    return 0;
+bool filewriter_read (ioport *io, char *into, size_t sz) {
+    return false;
 }
 
 /*/ ======================================================================= /*/
@@ -58,8 +58,8 @@ void filewriter_reset_read (ioport *io) {
 /*/ ======================================================================= /*/
 /** Write method (disabled for reader) */
 /*/ ======================================================================= /*/
-int filereader_write (ioport *io, const char *dat, size_t sz) {
-    return 0;
+bool filereader_write (ioport *io, const char *dat, size_t sz) {
+    return false;
 }
 
 /*/ ======================================================================= /*/
@@ -72,7 +72,7 @@ void filereader_close (ioport *io) {
 /*/ ======================================================================= /*/
 /** Read method */
 /*/ ======================================================================= /*/
-int filereader_read (ioport *io, char *into, size_t sz) {
+bool filereader_read (ioport *io, char *into, size_t sz) {
     FILE *F = (FILE *) io->storage;
     return (fread (into, sz, 1, F) > 0);
 }

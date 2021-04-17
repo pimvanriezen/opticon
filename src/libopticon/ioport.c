@@ -18,7 +18,7 @@ size_t ioport_write_available (ioport *io) {
   * \param sz The blob size
   * \return 1 on success, 0 on failure  */
 /*/ ======================================================================= /*/
-int ioport_write (ioport *io, const void *data, size_t sz) {
+bool ioport_write (ioport *io, const void *data, size_t sz) {
     if (io->bitpos) {
         if (! ioport_flush_bits (io)) return 0;
     }
@@ -28,7 +28,7 @@ int ioport_write (ioport *io, const void *data, size_t sz) {
 /*/ ======================================================================= /*/
 /** Write formatted ascii to the port */
 /*/ ======================================================================= /*/
-int ioport_printf (ioport *io, const char *fmt, ...) {
+bool ioport_printf (ioport *io, const char *fmt, ...) {
     char buffer[4096];
     buffer[0] = 0;
     va_list ap;
@@ -45,7 +45,7 @@ int ioport_printf (ioport *io, const char *fmt, ...) {
   * \param b The byte to write
   * \return 1 on success, 0 on failure  */
 /*/ ======================================================================= /*/
-int ioport_write_byte (ioport *io, uint8_t b) {
+bool ioport_write_byte (ioport *io, uint8_t b) {
     if (io->bitpos) {
         if (! ioport_flush_bits (io)) return 0;
     }
@@ -58,7 +58,7 @@ int ioport_write_byte (ioport *io, uint8_t b) {
     \param u The uuid
     \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
-int ioport_write_uuid (ioport *io, uuid u) {
+bool ioport_write_uuid (ioport *io, uuid u) {
     uint8_t out[16];
     out[0] = (u.msb & 0xff00000000000000) >> 56;
     out[1] = (u.msb & 0x00ff000000000000) >> 48;
@@ -112,7 +112,7 @@ uint8_t BITMASKS[9] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
   * \param d The data
   * \param bits The number of bits to write (max 8) */
 /*/ ======================================================================= /*/
-int ioport_write_bits (ioport *io, uint8_t d, uint8_t bits) {
+bool ioport_write_bits (ioport *io, uint8_t d, uint8_t bits) {
     if (bits>8) return 0;
     uint8_t bits1 = (io->bitpos + bits < 8) ? bits : 8-io->bitpos;
     uint8_t bits2 = bits - bits1;
@@ -124,12 +124,12 @@ int ioport_write_bits (ioport *io, uint8_t d, uint8_t bits) {
     io->bitpos += bits1;
     if (io->bitpos > 7) {
         if (! io->write (io, (const char *)&(io->bitbuffer), 1)) {
-            return 0;
+            return false;
         }
         io->bitpos = bits2;
         io->bitbuffer = bits2 ? data2 << (8-bits2) : 0;
     }
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/
@@ -138,11 +138,11 @@ int ioport_write_bits (ioport *io, uint8_t d, uint8_t bits) {
   * \param io The ioport.
   * \return 1 on success, 0 on failure. */
 /*/ ======================================================================= /*/
-int ioport_flush_bits (ioport *io) {
-    if (! io->bitpos) return 1;
-    if (! io->write (io, (const char *)&(io->bitbuffer), 1)) return 0;
+bool ioport_flush_bits (ioport *io) {
+    if (! io->bitpos) return true;
+    if (! io->write (io, (const char *)&(io->bitbuffer), 1)) return false;
     io->bitpos = io->bitbuffer = 0;
-    return 1;
+    return true;
 }
 
 static const char *ENCSET = "abcdefghijklmnopqrstuvwxyz#/-_"
@@ -165,19 +165,19 @@ static uint8_t DECSET[128] = {
   * \param str The string to encode (maximum length 127 chars)
   * \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
-int ioport_write_encstring (ioport *io, const char *str) {
+bool ioport_write_encstring (ioport *io, const char *str) {
     uint8_t i;
     size_t len = strlen (str);
-    if (len > 127) return 0;
+    if (len > 127) return false;
     for (i=0;i<len;++i) {
         if ((str[i]>127) || (DECSET[(int)str[i]] == 255)) {
-            if (! ioport_write_byte (io, len)) return 0;
+            if (! ioport_write_byte (io, len)) return false;
             return ioport_write (io, str, len);
         }
     }
-    if (! ioport_write_byte (io, len | 0x80)) return 0;
+    if (! ioport_write_byte (io, len | 0x80)) return false;
     for (i=0;i<len;++i) {
-        if (! ioport_write_bits (io, DECSET[(int)str[i]], 6)) return 0;
+        if (! ioport_write_bits (io, DECSET[(int)str[i]], 6)) return false;
     }
     return ioport_flush_bits (io);
 }
@@ -189,7 +189,7 @@ int ioport_write_encstring (ioport *io, const char *str) {
   * \param d The value to encode (between 0.0 and 255.999)
   * \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
-int ioport_write_encfrac (ioport *io, double d) {
+bool ioport_write_encfrac (ioport *io, double d) {
     if (d <= 0.0) return ioport_write (io, "\0\0", 2);
     if (d >= 192.0) {
         double wval = floor (d / 2.0);
@@ -207,7 +207,7 @@ int ioport_write_encfrac (ioport *io, double d) {
     }
     double fl = floor (d);
     double fr = (d - fl) * 255;
-    if (! ioport_write_byte (io, (uint8_t) fl)) return 0;
+    if (! ioport_write_byte (io, (uint8_t) fl)) return false;
     return ioport_write_byte (io, (uint8_t) fr);
 }
 
@@ -217,7 +217,7 @@ int ioport_write_encfrac (ioport *io, double d) {
   * \param i The integer to encode
   * \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
-int ioport_write_encint (ioport *io, uint64_t i) {
+bool ioport_write_encint (ioport *io, uint64_t i) {
     uint64_t msk;
     uint8_t byte;
     uint8_t started = 0;
@@ -228,10 +228,10 @@ int ioport_write_encint (ioport *io, uint64_t i) {
         if (byte || started) {
             if (bitpos) byte |= 0x80;
             started = 1;
-            if (! ioport_write_byte (io, byte)) return 0;
+            if (! ioport_write_byte (io, byte)) return false;
         }
     }
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/
@@ -241,7 +241,7 @@ int ioport_write_encint (ioport *io, uint64_t i) {
   * \param i The integer to encode
   * \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
-int ioport_write_u64 (ioport *io, uint64_t i) {
+bool ioport_write_u64 (ioport *io, uint64_t i) {
     uint64_t netorder = ((uint64_t) htonl (i&0xffffffffLLU)) << 32;
     netorder |= htonl ((i & 0xffffffff00000000LLU) >> 32);
     return ioport_write (io, (const char *)&netorder, sizeof (netorder));
@@ -254,7 +254,7 @@ int ioport_write_u64 (ioport *io, uint64_t i) {
   * \param i The integer to encode
   * \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
-int ioport_write_u32 (ioport *io, uint32_t i) {
+bool ioport_write_u32 (ioport *io, uint32_t i) {
     uint32_t netorder = htonl (i);
     return ioport_write (io, (const char *)&netorder, sizeof(netorder));
 }
@@ -273,7 +273,7 @@ size_t ioport_read_available (ioport *io) {
   * \param sz The number of bytes to read
   * \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
-int ioport_read (ioport *io, void *into, size_t sz) {
+bool ioport_read (ioport *io, void *into, size_t sz) {
     io->bitpos = io->bitbuffer = 0;
     return io->read (io, (char *) into, sz);
 }
@@ -345,15 +345,15 @@ uint8_t ioport_read_bits (ioport *io, uint8_t numbits) {
   * \param io The ioport
   * \param into The string buffer (size 128). */
 /*/ ======================================================================= /*/
-int ioport_read_encstring (ioport *io, char *into) {
+bool ioport_read_encstring (ioport *io, char *into) {
     io->bitpos = io->bitbuffer = 0;
     uint8_t sz = ioport_read_byte (io);
-    if (! sz) return 0;
+    if (! sz) return false;
     
     if (sz < 0x80) {
-        if (! ioport_read (io, into, sz)) return 0;
+        if (! ioport_read (io, into, sz)) return false;
         into[sz] = '\0';
-        return 1;
+        return true;
     }
     
     char *crsr = into;
@@ -367,7 +367,7 @@ int ioport_read_encstring (ioport *io, char *into) {
     }
     if (sz < 127) *crsr = '\0';
     else into[127] = '\0';
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/

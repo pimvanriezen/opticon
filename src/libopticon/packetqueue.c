@@ -54,8 +54,8 @@ pktbuf *packetqueue_waitpkt (packetqueue *self) {
         pthread_mutex_unlock (&self->mutex);
         if (! havedata) conditional_wait (self->cond);
     }
-    pktbuf *res = self->buffer + self->rpos;
     pthread_mutex_lock (&self->mutex);
+    pktbuf *res = self->buffer + self->rpos;
     self->rpos++;
     if (self->rpos >= self->sz) self->rpos -= self->sz;
     pthread_mutex_unlock (&self->mutex);

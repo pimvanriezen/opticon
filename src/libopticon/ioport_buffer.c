@@ -5,30 +5,30 @@
 /*/ ======================================================================= /*/
 /** Read method of the buffer ioport */
 /*/ ======================================================================= /*/
-int buffer_read (ioport *io, char *into, size_t sz) {
+bool buffer_read (ioport *io, char *into, size_t sz) {
     bufferstorage *S = (bufferstorage *) io->storage;
-    if (S->rpos + sz > S->bufsz) return 0;
-    if (S->pos && (S->rpos + sz > S->pos)) return 0;
+    if (S->rpos + sz > S->bufsz) return false;
+    if (S->pos && (S->rpos + sz > S->pos)) return false;
     if ((S->buf+S->rpos) != into) memcpy (into, S->buf + S->rpos, sz);
     S->rpos += sz;
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/
 /** Write method of the buffer ioport */
 /*/ ======================================================================= /*/
-int buffer_write (ioport *io, const char *dat, size_t sz) {
+bool buffer_write (ioport *io, const char *dat, size_t sz) {
     bufferstorage *S = (bufferstorage *) io->storage;
     if (S->pos + sz > S->bufsz) {
-        if (! S->owned) return 0;
+        if (! S->owned) return false;
         while (S->pos + sz > S->bufsz) S->bufsz += 4096;
         S->buf = (char *) realloc (S->buf, S->bufsz);
     }
     if (S->buf + S->pos != dat) {
-        if ((S->buf+S->pos) != dat) memcpy (S->buf + S->pos, dat, sz);
+        memcpy (S->buf + S->pos, dat, sz);
     }
     S->pos += sz;
-    return 1;
+    return true;
 }
 
 /*/ ======================================================================= /*/

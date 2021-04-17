@@ -4,13 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <libopticon/uuid.h>
 
 /* =============================== TYPES =============================== */
 struct ioport_s; /* forward declaration */
 
-typedef int (*writefunc)(struct ioport_s *, const char *, size_t);
-typedef int (*readfunc)(struct ioport_s *, char *, size_t);
+typedef bool (*writefunc)(struct ioport_s *, const char *, size_t);
+typedef bool (*readfunc)(struct ioport_s *, char *, size_t);
 typedef void (*closefunc)(struct ioport_s *);
 typedef size_t (*availfunc)(struct ioport_s *);
 typedef char *(*bufferfunc)(struct ioport_s *);
@@ -37,24 +38,24 @@ char        *ioport_get_buffer (ioport *io);
 void         ioport_reset_read (ioport *io);
 
 size_t       ioport_write_available (ioport *io);
-int          ioport_write (ioport *io, const void *data, size_t sz);
-int          ioport_printf (ioport *io, const char *fmt, ...);
-int          ioport_write_uuid (ioport *io, uuid u);
-int          ioport_write_byte (ioport *io, uint8_t b);
-int          ioport_write_bits (ioport *io, uint8_t d, uint8_t numbits);
-int          ioport_flush_bits (ioport *io);
-int          ioport_write_encstring (ioport *io, const char *str);
-int          ioport_write_encfrac (ioport *io, double d);
-int          ioport_write_encint (ioport *io, uint64_t i);
-int          ioport_write_u64 (ioport *io, uint64_t i);
-int          ioport_write_u32 (ioport *io, uint32_t i);
+bool         ioport_write (ioport *io, const void *data, size_t sz);
+bool         ioport_printf (ioport *io, const char *fmt, ...);
+bool         ioport_write_uuid (ioport *io, uuid u);
+bool         ioport_write_byte (ioport *io, uint8_t b);
+bool         ioport_write_bits (ioport *io, uint8_t d, uint8_t numbits);
+bool         ioport_flush_bits (ioport *io);
+bool         ioport_write_encstring (ioport *io, const char *str);
+bool         ioport_write_encfrac (ioport *io, double d);
+bool         ioport_write_encint (ioport *io, uint64_t i);
+bool         ioport_write_u64 (ioport *io, uint64_t i);
+bool         ioport_write_u32 (ioport *io, uint32_t i);
 
 size_t       ioport_read_available (ioport *io);
-int          ioport_read (ioport *io, void *into, size_t sz);
+bool         ioport_read (ioport *io, void *into, size_t sz);
 uuid         ioport_read_uuid (ioport *io);
 uint8_t      ioport_read_byte (ioport *io);
 uint8_t      ioport_read_bits (ioport *io, uint8_t numbits);
-int          ioport_read_encstring (ioport *io, char *into);
+bool         ioport_read_encstring (ioport *io, char *into);
 double       ioport_read_encfrac (ioport *io);
 uint64_t     ioport_read_encint (ioport *io);
 uint64_t     ioport_read_u64 (ioport *io);
