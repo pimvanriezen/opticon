@@ -98,11 +98,11 @@ ioport *ioport_create_buffer (void *buf, size_t sz) {
     S->rpos = 0;
     if (buf) {
         S->buf = (char *) buf;
-        S->owned = 0;
+        S->owned = false;
     }
     else {
         S->buf = (char *) malloc (sz);
-        S->owned = 1;
+        S->owned = true;
     }
     return res;
 }
