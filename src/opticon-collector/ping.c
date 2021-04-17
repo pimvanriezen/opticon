@@ -252,7 +252,7 @@ double ping_diff (struct timeval *then, struct timeval *now) {
 /*/ ======================================================================= /*/
 void ping_run_receiver_v4 (thread *self) {
     thread_setname (self, "rtt-recv-v4");
-    sched_param param;
+    struct sched_param param;
     int policy;
     uint8_t buf[1500];
     struct icmp *icp;
