@@ -11,7 +11,7 @@
   * \param second Second UUID.
   * \return 0 if they differ, 1 if they're the same. */
 /*/ ======================================================================= /*/
-int uuidcmp (uuid first, uuid second) {
+bool uuidcmp (uuid first, uuid second) {
     return (first.msb == second.msb && first.lsb == second.lsb);
 }
 
@@ -56,7 +56,7 @@ uuid mkuuid (const char *str) {
 /*/ ======================================================================= /*/
 /** Checks if a string contains a valid uuid */
 /*/ ======================================================================= /*/
-int isuuid (const char *str) {
+bool isuuid (const char *str) {
     int hexcnt = 0;
     int dashcnt = 0;
     const char *c = str;
@@ -64,9 +64,9 @@ int isuuid (const char *str) {
         if ((*c>='0') && (*c<='9')) hexcnt++;
         else if ((*c>='a')&&(*c<='f')) hexcnt++;
         else if (*c == '-') dashcnt++;
-        else return 0;
-        if (hexcnt >32) return 0;
-        if (dashcnt > 4) return 0;
+        else return false;
+        if (hexcnt >32) return false;
+        if (dashcnt > 4) return false;
         c++;
     }
     return (hexcnt == 32);
@@ -94,7 +94,7 @@ uuid uuidnil (void) {
 /*/ ======================================================================= /*/
 /** Check whether a uuid is not nil */
 /*/ ======================================================================= /*/
-int uuidvalid (uuid u) {
+bool uuidvalid (uuid u) {
     return (u.msb && u.lsb);
 }
 

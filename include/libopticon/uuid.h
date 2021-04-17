@@ -2,16 +2,17 @@
 #define _UUID_H 1
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 /** UUIDs are normally passed by value */
 typedef struct { uint64_t msb; uint64_t lsb; } uuid;
 
-int          uuidcmp (uuid first, uuid second);
+bool         uuidcmp (uuid first, uuid second);
 uuid         mkuuid (const char *str);
-int          isuuid (const char *str);
+bool         isuuid (const char *str);
 uuid         uuidgen (void);
 uuid         uuidnil (void);
-int          uuidvalid (uuid);
+bool         uuidvalid (uuid);
 void         uuid2str (uuid u, char *into);
 
 #endif
