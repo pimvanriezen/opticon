@@ -45,6 +45,8 @@ var *collect_meterdefs (uuid tenant, uuid host, int watchonly) {
     const char *tstr;
     var *tvar;
     
+    db_free (DB);
+    
     var *tc = tmeters->value.arr.first;
     while (tc) {
         tvar = var_find_key (cmeters, tc->id);
