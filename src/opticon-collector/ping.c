@@ -470,13 +470,24 @@ double pingtarget_get_rtt (pingtarget *self) {
     uint8_t losscount = 0;
     uint8_t msrcount = 0;
     double total = 0.0;
+    uint32_t crsr = self->wpos;
     
     for (int i=0; i<32; ++i) {
-        double c = self->data[i];
+        crsr = (crsr-1) & 0x1f;
+        
+        double c = self->data[crsr];
         if (c<0) losscount++;
         else {
+            if (! i) {
+                msrcount += 2;
+                total += 2*c;
+            }
             msrcount++;
             total += c;
+            if (i<6) {
+                msrcount++;
+                total += c;
+            }
         }
     }
     
