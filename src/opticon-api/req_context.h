@@ -4,6 +4,7 @@
 #include <libopticon/var.h>
 #include <microhttpd.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 typedef uint8_t req_method;
 #define REQ_GET 0x01
@@ -41,6 +42,7 @@ typedef struct req_context_s {
     uuid        *auth_tenants; /**< parsed tenant uuids */
     int          auth_tenantcount; /**< Number of authorized tenants */
     var         *auth_data; /**< Authentication data */
+    time_t       ts;
 } req_context;
 
 /** Arguments matched out of a URL */

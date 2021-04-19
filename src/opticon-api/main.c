@@ -83,7 +83,11 @@ MHDResult answer_to_connection (void *cls, struct MHD_Connection *connection,
     if (ctx->userlevel == AUTH_USER) lvl = "AUTH_USER ";
     if (ctx->userlevel == AUTH_ADMIN) lvl = "AUTH_ADMIN";
     
-    log_info ("%s [%s] %i %s %s", ctx->remote, lvl, ctx->status, method, url);
+    time_t now = time (NULL);
+    int delta = now - ctx->ts;
+    
+    log_info ("%s [%s] %i %s %s (%is)", ctx->remote, lvl, ctx->status, method,
+              url, delta);
 
     req_context_free (ctx);
     *con_cls = NULL;

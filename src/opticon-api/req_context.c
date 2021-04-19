@@ -16,6 +16,7 @@ req_arg *req_arg_alloc (void) {
     req_arg *self = (req_arg *) malloc (sizeof (req_arg));
     self->argc = 0;
     self->argv = NULL;
+    self->ts = time (NULL);
     return self;
 }
 
