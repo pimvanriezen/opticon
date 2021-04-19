@@ -361,7 +361,7 @@ req_context *req_context_alloc (void) {
         memset (&self->hostid, 0, sizeof (uuid));
         memset (&self->opticon_token, 0, sizeof (uuid));
         self->external_token = NULL;
-        self->ts = time (NULL);
+        timer_start (&self->ti);
     }
     return self;
 }
