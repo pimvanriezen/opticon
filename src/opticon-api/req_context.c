@@ -16,7 +16,6 @@ req_arg *req_arg_alloc (void) {
     req_arg *self = (req_arg *) malloc (sizeof (req_arg));
     self->argc = 0;
     self->argv = NULL;
-    self->ts = time (NULL);
     return self;
 }
 
@@ -362,6 +361,7 @@ req_context *req_context_alloc (void) {
         memset (&self->hostid, 0, sizeof (uuid));
         memset (&self->opticon_token, 0, sizeof (uuid));
         self->external_token = NULL;
+        self->ts = time (NULL);
     }
     return self;
 }
