@@ -85,7 +85,7 @@ MHDResult answer_to_connection (void *cls, struct MHD_Connection *connection,
     
     timer_end (&ctx->ti);
     
-    log_info ("%s [%s] %i %s %s (%.0f ms)", ctx->remote, lvl, ctx->status, method,
+    log_info ("%s [%s] %i %s %s (%.1f ms)", ctx->remote, lvl, ctx->status, method,
               url, ctx->ti.diff);
 
     req_context_free (ctx);
