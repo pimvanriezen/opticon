@@ -265,7 +265,7 @@ void ping_run_receiver_v4 (thread *self) {
     char addrstr[INET6_ADDRSTRLEN];
     
     if (! pthread_getschedparam (pthread_self(), &policy, &param)) {
-        param.sched_priority++;
+        param.sched_priority--;
         pthread_setschedparam (pthread_self(), policy, &param);
         log_debug ("Raised thread priority to %i", param.sched_priority);
     }
