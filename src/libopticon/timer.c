@@ -1,4 +1,5 @@
 #include <libopticon/timer.h>
+#include <string.h>
 
 void timer_start (timer *self) {
     self->diff = 0.0;
