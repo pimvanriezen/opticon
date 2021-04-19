@@ -81,6 +81,18 @@ void var_link (var *self, var *parent) {
 }
 
 /*/ ======================================================================= /*/
+/** Link a var into a parent with a given id.
+  * \param self The fresh var object.
+  * \param parent The parent var to add this node to. 
+  * \param id The new id of the object. */
+/*/ ======================================================================= /*/
+void var_link_as (var *self, var *parent, const char *id) {
+    strncpy (self->id, id, 128);
+    self->id[127] = 0;
+    var_link (self, parent);
+}
+
+/*/ ======================================================================= /*/
 /** Deep copy another var into one. The new structure will share no memory
   * with the original.
   * \param self The destination var

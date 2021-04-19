@@ -296,8 +296,7 @@ int cmd_host_list_graphs (req_context *ctx, req_arg *a, var *env,
         *status = 500;
         return err_generic (env, "Could not collect graphs");
     }
-    strcpy (res->id, "graph");
-    var_link (res, env);
+    var_link_as (res, env, "graph");
     *status = 200;
     return 1;    
 }

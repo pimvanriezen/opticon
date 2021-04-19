@@ -832,16 +832,13 @@ int main (int _argc, const char *_argv[]) {
     
     /* Preload the default meter set */
     var *defmeters = get_default_meterdef();
-    sprintf (defmeters->id, "meter");
-    var_link (defmeters, APP.conf);
+    var_link_as (defmeters, APP.conf, "meter");
     
     var *defsummary = get_default_summarydef();
-    sprintf (defsummary->id, "summary");
-    var_link (defsummary, APP.conf);
+    var_link_as (defsummary, APP.conf, "summary");
     
     var *defgraph = get_default_graphs();
-    sprintf (defgraph->id, "graph");
-    var_link (defgraph, APP.conf);
+    var_link_as (defgraph, APP.conf, "graph");
     
     /* Load other meters from meter.conf */
     if (! var_load_json (defmeters, APP.mconfpath)) {

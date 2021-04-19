@@ -56,6 +56,7 @@ typedef struct var_s {
 
 var         *var_alloc (void);
 void         var_link (var *, var *parent);
+void         var_link_as (var *v, var *parent, const char *key);
 void         var_free (var *);
 void         var_copy (var *into, var *orig);
 
