@@ -197,6 +197,7 @@ bool ioport_write_encfrac (ioport *io, double d) {
         
         while ((wval>255.0) && (i<63)) {
             wval = floor (wval / 2.0);
+            i++;
         }
         if (wval>255.0) {
             return ioport_write_byte (io,255) &&

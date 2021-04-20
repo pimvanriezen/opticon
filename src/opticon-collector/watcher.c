@@ -463,15 +463,15 @@ void watchthread_handle_host (host *host) {
 void overviewthread_run (thread *self) {
     thread_setname (self, "overview");
     tenant *tcrsr;
+    timer ti;
     time_t t_now = time (NULL);
     time_t t_next = (t_now+60)-((t_now+60)%60)+2;
-    time_t t_start;
     log_debug ("Overviewthread started");
     sleep (t_next - t_now);
     t_next += 60;
     
     while (1) {
-        t_start = time (NULL);
+        timer_start (&ti);
         tcrsr = tenant_first (TENANT_LOCK_READ);
         while (tcrsr) {
             var *overv = tenant_overview (tcrsr);
@@ -490,8 +490,9 @@ void overviewthread_run (thread *self) {
             tcrsr = tenant_next (tcrsr, TENANT_LOCK_READ);
         }
         
+        timer_end (&ti);
         t_now = time (NULL);
-        log_debug ("Overview took %i seconds", t_now - t_start);
+        log_debug ("Overview took %.1f ms", ti.diff);
         if (t_next <= t_now) t_next += 60;
         if (t_now < t_next) {
             sleep (t_next-t_now);
@@ -512,6 +513,7 @@ void watchthread_run (thread *self) {
     thread_setname (self, "watcher");
     tenant *tcrsr;
     host *hcrsr;
+    timer ti;
     time_t t_now = time (NULL);
     time_t t_next = (t_now+60)-((t_now+60)%60);
     log_debug ("Watchthread started");
@@ -519,6 +521,7 @@ void watchthread_run (thread *self) {
     t_next += 60;
     
     while (1) {
+        timer_start (&ti);
         tcrsr = tenant_first (TENANT_LOCK_READ);
         while (tcrsr) {
             summaryinfo_start_round (&tcrsr->summ);
@@ -538,9 +541,10 @@ void watchthread_run (thread *self) {
             tcrsr = tenant_next (tcrsr, TENANT_LOCK_READ);
         }
         
+        timer_end (&ti);
         t_now = time (NULL);
         if (t_now < t_next) {
-            log_debug ("Watchthread took %i seconds", 60-(t_next-t_now));
+            log_debug ("Watchthread took %.1f ms", ti.diff);
             sleep (t_next-t_now);
         }
         else {
