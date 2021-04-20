@@ -14,6 +14,7 @@
 #include <libopticon/cliopt.h>
 #include <libopticon/transport_udp.h>
 #include <libopticon/summary.h>
+#include <libopticon/timer.h>
 
 watchlist WATCHERS;
 
