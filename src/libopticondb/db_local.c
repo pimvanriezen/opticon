@@ -730,6 +730,7 @@ int localdb_remove_tenant (db *d, uuid tenantid) {
 
 /** Implementation for db_remove_host() */
 int localdb_remove_host (db *d, uuid hostid) {
+    struct stat st;
     localdb *self = (localdb *) d;
     char uuidstr[40];
     char *tmpstr = (char *) malloc (strlen (self->path) + 128);
@@ -739,6 +740,39 @@ int localdb_remove_host (db *d, uuid hostid) {
     if (! localdb_remove_dir (tmpstr)) return 0;
     strcat (tmpstr, ".metadata");
     unlink (tmpstr);
+    FILE *F;
+    
+    var *v_deleted = var_alloc();
+    
+    sprintf (tmpstr, "%sdeleted.json", self->path);
+    if (stat (tmpstr, &st) == 0) {
+        F = fopen (tmpstr, "r");
+        if (F) {
+            flock (fileno (F), LOCK_SH);
+            char *data = (char *) malloc (st.st_size+16);
+            fread (data, st.st_size, 1, F);
+            data[st.st_size] = 0;
+            flock (fileno (F), LOCK_UN);
+            var_parse_json (v_deleted, data);
+            fclose (F);
+        }
+    }
+    
+    var *v_arr = var_get_array_forkey (v_deleted, "delete");
+    var_add_str (v_arr, uuidstr);
+    
+    F = fopen (tmpstr, "w");
+    if (! F) {
+        log_error ("Could not open db delete-list");
+        free (tmpstr);
+        return 0;
+    }
+    
+    flock (fileno (F), LOCK_EX);
+    var_dump (v_deleted, F);
+    flock (fileno (F), LOCK_UN);
+    fclose (F);
+    
     free (tmpstr);
     return 1;
 }
