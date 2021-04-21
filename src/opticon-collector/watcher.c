@@ -298,6 +298,9 @@ void watchthread_handle_host (host *host) {
         meter_set_str (m_status, 0, "STALE");
         if (db_open (APP.writedb, host->tenant->uuid, NULL)) {
             if (! db_host_exists (APP.writedb, host->uuid)) {
+                uuid2str (host->uuid, uuidstr);
+                log_info ("Removing STALE host <%s> that no longer exists in "
+                          "the database.", uuidstr);
                 host_delete (host);
                 db_close (APP.writedb);
                 return;
