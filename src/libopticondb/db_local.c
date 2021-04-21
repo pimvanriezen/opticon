@@ -63,6 +63,25 @@ int localdb_open (db *d, uuid tenant, var *options) {
     return 1;
 }
 
+bool localdb_host_exists (db *d, uuid hostid) {
+    localdb *self = (localdb *) d;
+    char uuidstr[40];
+    struct stat st;
+    char *dbpath = (char *) malloc (strlen (self->path) + 64);
+    if (! dbpath) return NULL;
+
+    uuid2str (hostid, uuidstr);
+    sprintf (dbpath, "%s/%s/current.db", self->path, uuidstr);
+    if (stat (dbpath, &st) == 0) {
+        free (dbpath);
+        return true;
+    }
+    else {
+        free (dbpath);
+        return false;
+    }
+}
+
 /** Open the database file for a specified datestamp */
 FILE *localdb_open_dbfile (localdb *ctx, uuid hostid, datestamp dt, int flags) {
     char uuidstr[40];
@@ -1321,6 +1340,7 @@ db *localdb_create (const char *prefix) {
     if (!self) return NULL;
     
     self->db.open = localdb_open;
+    self->db.host_exists = localdb_host_exists;
     self->db.get_current = localdb_get_current;
     self->db.get_record = localdb_get_record;
     self->db.get_value_range_int = localdb_get_value_range_int;

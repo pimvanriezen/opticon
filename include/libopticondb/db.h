@@ -19,6 +19,7 @@ typedef struct usage_info_s {
 } usage_info;
 
 typedef int (*open_db_f)(struct db_s *, uuid, var *);
+typedef bool (*host_exists_f)(struct db_s *, uuid);
 typedef int (*get_current_f)(struct db_s *, host *);
 typedef int (*get_record_f)(struct db_s *, time_t, host *);
 typedef uint64_t *(*get_vrangei_f)(struct db_s *, time_t, time_t, int,
@@ -53,6 +54,7 @@ typedef void (*free_db_f)(struct db_s *);
 /** Database handle virtual class */
 typedef struct db_s {
     open_db_f        open; /** Unbound method */
+    host_exists_f    host_exists; /** Method */
     get_current_f    get_current; /** Method */
     get_record_f     get_record; /** Method */
     get_vrangei_f    get_value_range_int; /** Method */
@@ -89,6 +91,7 @@ typedef struct db_s {
 /* ============================= FUNCTIONS ============================= */
 
 int          db_open (db *d, uuid tenant, var *extra);
+bool         db_host_exists (db *d, uuid hostid);
 int          db_get_current (db *d, host *into);
 int          db_get_record (db *d, time_t when, host *into);
 uint64_t    *db_get_value_range_int (db *d, time_t start, time_t end,

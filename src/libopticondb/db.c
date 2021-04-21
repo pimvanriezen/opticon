@@ -16,6 +16,12 @@ int db_open (db *d, uuid tenant, var *extra) {
     return 0;
 }
 
+/** Verify that a host exists in the database */
+bool db_host_exists (db *d, uuid hostid) {
+    if (! d->opened) return false;
+    return d->host_exists (d, hostid);
+}
+
 /** Get the latest record for a host out of the database.
   * \param d The database handle
   * \param into The host to decode the meter data into. */
