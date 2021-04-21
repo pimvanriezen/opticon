@@ -129,13 +129,14 @@ FILE *localdb_open_current (localdb *ctx, uuid hostid, int flags) {
     if (! dbpath) return NULL;
     
     uuid2str (hostid, uuidstr);
-    sprintf (dbpath, "%s/%s/current.db.new", ctx->path, uuidstr);
+    sprintf (dbpath, "%s/%s/current.db", ctx->path, uuidstr);
     if (flags & LOCALDB_FLAG_NOCREATE) {
         if (stat (dbpath, &st) != 0) {
             free (dbpath);
             return NULL;
         }
     }
+    strcat (dbpath, ".new");
     
     FILE *res = fopen (dbpath, "w");
     if (! res) {
@@ -387,11 +388,19 @@ int localdb_save_record (db *dbctx, time_t when, host *h) {
     localdb *self = (localdb *) dbctx;
     datestamp dt = time2date (when);
     off_t dbpos = 0;
+    int openflags = 0;
     
-    FILE *curf = localdb_open_current (self, h->uuid, 0);
+    meterid_t mid_status = makeid ("status",MTYPE_STR,0);
+    meter *m_status = host_get_meter (h, mid_status);
+    fstring ostatus = meter_get_str (m_status, 0);
+    if (strcmp (ostatus.str, "STALE") == 0) {
+        openflags = LOCALDB_FLAG_NOCREATE;
+    }
+
+    FILE *curf = localdb_open_current (self, h->uuid, openflags);
     if (! curf) return 0;
 
-    FILE *dbf = localdb_open_dbfile (self, h->uuid, dt, 0);
+    FILE *dbf = localdb_open_dbfile (self, h->uuid, dt, openflags);
     if (! dbf) {
         fclose (curf);
         return 0;
