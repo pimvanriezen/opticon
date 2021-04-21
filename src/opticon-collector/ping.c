@@ -321,9 +321,34 @@ struct sockaddr_storage *pingtargetlist_all (pingtargetlist *self,
                                              uint32_t *count) {
     struct sockaddr_storage *res;
     uint32_t i = 0;
-    pingtarget *crsr;
+    pingtarget *crsr, *ncrsr;
+    time_t tnow = time (NULL);
     
     pthread_mutex_lock (&self->mutex);
+    
+    /* Now's a good time to expire addresses from the list that haven't been
+       asked for in at least 3 minutes */
+    crsr = self->first;
+    while (crsr) {
+        ncrsr = crsr->next;
+        if (tnow - crsr->lastseen > 180) {
+            if (crsr->prev) {
+                crsr->prev->next = crsr->next;
+            }
+            else {
+                self->first = crsr->next;
+            }
+            if (crsr->next) {
+                crsr->next->prev = crsr->prev;
+            }
+            else {
+                self->last = crsr->prev;
+            }
+            self->count--;
+        }
+        crsr = ncrsr;
+    }
+    
     *count = self->count;
     res = calloc (*count, sizeof (struct sockaddr_storage));
     crsr = self->first;
@@ -453,7 +478,7 @@ pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
     self->wpos = 0;
     self->users = 0;
     self->sequence = 0;
-    self->lastseen = 0;
+    self->lastseen = time (NULL);
     self->populated = false;
     for (int i=0; i<32; ++i) self->data[i] = 0.0;
     memcpy (&self->remote, remote, sizeof(struct sockaddr_storage));
@@ -471,6 +496,7 @@ double pingtarget_get_rtt (pingtarget *self) {
     uint8_t msrcount = 0;
     double total = 0.0;
     uint32_t crsr = self->wpos;
+    self->lastseen = time (NULL);
     
     for (int i=0; i<32; ++i) {
         crsr = (crsr-1) & 0x1f;
