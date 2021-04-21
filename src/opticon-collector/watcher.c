@@ -296,6 +296,14 @@ void watchthread_handle_host (host *host) {
             tenant_set_notification (host->tenant, true, "STALE", host->uuid);
         }
         meter_set_str (m_status, 0, "STALE");
+        if (db_open (APP.writedb, host->tenant->uuid, NULL)) {
+            if (! db_host_exists (APP.writedb, host->uuid)) {
+                host_delete (host);
+                db_close (APP.writedb);
+                return;
+            }
+            db_close (APP.writedb);
+        }
     }
     else {
 
@@ -514,6 +522,7 @@ void watchthread_run (thread *self) {
     thread_setname (self, "watcher");
     tenant *tcrsr;
     host *hcrsr;
+    host *ncrsr;
     timer ti;
     time_t t_now = time (NULL);
     time_t t_next = (t_now+60)-((t_now+60)%60);
@@ -528,8 +537,9 @@ void watchthread_run (thread *self) {
             summaryinfo_start_round (&tcrsr->summ);
             hcrsr = tcrsr->first;
             while (hcrsr) {
+                ncrsr = hcrsr->next;
                 watchthread_handle_host (hcrsr);
-                hcrsr = hcrsr->next;
+                hcrsr = ncrsr;
             }
             
             var *tally = summaryinfo_tally_round (&tcrsr->summ);
