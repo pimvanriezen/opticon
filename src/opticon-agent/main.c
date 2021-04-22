@@ -294,8 +294,8 @@ int conf_probe (const char *id, var *v, updatetype tp) {
     if (interval == 0) {
         const char *frequency = var_get_str_forkey (v, "frequency");
         if (frequency) {
-            if (strcmp (frequency, "fast") == 0) interval = 60;
-            else if (strcmp (frequency, "slow") == 0) interval = 300;
+            if (strcmp (frequency, "high") == 0) interval = 60;
+            else if (strcmp (frequency, "low") == 0) interval = 300;
             else {
                 log_error ("Invalid frequency specification for "
                            "probe '%s'", id);
