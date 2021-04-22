@@ -505,14 +505,14 @@ double pingtarget_get_rtt (pingtarget *self) {
         if (c<0) losscount++;
         else {
             if (! i) {
-                msrcount += 2;
-                total += 2*c;
+                msrcount += 8;
+                total += 8*c;
             }
             msrcount++;
             total += c;
             if (i<6) {
-                msrcount++;
-                total += c;
+                msrcount += 2;
+                total += 2*c;
             }
         }
     }
