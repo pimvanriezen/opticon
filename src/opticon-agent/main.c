@@ -291,6 +291,22 @@ int conf_probe (const char *id, var *v, updatetype tp) {
     const char *vtp = var_get_str_forkey (v, "type");
     const char *call = var_get_str_forkey (v, "call");
     int interval = var_get_int_forkey (v, "interval");
+    if (interval == 0) {
+        const char *frequency = var_get_str_forkey (v, "frequency");
+        if (frequency) {
+            if (strcmp (frequency, "fast") == 0) interval = 60;
+            else if (strcmp (frequency, "slow") == 0) interval = 300;
+            else {
+                log_error ("Invalid frequency specification for "
+                           "probe '%s'", id);
+                return 0;
+            }
+        }
+        else {
+            log_error ("No frequency defined for probe '%s'", id);
+            return 0;
+        }
+    }
     probetype t = PROBE_BUILTIN;
     
     if (vtp && call && interval) {
