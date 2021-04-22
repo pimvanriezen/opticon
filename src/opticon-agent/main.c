@@ -418,6 +418,25 @@ int main (int _argc, const char *_argv[]) {
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);
     if (! argv) return 1;
     
+#if defined (OS_LINUX)    
+    char buffer[1024];
+    FILE *F = fopen ("/sys/class/dmi/id/product_uuid","r");
+    if (F) {
+        fgets (buffer, 1023, F);
+        APP.hostid = mkuuid (buffer);
+        fclose (F);
+    }
+#elif defined (OS_DARWIN)
+    char buffer[1024];
+    FILE *F = popen ("ioreg -d2 -c IOPlatformExpertDevice | "
+                     "awk -F\" '/IOPlatformUUID/{print $(NF-1)}'","r");
+    if (F) {
+        fgets (buffer, 1023, F);
+        APP.hostid = mkuuid (buffer);
+        fclose (F);
+    }
+#endif
+    
     opticonf_add_reaction ("collector/address", conf_collector_address);
     opticonf_add_reaction ("collector/port", conf_collector_port);
     opticonf_add_reaction ("collector/key", conf_collector_key);
