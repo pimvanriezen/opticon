@@ -290,6 +290,7 @@ int conf_probe (const char *id, var *v, updatetype tp) {
     if (tp != UPDATE_ADD) exit (0);
     const char *vtp = var_get_str_forkey (v, "type");
     const char *call = var_get_str_forkey (v, "call");
+    var *opt = var_get_dict_forkey (v, "options");
     int interval = var_get_int_forkey (v, "interval");
     if (interval == 0) {
         const char *frequency = var_get_str_forkey (v, "frequency");
@@ -312,7 +313,7 @@ int conf_probe (const char *id, var *v, updatetype tp) {
     if (vtp && call && interval) {
         if (strcmp (vtp, "exec") == 0) t = PROBE_EXEC;
         else if (strcmp (vtp, "nagios") == 0) t = PROBE_NAGIOS;
-        if (probelist_add (&APP.probes, t, call, id, interval)) {
+        if (probelist_add (&APP.probes, t, call, id, interval, opt)) {
             return 1;
         }
         else {
@@ -429,7 +430,7 @@ int main (int _argc, const char *_argv[]) {
 #elif defined (OS_DARWIN)
     char buffer[1024];
     FILE *F = popen ("ioreg -d2 -c IOPlatformExpertDevice | "
-                     "awk -F\" '/IOPlatformUUID/{print $(NF-1)}'","r");
+                     "awk -F\\\" '/IOPlatformUUID/{print $(NF-1)}'","r");
     if (F) {
         fgets (buffer, 1023, F);
         APP.hostid = mkuuid (buffer);

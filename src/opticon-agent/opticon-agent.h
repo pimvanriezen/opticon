@@ -43,6 +43,7 @@ typedef struct probe_s {
     volatile time_t  lastreply; /**< Last update time */
     time_t           lastdispatch; /**< Last time it was dispatched */
     int              interval; /**< Configured time interval */
+    var             *options; /**< Probe-specific options, if any */
 } probe;
 
 /** List header for a collection of probe objects */
@@ -95,11 +96,12 @@ extern appcontext APP; /**< The keep-it-all-together blob */
 
 probe           *probe_alloc (void);
 int              probelist_add (probelist *, probetype, const char *,
-                                const char *, int);
+                                const char *, int, var *);
 void             probelist_start (probelist *);
 void             probelist_cancel (probelist *);
 authresender    *authresender_create (outtransport *);
 void             authresender_schedule (authresender *, const void *, size_t);
 
+bool             matchlist (const char *, var *);
 
 #endif

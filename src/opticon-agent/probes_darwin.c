@@ -297,6 +297,9 @@ var *runprobe_df (probe *self) {
     char *crsr;
     var *res = var_alloc();
     var *v_df = var_get_array_forkey (res, "df");
+    var *skipdevices = var_get_array_forkey (self->options, "skip");
+    var *matchdevices = var_get_array_forkey (self->options, "match");
+    
     FILE *f = popen ("/bin/df -k", "r");
     while (! feof (f)) {
         buffer[0] = 0;
@@ -305,6 +308,12 @@ var *runprobe_df (probe *self) {
         cpystr (device, buffer, 16);
         
         log_debug ("probe_df: --- found device %s", device);
+
+        if (var_get_count (matchdevices)) {
+            if (! matchlist (device, matchdevices)) continue;
+        }
+        
+        if (matchlist (device, skipdevices)) continue;
         
         crsr = buffer;
         while ((*crsr) && (! isspace (*crsr))) crsr++;

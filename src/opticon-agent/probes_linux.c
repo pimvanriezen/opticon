@@ -188,6 +188,8 @@ var *runprobe_df (probe *self) {
     wordlist *args;
     var *res = var_alloc();
     var *res_df = var_get_array_forkey (res, "df");
+    var *skipdevices = var_get_array_forkey (self->options, "skip");
+    var *matchdevices = var_get_array_forkey (self->options, "match");
 
     F = fopen ("/proc/mounts","r");
     if (! F) return res;
@@ -197,6 +199,21 @@ var *runprobe_df (probe *self) {
         if (*buf) {
             args = wordlist_make (buf);
             if (args->argc > 3) {
+                const char *dev = args->argv[0];
+                const char *mntat = args->argv[1];
+                
+                if (var_get_count (matchdevices)) {
+                    if (! matchlist (dev, matchdevices)) {
+                        wordlist_free (args);
+                        continue;
+                    }
+                }
+                
+                if (matchlist (dev, skipdevices)) {
+                    wordlist_free (args);
+                    continue;
+                }
+                
                 if ((! strncmp (args->argv[3], "rw", 2)) &&
                     (strcmp (args->argv[2], "rootfs")) &&
                     (strcmp (args->argv[2], "proc")) &&
@@ -213,8 +230,6 @@ var *runprobe_df (probe *self) {
                     (strcmp (args->argv[0], "none")) &&
                     (strncmp (args->argv[1], "/sys", 4)) &&
                     (strncmp (args->argv[1], "/proc", 5))) {
-                    const char *dev = args->argv[0];
-                    const char *mntat = args->argv[1];
                     uint64_t sz = diskdevice_size_in_mb (dev);
                     if (sz) {
                         var *mnt = var_add_dict (res_df);

@@ -1,9 +1,18 @@
 #include <libopticon/var_parse.h>
 #include <libopticon/log.h>
 #include <libopticon/popen.h>
+#include <libopticon/glob.h>
 #include "opticon-agent.h"
 #include "probes.h"
 #include <sys/select.h>
+
+bool matchlist (const char *val, var *defarr) {
+    for (int i=0; i<var_get_count (defarr); ++i) {
+        const char *m = var_get_str_atindex (defarr, i);
+        if (globcmp (val, m)) return true;
+    }
+    return false;
+}
 
 /** Allocate and initialize a probe object in memory */
 probe *probe_alloc (void) {
@@ -19,6 +28,7 @@ probe *probe_alloc (void) {
     res->lastdispatch = time (NULL);
     res->lastreply = res->lastdispatch - 1;
     res->interval = 0;
+    res->options = var_alloc();
     return res;
 }
 
@@ -124,7 +134,7 @@ probefunc_f probe_find_builtin (const char *id) {
 
 /** Add a probe to a list */
 int probelist_add (probelist *self, probetype t, const char *call, 
-                   const char *id, int iv) {
+                   const char *id, int iv, var *opt) {
     probefunc_f func;
     if (t == PROBE_BUILTIN) func = probe_find_builtin (call);
     else func = runprobe_exec;
@@ -136,6 +146,7 @@ int probelist_add (probelist *self, probetype t, const char *call,
     p->id = strdup (id);
     p->func = func;
     p->interval = iv;
+    var_copy (p->options, opt);
     
     if (self->last) {
         p->prev = self->last;

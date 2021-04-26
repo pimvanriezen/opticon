@@ -24,6 +24,9 @@ probes {
         type: built-in
         call: probe_df
         frequency: low
+        options: {
+            skip: [ "/dev/disk2s2" ]
+        }
     }
     uptime {
         type: built-in
