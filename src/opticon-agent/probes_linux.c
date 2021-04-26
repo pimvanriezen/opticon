@@ -45,8 +45,11 @@ var *runprobe_net (probe *self) {
     uint64_t diffout_packets;
     wordlist *args;
     char *colon;
+    char *devstart;
     time_t ti;
     var *res = var_alloc();
+    var *skipdevices = var_get_array_forkey (self->options, "skip");
+    var *matchdevices = var_get_array_forkey (self->options, "match");
     
     F = fopen ("/proc/net/dev", "r");
     if (! F) {
@@ -63,6 +66,22 @@ var *runprobe_net (probe *self) {
         colon = strchr (buf, ':');
         if (! colon) continue;
         args = wordlist_make (colon);
+        *colon = 0;
+        devstart = buf;
+        while (*devstart == ' ') devstart++;
+        
+        if (var_get_count (matchdevices)) {
+            if (! matchlist (device, matchdevices)) {
+                wordlist_free (args);
+                continue;
+            }
+        }
+        
+        if (matchlist (device, skipdevices) {
+            wordlist_free (args);
+            continue;
+        }
+        
         if (args->argc < 11) {
             wordlist_free (args);
             continue;
@@ -447,6 +466,8 @@ var *runprobe_io (probe *self)
     uint64_t totalwait = 0;
     var *res = var_alloc();
     var *toplevels = var_alloc(); /* to skip hda1 if we already did hda */
+    var *skipdevices = var_get_array_forkey (self->options, "skip");
+    var *matchdevices = var_get_array_forkey (self->options, "match");
     
     F = fopen ("/proc/diskstats", "r");
     if (F) {
@@ -464,6 +485,19 @@ var *runprobe_io (probe *self)
             /* make copy of the device name with digits stripped off */
             strncpy (buf, split->argv[0], 255);
             buf[255] = 0;
+            
+            if (var_get_count (matchdevices)) {
+                if (! matchlist (buf, matchdevices)) {
+                    wordlist_free (split);
+                    continue;
+                }
+            }
+            
+            if (matchlist (buf, skipdevices)) {
+                wordlist_free (split);
+                continue;
+            }
+            
             c = buf;
             while (isalpha (*c)) c++;
             if (isdigit (*c)) *c = 0;
