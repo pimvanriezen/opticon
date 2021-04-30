@@ -38,6 +38,14 @@ probes {
         call: probe_io
         frequency: high
     }
+    net {
+        type: built-in
+        call: probe_net
+        frequency: high
+        options: {
+            match: [ "ens3" ]
+        }
+    }
     loadavg {
         type: built-in
         call: probe_loadavg

@@ -102,6 +102,7 @@ void procrun_setproc (procrun *p, pid_t pid, unsigned long utime,
 		p->array[ipos].beat = p->ti_now;
 		p->array[ipos].pcpu = 0;
 		p->array[ipos].pmem = pmem;
+		
 		strncpy (p->array[ipos].ptitle, ptitle, 47);
 		p->array[ipos].ptitle[47] = 0;
 	}

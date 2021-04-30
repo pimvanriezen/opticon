@@ -71,13 +71,13 @@ var *runprobe_net (probe *self) {
         while (*devstart == ' ') devstart++;
         
         if (var_get_count (matchdevices)) {
-            if (! matchlist (device, matchdevices)) {
+            if (! matchlist (devstart, matchdevices)) {
                 wordlist_free (args);
                 continue;
             }
         }
         
-        if (matchlist (device, skipdevices) {
+        if (matchlist (devstart, skipdevices) {
             wordlist_free (args);
             continue;
         }
@@ -682,7 +682,7 @@ void sample_tprocs (procrun *run) {
                     memset (buf, 0, 255);
                     fread (buf, 0, 255, F);
                     fclose (F);
-                    
+                                        
                     if (*buf == 0) {
                         sprintf (buf, "/proc/%d/status", pid);
                         if ((F = fopen (buf, "r"))) {

@@ -151,7 +151,7 @@ void run_top (thread *me) {
                 continue;
             }
             TOP[1].records[count].pid = atoi (buf);
-            cpystr (TOP[1].records[count].cmd, buf+offs_cmd, 15);
+            cpystr (TOP[1].records[count].cmd, buf+offs_cmd, 31);
             TOP[1].records[count].pcpu = atof (buf+offs_cpu);
             TOP[1].records[count].sizekb = 0; /* sz2kb (buf+offs_mem); */
             cpystr (TOP[1].records[count].user, buf+offs_user, 14);
