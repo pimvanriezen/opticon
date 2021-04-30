@@ -77,7 +77,7 @@ var *runprobe_net (probe *self) {
             }
         }
         
-        if (matchlist (devstart, skipdevices) {
+        if (matchlist (devstart, skipdevices)) {
             wordlist_free (args);
             continue;
         }
