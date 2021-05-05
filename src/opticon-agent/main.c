@@ -233,6 +233,7 @@ int daemon_main (int argc, const char *argv[]) {
         
         /* Done with the host object */
         host_delete (h);
+        var_free (vnagios);
 
         /* Figure out what the next scheduled wake-up time is */
         tnow = time (NULL);
