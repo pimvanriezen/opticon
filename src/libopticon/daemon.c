@@ -92,6 +92,7 @@ bool daemonize (const char *pidfilepath, int argc,
     struct passwd *pwd = NULL;
     FILE *pidfile;
     char pidbuf[128];
+    pidbuf[0] = 0;
     
     popen_init();
     
