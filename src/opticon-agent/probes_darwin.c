@@ -36,7 +36,7 @@ var *runprobe_distro (probe *self) {
 
 /** Structure for keeping track of top records */
 typedef struct toprec_s {
-    uint32_t pid;
+    pid_t pid;
     char cmd[32];
     double pcpu;
     uint32_t sizekb;
@@ -118,6 +118,7 @@ void run_top (thread *me) {
     topstate st = TOP_HDR;
     int count = 0;
     int offs_cmd, offs_cpu, offs_mem, offs_user;
+    pid_t pid;
     memset (TOP, 0, 2*sizeof(topinfo));
     thread_setname (me, "top");
     FILE *f = popen ("/usr/bin/top -l 0 -o cpu -n 16 -c d -s 30", "r");
@@ -153,12 +154,18 @@ void run_top (thread *me) {
                 count = 0;
                 continue;
             }
-            TOP[1].records[count].pid = atoi (buf);
-            proc_pidpath(TOP[1].records[count].pid, path, sizeof(path));
-            pcrsr = path;
-            while (strchr (pcrsr, '/')) pcrsr = strchr (pcrsr, '/') +1;
-            strncpy (TOP[1].records[count].cmd, pcrsr, 31);
-            TOP[1].records[count].cmd[31] = 0;
+            pid = atoi (buf);
+            TOP[1].records[count].pid = pid;
+            if (pid) {
+                proc_pidpath(pid, path, sizeof(path));
+                pcrsr = path;
+                while (strchr (pcrsr, '/')) pcrsr = strchr (pcrsr, '/') +1;
+                strncpy (TOP[1].records[count].cmd, pcrsr, 31);
+                TOP[1].records[count].cmd[31] = 0;
+            }
+            else {
+                strcpy (TOP[1].records[count].cmd, "kernel_task");
+            }
             
             //cpystr (TOP[1].records[count].cmd, buf+offs_cmd, 15);
             TOP[1].records[count].pcpu = atof (buf+offs_cpu);
