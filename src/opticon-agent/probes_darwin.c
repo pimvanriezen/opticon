@@ -319,9 +319,11 @@ var *runprobe_df (probe *self) {
     FILE *f = popen ("/bin/df -k", "r");
     while (! feof (f)) {
         buffer[0] = 0;
-        fgets (buffer, 1023, f);
+        if (! fgets (buffer, 1023, f)) break;
         if (memcmp (buffer, "/dev", 4) != 0) continue;
         cpystr (device, buffer, 16);
+        char *spc = strchr (device, ' ');
+        if (spc) *spc=0;
         
         log_debug ("probe_df: --- found device %s", device);
 
