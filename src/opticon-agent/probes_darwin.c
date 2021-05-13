@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/sysctl.h>
+#include <libproc.h>
 
 var *runprobe_distro (probe *self) {
     var *res = var_alloc();
@@ -112,6 +113,8 @@ static uint32_t sz2b (const char *str) {
   * as it comes along. */
 void run_top (thread *me) {
     char buf[1024];
+    char path[PROC_PIDPATHINFO_MAXSIZE];
+    char *pcrsr;
     topstate st = TOP_HDR;
     int count = 0;
     int offs_cmd, offs_cpu, offs_mem, offs_user;
@@ -151,7 +154,13 @@ void run_top (thread *me) {
                 continue;
             }
             TOP[1].records[count].pid = atoi (buf);
-            cpystr (TOP[1].records[count].cmd, buf+offs_cmd, 31);
+            proc_pidpath(TOP[1].records[count].pid, path, sizeof(path));
+            pcrsr = path;
+            while (strchr (pcrsr, '/')) pcrsr = strchr (pcrsr, '/') +1;
+            strncpy (TOP[1].records[count].cmd, pcrsr, 31);
+            TOP[1].records[count].cmd[31] = 0;
+            
+            //cpystr (TOP[1].records[count].cmd, buf+offs_cmd, 15);
             TOP[1].records[count].pcpu = atof (buf+offs_cpu);
             TOP[1].records[count].sizekb = 0; /* sz2kb (buf+offs_mem); */
             cpystr (TOP[1].records[count].user, buf+offs_user, 14);
