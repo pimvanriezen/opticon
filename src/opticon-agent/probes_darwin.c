@@ -1,5 +1,6 @@
 #include <libopticon/log.h>
 #include <libopticon/var_dump.h>
+#include <libopticon/popen.h>
 #include <ctype.h>
 #include <time.h>
 #include <errno.h>
@@ -13,7 +14,7 @@ var *runprobe_distro (probe *self) {
     char *c;
     FILE *F;
     char buf[256];
-    F = popen ("/usr/sbin/system_profiler SPSoftwareDataType","r");
+    F = popen_safe ("/usr/sbin/system_profiler SPSoftwareDataType","r");
     if (! F) return res;
     while (! feof (F)) {
         *buf = 0;
@@ -121,7 +122,7 @@ void run_top (thread *me) {
     pid_t pid;
     memset (TOP, 0, 2*sizeof(topinfo));
     thread_setname (me, "top");
-    FILE *f = popen ("/usr/bin/top -l 0 -o cpu -n 16 -c d -s 30", "r");
+    FILE *f = popen_safe ("/usr/bin/top -l 0 -o cpu -n 16 -c d -s 30", "r");
     if (! f) {
         log_error ("Could not open top probe");
         return;
@@ -130,7 +131,7 @@ void run_top (thread *me) {
         if (feof (f)) {
             log_info ("Reopening top");
             pclose (f);
-            f = popen ("/usr/bin/top -l 0 -o cpu -n 16 -c d -s 30", "r");
+            f = popen_safe ("/usr/bin/top -l 0 -o cpu -n 16 -c d -s 30", "r");
         }
         
         buf[0] = 0;
@@ -316,7 +317,7 @@ var *runprobe_df (probe *self) {
     var *skipdevices = var_get_array_forkey (self->options, "skip");
     var *matchdevices = var_get_array_forkey (self->options, "match");
     
-    FILE *f = popen ("/bin/df -k", "r");
+    FILE *f = popen_safe ("/bin/df -k", "r");
     while (! feof (f)) {
         buffer[0] = 0;
         if (! fgets (buffer, 1023, f)) break;
@@ -407,7 +408,7 @@ var *runprobe_df (probe *self) {
     pclose (f);
     int cnt = var_get_count (v_df);
     log_debug ("probe_df: --- probing filesystems");
-    f = popen ("/sbin/mount","r");
+    f = popen_safe ("/sbin/mount","r");
     while (! feof (f)) {
         buffer[0] = 0;
         fgets (buffer, 1023, f);
