@@ -342,7 +342,7 @@ rm -f conftest.bin conftest.c
 
 if [ -z "$LIBCURL" ]; then
   for loc in /sw/lib /usr/lib32 /usr/lib /opt/local/lib /usr/local/lib /usr/freeware/lib /usr/X11R6/lib /lib64 /usr/lib64 /usr/local/lib64 $HOME/lib; do
-    if [ -f "$loc/libmicrohttpd.$DYNEXT" ]; then
+    if [ -f "$loc/libcurl.$DYNEXT" ]; then
       LIBCURL="-L$loc -lcurl"
     fi
   done
