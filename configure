@@ -320,7 +320,7 @@ COMPILERFLAGS=$CFLAGS
 
 saypending "looking for curl.h include"
 for loc in /sw/include /usr/local/include /usr/include $HOME/include \
-           /sw/include/pcre /opt/local/include /usr/local/include/pcre /usr/include/pcre $HOME/include/pcre; do
+           /usr/local/opt/curl/include /opt/local/include; do
   if [ -f "$loc/curl/curl.h" ]; then
     CURLINC="$loc"
   fi
