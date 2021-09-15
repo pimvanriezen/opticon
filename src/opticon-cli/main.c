@@ -282,6 +282,59 @@ int keystone_login (void) {
     return (token == NULL) ? 0 : 1;
 }
 
+/** Create a unithost-identity token. TODO: Add OTP support */
+int unithost_login (void) {
+    char username[256];
+    printf ("%% Login required\n\n");
+    char *domain = domain_from_url (OPTIONS.unithost_url);
+    printf ("  UnitHost Domain: %s\n", domain);
+    free (domain);
+    printf ("  Username........: ");
+    fflush (stdout);
+    fgets (username, 255, stdin);
+    const char *password = getpass ("  Password........: ");
+    printf ("\n");
+    
+    char *kurl = (char *) malloc (strlen (OPTIONS.unithost_url) + 10);
+    sprintf (kurl, "%s/token", OPTIONS.unithost_url);
+    var *req = var_alloc();
+    var_set_str_forkey (req, "username", username);
+    var_set_str_forkey (req, "password", password);
+    var *hdr = var_alloc();
+    var_set_str_forkey (hdr, "Content-Type", "application/json");
+    var *err = var_alloc();
+    var *kres = http_call ("POST", kurl, hdr, req, err, NULL);
+    if (! kres) {
+        printf ("%% Login failed\n");
+        var_free (hdr);
+        var_free (req);
+        var_free (err);
+        free (kurl);
+        return 0;
+    }
+    
+    const char *token = var_get_str_forkey (kres, "token");
+    if ((!token) || (!token[0])) {
+        printf ("%% Access denied\n");
+        var_free (hdr);
+        var_free (req);
+        var_free (err);
+        var_free (kres);
+        free (kurl);
+        return 0;
+    }
+    
+    OPTIONS.external_token = strdup (token);
+    write_cached_token (token);
+    
+    var_free (hdr);
+    var_free (req);
+    var_free (err);
+    var_free (kres);
+    free (kurl);
+    return 1;
+}
+
 /** Command line flags */
 cliopt CLIOPT[] = {
     {"--tenant","-t",OPT_VALUE,"",set_tenant},
