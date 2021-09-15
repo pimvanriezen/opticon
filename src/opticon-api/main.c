@@ -267,9 +267,7 @@ int flt_check_admin (req_context *ctx, req_arg *a, var *out, int *status) {
 }
 
 /** Filter that extracts the tenantid argumnt from the url, and croaks
-  * when it is invalid. FIXME: Should also croak when the user has
-  * no access to the tenant, on account of being a filthy peasant with
-  * the wrong UUID.
+  * when it is invalid.
   */
 int flt_check_tenant (req_context *ctx, req_arg *a, var *out, int *status) {
     if (a->argc<1) return err_server_error (ctx, a, out, status);
