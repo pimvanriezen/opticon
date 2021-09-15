@@ -220,7 +220,7 @@ int req_match_check (req_match *self, const char *url, req_arg *arg) {
             /* Reject invalid UUID / timespec */
             if (matchtp == 'U' && validch != 32) return 0;
             
-            /* 123456789 1234
+            /* 123456789 1234 */
             /* 20210401113800 */
             if (matchtp == 'T' && (validch < 12 || validch > 14)) return 0;
             
@@ -312,7 +312,8 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
             if (req_match_check (crsr, url, targ)) {
                 if (crsr->func) {
                     if (crsr->func (ctx, targ, ctx->response, &ctx->status)) {
-                        req_write_response (conn, ctx->response, ctx->status, out, 0);
+                        req_write_response (conn, ctx->response, ctx->status,
+                                            out, 0);
                         req_arg_free (targ);
                         ioport_close (out);
                         return;
@@ -320,7 +321,8 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
                 }
                 else if (crsr->textfunc) {
                     if (crsr->textfunc (ctx, targ, out, &ctx->status)) {
-                        req_write_response (conn, ctx->response, ctx->status, out, 1);
+                        req_write_response (conn, ctx->response, ctx->status,
+                                            out, 1);
                         req_arg_free (targ);
                         ioport_close (out);
                         return;
