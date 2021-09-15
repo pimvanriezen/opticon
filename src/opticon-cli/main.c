@@ -558,7 +558,12 @@ int main (int _argc, const char *_argv[]) {
      * the user to log in. */
     if (OPTIONS.external_token[0] == 0 && OPTIONS.opticon_token[0] == 0) {
         if (! load_cached_token()) {
-            if (! keystone_login()) return 1;
+            if (OPTIONS.keystone_url && OPTIONS.keystone_url[0]) {
+                if (! keystone_login()) return 1;
+            }
+            else if (OPTIONS.unithost_url && OPTIONS.unithost_url[0]) {
+                if (! unithost_login()) return 1;
+            }
         }
     }
     
