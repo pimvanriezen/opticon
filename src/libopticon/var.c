@@ -1009,3 +1009,20 @@ var *var_add_dict (var *self) {
     var_link (nvar, self);
     return nvar;
 }
+
+/*/ ======================================================================= /*/
+/** Checks if an array contains a string value.
+  * \param self The parent array.
+  * \param str The string to search.
+  * \return 1 if found, 0 if not. */
+/*/ ======================================================================= /*/
+int var_contains_str (var *self, const char *str) {
+    if (self->type != VAR_ARRAY) return 0;
+    var *node = self->value.arr.first;
+    while (node) {
+        const char *nodestr = var_get_str (node);
+        if (nodestr && (strcmp (nodestr,str) == 0)) return 1;
+        node = node->next;
+    }
+    return 0;
+}
