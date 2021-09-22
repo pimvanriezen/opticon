@@ -157,6 +157,8 @@ int handle_external_token_unithost (req_context *ctx) {
     var *data = var_alloc();
     var *res = http_call ("GET", url, hdr, data, NULL, NULL);
 
+    ctx->userlevel = AUTH_GUEST;
+
     if (ctx->auth_tenants) {
         free (ctx->auth_tenants);
         ctx->auth_tenants = NULL;
@@ -176,9 +178,18 @@ int handle_external_token_unithost (req_context *ctx) {
                     idname = var_get_str_forkey (acc, "contact");
                 }
                 var_set_str_forkey (ctx->auth_data, strid, idname);
+                retcode = 1;
+                ctx->userlevel = AUTH_USER;
             }
-            retcode = 1;
-            ctx->userlevel = AUTH_USER;
+            else {
+                var *roles = var_get_array_forkey (res, "roles");
+                if (roles) {
+                    if (var_contains_str (roles, "ADMIN")) {
+                        retcode = 1;
+                        ctx->userlevel = AUTH_ADMIN;
+                    }
+                }
+            }
         }
         var_free (res);
     }
