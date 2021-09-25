@@ -443,32 +443,32 @@ time_t var_get_time (var *self) {
 var *var_find_index (var *self, int index) {
     if (self->type != VAR_ARRAY && self->type != VAR_DICT) return NULL;
     var *res = NULL;
-    int cindex = (index < 0) ? self->value.arr.count - index : index;
-    if (cindex < 0) return NULL;
-    if (cindex >= self->value.arr.count) return NULL;
+    int absindex = (index < 0) ? self->value.arr.count - index : index;
+    if (absindex < 0) return NULL;
+    if (absindex >= self->value.arr.count) return NULL;
     
     int cpos = self->value.arr.cachepos;
-    if (cpos == cindex) {
+    if (cpos == absindex) {
         return self->value.arr.cachenode;
     }
 
     if (index == -1) res = self->value.arr.last;    
-    else if (cpos == cindex+1) {
+    else if (cpos == absindex+1) {
         res = self->value.arr.cachenode->prev;
     }
-    else if (cindex && cpos == cindex-1) { 
+    else if (absindex && cpos == absindex-1) { 
         res = self->value.arr.cachenode->next;
     }
     
     if (! res) {
         res = self->value.arr.first;
-        for (int i=0; res && (i<cindex); ++i) {
+        for (int i=0; res && (i<absindex); ++i) {
             res = res->next;
         }
     }
     
     if (! res) return NULL;
-    self->value.arr.cachepos = cindex;
+    self->value.arr.cachepos = absindex;
     self->value.arr.cachenode = res;
     return res;
 }
@@ -1018,11 +1018,23 @@ var *var_add_dict (var *self) {
 /*/ ======================================================================= /*/
 int var_contains_str (var *self, const char *str) {
     if (self->type != VAR_ARRAY) return 0;
-    var *node = self->value.arr.first;
+    return (var_indexof (self,str) < 0) ? 0 : 1;
+}
+
+/*/ ======================================================================= /*/
+/** Finds the first index of a matching string in an array.
+  * \param self The parent array.
+  * \param str The string to search.
+  * \return index position of first match if found, -1 if not. */
+/*/ ======================================================================= /*/
+int var_indexof (var *self, const char *str) {
+    if (self->type != VAR_ARRAY) return -1;
+    int pos = 0;
     while (node) {
         const char *nodestr = var_get_str (node);
-        if (nodestr && (strcmp (nodestr,str) == 0)) return 1;
+        if (nodestr && (strcmp (nodestr,str) == 0)) return pos;
         node = node->next;
+        pos++;
     }
-    return 0;
+    return -1;
 }

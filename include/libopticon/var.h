@@ -110,4 +110,5 @@ void         var_add_unixtime (var *, time_t);
 var         *var_add_array (var *);
 var         *var_add_dict (var *);
 int          var_contains_str (var *, const char *);
+int          var_indexof (var *, const char *);
 #endif
