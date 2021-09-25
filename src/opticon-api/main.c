@@ -150,7 +150,7 @@ static var *UNITHOST_CACHE = NULL;
 
 char *resolve_unithost_service (const char *registry_url, const char *svcname) {
     if (UNITHOST_CACHE) {
-        char *v = var_get_str_forkey (UNITHOST_CACHE, svcname);
+        const char *v = var_get_str_forkey (UNITHOST_CACHE, svcname);
         if (v) return strdup (v);
     }
     else {
