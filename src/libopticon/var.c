@@ -1030,6 +1030,8 @@ int var_contains_str (var *self, const char *str) {
 int var_indexof (var *self, const char *str) {
     if (self->type != VAR_ARRAY) return -1;
     int pos = 0;
+    var *node = self->value.arr.first;
+    
     while (node) {
         const char *nodestr = var_get_str (node);
         if (nodestr && (strcmp (nodestr,str) == 0)) return pos;
