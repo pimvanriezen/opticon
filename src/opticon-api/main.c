@@ -146,10 +146,51 @@ int handle_external_token_openstack (req_context *ctx) {
     return retcode;;
 }
 
+static char *SERVICE_URL = NULL;
+
+char *resolve_unithost_service (const char *registry_url, const char *svcname) {
+    if (SERVICE_URL) return strdup (SERVICE_URL);
+    
+    char *url = (char *) malloc (strlen(registry_url)+48);
+    sprintf (url, "%s/service", registry_url);
+    var *hdr = var_alloc();
+    var *data = var_alloc();
+    var *res = http_call ("GET", url, hdr, data, NULL, NULL);
+    if (! res) {
+        log_error ("Error resolving service '%s' from unithost-registry at %s",
+                   svcname, registry_url);
+        var_free (hdr);
+        var_free (data);
+        return NULL;
+    }
+    
+    var *svc = var_find_key (res, svcname);
+    if (! svc) {
+        log_error ("Could not find service '%s' in unithost-registry at %s",
+                   svcname, registry_url);
+        var_free (hdr);
+        var_free (data);
+        var_free (res);
+        return NULL;
+    }
+    
+    char *retval = strdup (var_get_str_forkey (svc, "external_url"));
+    var_free (hdr);
+    var_free (data);
+    var_free (res);
+    
+    SERVICE_URL = strdup (retval);
+    return retval;
+}
+
 int handle_external_token_unithost (req_context *ctx) {
     if (! OPTIONS.unithost_url[0]) return 0;
-    char *url = (char *) malloc (strlen(OPTIONS.unithost_url)+40);
-    sprintf (url, "%s", OPTIONS.unithost_url);
+    char *accurl = resolve_unithost_service (OPTIONS.unithost_url, "account");
+    if (! accurl) return 0;
+    char *url = (char *) malloc (strlen(accurl)+40);
+    sprintf (url, "%s/token", accurl);
+    free (accurl);
+    
     int retcode = 0;
     int i = 0;
     var *hdr = var_alloc();
