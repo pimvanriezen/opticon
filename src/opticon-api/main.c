@@ -146,10 +146,16 @@ int handle_external_token_openstack (req_context *ctx) {
     return retcode;;
 }
 
-static char *SERVICE_URL = NULL;
+static var *UNITHOST_CACHE = NULL;
 
 char *resolve_unithost_service (const char *registry_url, const char *svcname) {
-    if (SERVICE_URL) return strdup (SERVICE_URL);
+    if (UNITHOST_CACHE) {
+        char *v = var_get_str_forkey (UNITHOST_CACHE, svcname);
+        if (v) return strdup (v);
+    }
+    else {
+        UNITHOST_CACHE = var_alloc();
+    }
     
     char *url = (char *) malloc (strlen(registry_url)+48);
     sprintf (url, "%s/service", registry_url);
@@ -179,7 +185,7 @@ char *resolve_unithost_service (const char *registry_url, const char *svcname) {
     var_free (data);
     var_free (res);
     
-    SERVICE_URL = strdup (retval);
+    var_set_str_forkey (UNITHOST_CACHE, svcname, retval);
     return retval;
 }
 
