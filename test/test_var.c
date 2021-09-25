@@ -19,6 +19,7 @@ int main (int argc, const char *argv[]) {
     
     assert (var_contains_str (env_colors, "green"));
     assert (! var_contains_str (env_colors, "purple"));
+    assert (var_indexof (env_colors, "blue") == 2);
     assert (var_get_int_forkey (env_collector, "listenport") == 3333);
     assert (tstr = var_get_str_forkey (env_collector, "address"));
     assert (strcmp (tstr, "127.0.0.1") == 0);
