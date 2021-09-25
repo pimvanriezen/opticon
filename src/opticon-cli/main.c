@@ -282,6 +282,49 @@ int keystone_login (void) {
     return (token == NULL) ? 0 : 1;
 }
 
+static var *UNITHOST_CACHE = NULL;
+
+char *resolve_unithost_service (const char *registry_url, const char *svcname) {
+    if (UNITHOST_CACHE) {
+        const char *v = var_get_str_forkey (UNITHOST_CACHE, svcname);
+        if (v) return strdup (v);
+    }
+    else {
+        UNITHOST_CACHE = var_alloc();
+    }
+    
+    char *url = (char *) malloc (strlen(registry_url)+48);
+    sprintf (url, "%s/service", registry_url);
+    var *hdr = var_alloc();
+    var *data = var_alloc();
+    var *res = http_call ("GET", url, hdr, data, NULL, NULL);
+    if (! res) {
+        log_error ("Error resolving service '%s' from unithost-registry at %s",
+                   svcname, registry_url);
+        var_free (hdr);
+        var_free (data);
+        return NULL;
+    }
+    
+    var *svc = var_find_key (res, svcname);
+    if (! svc) {
+        log_error ("Could not find service '%s' in unithost-registry at %s",
+                   svcname, registry_url);
+        var_free (hdr);
+        var_free (data);
+        var_free (res);
+        return NULL;
+    }
+    
+    char *retval = strdup (var_get_str_forkey (svc, "external_url"));
+    var_free (hdr);
+    var_free (data);
+    var_free (res);
+    
+    var_set_str_forkey (UNITHOST_CACHE, svcname, retval);
+    return retval;
+}
+
 /** Create a unithost-identity token. TODO: Add OTP support */
 int unithost_login (void) {
     char username[256];
@@ -295,8 +338,16 @@ int unithost_login (void) {
     const char *password = getpass ("  Password........: ");
     printf ("\n");
     
-    char *kurl = (char *) malloc (strlen (OPTIONS.unithost_url) + 10);
-    sprintf (kurl, "%s/token", OPTIONS.unithost_url);
+    char *svcurl = resolve_unithost_service (OPTIONS.unithost_url, "identity");
+    if (! svcurl) {
+        printf ("%% Could not connect to unithost service\n");
+        return 0;
+    }
+    
+    char *kurl = (char *) malloc (strlen (svcurl) + 16);
+    sprintf (kurl, "%s/token", svcurl);
+    
+    free (svcurl);
     var *req = var_alloc();
     var_set_str_forkey (req, "username", username);
     var_set_str_forkey (req, "password", password);
