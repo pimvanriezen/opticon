@@ -1,0 +1,16 @@
+proc/run {
+    graph: proc
+    datum: running
+    title: "Running Processes"
+    unit: ""
+    color: yellow
+    max: 64
+}
+mem/free {
+    graph: memory
+    datum: free
+    title: "Free RAM"
+    unit: MB
+    color: blue
+    max: 32768
+}
