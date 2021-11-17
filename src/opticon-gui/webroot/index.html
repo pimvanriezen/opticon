@@ -1,0 +1,49 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="main.css?rev=0.0.1">
+    <title>Opticon</title>
+    
+    <!-- third party library -->
+    <script type="text/javascript" src="ext/vidi.js?rev=1"></script>
+    
+    <!-- local javascript -->
+    <script type="text/javascript" src="core/App.js?rev=0.0.1"></script>
+    <script type="text/javascript" src="core/Markup.js?rev=0.0.1"></script>
+    <script type="text/javascript" src="core/Module.js?rev=0.0.1"></script>
+    <script type="text/javascript" src="core/Router.js?rev=0.0.1"></script>
+    <script type="text/javascript" src="main.js?rev=0.0.1"></script>
+
+    <!-- modules -->
+    <u-module type="page" name="ServerList"></u-module>
+    <u-module type="dialog" name="FatalError"></u-module>
+    <u-module type="dialog" name="LoginScreen"></u-module>
+  </head>
+
+  <body class="uDoc" id="main"><center>
+   <div style="position:relative; width:100%; max-width:1600px; text-align: left;">
+   <div style="box-shadow: 0px 0px 19px 0px rgba(0,0,0,0.80);">
+    <div class="uSideBar" style="display: none;">
+      <div class="uLogo">
+          <img src="img/newvm-big.png" width="100">
+      </div>
+      <div id="servicetag"></div>
+      <span>
+        <u-menuitem icon="toolbar-servers.png"
+                    route="/Server">Servers</u-menuitem>
+        <u-menuitem icon="toolbar-logout.png"
+                    onclick="Logout()">Log Out</u-menuitem>
+      </span>
+    </div>
+    <div class="uContainer" id="content">
+      <div id="busy"></div>
+      <div id="overlay"></div>
+      <div id="progress">
+        <img src="img/newvm-big.png" width="150"><br><br><br>
+        <progress id="loadprogress"></progress>
+    </div>
+   </div>
+   </div>
+  </body>
+</html>
