@@ -1,0 +1,26 @@
+<!-- toolbar -->
+<form class="uSearch">
+        <div class="uToolbarButton">
+            <u-tabgroup cb="switchTab" name="server_status"
+                tabs="ALERT:Alert,WARN:Warnings,ALL:All"></u-tabgroup>
+        </div>
+</form>
+
+<u-listkeyboard></u-listkeyboard>
+
+<div class="uSelectList uServerList" v-on:click="deSelect">
+    <div v-if="empty" class="uNoResults">
+        <center>No servers found.</center>
+    </div>
+    <ul v-if="!empty">
+      <span v-for="o,idx,count in servers">
+        <li v-bind:id="'serverList-'+o.id"
+            v-bind:class="o.id==selected?'selected':''"
+            v-on:click="rowClick(o,$event)"
+            v-on:dblclick="rowDoubleClick(o)">
+            <h2>o.name=</h2>
+          <span v-bind:class="statusClass(o)">{{status(o)}}</span>
+          <span v-html="o.display_string"></span>
+        </li>
+    </ul>
+</div>

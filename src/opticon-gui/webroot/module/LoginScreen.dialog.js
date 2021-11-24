@@ -45,6 +45,11 @@ LoginScreen.open = function() {
         }, 300);
 }
 
+LoginScreen.mockLogin = function (u, p, cb) {
+    if (u == "admin" && p == "admin") cb(true);
+    else cb (false);
+}
+
 // --------------------------------------------------------------------------
 // Callback, try to authenticate the user.
 // --------------------------------------------------------------------------
@@ -52,15 +57,15 @@ LoginScreen.submit = function() {
     var self = LoginScreen;
     $("#LoginScreen-submit").prop ("disabled", true);
 
-    API.Identity.login (self.View.username, self.View.password, function(r) {
+
+    self.mockLogin (self.View.username, self.View.password, function(r) {
         if (r) {
              $("#LoginScreen-submit").prop ("disabled", false);
              $(".uSideBar").fadeIn();
             self.hide();
             self.isOpen = false;
             App.handleLogin();
-            EventListener.start();
-            App.activate ("/Customer");
+            App.activate ("/Server");
         }
         else {
             self.View.password = "";
