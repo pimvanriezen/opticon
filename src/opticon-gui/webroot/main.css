@@ -1,17 +1,3 @@
-@font-face {
-  font-family: 'Reenie Beanie';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Reenie Beanie'), local('ReenieBeanie'), url(sticky.ttf) format('truetype');
-}
-
-@font-face {
-    font-family: 'FF Copa';
-    font-style: normal;
-    font-weight: 400;
-    src: url(FFCopa.ttf);
-}
-
 input, select, textarea {font-family:inherit;}
 input[type=button],button
 {
@@ -26,7 +12,6 @@ html, body
     margin: 0;
     height: 100%;
     overflow: hidden;
-    font-family: 'FF Copa';
     background-color: #777777;
 }
 
