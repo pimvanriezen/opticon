@@ -65,7 +65,7 @@ ServerList.switchTab = function (status) {
     let self = ServerList;
     self.View.selected = "";
     self.View.haveselection = false;
-    self.View.order_status = status;
+    self.View.server_status = status;
     self.refresh();
 }
 
