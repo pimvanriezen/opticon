@@ -12,15 +12,17 @@
     <div v-if="empty" class="uNoResults">
         <center>No servers found.</center>
     </div>
-    <ul v-if="!empty">
-      <span v-for="o,idx,count in servers">
-        <li v-bind:id="'serverList-'+o.id"
-            v-bind:class="o.id==selected?'selected':''"
-            v-on:click="rowClick(o,$event)"
-            v-on:dblclick="rowDoubleClick(o)">
-            <h2>o.name=</h2>
-          <span v-bind:class="statusClass(o)">{{status(o)}}</span>
-          <span v-html="o.display_string"></span>
-        </li>
-    </ul>
+    <span v-if="!empty">
+      <table cellspacing="0" border="0" class="tbserverlist" width="100%">
+        <tr height="32" v-for="o,idx,count in servers">
+          <td width="*"><b>{{o.hostname}}</b> ({{o.ip}})</td>
+          <td width="128">
+            <span v-bind:class="statusClass(o)">{{o.status}}</span>
+          </td>
+          <td align="right" width="64">{{o.pcpu}} %</td>
+          <td align="right" width="64">{{o.loadavg}}</td>
+          <td align="right" width="64">{{o.rtt}} ms</td>
+        </tr>
+      </table>
+    </span>
 </div>

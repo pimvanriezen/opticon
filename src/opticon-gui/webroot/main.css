@@ -906,6 +906,28 @@ button.tabgroup.middle,
     box-shadow: 0 5px 8px 0 #777777;
 }
 
+table.tbserverlist {
+    box-shadow: 0 5px 8px 0 #777777;
+}
+
+table.tbserverlist tr {
+    font-family: "Verdana", sans-serif;
+    border-top: 1px solid #fcfcfc;
+    border-bottom: 1px solid #d0d0d0;
+    color: #888888;
+    background-color: #E8E8E8;
+    font-size: 14px;
+    min-height: 20px;
+}
+
+table.tbserverlist tr td {
+    border-width: 0px !important;
+    border-color: #E8E8E8;
+    min-height: 20px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
 .uSelectList li table {
     font-size: 13px;
     color: #888888;
