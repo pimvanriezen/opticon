@@ -74,7 +74,7 @@ ServerList.activate = function (argv) {
 }
 
 // --------------------------------------------------------------------------
-// Background task.
+// Refresh task.
 // --------------------------------------------------------------------------
 ServerList.refresh = function () {
     var self = ServerList;
@@ -108,6 +108,9 @@ ServerList.refresh = function () {
     */
 }
 
+// --------------------------------------------------------------------------
+// Handler for switching between filter tab
+// --------------------------------------------------------------------------
 ServerList.switchTab = function (status) {
     let self = ServerList;
     self.View.selected = "";
@@ -116,6 +119,9 @@ ServerList.switchTab = function (status) {
     self.refresh();
 }
 
+// --------------------------------------------------------------------------
+// Translate server status to a css class for the status badge
+// --------------------------------------------------------------------------
 ServerList.statusClass = function (server) {
     if (server.status == "OK") return "status green";
     if (server.status == "WARN") return "status orange";
