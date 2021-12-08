@@ -920,6 +920,10 @@ table.tbserverlist tr {
     min-height: 20px;
 }
 
+table.tbserverlist tr:hover {
+    background-color: #D8D8D8;
+}
+
 table.tbserverlist tr td {
     border-width: 0px !important;
     border-color: #E8E8E8;
