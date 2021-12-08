@@ -31,9 +31,10 @@ ServerList.activate = function (argv) {
     self.View.selected = "";
     self.selectedObject = null;
     
-    self.View.servers = {
+    
+    self.stub = {
         "1a7f7412-d13c-4af8-ae7c-defa899bcf59":{
-            hostname:"server1",
+            hostname:"lizzy",
             ip:"10.1.1.5",
             status:"OK",
             pcpu:1.2,
@@ -41,14 +42,24 @@ ServerList.activate = function (argv) {
             rtt:11.2
         },
         "b77831c8-afab-46bd-9f6d-8e72beda4803":{
-            hostname:"server2",
+            hostname:"juultje",
             ip:"10.1.1.6",
             status:"OK",
             pcpu:11.5,
             loadavg:0.9,
             rtt:8.5
+        },
+        "17e44438-e935-4197-b9d8-78f0a00a7507":{
+            hostname:"babetje",
+            ip:"10.1.1.8",
+            status:"WARN",
+            pcpu:45.5,
+            loadavg:3.9,
+            rtt:13.5
         }
     }
+    
+    self.refresh();
     
     /*    
     
@@ -67,6 +78,23 @@ ServerList.activate = function (argv) {
 // --------------------------------------------------------------------------
 ServerList.refresh = function () {
     var self = ServerList;
+    
+    var nwlist = {};
+    let count = 0;
+    for (var i in self.stub) {
+        let srv = self.stub[i];
+        if (srv.status == "OK") {
+            if (self.View.server_status != "ALL") continue;
+        }
+        if (srv.status == "WARN") {
+            if (self.View.server_status == "ALERT") continue;
+        }
+        nwlist[i] = srv;
+        count++;
+    }
+    
+    self.View.empty = (count == 0);
+    self.View.servers = nwlist;
     
     /*
     API.Order.list({
