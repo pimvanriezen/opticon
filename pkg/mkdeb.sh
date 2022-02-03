@@ -16,6 +16,10 @@ if [ "$1" = "--version" ]; then
   [ -z "$VERSION" ] && exitfail Argument error on --version
 fi
 
+# =============================================================================
+# Agent build
+# =============================================================================
+
 BUILDROOT=/var/build/opticon-agent_$VERSION
 
 [ -d $BUILDROOT ] && rm -rf $BUILDROOT
@@ -39,12 +43,57 @@ Description: Opticon Agent Software
 _EOF_
 
 # Create debian post-install script
-cp pkg/debian-postinst.sh $BUILDROOT/DEBIAN/postinst
+cp pkg/opticon-agent.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 
-# Copy binaries
+# Copy binaries, scripts and example config
 cp bin/opticon-agent $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-agent
 cp init/opticon-agent.service $BUILDROOT/etc/systemd/system/
+cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/etc/opticon/
+
+# Build the package
+dpkg-deb --build $BUILDROOT || exitfail Could not build
+rm -rf $BUILDROOT
+mkdir -p pkg/deb
+cp ${BUILDROOT}.deb pkg/deb/
+
+# =============================================================================
+# Collector build
+# =============================================================================
+
+BUILDROOT=/var/build/opticon-collector_$VERSION
+
+[ -d $BUILDROOT ] && rm -rf $BUILDROOT
+
+mkdir -p $BUILDROOT || exitfail Could not create build dir
+mkdir -p $BUILDROOT/etc/opticon
+mkdir -p $BUILDROOT/var/opticon/db
+mkdir -p $BUILDROOT/etc/systemd/system
+mkdir -p $BUILDROOT/usr/sbin
+mkdir -p $BUILDROOT/DEBIAN
+
+# Create debian control file
+cat > $BUILDROOT/DEBIAN/control << _EOF_
+Package: opticon-collector
+Version: $VERSION
+Section: base
+Priority: optional
+Requires: libmicrohttpd12
+Architecture: amd64
+Maintainer: NewVM <info@newvm.com>
+Description: Opticon Collector Software
+ Gathers performance information from remote agents and stores it.
+_EOF_
+
+# Create debian post-install script
+cp pkg/opticon-collector.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
+
+# Copy binaries, scripts and example config
+cp bin/opticon-collector $BUILDROOT/usr/sbin/
+chmod 750 $BUILDROOT/usr/sbin/opticon-collector
+cp init/opticon-collector.service $BUILDROOT/etc/systemd/system/
+cp src/opticon-collector/opticon-collector.conf.example $BUILDROOT/etc/opticon/
+cp src/opticon-collector/opticon-graph.conf.example $BUILDROOT/etc/opticon/
 
 # Build the package
 dpkg-deb --build $BUILDROOT || exitfail Could not build

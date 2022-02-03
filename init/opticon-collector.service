@@ -1,0 +1,9 @@
+[Unit]
+Description=Opticon Collector
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/opticon-collector
+
+[Install]
+WantedBy=multi-user.target
