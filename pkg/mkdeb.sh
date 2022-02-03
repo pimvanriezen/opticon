@@ -8,7 +8,7 @@ exitfail() {
 [ $UID -eq 0 ] || exitfail Not root
 
 # Set up build dir
-VERSION=$(git describe --tags | cut -f1 -d' ' | sed -e "s/-g[0-9a-f]+$//")
+VERSION=$(git describe --tags | cut -f1 -d' ' | cut -f1-2 -d-)
 
 # Allow version override
 if [ "$1" = "--version" ]; then
