@@ -8,6 +8,7 @@ test/tmpdb
 test/*.db
 test/*.idx
 lib/*.a
+pkg/deb
 playground/
 makeinclude
 platform.h
