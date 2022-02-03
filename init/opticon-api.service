@@ -1,0 +1,9 @@
+[Unit]
+Description=Opticon API
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/opticon-api
+
+[Install]
+WantedBy=multi-user.target
