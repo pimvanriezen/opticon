@@ -22,6 +22,7 @@ BUILDROOT=/var/build/opticon-agent_$VERSION
 
 mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/etc/opticon
+mkdir -p $BUILDROOT/etc/systemd
 mkdir -p $BUILDROOT/usr/sbin
 mkdir -p $BUILDROOT/DEBIAN
 
@@ -43,6 +44,7 @@ cp pkg/debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 # Copy binaries
 cp bin/opticon-agent $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-agent
+cp init/opticon-agent.service $BUILDROOT/etc/systemd/system/
 
 # Build the package
 dpkg-deb --build $BUILDROOT || exitfail Could not build

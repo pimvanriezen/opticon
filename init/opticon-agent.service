@@ -1,0 +1,9 @@
+[Unit]
+Description=Opticon Agent
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/opticon-agent
+
+[Install]
+WantedBy=multi-user.target
