@@ -37,6 +37,9 @@ Description: Opticon Agent Software
  Gathers local performance information to send to an Opticon collector.
 _EOF_
 
+
+cp pkg/debian-postinst.sh $BUILDROOT/DEBIAN/postinst
+
 # Copy binaries
 cp bin/opticon-agent $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-agent
