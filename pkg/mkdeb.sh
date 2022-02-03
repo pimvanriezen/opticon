@@ -9,7 +9,17 @@ exitfail() {
 
 # Set up build dir
 VERSION=$(git describe --tags | cut -f1 -d' ')
+
+# Allow version override
+if [ "$1" = "--version" ]; then
+  VERSION="$2"
+  [ -z "$VERSION" ] && exitfail Argument error on --version
+fi
+
 BUILDROOT=/var/build/opticon-agent_$VERSION
+
+[ -d $BUILDROOT ] && rm -rf $BUILDROOT
+
 mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/etc/opticon
 mkdir -p $BUILDROOT/usr/sbin
