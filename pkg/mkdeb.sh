@@ -142,3 +142,44 @@ dpkg-deb --build $BUILDROOT || exitfail Could not build
 rm -rf $BUILDROOT
 mkdir -p pkg/deb
 cp ${BUILDROOT}.deb pkg/deb/
+
+# =============================================================================
+# CLI build
+# =============================================================================
+
+BUILDROOT=/var/build/opticon-cli_$VERSION
+
+[ -d $BUILDROOT ] && rm -rf $BUILDROOT
+
+mkdir -p $BUILDROOT || exitfail Could not create build dir
+mkdir -p $BUILDROOT/etc/opticon
+mkdir -p $BUILDROOT/usr/bin
+mkdir -p $BUILDROOT/DEBIAN
+
+# Create debian control file
+cat > $BUILDROOT/DEBIAN/control << _EOF_
+Package: opticon-cli
+Version: $VERSION
+Section: base
+Priority: optional
+Requires: libcurl4
+Architecture: amd64
+Maintainer: NewVM <info@newvm.com>
+Description: Opticon CLI client
+ Provides CLI access to the opticon API.
+_EOF_
+
+# Create debian post-install script
+cp pkg/opticon-cli.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
+
+# Copy binaries, scripts and example config
+cp bin/opticon $BUILDROOT/usr/bin/
+chmod 750 $BUILDROOT/usr/bin/opticon
+#cp src/opticon-api/opticon-api.conf.example $BUILDROOT/etc/opticon/
+
+# Build the package
+dpkg-deb --build $BUILDROOT || exitfail Could not build
+rm -rf $BUILDROOT
+mkdir -p pkg/deb
+cp ${BUILDROOT}.deb pkg/deb/
+
