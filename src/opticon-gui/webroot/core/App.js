@@ -402,6 +402,7 @@ App.addLoginHandler = function(f) {
 // Execute all login callback hooks.
 // --------------------------------------------------------------------------
 App.handleLogin = function() {
+    App.menuRoles();
     App.serviceTag();
     for (let listener of App.loginListeners) {
         listener();

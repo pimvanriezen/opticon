@@ -1,0 +1,3 @@
+endpoints {
+	opticon: "http://localhost:1888/"
+}
