@@ -175,7 +175,7 @@ cp pkg/opticon-cli.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 # Copy binaries, scripts and example config
 cp bin/opticon $BUILDROOT/usr/bin/
 chmod 750 $BUILDROOT/usr/bin/opticon
-#cp src/opticon-api/opticon-api.conf.example $BUILDROOT/etc/opticon/
+cp src/opticon-cli/opticon-cli.conf.example $BUILDROOT/etc/opticon/
 
 # Build the package
 dpkg-deb --build $BUILDROOT || exitfail Could not build
