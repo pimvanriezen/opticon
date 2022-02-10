@@ -1,9 +1,12 @@
 [Unit]
 Description=Opticon Collector
+After=network.target
 
 [Service]
-Type=oneshot
+Type=forking
 ExecStart=/usr/sbin/opticon-collector
+PIDFile=opticon-collector.pid
+KillSignal=SIGTERM
 
 [Install]
 WantedBy=multi-user.target

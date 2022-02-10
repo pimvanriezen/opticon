@@ -26,7 +26,7 @@ BUILDROOT=/var/build/opticon-agent_$VERSION
 
 mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/etc/opticon
-mkdir -p $BUILDROOT/etc/systemd/system
+mkdir -p $BUILDROOT/lib/systemd/system
 mkdir -p $BUILDROOT/usr/sbin
 mkdir -p $BUILDROOT/DEBIAN
 
@@ -48,7 +48,7 @@ cp pkg/opticon-agent.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 # Copy binaries, scripts and example config
 cp bin/opticon-agent $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-agent
-cp init/opticon-agent.service $BUILDROOT/etc/systemd/system/
+cp init/opticon-agent.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/etc/opticon/
 
 # Build the package
@@ -68,8 +68,9 @@ BUILDROOT=/var/build/opticon-collector_$VERSION
 mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/etc/opticon
 mkdir -p $BUILDROOT/var/opticon/db
-mkdir -p $BUILDROOT/etc/systemd/system
+mkdir -p $BUILDROOT/lib/systemd/system
 mkdir -p $BUILDROOT/usr/sbin
+mkdir -p $BUILDROOT/var/log/opticon
 mkdir -p $BUILDROOT/DEBIAN
 
 # Create debian control file
@@ -90,7 +91,7 @@ cp pkg/opticon-collector.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 # Copy binaries, scripts and example config
 cp bin/opticon-collector $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-collector
-cp init/opticon-collector.service $BUILDROOT/etc/systemd/system/
+cp init/opticon-collector.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-collector/opticon-collector.conf.example $BUILDROOT/etc/opticon/
 cp src/opticon-collector/opticon-meter.conf.example $BUILDROOT/etc/opticon/
 cp src/opticon-collector/opticon-graph.conf.example $BUILDROOT/etc/opticon/
@@ -112,7 +113,7 @@ BUILDROOT=/var/build/opticon-api_$VERSION
 mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/etc/opticon
 mkdir -p $BUILDROOT/var/opticon/db
-mkdir -p $BUILDROOT/etc/systemd/system
+mkdir -p $BUILDROOT/lib/systemd/system
 mkdir -p $BUILDROOT/usr/sbin
 mkdir -p $BUILDROOT/DEBIAN
 
@@ -135,7 +136,7 @@ cp pkg/opticon-api.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 # Copy binaries, scripts and example config
 cp bin/opticon-api $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-api
-cp init/opticon-api.service $BUILDROOT/etc/systemd/system/
+cp init/opticon-api.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-api/opticon-api.conf.example $BUILDROOT/etc/opticon/
 
 # Build the package
