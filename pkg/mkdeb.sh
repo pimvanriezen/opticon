@@ -92,6 +92,7 @@ cp bin/opticon-collector $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-collector
 cp init/opticon-collector.service $BUILDROOT/etc/systemd/system/
 cp src/opticon-collector/opticon-collector.conf.example $BUILDROOT/etc/opticon/
+cp src/opticon-collector/opticon-meter.conf.example $BUILDROOT/etc/opticon/
 cp src/opticon-collector/opticon-graph.conf.example $BUILDROOT/etc/opticon/
 
 # Build the package
