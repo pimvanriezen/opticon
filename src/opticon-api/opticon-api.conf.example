@@ -1,0 +1,11 @@
+network {
+    port: 1888
+}
+auth {
+    admin_token: "00000000-0000-0000-0000-000000000000"
+    admin_host: "127.0.0.1"
+    unithost_url: "https://backoffice.newvm.com/api/account/v1/token"
+}
+database {
+    path: "/var/opticon/db"
+}
