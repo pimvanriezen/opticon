@@ -46,6 +46,7 @@ extern optinfo OPTIONS;
 /* ============================= FUNCTIONS ============================= */
 
 int keystone_login (void);
+int unithost_login (void);
 void cmd_print_graph (const char *, const char *, int, int);
 int cmd_tenant_list (int argc, const char *argv[]);
 int cmd_tenant_get_metadata (int argc, const char *argv[]);
