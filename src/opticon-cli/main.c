@@ -333,10 +333,10 @@ int unithost_login (void) {
     char *domain = domain_from_url (OPTIONS.unithost_url);
     printf ("  UnitHost Domain: %s\n", domain);
     free (domain);
-    printf ("  Username........: ");
+    printf ("  Username.......: ");
     fflush (stdout);
     fgets (username, 255, stdin);
-    const char *password = getpass ("  Password........: ");
+    const char *password = getpass ("  Password.......: ");
     printf ("\n");
     
     char *svcurl;
