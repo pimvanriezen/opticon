@@ -55,6 +55,7 @@ STRINGOPT(weight)
 STRINGOPT(api_url)
 STRINGOPT(keystone_url)
 STRINGOPT(unithost_url)
+STRINGOPT(unithost_identity_url)
 STRINGOPT(external_token)
 STRINGOPT(opticon_token)
 STRINGOPT(config_file)
@@ -338,7 +339,14 @@ int unithost_login (void) {
     const char *password = getpass ("  Password........: ");
     printf ("\n");
     
-    char *svcurl = resolve_unithost_service (OPTIONS.unithost_url, "identity");
+    char *svcurl;
+    if (OPTIONS.unithost_identity_url[0]) {
+        svcurl = strdup (OPTIONS.unithost_identity_url);
+    }
+    else {
+        svcurl = resolve_unithost_service (OPTIONS.unithost_url, "identity");
+    }
+    
     if (! svcurl) {
         printf ("%% Could not connect to unithost service\n");
         return 0;
@@ -409,7 +417,8 @@ cliopt CLIOPT[] = {
     {"--weight","-W",OPT_VALUE,"1.0",set_weight},
     {"--api-url","-A",OPT_VALUE,"",set_api_url},
     {"--keystone-url","-X",OPT_VALUE,"",set_keystone_url},
-    {"--unithost-url","-U",OPT_VALUE,"",set_unithost_url},
+    {"--unithost-url","-u",OPT_VALUE,"",set_unithost_url},
+    {"--unithost-identity-url","-i",OPT_VALUE,"",set_unithost_identity_url},
     {"--external-token","-K",OPT_VALUE,"",set_external_token},
     {"--opticon-token","-O",OPT_VALUE,"",set_opticon_token},
     {"--config-file","-c",OPT_VALUE,
@@ -457,6 +466,11 @@ int conf_endpoint_keystone (const char *id, var *v, updatetype tp) {
 /** Set up the unithost endpoint from configuration */
 int conf_endpoint_unithost (const char *id, var *v, updatetype tp) {
     OPTIONS.unithost_url = var_get_str(v);
+    return 1;
+}
+
+int conf_endpoint_unithost_identity (const char *id, var *v, updatetype tp) {
+    OPTIONS.unithost_identity_url = var_get_str(v);
     return 1;
 }
 
@@ -550,6 +564,8 @@ int main (int _argc, const char *_argv[]) {
 
     opticonf_add_reaction ("endpoints/keystone", conf_endpoint_keystone);
     opticonf_add_reaction ("endpoints/unithost", conf_endpoint_unithost);
+    opticonf_add_reaction ("endpoints/unithost_identity",
+                           conf_endpoint_unithost_identity);
     opticonf_add_reaction ("endpoints/opticon", conf_endpoint_api);
     opticonf_add_reaction ("defaults/tenant", conf_default_tenant);
     opticonf_add_reaction ("defaults/admin_token", conf_admin_token);
