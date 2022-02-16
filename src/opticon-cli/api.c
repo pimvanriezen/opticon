@@ -67,8 +67,18 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
     if (! res) {
         int st = var_get_int_forkey (errinfo, "status");
         if (st == 401) {
-            if (keystone_login()) {
-                res = api_call (mth, data, "%s", path);
+            if (OPTIONS.keystone_url[0]) {
+                if (keystone_login()) {
+                    res = api_get_raw (path, exiterror);
+                }
+            }
+            else if (OPTIONS.unithost_url[0]) {
+                if (unithost_login()) {
+                    res = api_get_raw (path, exiterror);
+                }
+            }
+            if (! res) {
+                var_set_str_forkey (errinfo, "error", "Authorisation error");
             }
         }
     }
@@ -122,8 +132,18 @@ var *api_get_raw (const char *path, int exiterror) {
     if (! res) {
         int st = var_get_int_forkey (errinfo, "status");
         if (st == 401) {
-            if (keystone_login()) {
-                res = api_get_raw (path, exiterror);
+            if (OPTIONS.keystone_url[0]) {
+                if (keystone_login()) {
+                    res = api_get_raw (path, exiterror);
+                }
+            }
+            else if (OPTIONS.unithost_url[0]) {
+                if (unithost_login()) {
+                    res = api_get_raw (path, exiterror);
+                }
+            }
+            if (! res) {
+                var_set_str_forkey (errinfo, "error", "Authorisation error");
             }
         }
     }
