@@ -366,7 +366,7 @@ int unithost_login (void) {
     var *kres = http_call ("POST", kurl, hdr, req, err, NULL);
     if (! kres) {
         printf ("%% Login failed: %s\n", kurl);
-        var_dump (req);
+        var_dump (req, stdout);
         var_free (hdr);
         var_free (req);
         var_free (err);
