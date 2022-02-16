@@ -191,8 +191,16 @@ char *resolve_unithost_service (const char *registry_url, const char *svcname) {
 
 int handle_external_token_unithost (req_context *ctx) {
     if (! OPTIONS.unithost_url[0]) return 0;
-    char *accurl = resolve_unithost_service (OPTIONS.unithost_url, "account");
+    
+    char *accurl;
+    if (OPTIONS.unithost_account_url) {
+        accurl = strdup (OPTIONS.unithost_account_url)
+    }
+    else {
+        accurl = resolve_unithost_service (OPTIONS.unithost_url, "account");
+    }
     if (! accurl) return 0;
+    
     char *url = (char *) malloc (strlen(accurl)+40);
     sprintf (url, "%s/token", accurl);
     free (accurl);
@@ -518,6 +526,12 @@ int conf_unithost_url (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/** Handle auth/unithost_account_url config */
+int conf_unithost_account_url (const char *id, var *v, updatetype tp) {
+    OPTIONS.unithost_account_url = var_get_str (v);
+    return 1;
+}
+
 /** Handle network/port config */
 int conf_port (const char *id, var *v, updatetype tp) {
     OPTIONS.port = var_get_int (v);
@@ -558,12 +572,15 @@ int main (int _argc, const char *_argv[]) {
     
     OPTIONS.keystone_url = NULL;
     OPTIONS.unithost_url = NULL;
+    OPTIONS.unithost_account_url = NULL;
 
     opticonf_add_reaction ("network/port", conf_port);
     opticonf_add_reaction ("auth/admin_token", conf_admin_token);
     opticonf_add_reaction ("auth/admin_host", conf_admin_host);
     opticonf_add_reaction ("auth/keystone_url", conf_keystone_url);
     opticonf_add_reaction ("auth/unithost_url", conf_unithost_url);
+    opticonf_add_reaction ("auth/unithost_account_url",
+                           conf_unithost_account_url);
     opticonf_add_reaction ("database/path", conf_dbpath);
     
     OPTIONS.conf = var_alloc();

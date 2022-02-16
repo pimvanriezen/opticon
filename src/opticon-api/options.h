@@ -11,6 +11,7 @@ typedef struct apioptions_s {
     const char  *pidfile;
     const char  *keystone_url;
     const char  *unithost_url;
+    const char  *unithost_account_url;
     int          foreground;
     int          port;
     int          autoexit;
