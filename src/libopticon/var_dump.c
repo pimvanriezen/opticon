@@ -20,6 +20,11 @@ char *dump_escape (const char *str) {
         if (*icrsr == '\\' || *icrsr == '\"') {
             *ocrsr++ = '\\';
         }
+        else if (*icrsr == '\n') {
+            *ocrsr++ = '\\';
+            *ocrsr++ = 'n';
+            continue;
+        }
         *ocrsr++ = *icrsr++;
     }
     *ocrsr = 0;
