@@ -354,7 +354,7 @@ int unithost_login (void) {
     }
     
     char *kurl = (char *) malloc (strlen (svcurl) + 16);
-    sprintf (kurl, "%s/token", svcurl);
+    sprintf (kurl, "%s", svcurl);
     
     free (svcurl);
     var *req = var_alloc();
