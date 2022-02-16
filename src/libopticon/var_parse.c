@@ -13,7 +13,7 @@ static const char *VALIDUNQUOTEDV = "abcdefghijklmnopqrstuvwxyz"
                                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                     "0123456789-_./:*%";
 
-static char LAST_PARSE_ERROR[4096];
+static char LAST_PARSE_ERROR[8192];
 static int LAST_PARSE_LINE = 0;
 
 typedef enum parse_state_e {
