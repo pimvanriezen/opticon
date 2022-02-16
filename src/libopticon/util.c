@@ -196,8 +196,8 @@ uint64_t idmask (int sz) {
   *             nul-terminator. */
 /*/ ======================================================================= /*/
 void uuid2str (uuid u, char *into) {
-    sprintf (into, "%08llx-%04llx-%04llx-"
-                   "%04llx-%012llx",
+    sprintf (into, "%08lx-%04lx-%04lx-"
+                   "%04lx-%012llx",
                    ((u.msb & 0xffffffff00000000) >> 32),
                    ((u.msb & 0x00000000ffff0000) >> 16),
                    ((u.msb & 0x000000000000ffff)),

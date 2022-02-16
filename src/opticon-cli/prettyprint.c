@@ -167,8 +167,9 @@ void print_value (const char *key, const char *fmt, ...) {
     val[0] = 0;
     va_list ap;
     va_start (ap, fmt);
-    vsnprintf (val, 4096, fmt, ap);
+    vsnprintf (val, 4095, fmt, ap);
     va_end (ap);
+    val[4095] = 0;
 
     const char *dots = "......................";
     int dotspos = strlen(dots) - 18;
@@ -201,7 +202,7 @@ void print_array (const char *key, var *arr) {
     int cnt=0;
     var *crsr = arr->value.arr.first;
     while (crsr) {
-        if (cnt) strncat (out, ",", 4096);
+        if (cnt) strncat (out, ",", 4095);
         switch (crsr->type) {
             case VAR_INT:
                 snprintf (out+strlen(out), 4095-strlen(out), 
@@ -227,6 +228,7 @@ void print_array (const char *key, var *arr) {
         crsr = crsr->next;
         cnt++;
     }
+    out[4095] = 0;
     
     print_value (key, "%s", out);   
 }

@@ -5,6 +5,7 @@
 #include <libopticon/var_parse.h>
 #include <libopticon/var_dump.h>
 #include <libopticon/log.h>
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/file.h>
