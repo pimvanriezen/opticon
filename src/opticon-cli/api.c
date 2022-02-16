@@ -69,12 +69,12 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
         if (st == 401) {
             if (OPTIONS.keystone_url[0]) {
                 if (keystone_login()) {
-                    res = api_get_raw (path, exiterror);
+                    res = api_call (mth, data, "%s", path);
                 }
             }
             else if (OPTIONS.unithost_url[0]) {
                 if (unithost_login()) {
-                    res = api_get_raw (path, exiterror);
+                    res = api_call (mth, data, "%s", path);
                 }
             }
             if (! res) {
