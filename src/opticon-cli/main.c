@@ -336,6 +336,7 @@ int unithost_login (void) {
     printf ("  Username.......: ");
     fflush (stdout);
     fgets (username, 255, stdin);
+    for (char *c = username; *c; c++) if (*c == '\n') *c = 0;
     const char *password = getpass ("  Password.......: ");
     printf ("\n");
     
