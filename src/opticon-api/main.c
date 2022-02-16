@@ -194,7 +194,7 @@ int handle_external_token_unithost (req_context *ctx) {
     
     char *accurl;
     if (OPTIONS.unithost_account_url) {
-        accurl = strdup (OPTIONS.unithost_account_url)
+        accurl = strdup (OPTIONS.unithost_account_url);
     }
     else {
         accurl = resolve_unithost_service (OPTIONS.unithost_url, "account");
