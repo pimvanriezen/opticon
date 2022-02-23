@@ -23,6 +23,7 @@ char *dump_escape (const char *str) {
         else if (*icrsr == '\n') {
             *ocrsr++ = '\\';
             *ocrsr++ = 'n';
+            icrsr++;
             continue;
         }
         *ocrsr++ = *icrsr++;
