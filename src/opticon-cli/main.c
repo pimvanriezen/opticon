@@ -1,4 +1,4 @@
-#include <stdio.h>
+§#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
@@ -510,6 +510,7 @@ void usage (const char *cmdname) {
          "        --flip\n"
          "\n"
          "  Commands:\n"
+         "        session-list\n"
          "        tenant-list\n"
          "        tenant-create        [--tenant <uuid>] [--key <base64>] "
                                                         "[--name <name>]\n"
