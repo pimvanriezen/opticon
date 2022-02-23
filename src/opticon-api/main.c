@@ -323,9 +323,6 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
   * said token is a filthy peasant.
   */
 int flt_check_admin (req_context *ctx, req_arg *a, var *out, int *status) {
-    if (! uuidvalid (ctx->opticon_token)) {
-        return err_not_allowed (ctx, a, out, status);
-    }
     if (ctx->userlevel != AUTH_ADMIN) {
         return err_not_allowed (ctx, a, out, status);
     }
