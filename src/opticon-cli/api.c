@@ -158,11 +158,12 @@ var *api_get_raw (const char *path, int exiterror) {
     
     /* Catch error */
     if (! res) {
-        if (! exiterror) return NULL;
-        const char *errstr = var_get_str_forkey (errinfo, "error");
-        if (! errstr) errstr = "Unknown error";
-        fprintf (stderr, "%% %s\n", errstr);
-        exit (1);
+        if (exiterror) {
+            const char *errstr = var_get_str_forkey (errinfo, "error");
+            if (! errstr) errstr = "Unknown error";
+            fprintf (stderr, "%% %s\n", errstr);
+            exit (1);
+        }
     }
     var_free (outhdr);
     var_free (errinfo);
