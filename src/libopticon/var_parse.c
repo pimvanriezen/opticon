@@ -263,8 +263,25 @@ static int var_parse_json_level (var *v, const char **buf,
                     st = PSTATE_DICT_WAITKEY;
                     break;
                 }
-                if (*c == '\\') ++c;
                 if (valuebuf_pos >= 4095) return 0;
+                if (*c == '\\') {
+                    ++c;
+                    if (*c == 'n') {
+                        valuebuf[valuebuf_pos++] = '\n';
+                        valuebuf[valuebuf_pos] = 0;
+                        break;
+                    }
+                    if (*c == 't') {
+                        valuebuf[valuebuf_pos++] = '\t';
+                        valuebuf[valuebuf_pos] = 0;
+                        break;
+                    }
+                    if (*c == 'r') {
+                        valuebuf[valuebuf_pos++] = '\r';
+                        valuebuf[valuebuf_pos] = 0;
+                        break;
+                    }
+                }
                 valuebuf[valuebuf_pos++] = *c;
                 valuebuf[valuebuf_pos] = 0;
                 break;
@@ -366,8 +383,25 @@ static int var_parse_json_level (var *v, const char **buf,
                     st = PSTATE_ARRAY_WAITVALUE;
                     break;
                 }
-                if (*c == '\\') ++c;
                 if (valuebuf_pos >= 4095) return 0;
+                if (*c == '\\') {
+                    ++c;
+                    if (*c == 'n') {
+                        valuebuf[valuebuf_pos++] = '\n';
+                        valuebuf[valuebuf_pos] = 0;
+                        break;
+                    }
+                    if (*c == 't') {
+                        valuebuf[valuebuf_pos++] = '\t';
+                        valuebuf[valuebuf_pos] = 0;
+                        break;
+                    }
+                    if (*c == 'r') {
+                        valuebuf[valuebuf_pos++] = '\r';
+                        valuebuf[valuebuf_pos] = 0;
+                        break;
+                    }
+                }
                 valuebuf[valuebuf_pos++] = *c;
                 valuebuf[valuebuf_pos] = 0;
                 break;
