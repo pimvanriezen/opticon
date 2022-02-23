@@ -73,6 +73,10 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
                 }
             }
             else if (OPTIONS.unithost_url[0]) {
+                if (OPTIONS.external_token[0]) {
+                    fprintf (stderr, "%% Token '%s' seems expired\n",
+                             OPTIONS.external_token);
+                }
                 if (unithost_login()) {
                     res = api_call (mth, data, "%s", path);
                 }
@@ -138,6 +142,10 @@ var *api_get_raw (const char *path, int exiterror) {
                 }
             }
             else if (OPTIONS.unithost_url[0]) {
+                if (OPTIONS.external_token[0]) {
+                    fprintf (stderr, "%% Token '%s' seems expired\n",
+                             OPTIONS.external_token);
+                }
                 if (unithost_login()) {
                     res = api_get_raw (path, exiterror);
                 }
