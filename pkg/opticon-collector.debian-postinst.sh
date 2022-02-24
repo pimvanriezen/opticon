@@ -8,3 +8,4 @@ chown opticon /var/opticon/db
 chown opticon /var/log/opticon
 chgrp opticon /var/opticon/db
 chgrp opticon /var/log/opticon
+systemctl is-active --quiet opticon-collector && systemctl restart opticon-collector
