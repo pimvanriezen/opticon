@@ -74,6 +74,16 @@ MHDResult answer_to_connection (void *cls, struct MHD_Connection *connection,
         inet_ntop (AF_INET6, &si->sin6_addr, ctx->remote, INET6_ADDRSTRLEN);
     }
     
+    /* If request comes from localhost, parse X-Forwarded-For */
+    if (strcmp (ctx->remote, "127.0.0.1") == 0) {
+        if (ctx->original_ip) {
+            char *comma = strchr (ctx->original_ip, ',');
+            if (comma) *comma = 0;
+            strncpy (ctx->remote, ctx->original_ip, INET6_ADDRSTRLEN-1);
+            ctx->remote[INET6_ADDRSTRLEN-1] = 0;
+        }
+    }
+    
     /* Parse post data */
     req_context_parse_body (ctx);
     

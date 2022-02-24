@@ -363,6 +363,7 @@ req_context *req_context_alloc (void) {
         memset (&self->hostid, 0, sizeof (uuid));
         memset (&self->opticon_token, 0, sizeof (uuid));
         self->external_token = NULL;
+        self->original_ip = NULL;
         timer_start (&self->ti);
     }
     return self;
@@ -383,6 +384,7 @@ void req_context_free (req_context *self) {
     if (self->auth_tenants) free (self->auth_tenants);
     if (self->body) free (self->body);
     if (self->external_token) free (self->external_token);
+    if (self->original_ip) free (self->original_ip);
     free (self);
 }
 
@@ -411,6 +413,9 @@ void req_context_set_header (req_context *self, const char *hdrname,
     }
     else if (strcmp (canon, "Content-Type") == 0) {
         self->ctype = strdup (hdrval);
+    }
+    else if (strcmp (canon, "X-Forwarded-For") == 0) {
+        self->original_ip = strdup (hdrval);
     }
     
     free (canon);

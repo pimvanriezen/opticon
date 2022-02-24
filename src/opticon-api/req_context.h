@@ -39,7 +39,8 @@ typedef struct req_context_s {
     uuid         hostid; /**< URL-parsed hostid, if any */
     auth_level   userlevel; /**< 1 if user is admin */
     uuid         opticon_token; /**< Header-parsed opticon token */
-    char        *external_token; /**< Header-pasred openstack token */
+    char        *external_token; /**< Header-parsed openstack token */
+    char        *original_ip; /**< Header-parsed X-Forwarded-For */
     uuid        *auth_tenants; /**< parsed tenant uuids */
     int          auth_tenantcount; /**< Number of authorized tenants */
     var         *auth_data; /**< Authentication data */
