@@ -158,6 +158,9 @@ void write_cached_token (const char *token) {
     FILE *f = fopen (path, "w");
     if (! f) return;
 
+#ifdef DEBUG
+    printf ("%% Writing token '%s' to cache\n", token);
+#endif
     var *cache = var_alloc();
     var_set_str_forkey (cache, "external_token", token);
     var_dump (cache, f);
@@ -174,6 +177,10 @@ int load_cached_token (void) {
     if (OPTIONS.external_token[0]) return 1;
     struct stat st;
     time_t tnow = time (NULL);
+
+#ifdef DEBUG
+    printf ("%% Loading cached token\n");
+#endif
     
     int res = 0;
     var *cache = var_alloc();
@@ -184,6 +191,9 @@ int load_cached_token (void) {
         token = var_get_str_forkey (cache, "external_token");
         
         if (token) {
+#ifdef DEBUG
+            printf ("%% Found token '%s' in cache\n", token);
+#endif
             stat (path, &st);
             /* re-validate after an hour */
             if (tnow - st.st_mtime > 3600) {
@@ -627,12 +637,20 @@ int main (int _argc, const char *_argv[]) {
      * the user to log in. */
     if (OPTIONS.external_token[0] == 0 && OPTIONS.opticon_token[0] == 0) {
         if (! load_cached_token()) {
+#ifdef DEBUG
+            printf ("%% Could not load cached token\n");
+#endif
             if (OPTIONS.keystone_url && OPTIONS.keystone_url[0]) {
                 if (! keystone_login()) return 1;
             }
             else if (OPTIONS.unithost_url && OPTIONS.unithost_url[0]) {
                 if (! unithost_login()) return 1;
             }
+        }
+        else {
+#ifdef DEBUG
+            printf ("%% Loaded cached token '%s'\n", OPTIONS.external_token);
+#endif
         }
     }
     

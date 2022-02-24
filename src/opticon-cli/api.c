@@ -45,6 +45,9 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
     /* Set token headers */
     if (OPTIONS.external_token[0]) {
         var_set_str_forkey (outhdr, "X-Auth-Token", OPTIONS.external_token);
+#ifdef DEBUG
+        printf ("%% Setting external token '%s'\n", OPTIONS.external_token);
+#endif
     }
     else if (OPTIONS.opticon_token[0]) {
         var_set_str_forkey (outhdr, "X-Opticon-Token", OPTIONS.opticon_token);
@@ -67,6 +70,9 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
     if (! res) {
         int st = var_get_int_forkey (errinfo, "status");
         if (st == 401) {
+#ifdef DEBUG
+            printf ("%% Got 401 from <%s>\n", tmpurl);
+#endif
             if (OPTIONS.keystone_url[0]) {
                 if (keystone_login()) {
                     res = api_call (mth, data, "%s", path);
@@ -79,6 +85,9 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
                     OPTIONS.external_token = strdup("");
                 }
                 if (unithost_login()) {
+#ifdef DEBUG
+                    printf ("%% Retrying with token '%s'\n", OPTIONS.external_token);
+#endif
                     res = api_call (mth, data, "%s", path);
                 }
             }
@@ -114,6 +123,9 @@ var *api_get_raw (const char *path, int exiterror) {
     /* Set up token headers */
     if (OPTIONS.external_token[0]) {
         var_set_str_forkey (outhdr, "X-Auth-Token", OPTIONS.external_token);
+#ifdef DEBUG
+        printf ("%% Setting external token '%s'\n", OPTIONS.external_token);
+#endif
     }
     else if (OPTIONS.opticon_token[0]) {
         var_set_str_forkey (outhdr, "X-Opticon-Token", OPTIONS.opticon_token);
@@ -137,6 +149,9 @@ var *api_get_raw (const char *path, int exiterror) {
     if (! res) {
         int st = var_get_int_forkey (errinfo, "status");
         if (st == 401) {
+#ifdef DEBUG
+            printf ("%% Got 401 from <%s>\n", tmpurl);
+#endif
             if (OPTIONS.keystone_url[0]) {
                 if (keystone_login()) {
                     res = api_get_raw (path, exiterror);
@@ -149,6 +164,9 @@ var *api_get_raw (const char *path, int exiterror) {
                     OPTIONS.external_token = strdup("");
                 }
                 if (unithost_login()) {
+#ifdef DEBUG
+                    printf ("%% Retrying with token '%s'\n", OPTIONS.external_token);
+#endif
                     res = api_get_raw (path, exiterror);
                 }
             }
