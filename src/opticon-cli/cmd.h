@@ -10,32 +10,32 @@
   * command line.
   */
 typedef struct optinfo {
-    const char  *tenant;
-    const char  *key;
-    const char  *path;
-    const char  *name;
-    const char  *host;
-    const char  *hostname;
-    const char  *meter;
-    const char  *type;
-    const char  *description;
-    const char  *unit;
-    const char  *level;
-    const char  *match;
-    const char  *value;
-    const char  *weight;
+    char        *tenant;
+    char        *key;
+    char        *path;
+    char        *name;
+    char        *host;
+    char        *hostname;
+    char        *meter;
+    char        *type;
+    char        *description;
+    char        *unit;
+    char        *level;
+    char        *match;
+    char        *value;
+    char        *weight;
     time_t       time;
     int          json;
     int          watch;
     int          flip;
     int          showgraphs;
-    const char  *api_url;
-    const char  *keystone_url;
-    const char  *unithost_url;
-    const char  *unithost_identity_url;
-    const char  *external_token;
-    const char  *opticon_token;
-    const char  *config_file;
+    char        *api_url;
+    char        *keystone_url;
+    char        *unithost_url;
+    char        *unithost_identity_url;
+    char        *external_token;
+    char        *opticon_token;
+    char        *config_file;
     var         *conf;
 } optinfo;
 

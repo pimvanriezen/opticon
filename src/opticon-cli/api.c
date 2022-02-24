@@ -82,6 +82,7 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
                 if (OPTIONS.external_token[0]) {
                     fprintf (stderr, "%% Token '%s' seems expired\n",
                              OPTIONS.external_token);
+                    free (OPTIONS.external_token);
                     OPTIONS.external_token = strdup("");
                 }
                 if (unithost_login()) {
@@ -161,6 +162,7 @@ var *api_get_raw (const char *path, int exiterror) {
                 if (OPTIONS.external_token[0]) {
                     fprintf (stderr, "%% Token '%s' seems expired\n",
                              OPTIONS.external_token);
+                    free (OPTIONS.external_token);
                     OPTIONS.external_token = strdup("");
                 }
                 if (unithost_login()) {

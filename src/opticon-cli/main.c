@@ -25,7 +25,7 @@ optinfo OPTIONS;
 
 #define STRINGOPT(xoptname) \
     int CONCAT(set_,xoptname) (const char *o, const char *v) { \
-        OPTIONS. xoptname = v; \
+        OPTIONS. xoptname = strdup(v); \
         return 1; \
     }
     
@@ -66,7 +66,7 @@ int set_type (const char *o, const char *v) {
          (strcmp (v, "frac") == 0) ||
          (strcmp (v, "table") == 0) ||
          (strcmp (v, "string") == 0) ) {
-        OPTIONS.type = v;
+        OPTIONS.type = strdup (v);
         return 1;
     }
     fprintf (stderr, "%% Illegal type: %s\n", v);
@@ -200,7 +200,8 @@ int load_cached_token (void) {
             stat (path, &st);
             /* re-validate after an hour */
             if (tnow - st.st_mtime > 3600) {
-                OPTIONS.external_token = token;
+                if (OPTIONS.external_token) free (OPTIONS.external_token);
+                OPTIONS.external_token = strdup (token);
                 var *vres = api_get_raw ("/token", 0);
                 if (vres) {
                     res = 1;
@@ -210,10 +211,12 @@ int load_cached_token (void) {
                     write_cached_token (OPTIONS.external_token);
                 }
                 else {
-                    OPTIONS.external_token = NULL;
+                    if (OPTIONS.external_token) free (OPTIONS.external_token);
+                    OPTIONS.external_token = strdup ("");
                 }
             }
             else {
+                if (OPTIONS.external_token) free (OPTIONS.external_token);
                 OPTIONS.external_token = strdup (token);
                 res = 1;
             }
@@ -285,6 +288,7 @@ int keystone_login (void) {
     var *res_tok = var_get_dict_forkey (res_xs, "token");
     const char *token = var_get_str_forkey (res_tok, "id");
     if (token) {
+        if (OPTIONS.external_token) free (OPTIONS.external_token);
         OPTIONS.external_token = strdup (token);
         write_cached_token (token);
     }
@@ -396,6 +400,7 @@ int unithost_login (void) {
         return 0;
     }
     
+    if (OPTIONS.external_token) free (OPTIONS.external_token);
     OPTIONS.external_token = strdup (token);
     write_cached_token (token);
     
@@ -466,24 +471,24 @@ clicmd CLICMD[] = {
 
 /** Set up the api endpoint from configuration */
 int conf_endpoint_api (const char *id, var *v, updatetype tp) {
-    OPTIONS.api_url = var_get_str(v);
+    OPTIONS.api_url = strdup (var_get_str(v));
     return 1;
 }
 
 /** Set up the keystone endpoint from configuration */
 int conf_endpoint_keystone (const char *id, var *v, updatetype tp) {
-    OPTIONS.keystone_url = var_get_str(v);
+    OPTIONS.keystone_url = strdup (var_get_str(v));
     return 1;
 }
 
 /** Set up the unithost endpoint from configuration */
 int conf_endpoint_unithost (const char *id, var *v, updatetype tp) {
-    OPTIONS.unithost_url = var_get_str(v);
+    OPTIONS.unithost_url = strdup (var_get_str(v));
     return 1;
 }
 
 int conf_endpoint_unithost_identity (const char *id, var *v, updatetype tp) {
-    OPTIONS.unithost_identity_url = var_get_str(v);
+    OPTIONS.unithost_identity_url = strdup (var_get_str(v));
     return 1;
 }
 
@@ -492,14 +497,16 @@ int conf_endpoint_unithost_identity (const char *id, var *v, updatetype tp) {
   */
 int conf_default_tenant (const char *id, var *v, updatetype tp) {
     if (OPTIONS.tenant[0] == 0) {
-        OPTIONS.tenant = var_get_str (v);
+        free (OPTIONS.tenant);
+        OPTIONS.tenant = strdup (var_get_str(v));
     }
     return 1;
 }
 
 int conf_admin_token (const char *id, var *v, updatetype tp) {
     if (OPTIONS.opticon_token[0] == 0) {
-        OPTIONS.opticon_token = var_get_str (v);
+        free (OPTIONS.opticon_token);
+        OPTIONS.opticon_token = strdup (var_get_str (v));
     }
     return 1;
 }
@@ -612,13 +619,23 @@ int main (int _argc, const char *_argv[]) {
     opticonf_handle_config (OPTIONS.conf);
     
     tstr = getenv ("OPTICON_TOKEN");
-    if (tstr) OPTIONS.opticon_token = getenv ("OPTICON_TOKEN");
+    if (tstr) {
+        if (OPTIONS.opticon_token) free (OPTIONS.opticon_token);
+        OPTIONS.opticon_token = strdup (tstr);
+    }
     
     tstr = getenv ("OPTICON_EXTERNAL_TOKEN");
-    if (tstr) OPTIONS.external_token = getenv ("OPTICON_EXTERNAL_TOKEN");
+    if (tstr) {
+        if (OPTIONS.external_token) free (OPTIONS.external_token);
+        OPTIONS.external_token = strdup (tstr);
+    }
     
     tstr = getenv ("OPTICON_TENANT");
-    if (tstr) OPTIONS.tenant = getenv ("OPTICON_TENANT");
+    if (tstr) {
+        if (OPTIONS.tenant) free (OPTIONS.tenant);
+        OPTIONS.tenant = strdup (tstr);
+    }
+    
         
     /* Make sure we have the information we need */
     if (OPTIONS.api_url[0] == 0) {
