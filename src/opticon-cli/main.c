@@ -153,9 +153,11 @@ int set_time (const char *o, const char *v) {
 void write_cached_token (const char *token) {
     char *home = getenv ("HOME");
     if (! home) return;
+    char npath[1024];
     char path[1024];
+    sprintf (npath, "%s/.opticon-token-cache.new", home);
     sprintf (path, "%s/.opticon-token-cache", home);
-    FILE *f = fopen (path, "w");
+    FILE *f = fopen (npath, "w");
     if (! f) return;
 
 #ifdef DEBUG
@@ -165,6 +167,7 @@ void write_cached_token (const char *token) {
     var_set_str_forkey (cache, "external_token", token);
     var_dump (cache, f);
     fclose (f);
+    rename (npath, path);
     var_free (cache);
 }
 
