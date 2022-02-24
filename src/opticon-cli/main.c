@@ -203,12 +203,11 @@ int load_cached_token (void) {
                 OPTIONS.external_token = token;
                 var *vres = api_get_raw ("/token", 0);
                 if (vres) {
-                    OPTIONS.external_token = strdup (token);
                     res = 1;
                     var_free (vres);
                     
                     /* refresh the file */
-                    write_cached_token (token);
+                    write_cached_token (OPTIONS.external_token);
                 }
                 else {
                     OPTIONS.external_token = NULL;
