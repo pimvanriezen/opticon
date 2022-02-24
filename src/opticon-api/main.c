@@ -103,6 +103,7 @@ MHDResult answer_to_connection (void *cls, struct MHD_Connection *connection,
     return MHD_YES;
 }
 
+/** Handle an X-Auth-Token header that should be passed to keystone */
 int handle_external_token_openstack (req_context *ctx) {
     if (! OPTIONS.keystone_url[0]) return 0;
     char *url = (char *) malloc (strlen(OPTIONS.keystone_url)+40);
@@ -156,8 +157,15 @@ int handle_external_token_openstack (req_context *ctx) {
     return retcode;;
 }
 
+/** Cache for looking up services in the unithost registry */
 static var *UNITHOST_CACHE = NULL;
 
+/** Resolves base url for a unithost service by name from unithost-registry.
+  * \param registry_url Base URL for the unithost registry
+  * \param svcname      The service name to look up
+  * \return             Copied string with the resolved base URL, caller
+  *                     should free() when done.
+  */
 char *resolve_unithost_service (const char *registry_url, const char *svcname) {
     if (UNITHOST_CACHE) {
         const char *v = var_get_str_forkey (UNITHOST_CACHE, svcname);
@@ -199,6 +207,7 @@ char *resolve_unithost_service (const char *registry_url, const char *svcname) {
     return retval;
 }
 
+/** Handle an X-Auth-Token header that should be passed to unithost */
 int handle_external_token_unithost (req_context *ctx) {
     if (! OPTIONS.unithost_url[0]) return 0;
     
@@ -270,6 +279,7 @@ int handle_external_token_unithost (req_context *ctx) {
     return retcode;;
 }
 
+/** Handle X-Auth-Token header */
 int handle_external_token (req_context *ctx) {
     if (! ctx->external_token) return 0;
     if (! ctx->external_token[0]) return 0;
