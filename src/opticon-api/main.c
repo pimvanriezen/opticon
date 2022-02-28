@@ -539,13 +539,23 @@ int conf_keystone_url (const char *id, var *v, updatetype tp) {
 
 /** Handle auth/unithost_url config */
 int conf_unithost_url (const char *id, var *v, updatetype tp) {
-    OPTIONS.unithost_url = var_get_str (v);
+    char *url = strdup (var_get_str (v));
+    if (url[0]) {
+        char *e = url[strlen(url)-1];
+        if (*e == '/') *e = 0;
+    }
+    OPTIONS.unithost_url = url;
     return 1;
 }
 
 /** Handle auth/unithost_account_url config */
 int conf_unithost_account_url (const char *id, var *v, updatetype tp) {
-    OPTIONS.unithost_account_url = var_get_str (v);
+    char *url = strdup (var_get_str (v));
+    if (url[0]) {
+        char *e = url[strlen(url)-1];
+        if (*e == '/') *e = 0;
+    }
+    OPTIONS.unithost_account_url = url;
     return 1;
 }
 
