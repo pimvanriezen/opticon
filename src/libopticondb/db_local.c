@@ -1149,13 +1149,13 @@ graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
     if (initialize) log_debug ("graph: create %s", graphpath);
     
     self->graphfd = open (graphpath, O_RDWR | O_CREAT);
-    if (initialize) fchmod (self->graphfd, 0660);
-    
     free (graphpath);
     if (self->graphfd < 0) return NULL;
     
     if (initialize) {
         const char *blockdata = "\0\0\0\0\0\0\0\0";
+        
+        fchmod (self->graphfd, 0660);
         for (uint32_t i=0; i<sizeof(graphdata); i+=8) {
             write (self->graphfd, blockdata, 8);
         }
