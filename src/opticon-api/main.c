@@ -296,6 +296,9 @@ int handle_external_token (req_context *ctx) {
 /** Filter that croaks when no valid token was set */
 int flt_check_validuser (req_context *ctx, req_arg *a,
                          var *out, int *status) {
+    
+    char uuidstr[40];
+    
     if (uuidvalid (ctx->opticon_token)) {
         if (strcmp (OPTIONS.adminhost, ctx->remote) != 0) {
             log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (IP)", ctx->remote); 
@@ -306,9 +309,11 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
             ctx->userlevel = AUTH_ADMIN;
         }
         else {
+            uuid2str (ctx->opticon_token, uuidstr);
             log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (Token %c%c...)",
-                      ctx->remote, ctx->opticon_token[0], ctx->opticon_token[1]);
+                      ctx->remote, uuidstr[0], uuidstr[1]);
             ctx->userlevel = AUTH_USER;
+        }
     }
     else if (ctx->external_token) {
         tcache_node *cache = tokencache_lookup (ctx->external_token);
@@ -541,7 +546,7 @@ int conf_keystone_url (const char *id, var *v, updatetype tp) {
 int conf_unithost_url (const char *id, var *v, updatetype tp) {
     char *url = strdup (var_get_str (v));
     if (url[0]) {
-        char *e = url[strlen(url)-1];
+        char *e = &url[strlen(url)-1];
         if (*e == '/') *e = 0;
     }
     OPTIONS.unithost_url = url;
@@ -552,7 +557,7 @@ int conf_unithost_url (const char *id, var *v, updatetype tp) {
 int conf_unithost_account_url (const char *id, var *v, updatetype tp) {
     char *url = strdup (var_get_str (v));
     if (url[0]) {
-        char *e = url[strlen(url)-1];
+        char *e = &url[strlen(url)-1];
         if (*e == '/') *e = 0;
     }
     OPTIONS.unithost_account_url = url;
