@@ -468,8 +468,8 @@ int cmd_tenant_create (int argc, const char *argv[]) {
     
     if (OPTIONS.tenant[0] == 0) {
         tenant = uuidgen();
-        OPTIONS.tenant = (const char *) malloc (40);
-        uuid2str (tenant, (char *) OPTIONS.tenant);
+        OPTIONS.tenant = (char *) malloc (40);
+        uuid2str (tenant, OPTIONS.tenant);
     }
     else {
         tenant = mkuuid (OPTIONS.tenant);

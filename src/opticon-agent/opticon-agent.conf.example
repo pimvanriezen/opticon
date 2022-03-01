@@ -61,4 +61,9 @@ probes {
         call: probe_distro
         frequency: low
     }
+    who {
+        type: built-in
+        call: probe_who
+        frequency: low
+    }
 }

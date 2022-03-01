@@ -82,6 +82,23 @@ int cmd_host_remove (req_context *ctx, req_arg *a, var *env, int *status) {
     return err_generic (env, "Could not delete host");
 }
 
+/** GET /$TENANT/host/$HOST/log */
+int cmd_host_get_log (req_context *ctx, req_arg *a, var *env, int *status) {
+    db *DB = localdb_create (OPTIONS.dbpath);
+    if (! db_open (DB, ctx->tenantid, NULL)) {
+        db_free (DB);
+        return err_not_found (ctx, a, env, status);
+    }
+    
+    var *log = db_get_log (DB, ctx->hostid);
+    var_copy (env, log);
+    var_free (log);
+    db_free (DB);
+
+    *status = 200;
+    return 1;
+}
+
 /** GET /$TENANT/host/$HOST/watcher */
 int cmd_host_list_watchers (req_context *ctx, req_arg *a, 
                             var *env, int *status) {
