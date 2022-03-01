@@ -145,9 +145,9 @@ int handle_external_token_openstack (req_context *ctx) {
         }
         var_free (res);
     }
-    
-    log_info ("%s [KEYSTONE  ] %03i CALL %s %s <%c%c...>",
-              ctx->remote, retcode, url,
+                   
+    log_info ("%s [AUTH_TOKEN] %03i FWD %s %s <%c%c...>",
+              ctx->remote, retcode ? 200 : 401, url,
               retcode?"ACCEPT":"REJECT",
               ctx->external_token[0], ctx->external_token[1]);
     
@@ -268,8 +268,8 @@ int handle_external_token_unithost (req_context *ctx) {
         var_free (res);
     }
     
-    log_info ("%s [UNITHOST  ] %03i CALL %s %s <%c%c...>",
-              ctx->remote, retcode, url,
+    log_info ("%s [AUTH_TOKEN] %03i FWD %s %s (Token %c%c...)",
+              ctx->remote, retcode ? 200 : 401, url,
               retcode?"ACCEPT":"REJECT",
               ctx->external_token[0], ctx->external_token[1]);
     
@@ -298,17 +298,17 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
                          var *out, int *status) {
     if (uuidvalid (ctx->opticon_token)) {
         if (strcmp (OPTIONS.adminhost, ctx->remote) != 0) {
-            log_error ("Rejected admin authentication from host "
-                       "<%s> for reasons of not being <%s>",
-                       ctx->remote, OPTIONS.adminhost);
-
+            log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (IP)", ctx->remote); 
             ctx->userlevel = AUTH_GUEST;
             return err_unauthorized (ctx, a, out, status);
         }
         else if (uuidcmp (ctx->opticon_token, OPTIONS.admintoken)) {
             ctx->userlevel = AUTH_ADMIN;
         }
-        else ctx->userlevel = AUTH_USER;
+        else {
+            log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (Token %c%c...)",
+                      ctx->remote, ctx->opticon_token[0], ctx->opticon_token[1]);
+            ctx->userlevel = AUTH_USER;
     }
     else if (ctx->external_token) {
         tcache_node *cache = tokencache_lookup (ctx->external_token);
