@@ -392,8 +392,7 @@ int cmd_tenant_get_meta (req_context *ctx, req_arg *a,
     var *v_meta = var_get_dict_forkey (env, "metadata");
     var *meta = db_get_metadata (DB);
     if (! meta) meta = var_alloc();
-    var *v_dbusermeta = var_get_dict_forkey (meta, "meta");
-    var_copy (v_meta, v_dbusermeta);
+    var_copy (v_meta, meta);
     var_free (meta);
     db_free (DB);
     *status = 200;
