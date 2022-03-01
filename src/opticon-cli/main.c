@@ -467,9 +467,9 @@ clicmd CLICMD[] = {
 
 /** Set up the api endpoint from configuration */
 int conf_endpoint_api (const char *id, var *v, updatetype tp) {
-    char *url = strdup (var_get_str());
+    char *url = strdup (var_get_str(v));
     if (url[0]) {
-        char *e = url[strlen(url)-1];
+        char *e = &url[strlen(url)-1];
         if (*e == '/') *e = 0;
     }
     OPTIONS.api_url = url;
@@ -484,9 +484,9 @@ int conf_endpoint_keystone (const char *id, var *v, updatetype tp) {
 
 /** Set up the unithost endpoint from configuration */
 int conf_endpoint_unithost (const char *id, var *v, updatetype tp) {
-    char *url = strdup (var_get_str());
+    char *url = strdup (var_get_str(v));
     if (url[0]) {
-        char *e = url[strlen(url)-1];
+        char *e = &url[strlen(url)-1];
         if (*e == '/') *e = 0;
     }
     OPTIONS.unithost_url = url;
@@ -496,7 +496,7 @@ int conf_endpoint_unithost (const char *id, var *v, updatetype tp) {
 int conf_endpoint_unithost_identity (const char *id, var *v, updatetype tp) {
     char *url = strdup (var_get_str(v));
     if (url[0]) {
-        char *e = url[strlen(url)-1];
+        char *e = &url[strlen(url)-1];
         if (*e == '/') *e = 0;
     }
     OPTIONS.unithost_identity_url = url;
