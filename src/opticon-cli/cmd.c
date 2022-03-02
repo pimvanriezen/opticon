@@ -588,6 +588,15 @@ int cmd_get_record (int argc, const char *argv[]) {
         fprintf (stderr, "%% No hostid provided\n");
         return 1;
     }
+    
+    if (strcmp (OPTIONS.tenant, "any") == 0) {
+        var *res = api_get ("/any/host/%s/tenant", OPTIONS.host);
+        if (res) {
+            free (OPTIONS.tenant);
+            OPTIONS.tenant = strdup (var_get_str_forkey (res, "tenant"));
+            var_free (res);
+        }
+    }
 
     var *apires = api_get ("/%s/host/%s", OPTIONS.tenant, OPTIONS.host);
     
