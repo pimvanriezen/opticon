@@ -97,7 +97,7 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
     if (! res) {
         const char *errstr = var_get_str_forkey (errinfo, "error");
         if (! errstr) errstr = "Unknown error";
-        fprintf (stderr, "%% %s\n", errstr);
+        fprintf (stderr, "%% %s <%s>\n", errstr, tmpurl);
         exit (1);
     }
     var_free (outhdr);
@@ -171,7 +171,7 @@ var *api_get_raw (const char *path, int exiterror) {
         if (exiterror) {
             const char *errstr = var_get_str_forkey (errinfo, "error");
             if (! errstr) errstr = "Unknown error";
-            fprintf (stderr, "%% %s\n", errstr);
+            fprintf (stderr, "%% %s <%s>\n", errstr, tmpurl);
             exit (1);
         }
     }

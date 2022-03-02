@@ -96,30 +96,35 @@ void var_link_as (var *self, var *parent, const char *id) {
 /** Deep copy another var into one. The new structure will share no memory
   * with the original.
   * \param self The destination var
-  * \param orig The original var */
+  * \param orig The original var 
+  * \param merge If true, don't erase existing dictionary objects */
 /*/ ======================================================================= /*/
-void var_copy (var *self, var *orig) {
+void var_copy_merge (var *self, var *orig, bool merge) {
     if (self->type == VAR_STR) {
         free (self->value.sval);
         self->value.sval = NULL;
     }
     
-    if (self->type == VAR_ARRAY || self->type == VAR_DICT) {
-        var *c = self->value.arr.first;
-        var *nc;
+    if (merge && self->type != VAR_DICT) return;
+    
+    if (! merge) {
+        if (self->type == VAR_ARRAY || self->type == VAR_DICT) {
+            var *c = self->value.arr.first;
+            var *nc;
         
-        while (c) {
-            nc = c->next;
-            var_free (c);
-            c = nc;
+            while (c) {
+                nc = c->next;
+                var_free (c);
+                c = nc;
+            }
+            self->value.arr.first = self->value.arr.last = NULL;
+            self->value.arr.cachepos = -1;
+            self->value.arr.cachenode = NULL;
+            self->value.arr.count = 0;
         }
-        self->value.arr.first = self->value.arr.last = NULL;
-        self->value.arr.cachepos = -1;
-        self->value.arr.cachenode = NULL;
-        self->value.arr.count = 0;
-    }
 
-    self->type = VAR_NULL;
+        self->type = VAR_NULL;
+    }
     var *crsr;
     
     switch (orig->type) {
@@ -156,13 +161,26 @@ void var_copy (var *self, var *orig) {
             break;
         
         case VAR_DICT:
-            self->type = VAR_DICT;
-            self->value.arr.first = self->value.arr.last = NULL;
-            self->value.arr.cachepos = -1;
-            self->value.arr.cachenode = NULL;
-            self->value.arr.count = 0;
+            if (! merge) {
+                self->type = VAR_DICT;
+                self->value.arr.first = self->value.arr.last = NULL;
+                self->value.arr.cachepos = -1;
+                self->value.arr.cachenode = NULL;
+                self->value.arr.count = 0;
+            }
+            else {
+            }
             crsr = orig->value.arr.first;
             while (crsr) {
+                if (merge) {
+                    var *existing = var_find_key (self, crsr->id);
+                    if (existing) {
+                        var_copy (existing, crsr);
+                        crsr = crsr->next;
+                        continue;
+                    }
+                }
+                
                 var *nvar = var_alloc();
                 strcpy (nvar->id, crsr->id);
                 nvar->hashcode = crsr->hashcode;
@@ -172,6 +190,24 @@ void var_copy (var *self, var *orig) {
             }
             break;
     }
+}
+
+/*/ ======================================================================= /*/
+/** Shorthand for var_copy_merge with no merge set to false.
+  * \param self The destination var
+  * \param orig The original var */
+/*/ ======================================================================= /*/
+void var_copy (var *self, var *orig) {
+    var_copy_merge (self, orig, false);
+}
+
+/*/ ======================================================================= /*/
+/** Shorthand for var_copy_merge with merge set to true.
+  * \param self The destination var
+  * \param orig The original var */
+/*/ ======================================================================= /*/
+void var_merge (var *self, var *orig) {
+    var_copy_merge (self, orig, true);
 }
 
 /*/ ======================================================================= /*/

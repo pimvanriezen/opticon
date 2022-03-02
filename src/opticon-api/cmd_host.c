@@ -60,6 +60,10 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
             var_free (res);
         }
     }
+    
+    db_free (DB);
+    *status = 200;
+    return 1;
 }
 
 /** GET /$TENANT/host/$HOST */

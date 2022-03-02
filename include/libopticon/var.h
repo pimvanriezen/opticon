@@ -59,6 +59,7 @@ void         var_link (var *, var *parent);
 void         var_link_as (var *v, var *parent, const char *key);
 void         var_free (var *);
 void         var_copy (var *into, var *orig);
+void         var_merge (var *into, var *orig);
 
 var         *var_find_key (var *, const char *);
 var         *var_find_index (var *, int);
