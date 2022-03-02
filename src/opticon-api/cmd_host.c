@@ -32,6 +32,43 @@ int cmd_host_overview (req_context *ctx, req_arg *a,
     return 1;
 }
 
+uuid cmd_host_any_resolve (req_context *ctx, const char *hostuuidstr) {
+    db *DB = localdb_create (OPTIONS.dbpath);
+    ctx->hostid = mkuuid (hostuuidstr);
+    
+    var *cache = db_get_global (DB, "hosts.tenants");
+    if (cache) {
+        var *entry = var_find_key (cache, hostuuidstr);
+        if (entry) {
+            uuid res = ctx->tenantid = var_get_uuid (entry);
+            var_free (cache);
+            db_free (DB);
+            return res;
+        }
+    }
+    else cache = var_alloc();
+    
+    int uuid_cnt = 0;
+    uuid *uuid_list = db_list_tenants (DB, &uuid_cnt);
+    for (int i=0; i<uuid_cnt; ++i) {
+        if (db_open (DB, uuid_list[i], NULL)) {
+            if (db_host_exists (DB, ctx->hostid)) {
+                uuid res = ctx->tenantid = uuid_list[i];
+                var_set_uuid_forkey (cache, hostuuidstr, ctx->tenantid);
+                db_set_global (DB, "hosts.tenants", cache);
+                var_free (cache);
+                db_free (DB);
+                free (uuid_list);
+                return res;
+            }
+        }
+    }
+    var_free (cache);
+    db_free (DB);
+    free (uuid_list);
+    return uuidnil();
+}
+
 /** GET /any/host/overview */
 int cmd_host_any_overview (req_context *ctx, req_arg *a,
                            var *env, int *status) {
@@ -67,57 +104,20 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
 }
 
 /** GET /any/host/$HOST */
-int cmd_host_any_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
-    db *DB = localdb_create (OPTIONS.dbpath);
-    char *hostuuidstr = a->argv[0];
-    ctx->hostid = mkuuid (hostuuidstr);
-    
-    var *cache = db_get_global (DB, "hosts.tenants");
-    if (cache) {
-        var *entry = var_find_key (cache, hostuuidstr);
-        if (entry) {
-            ctx->tenantid = var_get_uuid (entry);
-            var_free (cache);
-            db_free (DB);
-            return cmd_host_get (ctx, a, outio, status);
-        }
-    }
-    else cache = var_alloc();
-    
-    log_info ("Host %s not in cache", hostuuidstr);
-    
-    int uuid_cnt = 0;
-    uuid *uuid_list = db_list_tenants (DB, &uuid_cnt);
-    for (int i=0; i<uuid_cnt; ++i) {
-        if (db_open (DB, uuid_list[i], NULL)) {
-            if (db_host_exists (DB, ctx->hostid)) {
-                ctx->tenantid = uuid_list[i];
-                var_set_uuid_forkey (cache, hostuuidstr, ctx->tenantid);
-                db_set_global (DB, "hosts.tenants", cache);
-                var_free (cache);
-                db_free (DB);
-                free (uuid_list);
-                return cmd_host_get (ctx, a, outio, status);
-            }
-        }
-        else {
-            log_error ("Could not open tenant %i", i);
-        }
-    }
-    
-    log_info ("Host %s not found in %i tenants", hostuuidstr, uuid_cnt);
-    
-    free (uuid_list);
-    var_free (cache);
-    db_free (DB);
-    
-    var *err = var_alloc();
-    var_set_str_forkey (err, "error", "No current record found for host");
-    var_write (err, outio);
-    var_free (err);
-    *status = 404;
+int cmd_host_any_get (req_context *ctx, req_arg *a,
+                      ioport *outio, int *status) {
+    cmd_host_any_resolve (ctx, a->argv[0]);
+    return cmd_host_get (ctx, a, outio, status);
+}
+
+/** GET /any/host/$HOST/tenant */
+int cmd_host_any_get_tenant (req_context *ctx, req_arg *a,
+                             var *env, int *status) {
+    uuid tenant = cmd_host_any_resolve (ctx, a->argv[0]);
+    var_set_uuid_forkey (env, "tenant", tenant);
+    *status = 200;
     return 1;
-}    
+}
 
 /** GET /$TENANT/host/$HOST */
 int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
