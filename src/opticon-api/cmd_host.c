@@ -37,14 +37,18 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
                            var *env, int *status) {
     int uuidcount = 0;
     db *DB = localdb_create (OPTIONS.dbpath);
-    uuid *uuids = db_list_tenants (DB, &count);
+    uuid *uuids = db_list_tenants (DB, &uuidcount);
     
-    var v_summary = var_get_dict_forkey (env, "summary");
+    var *v_summary = var_get_dict_forkey (env, "summary");
     
     for (int c = 0; c<uuidcount; ++c) {
         if (db_open (DB, uuids[c], NULL)) {
             var *summ = db_get_overview (DB);
-            var *crsr = summ->first;
+            var *crsr = NULL;
+            
+            if (summ->type == VAR_DICT) {
+                crsr = summ->value.arr.first;
+            }
             
             while (crsr) {
                 var_set_uuid_forkey (crsr, "tenant", uuids[c]);
