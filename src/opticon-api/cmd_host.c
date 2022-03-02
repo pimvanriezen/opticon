@@ -66,6 +66,51 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/** GET /any/host/$HOST */
+int cmd_host_any_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
+    db *DB = localdb_create (OPTIONS.dbpath);
+    char *hostuuidstr = a->argv[0];
+    ctx->hostid = mkuuid (hostuuidstr);
+    
+    var *cache = db_get_global (DB, "hosts.tenants");
+    if (cache) {
+        var *entry = var_find_key (cache, hostuuidstr);
+        if (entry) {
+            ctx->tenantid = var_get_uuid (entry);
+            var_free (cache);
+            db_free (DB);
+            return cmd_host_get (ctx, a, outio, status);
+        }
+    }
+    else cache = var_alloc();
+    
+    int uuid_cnt = 0;
+    uuid *uuid_list = db_list_tenants (DB, &uuid_cnt);
+    log_info ("Checking %i tenants 
+    for (int i=0; i<uuid_cnt; ++i) {
+        if (db_open (DB, uuid_list[i], NULL)) {
+            if (db_host_exists (DB, ctx->hostid)) {
+                ctx->tenantid = uuid_list[i];
+                var_set_uuid_forkey (cache, hostuuidstr, ctx->tenantid);
+                db_set_global (DB, "hosts.tenants", cache);
+                var_free (cache);
+                db_free (DB);
+                free (uuid_list);
+                return cmd_host_get (ctx, a, outio, status);
+            }
+    }
+    
+    free (uuidlist);
+    var_free (cache);
+    db_free (DB);
+    
+    var *err = var_alloc();
+    var_set_str_forkey (err, "error", "No current record found for host");
+    var_write (err, outio);
+    var_free (err);
+    *status = 404;
+}    
+
 /** GET /$TENANT/host/$HOST */
 int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
