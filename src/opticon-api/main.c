@@ -399,6 +399,7 @@ void setup_matches (void) {
     _P_ ("/session",                  REQ_GET,    cmd_list_sessions);
     _P_ ("/any*",                     REQ_ANY,    flt_check_admin);
     _P_ ("/any/host/overview",        REQ_GET,    cmd_host_any_overview);
+    _T_ ("/any/host/%U",              REQ_GET,    cmd_host_any_get);
     _P_ ("/%U*",                      REQ_ANY,    flt_check_tenant);
     _P_ ("/%U",                       REQ_GET,    cmd_tenant_get);
     _P_ ("/%U",                       REQ_POST,   cmd_tenant_create);
