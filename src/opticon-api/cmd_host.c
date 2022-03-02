@@ -98,7 +98,12 @@ int cmd_host_any_get (req_context *ctx, req_arg *a, ioport *outio, int *status) 
                 return cmd_host_get (ctx, a, outio, status);
             }
         }
+        else {
+            log_error ("Could not open tenant %i", i);
+        }
     }
+    
+    log_info ("Host %s not found in %i tenants", hostuuidstr, uuid_cnt);
     
     free (uuid_list);
     var_free (cache);
