@@ -84,6 +84,8 @@ int cmd_host_any_get (req_context *ctx, req_arg *a, ioport *outio, int *status) 
     }
     else cache = var_alloc();
     
+    log_info ("Host %s not in cache", hostuuidstr);
+    
     int uuid_cnt = 0;
     uuid *uuid_list = db_list_tenants (DB, &uuid_cnt);
     for (int i=0; i<uuid_cnt; ++i) {
