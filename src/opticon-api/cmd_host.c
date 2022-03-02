@@ -86,7 +86,6 @@ int cmd_host_any_get (req_context *ctx, req_arg *a, ioport *outio, int *status) 
     
     int uuid_cnt = 0;
     uuid *uuid_list = db_list_tenants (DB, &uuid_cnt);
-    log_info ("Checking %i tenants 
     for (int i=0; i<uuid_cnt; ++i) {
         if (db_open (DB, uuid_list[i], NULL)) {
             if (db_host_exists (DB, ctx->hostid)) {
@@ -98,9 +97,10 @@ int cmd_host_any_get (req_context *ctx, req_arg *a, ioport *outio, int *status) 
                 free (uuid_list);
                 return cmd_host_get (ctx, a, outio, status);
             }
+        }
     }
     
-    free (uuidlist);
+    free (uuid_list);
     var_free (cache);
     db_free (DB);
     
@@ -109,6 +109,7 @@ int cmd_host_any_get (req_context *ctx, req_arg *a, ioport *outio, int *status) 
     var_write (err, outio);
     var_free (err);
     *status = 404;
+    return 1;
 }    
 
 /** GET /$TENANT/host/$HOST */
