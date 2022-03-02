@@ -428,6 +428,9 @@ int main (int _argc, const char *_argv[]) {
         APP.hostid = mkuuid (buffer);
         fclose (F);
     }
+    else {
+        log_warn ("Error loading product_uuid: %s", strerror (errno));
+    }
 #elif defined (OS_DARWIN)
     char buffer[1024];
     FILE *F = popen ("ioreg -d2 -c IOPlatformExpertDevice | "
@@ -456,6 +459,10 @@ int main (int _argc, const char *_argv[]) {
     }
     
     opticonf_handle_config (APP.conf);
+
+    if (! uuidvalid (APP.hostid)) {
+        log_error ("No hostid configured and could not auto-recognise");
+    }
     
     if (! outtransport_setremote (APP.transport, APP.collectoraddr,
                                   APP.collectorport)) {
