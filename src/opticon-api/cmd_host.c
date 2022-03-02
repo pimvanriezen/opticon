@@ -39,15 +39,16 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
     db *DB = localdb_create (OPTIONS.dbpath);
     uuid *uuids = db_list_tenants (DB, &uuidcount);
     
-    var *v_summary = var_get_dict_forkey (env, "summary");
+    var *v_overview = var_get_dict_forkey (env, "overview");
     
     for (int c = 0; c<uuidcount; ++c) {
         if (db_open (DB, uuids[c], NULL)) {
-            var *summ = db_get_overview (DB);
+            var *res = db_get_overview (DB);
+            var *ov = var_get_dict_forkey (res, "overview");
             var *crsr = NULL;
             
-            if (summ->type == VAR_DICT) {
-                crsr = summ->value.arr.first;
+            if (ov->type == VAR_DICT) {
+                crsr = ov->value.arr.first;
             }
             
             while (crsr) {
@@ -55,8 +56,8 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
                 crsr = crsr->next;
             }
             
-            var_copy (v_summary, summ);
-            var_free (summ);
+            var_copy (v_overview, ov);
+            var_free (res);
         }
     }
 }
