@@ -56,7 +56,7 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
                 crsr = crsr->next;
             }
             
-            var_copy (v_overview, ov);
+            var_merge (v_overview, ov);
             var_free (res);
         }
     }
