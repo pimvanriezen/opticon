@@ -17,11 +17,39 @@
 
 static const char *PENDING_HDR = NULL;
 static var *MDEF = NULL;
+static enum termtype {
+    TERM_UNSET,
+    TERM_MODERN,
+    TERM_PRIMITIVE } TERM = TERM_UNSET;
+
 
 void print_line (void) {
-    printf ("\033[1m╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
-            "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
-            "╌╌╌╌╌╌╌╌\033[0m\n");
+    if (TERM == TERM_UNSET) {
+        const char *env_term = getenv("TERM");
+        if (env_term) {
+            if ((strcmp (env_term, "xterm-mono") == 0) ||
+                (strcmp (env_term, "vt100") == 0)) {
+                TERM = TERM_PRIMITIVE;
+            }
+            else {
+                TERM = TERM_MODERN;
+            }
+        }
+        else {
+            TERM = TERM_PRIMITIVE;
+        }
+    }
+    
+    if (TERM == TERM_MODERN) {
+        printf ("\033[1m╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+                "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+                "╌╌╌╌╌╌╌╌\033[0m\n");
+    }
+    else {
+        printf ("\033[1m------------------------------------"
+                "------------------------------------"
+                "--------\033[0m\n");
+    }
 }
 
 static char *statustxt = NULL;
@@ -51,18 +79,33 @@ void print_bar (int width, double max, double v) {
     const char *bars[9] = {
         " ","▏","▎","▍","▌","▋","▊","▉","█"
     };
+    const char *pbars[9] = {
+        " ", " ", " ", " ", ">", ">", ">", ">", "#"
+    };
+    
+    if (TERM == TERM_PRIMITIVE) {
+        bars[1] = " ";
+        bars[2] = " ";
+        bars[3] = " ";
+        bars[4] = ">";
+        bars[5] = ">";
+        bars[6] = ">";
+        bars[7] = ">";
+        bars[8] = "#";
+    }
     
     printf ("\033[38;5;45m\033[48;5;239m");
     for (int i=0; i<width; ++i) {
         if ((i+1) <= (v/prop)) {
-            printf ("%s", bars[8]);
+            printf ("%s", (TERM==TERM_MODERN) ? bars[8] : pbars[8]);
         }
         else if (i > (v/prop)) {
             printf (" ");
         }
         else {
             double diff = ((i+1) - (v/prop)) * 8;
-            printf ("%s", bars[(int) (8-diff)]);
+            printf ("%s", (TERM==TERM_MODERN) ? bars[(int) (8-diff)]
+                                              : pbars[(int) (8-diff)]);
         }
     }
     printf ("\033[0m");
@@ -70,6 +113,7 @@ void print_bar (int width, double max, double v) {
 
 void print_graph (int width, int height, int ind, double minmax, double *data) {
     const char *bars[9] = {" ","▁","▂","▃","▄","▅","▆","▇","█"};
+    const char *pbars[9] = {" "," "," "," ",".",".",".",".","#"};
     char *map = (char *) malloc (width*height);
     
     double max = minmax;
@@ -115,17 +159,25 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     
     for (y=0; y<height; ++y) {
         printf ("\033[%iC", ind);
-        printf ("\033[38;2;%.0f;%.0f;%.0fm"
-                "\033[48;2;%.0f;%.0f;%.0fm",
-                r, g, b, gr, gr, gr);
-        for (x=0; x<width; ++x) {
-            printf ("%s", bars[map[x+(y*width)]]);
-        }
+
+        if (TERM == TERM_MODERN) {
+            printf ("\033[38;2;%.0f;%.0f;%.0fm"
+                    "\033[48;2;%.0f;%.0f;%.0fm",
+                    r, g, b, gr, gr, gr);
+            for (x=0; x<width; ++x) {
+                printf ("%s", bars[map[x+(y*width)]]);
+            }
         
-        r = r + dr;
-        g = g + dg;
-        b = b + db;
-        gr = gr *0.96;
+            r = r + dr;
+            g = g + dg;
+            b = b + db;
+            gr = gr *0.96;
+        }
+        else {
+            for (x=0; x<width; ++x) {
+                printf ("%s", pbars[map[x+(y*width)]]);
+            }
+        }
         
         printf ("\033[0m\n");
     }
@@ -141,7 +193,12 @@ void print_hdr (const char *hdr) {
     
     int minspos = strlen(mins) - 73;
     const char *crsr = hdr;
-    printf ("\033[1m╌╌╌( \033[0m\033[38;5;45m");
+    if (TERM == TERM_MODERN) {
+        printf ("\033[1m╌╌╌( \033[0m\033[38;5;45m");
+    }
+    else {
+        printf ("\033[1m---( \033[0m\033[38;5;45m");
+    }
     while (*crsr) {
         putc (toupper (*crsr), stdout);
         minspos++;
@@ -151,7 +208,7 @@ void print_hdr (const char *hdr) {
     
     crsr = mins+minspos;
     while (*crsr) {
-        printf ("╌");
+        printf ((TERM == TERM_MODERN) ? "╌" : "-");
         crsr++;
     }
     printf ("\033[0m\n");
