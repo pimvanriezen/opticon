@@ -284,6 +284,13 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
     uuid2str (auth->hostid, s_hostid);
     uuid2str (auth->tenantid, s_tenantid);
     
+    if (! uuidvalid (auth->hostid)) {
+        log_warn ("Rejecting session <%08x-%08x> from <%s> for invalid "
+                  "host <%s>", auth->sessionid, netid, addrbuf, s_hostid);
+        free (auth);
+        return;
+    }
+    
     time_t tnow = time (NULL);
     
     /* Figure out if we're renewing an existing session */
