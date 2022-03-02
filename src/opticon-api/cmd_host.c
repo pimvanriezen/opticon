@@ -32,6 +32,31 @@ int cmd_host_overview (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/** GET /any/host/overview */
+int cmd_host_any_overview (req_context *ctx, req_arg *a,
+                           var *env, int *status) {
+    int uuidcount = 0;
+    db *DB = localdb_create (OPTIONS.dbpath);
+    uuid *uuids = db_list_tenants (DB, &count);
+    
+    var v_summary = var_get_dict_forkey (env, "summary");
+    
+    for (int c = 0; c<uuidcount; ++c) {
+        if (db_open (DB, uuids[c], NULL)) {
+            var *summ = db_get_overview (DB);
+            var *crsr = summ->first;
+            
+            while (crsr) {
+                var_set_uuid_forkey (crsr, "tenant", uuids[c]);
+                crsr = crsr->next;
+            }
+            
+            var_copy (v_summary, summ);
+            var_free (summ);
+        }
+    }
+}
+
 /** GET /$TENANT/host/$HOST */
 int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
