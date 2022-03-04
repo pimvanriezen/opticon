@@ -58,7 +58,7 @@ LoginScreen.submit = function() {
     $("#LoginScreen-submit").prop ("disabled", true);
 
 
-    self.mockLogin (self.View.username, self.View.password, function(r) {
+    API.Auth.login (self.View.username, self.View.password, function(r) {
         if (r) {
              $("#LoginScreen-submit").prop ("disabled", false);
              $(".uSideBar").fadeIn();
