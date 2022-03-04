@@ -10,7 +10,7 @@
 
 <div class="uSelectList uServerList" v-on:click="deSelect">
     <div v-if="empty" class="uNoResults">
-        <center>No servers found.</center>
+        <center>No servers in the {{server_status}} state.</center>
     </div>
     <span v-if="!empty">
       <table cellspacing="0" border="0" class="tbserverlist" width="100%">
@@ -19,9 +19,9 @@
           <td width="128">
             <span v-bind:class="statusClass(o)">{{o.status}}</span>
           </td>
-          <td align="right" width="64">{{parseInt(o.pcpu).toFixed(2)}} %</td>
-          <td align="right" width="64">{{parseInt(o.loadavg).toFixed(2)}}</td>
-          <td align="right" width="80">{{parseInt(o["link/rtt"]).toFixed(2)}} ms</td>
+          <td align="right" width="64">{{parseFloat(o.pcpu).toFixed(2)}} %</td>
+          <td align="right" width="64">{{parseFloat(o.loadavg).toFixed(2)}}</td>
+          <td align="right" width="80">{{parseFloat(o["link/rtt"]).toFixed(2)}} ms</td>
         </tr>
       </table>
     </span>
