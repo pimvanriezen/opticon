@@ -9,6 +9,9 @@ API.Auth.credentials = {
     roles:["GUEST"]
 }
 
+API.Auth.create = function() {
+}
+
 API.Auth.login = function (username, password, cb) {
     var self = API.Auth;
     API.post ("identity","/",{username,password}, function (err, data) {

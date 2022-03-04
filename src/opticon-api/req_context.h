@@ -12,9 +12,10 @@ typedef uint8_t req_method;
 #define REQ_POST 0x02
 #define REQ_PUT 0x04
 #define REQ_DELETE 0x08
-#define REQ_OTHER 0x10
+#define REQ_OPTIONS 0x10
+#define REQ_OTHER 0x20
 #define REQ_UPDATE (REQ_POST|REQ_PUT)
-#define REQ_ANY (REQ_UPDATE|REQ_GET|REQ_DELETE|REQ_OTHER)
+#define REQ_ANY (REQ_UPDATE|REQ_GET|REQ_DELETE|REQ_OPTIONS|REQ_OTHER)
 
 typedef enum {
     AUTH_GUEST,
@@ -27,6 +28,7 @@ typedef struct req_context_s {
     var         *headers; /**< HTTP headers */
     var         *bodyjson; /**< Parsed JSON */
     var         *response; /**< Prepared JSON response */
+    var         *outhdr; /**< Response headers */
     int          status; /**< HTTP response code */
     req_method   method; /**< HTTP request method */
     char         remote[INET6_ADDRSTRLEN]; /**< Remote address */

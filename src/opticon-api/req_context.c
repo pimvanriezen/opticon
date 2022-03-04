@@ -273,8 +273,8 @@ int err_server_error (req_context *ctx, req_arg *arg,
   * \param out The ioport to use (may already contain data)
   * \param txt If 1, skip JSON encoding, send out ioport as-is. */
 /*/ ======================================================================= /*/
-void req_write_response (struct MHD_Connection *conn,
-                         var *res, int status, ioport *out, int txt) {
+void req_write_response (struct MHD_Connection *conn, var *res, int status,
+                         var *outhdr, ioport *out, int txt) {
     /* if no text data was sent into the ioport, encode the
      * response */
     if (! txt) {
@@ -286,6 +286,12 @@ void req_write_response (struct MHD_Connection *conn,
     size_t buflen = ioport_read_available (out);
     struct MHD_Response *response;
     response = MHD_create_response_from_buffer (buflen, buf, MHD_RESPMEM_MUST_COPY);
+    
+    var *hc = outhdr->value.arr.first;
+    while (hc) {
+        MHD_add_response_header (response, hc->id, var_get_str(hc));
+        hc = hc->next;
+    }
     MHD_queue_response (conn, status, response);
     MHD_destroy_response (response);
 }
@@ -313,7 +319,7 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
                 if (crsr->func) {
                     if (crsr->func (ctx, targ, ctx->response, &ctx->status)) {
                         req_write_response (conn, ctx->response, ctx->status,
-                                            out, 0);
+                                            ctx->outhdr, out, 0);
                         req_arg_free (targ);
                         ioport_close (out);
                         return;
@@ -322,7 +328,7 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
                 else if (crsr->textfunc) {
                     if (crsr->textfunc (ctx, targ, out, &ctx->status)) {
                         req_write_response (conn, ctx->response, ctx->status,
-                                            out, 1);
+                                            ctx->outhdr, out, 1);
                         req_arg_free (targ);
                         ioport_close (out);
                         return;
@@ -336,7 +342,7 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
     /* No matches, bail out */
     log_error ("No matches");
     err_server_error (ctx, targ, ctx->response, &ctx->status);
-    req_write_response (conn, ctx->response, ctx->status, out, 0);
+    req_write_response (conn, ctx->response, ctx->status, ctx->outhdr, out, 0);
     req_arg_free (targ);
     ioport_close (out);
 }
@@ -350,6 +356,7 @@ req_context *req_context_alloc (void) {
         self->headers = var_alloc();
         self->bodyjson = var_alloc();
         self->response = var_alloc();
+        self->outhdr = var_alloc();
         self->auth_data = var_alloc();
         self->auth_tenants = NULL;
         self->auth_tenantcount = 0;
@@ -376,6 +383,7 @@ void req_context_free (req_context *self) {
     var_free (self->headers);
     var_free (self->bodyjson);
     var_free (self->response);
+    var_free (self->outhdr);
     var_free (self->auth_data);
     if (self->url) {
         free (self->url);
@@ -476,5 +484,6 @@ void req_context_set_method (req_context *self, const char *mth) {
     else if (strcasecmp (mth, "post") == 0) m = REQ_POST;
     else if (strcasecmp (mth, "put") == 0) m = REQ_PUT;
     else if (strcasecmp (mth, "delete") == 0) m = REQ_DELETE;
+    else if (strcasecmp (mth, "options") == 0) m = REQ_OPTIONS;
     self->method = m;
 }

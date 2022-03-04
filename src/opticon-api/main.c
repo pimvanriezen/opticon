@@ -293,6 +293,18 @@ int handle_external_token (req_context *ctx) {
     else return 0;
 }
 
+int flt_add_cors (req_context *ctx, req_arg *a, var *out, int *status) {
+    var_set_str_forkey (ctx->outhdr, "Content-type", "application/json");
+    var_set_str_forkey (ctx->outhdr, "Access-Control-Allow-Origin","*");
+    var_set_str_forkey (ctx->outhdr, "Access-Control-Allow-Methods",
+                        "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+    if (ctx->method == REQ_OPTIONS) {
+        *status = 200;
+        return 1;
+    }
+    return 0;                  
+}
+
 /** Filter that croaks when no valid token was set */
 int flt_check_validuser (req_context *ctx, req_arg *a,
                          var *out, int *status) {
@@ -392,6 +404,7 @@ void setup_matches (void) {
 
     _P_ ("/obligatory-dancing-bears", REQ_GET,    cmd_dancing_bears);
     _P_ ("*",                         REQ_ANY,    flt_check_validuser);
+    _P_ ("*",                         REQ_ANY,    flt_add_cors);
     _P_ ("/",                         REQ_GET,    cmd_list_tenants);
     _P_ ("/",                         REQ_ANY,    err_method_not_allowed);
     _P_ ("/token",                    REQ_GET,    cmd_token);
