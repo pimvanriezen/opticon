@@ -15,6 +15,7 @@
 #include <libopticon/codec_json.h>
 #include <arpa/inet.h>
 #include <syslog.h>
+#include <errno.h>
 
 appcontext APP;
 
