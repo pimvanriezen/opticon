@@ -195,6 +195,7 @@ BUILDROOT=/var/build/opticon-gui_$VERSION
 
 mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/var/www/opticon
+mkdir -p $BUILDROOT/DEBIAN
 
 # Create debian control file
 cat > $BUILDROOT/DEBIAN/control << _EOF_
