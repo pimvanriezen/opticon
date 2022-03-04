@@ -13,3 +13,4 @@ playground/
 makeinclude
 platform.h
 configure.paths
+src/opticon-gui/webroot/config.js
