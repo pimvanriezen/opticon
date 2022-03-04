@@ -185,3 +185,34 @@ rm -rf $BUILDROOT
 mkdir -p pkg/deb
 cp ${BUILDROOT}.deb pkg/deb/
 
+# =============================================================================
+# GUI build
+# =============================================================================
+
+BUILDROOT=/var/build/opticon-gui_$VERSION
+
+[ -d $BUILDROOT ] && rm -rf $BUILDROOT
+
+mkdir -p $BUILDROOT || exitfail Could not create build dir
+mkdir -p $BUILDROOT/var/www/opticon
+
+# Create debian control file
+cat > $BUILDROOT/DEBIAN/control << _EOF_
+Package: opticon-gui
+Version: $VERSION
+Section: base
+Priority: optional
+Architecture: all
+Maintainer: NewVM <info@newvm.com>
+Description: Opticon Web GUI
+ Provides GUI access to the opticon API.
+_EOF_
+
+# Copy binaries, scripts and example config
+rsync -avz src/opticon-gui/webroot/ $BUILDROOT/var/www/opticon/
+
+# Build the package
+dpkg-deb --build $BUILDROOT || exitfail Could not build
+rm -rf $BUILDROOT
+mkdir -p pkg/deb
+cp ${BUILDROOT}.deb pkg/deb/
