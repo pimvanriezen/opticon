@@ -14,14 +14,14 @@
     </div>
     <span v-if="!empty">
       <table cellspacing="0" border="0" class="tbserverlist" width="100%">
-        <tr height="32" v-for="o,idx,count in servers">
-          <td width="*"><b>{{o.hostname}}</b> ({{o.ip}})</td>
+        <tr height="32" v-for="o,idx,count in overview">
+          <td width="*"><b>{{o.hostname}}</b> ({{o["agent/ip"]}})</td>
           <td width="128">
             <span v-bind:class="statusClass(o)">{{o.status}}</span>
           </td>
-          <td align="right" width="64">{{o.pcpu}} %</td>
-          <td align="right" width="64">{{o.loadavg}}</td>
-          <td align="right" width="64">{{o.rtt}} ms</td>
+          <td align="right" width="64">{{parseInt(o.pcpu).toFixed(2)}} %</td>
+          <td align="right" width="64">{{parseInt(o.loadavg).toFixed(2)}}</td>
+          <td align="right" width="80">{{parseInt(o["link/rtt"]).toFixed(2)}} ms</td>
         </tr>
       </table>
     </span>

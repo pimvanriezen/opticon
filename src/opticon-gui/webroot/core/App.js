@@ -391,6 +391,30 @@ App.shutDown = function() {
     }
 }
 
+App.menuRoles = function() {
+    let q = $(".uMenuItem");
+    let roles = API.Auth.credentials.roles;
+    for (let i=0; i<q.length; ++i) {
+        let show = true;
+        if (q[i].hasAttribute("u-role")) {
+            show = false;
+            let role = q[i].getAttribute("u-role");
+            if (roles.indexOf("ADMIN") >= 0) show = true;
+            else if (roles.indexOf(role) >= 0) show = true;
+        }
+        if (show && q[i].hasAttribute("u-module")) {
+            let module = q[i].getAttribute("u-module");
+            API.mkURL (module, "/", function (val) {
+                if (val === null) $(q[i]).hide();
+                else $(q[i]).show();
+            });
+            continue;
+        }
+        if (show) $(q[i]).show();
+        else $(q[i]).hide();
+   }
+}
+
 // --------------------------------------------------------------------------
 // Add a callback hook for successful login
 // --------------------------------------------------------------------------
