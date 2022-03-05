@@ -15,6 +15,11 @@ probes {
         call: probe_hostname
         frequency: low
     }
+    localip {
+        type: built-in
+        call: probe_localip
+        frequency: low
+    }
     uname {
         type: built-in
         call: probe_uname
@@ -43,7 +48,7 @@ probes {
         call: probe_net
         frequency: high
         options: {
-            match: [ "ens3" ]
+            skip: [ "ens3" ]
         }
     }
     loadavg {

@@ -190,6 +190,8 @@ meter *host_get_meter (host *h, meterid_t id) {
 meter *host_find_prefix (host *h, meterid_t prefix, meter *prev) {
     meter *crsr = prev ? prev : h->first;
     meterid_t mask = id2mask (prefix);
+    if (! crsr) return NULL;
+    
     crsr = crsr->next;
     while (crsr) {
         char meter[16];

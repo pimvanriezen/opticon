@@ -73,11 +73,64 @@ var *runprobe_who (probe *self) {
     return res;
 }
 
+var *runprobe_localip (probe *self) {
+    char buf[1024];
+    char addr[1024];
+    int count = 0;
+    fd_set fds;
+    struct timeval tv;
+    
+    var *res = var_alloc();
+    var *res_link = var_get_dict_forkey (res, "link");
+#if defined(OS_LINUX)
+    const char *cmd = "dev=$(ip route show | grep ^default | head -1 | "
+                      "sed -e 's/.*dev //' | cut -f1 -d' '); "
+                      "ip addr list dev $dev";
+#else
+    const char *cmd = "ifconfig";
+#endif
+    
+    FILE *f = popen (cmd, "r");
+    if (! f) return res;
+
+    int fd = fileno (f);
+
+    while (! feof (f)) {
+         *buf = 0;
+        tv.tv_sec = 30; tv.tv_usec = 0;
+        FD_ZERO (&fds);
+        FD_SET (fd, &fds);
+        if (select (fd+1, &fds, NULL, NULL, &tv) > 0) {
+            fgets (buf, 1023, f);
+            buf[1023] = 0;
+            if (*buf == 0) continue;
+        }
+        else {
+            log_error ("probe_localip timeout");
+            break;
+        }
+        
+        char *m_inet = strstr (buf, "inet ");
+        if (m_inet) {
+            m_inet += 5;
+            char *c = m_inet;
+            while ((*c == '.')||(*c >= '0' && *c <= '9')) {
+                ++c;
+            }
+            if (*c) *c = 0;
+            var_set_str_forkey (res_link, "ip", m_inet);
+            break;
+        }
+    }
+    pclose (f);
+    return res;
+}
+
 #define GLOBAL_BUILTINS \
     {"probe_hostname", runprobe_hostname}, \
     {"probe_uname", runprobe_uname}, \
-    {"probe_who", runprobe_who}
-
+    {"probe_who", runprobe_who}, \
+    {"probe_localip", runprobe_localip}
 
 #if defined(OS_DARWIN)
   #include "probes_darwin.c"
