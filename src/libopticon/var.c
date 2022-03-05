@@ -18,6 +18,10 @@ var *var_alloc (void) {
     self->generation = 0;
     self->lastmodified = 0;
     self->firstseen = 0;
+    self->value.arr.first = NULL;
+    self->value.arr.last = NULL;
+    self->value.arr.count = 0;
+    self->value.arr.cachepos = -1;
     return self;
 }
 
