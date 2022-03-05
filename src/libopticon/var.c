@@ -290,6 +290,177 @@ var *var_find_key (var *self, const char *key) {
     return NULL;
 }
 
+int var_comp_values (var *left, var *right) {
+    double dleft,dright;
+    int ileft,iright;
+    
+    switch (left->type) {
+        case VAR_NULL:
+            if (right->type != VAR_NULL) return 1;
+            return 0;
+        
+        case VAR_INT:
+            ileft = var_get_int (left);
+            iright = var_get_int (right);
+            
+            if (ileft > iright) return 1;
+            if (ileft == iright) return 0;
+            return -1;
+        
+        case VAR_DOUBLE:
+            dleft = var_get_double (left);
+            dright = var_get_double (right);
+            
+            if (dleft > dright) return 1;
+            if (dleft == dright) return 0;
+            return -1;
+        
+        case VAR_STR:
+            return strcasecmp (var_get_str(left),var_get_str(right));
+        
+        case VAR_DICT:
+        case VAR_ARRAY:
+            if (right->type != left->type) return 0;
+            if (left->value.arr.count > right->value.arr.count) {
+                return 1;
+            }
+            if (left->value.arr.count == right->value.arr.count) {
+                return 0;
+            }
+            return -1;
+        
+        default:
+            break;
+    }
+    return 0;
+}
+
+int var_sortfunc (var *crsr, var *i, var_sortflag f, const char *k1,
+                  const char *k2, const char *k3) {
+    int res = 0;
+    if ((f & 0x0f) == SORT_VALUE) res = var_comp_values (crsr, i);
+    else if ((f & 0x0f) == SORT_ID) res = strcmp (crsr->id, i->id);
+    else {
+        if (crsr->type != VAR_DICT) res = -1;
+        else {
+            if (i->type != VAR_DICT) res = 1;
+            else {
+                var *left, *right;
+                if (k1) {
+                    left = var_find_key (crsr, k1);
+                    right = var_find_key (i, k1);
+                    if (left && right) {
+                        res = var_comp_values (left, right);
+                    }
+                }
+                if ((res == 0) && k2) {
+                    left = var_find_key (crsr, k2);
+                    right = var_find_key (i, k2);
+                    if (left && right) {
+                        res = var_comp_values (left, right);
+                    }
+                }
+                if ((res == 0) && k3) {
+                    left = var_find_key (crsr, k3);
+                    right = var_find_key (i, k3);
+                    if (left && right) {
+                        res = var_comp_values (left, right);
+                    }
+                }
+            }
+        }
+    }
+    if (f & SORT_DESCEND) res = -res;
+    return res;
+}
+
+var *var_sort_impl (var *orig, var_sortflag f, const char *k1,
+                    const char *k2, const char *k3) {
+    var *res = var_alloc();
+    if (orig->type != VAR_ARRAY && orig->type != VAR_DICT) {
+        return orig;
+    }
+    
+    res->type = (orig->type == VAR_ARRAY) ? VAR_ARRAY : VAR_DICT;
+    res->value.arr.first = res->value.arr.last = NULL;
+    res->value.arr.count = 0;
+    res->value.arr.cachepos = -1;
+    
+    var *crsr = orig->value.arr.first;
+    var *icrsr = NULL;
+    
+    while (crsr) {
+        crsr->parent = res;
+        crsr->root = res;
+        
+        icrsr = res->value.arr.first;
+        while (icrsr) {
+            if (var_sortfunc (icrsr, crsr, f, k1, k2, k3) < 0) {
+                crsr->next = icrsr;
+                crsr->prev = icrsr->prev;
+                icrsr->prev = crsr;
+                break;
+            }
+            icrsr = icrsr->next;
+        }
+        if (! icrsr) {
+            if (res->value.arr.last) {
+                crsr->next = NULL;
+                crsr->prev = res->value.arr.last;
+                res->value.arr.last->next = crsr;
+                res->value.arr.last = crsr;
+            }
+            else {
+                crsr->next = crsr->prev = NULL;
+                res->value.arr.first = crsr;
+                res->value.arr.last = crsr;
+            }
+        }
+        crsr = crsr->next;
+    }
+    orig->value.arr.first = orig->value.arr.last = NULL;
+    orig->value.arr.count = 0;
+    if (orig->parent) {
+        var *p = orig->parent;
+        if (orig->next) {
+            orig->next->prev = orig->prev;
+        }
+        else {
+            p->value.arr.last = orig->prev;
+        }
+        if (orig->prev) {
+            orig->prev->next = orig->next;
+        }
+        else {
+            p->value.arr.first = orig->next;
+        }
+        p->value.arr.count--;
+        if (p->value.arr.cachenode == orig) {
+            p->value.arr.cachenode = NULL;
+            p->value.arr.cachepos = -1;
+        }
+        
+        strncpy (res->id, orig->id, 127);
+        res->id[127] = 0;
+        
+        var_link (res, p);
+    }
+    
+    orig->next = orig->prev = NULL;
+    orig->type = VAR_NULL;
+    free (orig);
+    return res;
+}
+
+var *var_sort_key (var *orig, var_sortflag f, const char *key) {
+    return var_sort_keys (orig, f, key, NULL, NULL);
+}
+
+var *var_sort_keys (var *orig, var_sortflag f, const char *k1,
+                    const char *k2, const char *k3) {
+    return var_sort_impl (orig, SORT_KEY | (f & SORT_DESCEND), k1, k2, k3);
+}
+
 /*/ ======================================================================= /*/
 /** Find, or create, a dictionary node inside a dictionary var.
   * \param self The var to look into
@@ -664,6 +835,12 @@ void var_clean_generation (var *node) {
   * \return The var found or created. */
 /*/ ======================================================================= /*/
 var *var_get_or_make (var *self, const char *key, vartype tp) {
+    if (self->type == VAR_NULL) {
+        self->type = VAR_DICT;
+        self->value.arr.first = self->value.arr.last = NULL;
+        self->value.arr.count = 0;
+        self->value.arr.cachepos = -1;
+    }
     var *res = var_find_key (self, key);
     if (! res) {
         res = var_alloc();

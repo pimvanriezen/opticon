@@ -87,7 +87,7 @@ var *runprobe_localip (probe *self) {
                       "sed -e 's/.*dev //' | cut -f1 -d' '); "
                       "ip addr list dev $dev";
 #else
-    const char *cmd = "ifconfig";
+    const char *cmd = "ifconfig | grep -v 127.0.0.1";
 #endif
     
     FILE *f = popen (cmd, "r");

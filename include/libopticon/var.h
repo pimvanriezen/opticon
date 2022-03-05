@@ -52,6 +52,14 @@ typedef struct var_s {
     uint32_t         firstseen; /**< First generation var was seen */
 } var;
 
+#define SORT_VALUE 0x00
+#define SORT_ID 0x01
+#define SORT_KEY 0x02
+#define SORT_ASCEND 0x00
+#define SORT_DESCEND 0x80
+
+typedef unsigned char var_sortflag;
+
 /* ============================= FUNCTIONS ============================= */
 
 var         *var_alloc (void);
@@ -60,6 +68,13 @@ void         var_link_as (var *v, var *parent, const char *key);
 void         var_free (var *);
 void         var_copy (var *into, var *orig);
 void         var_merge (var *into, var *orig);
+
+var         *var_sort_key (var *orig, var_sortflag f, const char *key);
+var         *var_sort_keys (var *orig, var_sortflag f, const char *key1,
+                            const char *key2, const char *key3);
+var         *var_sort_value (var *orig);
+var         *var_sort_id (var *orig);
+
 
 var         *var_find_key (var *, const char *);
 var         *var_find_index (var *, int);
