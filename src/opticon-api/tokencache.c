@@ -100,6 +100,9 @@ tcache_node *tokencache_lookup (const char *token) {
                 tokencache_expire();
                 return res;
             }
+            else {
+                tcache_node_clear (crsr, 1);
+            }
             break;
         }
     }
