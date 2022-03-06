@@ -916,8 +916,8 @@ table.tbserverlist tr {
     border-bottom: 1px solid #d0d0d0;
     color: #888888;
     background-color: #E8E8E8;
-    font-size: 14px;
-    min-height: 20px;
+    font-size: 13px;
+    min-height: 18px;
 }
 
 table.tbserverlist tr:hover {
@@ -1592,6 +1592,7 @@ li.ticketAction .ticketActionBody .account
     padding-right: 8px;
     margin-right: 4px;
     border-radius: 3px;
+    font-size: 14px;
 }
 
 .status.active, .status.green

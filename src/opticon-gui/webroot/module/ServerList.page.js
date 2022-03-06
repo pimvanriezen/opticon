@@ -31,16 +31,8 @@ ServerList.activate = function (argv) {
     self.View.selected = "";
     self.selectedObject = null;
     self.refresh();
-    
-    /*    
-    
-    API.Order.list({status: self.View.order_status}, function (err, res) {
-        if (err) res = [];
-        self.setOrders(res);
-    });
-    
-    */
-    
+    Module.backgroundInterval = 30000;
+    Module.setBackground (self.refresh);
     self.show();
 }
 
