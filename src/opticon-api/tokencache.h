@@ -7,7 +7,7 @@
 
 /* =============================== TYPES =============================== */
 
-#define TOKEN_TIMEOUT_VALID 600 /**< Re-verify valid tokens after 10m */
+#define TOKEN_TIMEOUT_VALID 1800 /**< Re-verify valid tokens after 30m */
 #define TOKEN_TIMEOUT_INVALID 60 /**< Re-try invalid tokens after 1m */
 
 /** Structure representing a cached authentication token and the
