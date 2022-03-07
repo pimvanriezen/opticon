@@ -337,6 +337,10 @@ int set_confpath (const char *i, const char *v) {
     return 1;
 }
 
+int set_defaultspath (const char *i, const vhar *v) {
+    APP.defaultspath = v;
+}
+
 /** Handle --pidfile */
 int set_pidfile (const char *i, const char *v) {
     APP.pidfile = v;
@@ -410,6 +414,13 @@ cliopt CLIOPT[] = {
         "/etc/opticon/opticon-agent.conf",
         set_confpath
     },
+    {
+        "--defaults-path",
+        "-d",
+        OPT_VALUE,
+        "/etc/opticon/opticon-defaultprobes.conf"
+        set_defaultspath
+    },
     {NULL,NULL,0,NULL,NULL}
 };
 
@@ -457,6 +468,40 @@ int main (int _argc, const char *_argv[]) {
     if (! var_load_json (APP.conf, APP.confpath)) {
         log_error ("Error loading %s: %s\n", APP.confpath, parse_error());
         return 1;
+    }
+    
+    /** Override default probes where needed */
+    var *default_probes = var_alloc();
+    var *conf_probes = var_get_dict_forkey (APP.conf, "probes");
+    if (var_load_json (default_probes, APP.defaultspath)) {
+        var *crsr = var_first (default_probes);
+        while (crsr) {
+            var *existing = var_find_key (conf_probes, crsr->id);
+            if (! existing) {
+                var *copy = var_get_dict_forkey (conf_probes, crsr->id);
+                var_copy (copy, crsr);
+            }
+            else {
+                var *cc = var_first (crsr);
+                while (cc) {
+                    var *ee = var_find_key (existing, cc->id);
+                    if (! ee) {
+                        if (cc->type == VAR_INT) {
+                            var_set_int_forkey (existing, cc->id, var_get_int(cc));
+                        }
+                        else if (cc->type == VAR_STRING) {
+                            var_set_str_forkey (existing, cc->id, var_get_str(cc));
+                        }
+                        else if (cc->type == VAR_DICT) {
+                            ee = var_get_dict_forkey (existing, cc->id);
+                            var_copy (ee, cc);
+                        }
+                    }
+                    cc = cc->next;
+                }
+            }
+            crsr = crsr->next;
+        }
     }
     
     opticonf_handle_config (APP.conf);
