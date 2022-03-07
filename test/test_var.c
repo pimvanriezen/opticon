@@ -84,13 +84,13 @@ int main (int argc, const char *argv[]) {
     key = var_find_key (env_collector, "key");
     assert (key == NULL);
     
+    /* test var_clone */
     var *vorig = var_alloc();
     var_set_int_forkey (vorig, "test", 42);
     var_set_str_forkey (vorig, "foo", "bar");
     
     var *vcopy = var_clone (vorig);
     assert (vcopy->type == VAR_DICT);
-    printf ("vcopy count: %i\n", vcopy->value.arr.count);
     assert (vcopy->value.arr.count == 2);
     assert (var_find_key (vcopy, "foo"));
     assert (var_get_int_forkey (vcopy, "test") == 42);
@@ -101,6 +101,7 @@ int main (int argc, const char *argv[]) {
     assert (var_get_int_forkey (vorig, "test") == 42);
     var_free (vorig);
     
+    /* test var_merge */
     var *oparent = var_alloc();
     var *onode1 = var_get_dict_forkey (oparent, "test");
     var *onode2 = var_get_array_forkey (onode1, "skip");
@@ -109,6 +110,7 @@ int main (int argc, const char *argv[]) {
     var *onode3 = var_get_dict_forkey (omerge, "test");
     var_set_int_forkey (onode3, "level", 42);
     var_merge (oparent, omerge);
+    var_free (omerge);
     
     assert (var_get_dict_forkey (oparent, "test") == onode1);
     assert (var_get_int_forkey (onode1, "level") == 42);
@@ -117,7 +119,6 @@ int main (int argc, const char *argv[]) {
     assert (strcmp (var_get_str_atindex (onode2, 0), "eth0") == 0);
     
     var_free (oparent);
-    var_free (omerge);
     
     return 0;
 }

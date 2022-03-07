@@ -25,6 +25,9 @@ var *var_alloc (void) {
     return self;
 }
 
+/*/ ======================================================================= /*/
+/** Get a var's first child var (if it has any) */
+/*/ ======================================================================= /*/
 var *var_first (var *self) {
     if (self->type == VAR_ARRAY || self->type == VAR_DICT) {
         return self->value.arr.first;
@@ -32,6 +35,9 @@ var *var_first (var *self) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
+/** Create a clone of a var (and its children) */
+/*/ ======================================================================= /*/
 var *var_clone (var *orig) {
     var *res = var_alloc();
     var *crsr = NULL;
@@ -346,6 +352,9 @@ var *var_find_key (var *self, const char *key) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
+/** Compare two vars by value for sorting purposes */
+/*/ ======================================================================= /*/
 int var_comp_values (var *left, var *right) {
     double dleft,dright;
     int ileft,iright;
@@ -391,6 +400,9 @@ int var_comp_values (var *left, var *right) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
+/** Compare two vars by specified criteria */
+/*/ ======================================================================= /*/
 int var_sortfunc (var *crsr, var *i, var_sortflag f, const char *k1,
                   const char *k2, const char *k3) {
     int res = 0;
@@ -430,6 +442,10 @@ int var_sortfunc (var *crsr, var *i, var_sortflag f, const char *k1,
     return res;
 }
 
+/*/ ======================================================================= /*/
+/** Master implementation of value sorting, creates a new var object that
+  * is going to be a sorted copy of the original. */
+/*/ ======================================================================= /*/
 var *var_sort_impl (var *orig, var_sortflag f, const char *k1,
                     const char *k2, const char *k3) {
     var *res = var_alloc();
@@ -508,10 +524,16 @@ var *var_sort_impl (var *orig, var_sortflag f, const char *k1,
     return res;
 }
 
+/*/ ======================================================================= /*/
+/** Sort a dict/array of dict objects by the value of a common child var */
+/*/ ======================================================================= /*/
 var *var_sort_key (var *orig, var_sortflag f, const char *key) {
     return var_sort_keys (orig, f, key, NULL, NULL);
 }
 
+/*/ ======================================================================= /*/
+/** Sort a dict/array of dict objects by multiple child values */
+/*/ ======================================================================= /*/
 var *var_sort_keys (var *orig, var_sortflag f, const char *k1,
                     const char *k2, const char *k3) {
     return var_sort_impl (orig, SORT_KEY | (f & SORT_DESCEND), k1, k2, k3);
