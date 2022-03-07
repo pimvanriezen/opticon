@@ -4,71 +4,18 @@ collector {
     key: "xxx"
     tenant: "xxx"
 }
+
 probes {
-    top {
-        type: built-in
-        call: probe_top
-        frequency: high
-    }
-    hostname {
-        type: built-in
-        call: probe_hostname
-        frequency: low
-    }
-    localip {
-        type: built-in
-        call: probe_localip
-        frequency: low
-    }
-    uname {
-        type: built-in
-        call: probe_uname
-        frequency: low
-    }
-    df {
-        type: built-in
-        call: probe_df
-        frequency: low
-        options: {
-            skip: [ "/dev/disk2s2" ]
-        }
-    }
-    uptime {
-        type: built-in
-        call: probe_uptime
-        frequency: high
-    }
-    io {
-        type: built-in
-        call: probe_io
-        frequency: high
-    }
-    net {
-        type: built-in
-        call: probe_net
-        frequency: high
-        options: {
-            skip: [ "ens3" ]
-        }
-    }
-    loadavg {
-        type: built-in
-        call: probe_loadavg
-        frequency: high
-    }
-    meminfo {
-        type: built-in
-        call: probe_meminfo
-        frequency: high
-    }
-    distro {
-        type: built-in
-        call: probe_distro
-        frequency: low
-    }
-    who {
-        type: built-in
-        call: probe_who
-        frequency: low
-    }
+# Custom probes can be added here, as well as amendments for default
+# probes. Some examples:
+#   df {
+#       options: {
+#           skip: ["/dev/disk2s2"]
+#       }
+#   }
+#   myprobe {
+#       type: exec
+#       call: /usr/local/scripts/myprobe.sh
+#       frequency: low
+#   }
 }
