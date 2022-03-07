@@ -10,16 +10,16 @@
 
 typedef struct
 {
-	pid_t			 pid;
+	pid_t            pid;
 	unsigned long	 utime_start;
 	unsigned long	 stime_start;
 	unsigned long	 utime_run;
 	unsigned long	 stime_run;
-	unsigned short	 pmem;
+	double           pmem;
 	uid_t			 uid;
 	gid_t			 gid;
 	time_t			 beat;
-	unsigned short	 pcpu;
+	double  	     pcpu;
 	char			 ptitle[48];
 } tproc;
 
@@ -37,7 +37,7 @@ typedef struct
 
 void procrun_init 		(procrun *);
 void procrun_setproc	(procrun *, pid_t, unsigned long, unsigned long,
-					 	 uid_t, gid_t, const char *, unsigned short);
+					 	 uid_t, gid_t, const char *, double);
 int  procrun_findproc 	(procrun *, pid_t);
 int	 procrun_alloc		(procrun *);
 void procrun_calc		(procrun *);

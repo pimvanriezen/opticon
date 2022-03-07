@@ -580,8 +580,8 @@ var *runprobe_io (probe *self)
 typedef struct topentry_s {
     char                username[16];
     pid_t               pid;
-    unsigned short      pcpu;
-    unsigned short      pmem;
+    double              pcpu;
+    double              pmem;
     time_t              secrun;
     char                ptitle[48];
 } topentry;
@@ -612,8 +612,8 @@ void sample_tprocs (procrun *run) {
     struct timeval   tv;
     int              pausetimer;
     long long        rss;
-    long long        tpmem;
-    int              pmem;
+    double           tpmem;
+    double           pmem;
     
     procrun_initsample (run);
     D = opendir ("/proc");
@@ -668,9 +668,9 @@ void sample_tprocs (procrun *run) {
                         rss = 4 * atoll (c);
                         
                         tpmem = rss;
-                        tpmem *= 10000;
+                        tpmem *= 10000.0;
                         tpmem /= KMEMTOTAL;
-                        pmem = (int) (tpmem & 0xffffffff);
+                        pmem = tpmem;
                     }
                     fclose (F);
                 }
@@ -747,7 +747,7 @@ var *gather_tprocs (procrun *procs) {
     sample_tprocs (procs);
     procrun_calc (procs);
     
-    var_set_double_forkey (res, "pcpu",(procs->pcpu*100.0)/256.0);
+    var_set_double_forkey (res, "pcpu",procs->pcpu);
     for (i=0; i<procs->count; ++i) {
         inserted = 0;
         if (! procs->array[i].pid) continue;

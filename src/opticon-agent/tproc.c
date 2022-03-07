@@ -86,7 +86,7 @@ int procrun_alloc (procrun *p) {
   */
 void procrun_setproc (procrun *p, pid_t pid, unsigned long utime,
 					  unsigned long stime, uid_t uid, gid_t gid,
-					  const char *ptitle, unsigned short pmem) {
+					  const char *ptitle, double pmem) {
 	int ipos;
 	
 	ipos = procrun_findproc (p, pid);
@@ -110,7 +110,6 @@ void procrun_setproc (procrun *p, pid_t pid, unsigned long utime,
 		/* Calculate total time spent during sample period */
 		p->array[ipos].utime_run = utime - p->array[ipos].utime_start;
 		p->array[ipos].stime_run = stime - p->array[ipos].stime_start;
-		
 		p->array[ipos].pmem = pmem;
 		
 		p->array[ipos].beat = p->ti_now;
@@ -143,7 +142,7 @@ void procrun_calc (procrun *p) {
 	if (p->total_ticks > (tdelta * p->ncpu)) {
 		p->total_ticks = tdelta * p->ncpu;
 	}
-	p->pcpu = ((255 * p->total_ticks) / tdelta) / p->ncpu;
+	p->pcpu = ((100.0 * p->total_ticks) / tdelta) / p->ncpu;
 }
 
 /** Initialize timer for a sample run */
