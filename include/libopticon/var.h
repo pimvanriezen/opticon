@@ -63,6 +63,7 @@ typedef unsigned char var_sortflag;
 /* ============================= FUNCTIONS ============================= */
 
 var         *var_alloc (void);
+var         *var_first (var *);
 void         var_link (var *, var *parent);
 void         var_link_as (var *v, var *parent, const char *key);
 void         var_free (var *);

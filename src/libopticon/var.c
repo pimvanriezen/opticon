@@ -25,6 +25,13 @@ var *var_alloc (void) {
     return self;
 }
 
+var *var_first (var *self) {
+    if (self->type == VAR_ARRAY || self->type == VAR_DICT) {
+        return self->value.arr.first;
+    }
+    return NULL;
+}
+
 /*/ ======================================================================= /*/
 /** Link a var into its parent (it is assumed to already have a unique
   * id.
