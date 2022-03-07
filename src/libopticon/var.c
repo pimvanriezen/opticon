@@ -32,6 +32,53 @@ var *var_first (var *self) {
     return NULL;
 }
 
+var *var_clone (var *orig) {
+    var *res = var_alloc();
+    var *crsr = NULL;
+    var *ins = NULL;
+    
+    switch (orig->type) {
+        case VAR_DICT:
+            res->type = VAR_DICT;
+            res->value.arr.first = res->value.arr.last = NULL;
+            crsr = var_first (orig);
+            while (crsr) {
+                ins = var_clone (crsr);
+                var_link_as (ins, res, crsr->id);
+                crsr = crsr->next;
+            }
+            break;
+        
+        case VAR_ARRAY:
+            res->type = VAR_ARRAY;
+            res->value.arr.first = res->value.arr.last = NULL;
+            crsr = var_first (orig);
+            while (crsr) {
+                ins = var_clone (crsr);
+                var_link (ins, res);
+                crsr = crsr->next;
+            }
+            break;
+        
+        case VAR_NULL:
+            break;
+        
+        case VAR_INT:
+            var_set_int (res, var_get_int (orig));
+            break;
+        
+        case VAR_DOUBLE:
+            var_set_double (res, var_get_double (orig));
+            break;
+        
+        case VAR_STR:
+            var_set_str (res, var_get_str (orig));
+            break;
+    }
+    
+    return res;
+}
+
 /*/ ======================================================================= /*/
 /** Link a var into its parent (it is assumed to already have a unique
   * id.
@@ -136,6 +183,7 @@ void var_copy_merge (var *self, var *orig, bool merge) {
 
         self->type = VAR_NULL;
     }
+    
     var *crsr;
     
     switch (orig->type) {
@@ -162,10 +210,9 @@ void var_copy_merge (var *self, var *orig, bool merge) {
             self->value.arr.count = 0;
             crsr = orig->value.arr.first;
             while (crsr) {
-                var *nvar = var_alloc();
+                var *nvar = var_clone (crsr);
                 nvar->id[0] = 0;
                 nvar->hashcode = 0;
-                var_copy (nvar, crsr);
                 var_link (nvar, self);
                 crsr = crsr->next;
             }
@@ -179,24 +226,22 @@ void var_copy_merge (var *self, var *orig, bool merge) {
                 self->value.arr.cachenode = NULL;
                 self->value.arr.count = 0;
             }
-            else {
-            }
+
             crsr = orig->value.arr.first;
             while (crsr) {
                 if (merge) {
                     var *existing = var_find_key (self, crsr->id);
                     if (existing) {
-                        var_copy (existing, crsr);
+                        if (existing->type == VAR_DICT) {
+                            var_merge (existing, crsr);
+                        }
                         crsr = crsr->next;
                         continue;
                     }
                 }
                 
-                var *nvar = var_alloc();
-                strcpy (nvar->id, crsr->id);
-                nvar->hashcode = crsr->hashcode;
-                var_copy (nvar, crsr);
-                var_link (nvar, self);
+                var *nvar = var_clone (crsr);
+                var_link_as (nvar, self, crsr->id);
                 crsr = crsr->next;
             }
             break;

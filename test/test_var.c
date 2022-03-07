@@ -83,5 +83,41 @@ int main (int argc, const char *argv[]) {
     /* collector.key should now be deleted */
     key = var_find_key (env_collector, "key");
     assert (key == NULL);
+    
+    var *vorig = var_alloc();
+    var_set_int_forkey (vorig, "test", 42);
+    var_set_str_forkey (vorig, "foo", "bar");
+    
+    var *vcopy = var_clone (vorig);
+    assert (vcopy->type == VAR_DICT);
+    printf ("vcopy count: %i\n", vcopy->value.arr.count);
+    assert (vcopy->value.arr.count == 2);
+    assert (var_find_key (vcopy, "foo"));
+    assert (var_get_int_forkey (vcopy, "test") == 42);
+    var_free (vcopy);
+    assert (vorig->type == VAR_DICT);
+    assert (vorig->value.arr.count == 2);
+    assert (var_find_key (vorig, "foo"));
+    assert (var_get_int_forkey (vorig, "test") == 42);
+    var_free (vorig);
+    
+    var *oparent = var_alloc();
+    var *onode1 = var_get_dict_forkey (oparent, "test");
+    var *onode2 = var_get_array_forkey (onode1, "skip");
+    var_add_str (onode2, "eth0");
+    var *omerge = var_alloc();
+    var *onode3 = var_get_dict_forkey (omerge, "test");
+    var_set_int_forkey (onode3, "level", 42);
+    var_merge (oparent, omerge);
+    
+    assert (var_get_dict_forkey (oparent, "test") == onode1);
+    assert (var_get_int_forkey (onode1, "level") == 42);
+    assert (var_get_array_forkey (onode1, "skip") == onode2);
+    assert (var_get_count (onode2) == 1);
+    assert (strcmp (var_get_str_atindex (onode2, 0), "eth0") == 0);
+    
+    var_free (oparent);
+    var_free (omerge);
+    
     return 0;
 }

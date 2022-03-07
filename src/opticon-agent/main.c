@@ -337,8 +337,9 @@ int set_confpath (const char *i, const char *v) {
     return 1;
 }
 
-int set_defaultspath (const char *i, const vhar *v) {
+int set_defaultspath (const char *i, const char *v) {
     APP.defaultspath = v;
+    return 1;
 }
 
 /** Handle --pidfile */
@@ -418,7 +419,7 @@ cliopt CLIOPT[] = {
         "--defaults-path",
         "-d",
         OPT_VALUE,
-        "/etc/opticon/opticon-defaultprobes.conf"
+        "/etc/opticon/opticon-defaultprobes.conf",
         set_defaultspath
     },
     {NULL,NULL,0,NULL,NULL}
@@ -489,7 +490,7 @@ int main (int _argc, const char *_argv[]) {
                         if (cc->type == VAR_INT) {
                             var_set_int_forkey (existing, cc->id, var_get_int(cc));
                         }
-                        else if (cc->type == VAR_STRING) {
+                        else if (cc->type == VAR_STR) {
                             var_set_str_forkey (existing, cc->id, var_get_str(cc));
                         }
                         else if (cc->type == VAR_DICT) {
