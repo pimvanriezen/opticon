@@ -1,4 +1,5 @@
 #include <libopticon/var.h>
+#include <libopticon/var_dump.h>
 #include <libopticon/util.h>
 #include <stdio.h>
 #include <assert.h>
@@ -120,5 +121,53 @@ int main (int argc, const char *argv[]) {
     
     var_free (oparent);
     
+    var *unsorted = var_alloc();
+    var *row = var_get_dict_forkey (unsorted, "0001");
+    var_set_int_forkey (row, "weight",10);
+    var_set_int_forkey (row, "quality",10);
+    var_set_str_forkey (row, "variation","b");
+    row = var_get_dict_forkey (unsorted, "0002");
+    var_set_int_forkey (row, "weight",10);
+    var_set_int_forkey (row, "quality",10);
+    var_set_str_forkey (row, "variation","a");
+    row = var_get_dict_forkey (unsorted, "0003");
+    var_set_int_forkey (row, "weight",10);
+    var_set_int_forkey (row, "quality",20);
+    var_set_str_forkey (row, "variation","a");
+    row = var_get_dict_forkey (unsorted, "0004");
+    var_set_int_forkey (row, "weight",5);
+    var_set_int_forkey (row, "quality",20);
+    row = var_get_dict_forkey (unsorted, "0005");
+    var_set_int_forkey (row, "weight",5);
+    var_set_int_forkey (row, "quality",10);
+    var_set_str_forkey (row, "variation","a");
+ 
+    var *sorted = var_sort_keys (unsorted, SORT_ASCEND, "weight", "quality",
+                                 "variation");
+    
+    row = var_first (sorted);
+    assert (row);
+    assert (var_get_int_forkey (row, "weight") == 5);
+    assert (var_get_int_forkey (row, "quality") == 10);
+    row = row->next;
+    assert (row);
+    assert (var_get_int_forkey (row, "weight") == 5);
+    assert (var_get_int_forkey (row, "quality") == 20);
+    row = row->next;
+    assert (row);
+    assert (var_get_int_forkey (row, "weight") == 10);
+    assert (var_get_int_forkey (row, "quality") == 10);
+    assert (strcmp (var_get_str_forkey (row, "variation"), "a") == 0);
+    row = row->next;
+    assert (row);
+    assert (var_get_int_forkey (row, "weight") == 10);
+    assert (var_get_int_forkey (row, "quality") == 10);
+    assert (strcmp (var_get_str_forkey (row, "variation"), "b") == 0);
+    row = row->next;
+    assert (row);
+    assert (var_get_int_forkey (row, "weight") == 10);
+    assert (var_get_int_forkey (row, "quality") == 20);
+
+    var_free (sorted);
     return 0;
 }

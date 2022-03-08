@@ -464,13 +464,17 @@ var *var_sort_impl (var *orig, var_sortflag f, const char *k1,
     while (crsr) {
         crsr->parent = res;
         crsr->root = res;
+        var *next = crsr->next;
         
         icrsr = res->value.arr.first;
         while (icrsr) {
-            if (var_sortfunc (icrsr, crsr, f, k1, k2, k3) < 0) {
+            if (var_sortfunc (icrsr, crsr, f, k1, k2, k3) > 0) {
                 crsr->next = icrsr;
                 crsr->prev = icrsr->prev;
                 icrsr->prev = crsr;
+                if (! crsr->prev) {
+                    res->value.arr.first = crsr;
+                }
                 break;
             }
             icrsr = icrsr->next;
@@ -488,7 +492,7 @@ var *var_sort_impl (var *orig, var_sortflag f, const char *k1,
                 res->value.arr.last = crsr;
             }
         }
-        crsr = crsr->next;
+        crsr = next;
     }
     orig->value.arr.first = orig->value.arr.last = NULL;
     orig->value.arr.count = 0;
