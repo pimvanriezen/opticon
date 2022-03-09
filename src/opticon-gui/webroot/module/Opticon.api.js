@@ -48,3 +48,19 @@ API.Opticon.Host.getCurrent = function (tenant, host, cb) {
         else cb (res);
     });
 }
+
+API.Opticon.Tenant = {}
+
+API.Opticon.Tenant.list = function (cb) {
+    API.get ("opticon","/", function (err,res) {
+        if (err) cb (null);
+        cb (res.tenant);
+    });
+}
+
+API.Opticon.Tenant.getQuota = function(tenant, cb) {
+    API.get ("opticon", "/"+tenant+"/quota", function (err, res) {
+        if (err) cb (null);
+        cb (res);
+    });
+}
