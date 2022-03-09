@@ -44,7 +44,7 @@ ServerList.refresh = function () {
     let nwlist = {};
     let count = 0;
     
-    API.Opticon.hostOverview (function (err, res) {
+    API.Opticon.Host.getOverview (function (err, res) {
         if (! err) {
             for (var i in res.overview) {
                 let srv = res.overview[i];
