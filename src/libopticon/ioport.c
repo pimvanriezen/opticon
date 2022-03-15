@@ -3,6 +3,21 @@
 #include <arpa/inet.h>
 #include <stdarg.h>
 
+#if defined(__linux__)
+#  include <endian.h>
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
+#  include <sys/endian.h>
+#elif defined(__OpenBSD__)
+#  include <sys/types.h>
+#  define be16toh(x) betoh16(x)
+#  define be32toh(x) betoh32(x)
+#  define be64toh(x) betoh64(x)
+#else
+#  define be64toh(x) ntohll(x)
+#  define htobe64(x) htonll(x)
+#endif
+
+
 /*/ ======================================================================= /*/
 /** Get the amount of available buffer space for writing into an
   * ioport.  */
@@ -243,7 +258,7 @@ bool ioport_write_encint (ioport *io, uint64_t i) {
   * \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
 bool ioport_write_u64 (ioport *io, uint64_t i) {
-    uint64_t netorder = htonll (i);
+    uint64_t netorder = htobe64 (i);
     return ioport_write (io, (const char *)&netorder, sizeof (netorder));
 }
 
@@ -377,7 +392,7 @@ uint64_t ioport_read_u64 (ioport *io) {
     io->bitpos = io->bitbuffer = 0;
     uint64_t dt;
     if (! ioport_read (io, (char *) &dt, sizeof (dt))) return 0;
-    return ntohll (dt);
+    return be64toh (dt);
 }
 
 /*/ ======================================================================= /*/
