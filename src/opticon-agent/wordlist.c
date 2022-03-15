@@ -139,10 +139,11 @@ wordlist *wordlist_split (const char *string, char sep) {
         word = strdup (crsr);
         if (*word) {
             int ln = strlen(word);
-            if (word[ln-1] == '\n') word[ln-1] = 0;
+            if (ln && word[ln-1] == '\n') word[ln-1] = 0;
         }
         result->argv[pos++] = word;
     }
+    return result;
 }
 
 void wordlist_free (wordlist *lst) {
