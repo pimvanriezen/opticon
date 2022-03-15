@@ -273,6 +273,7 @@ var *runprobe_df (probe *self) {
                                 }
                                 dc++;
                             }
+                            ndev[nc] = 0;
                             var_set_str_forkey (mnt, "device", ndev);
                             free (ndev);
                         }
