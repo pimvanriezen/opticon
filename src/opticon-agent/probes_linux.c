@@ -164,8 +164,9 @@ var *runprobe_ipmi (probe *self) {
                 var *cc = var_first (crsr);
                 while (cc) {
                     const char *match = var_get_str_forkey (cc, "match");
-                    log_debug ("probe_ipmi:   matching '%s'", match);
                     if (strcasecmp (match, args->argv[0]) == 0) {
+                        log_debug ("probe_ipmi:   matching '%s' value '%s'",
+                                   match, args->argv[3]);
                         const char *key = crsr->id;
                         const char *id = var_get_str_forkey (cc, "id");
                         const char *unit = var_get_str_forkey (cc, "u");
