@@ -152,11 +152,15 @@ var *runprobe_ipmi (probe *self) {
         if (! *buf) continue;
         args = wordlist_split (buf, ',');
         if (args->argc > 3) {
+            log_debug ("probe_ipmi: match '%s'", args->argv[0]);
             var *crsr = var_first (vipmi_values);
+            log_debug ("probe_ipmi: found %i value classes",
+                       vipmi_values->value.arr.count);
             while (crsr) {
                 var *cc = var_first (crsr);
                 while (cc) {
                     const char *match = var_get_str_forkey (cc, "match");
+                    log_debug ("probe_ipmi:   matching '%s'", match);
                     if (strcasecmp (match, args->argv[0]) == 0) {
                         const char *key = crsr->id;
                         const char *id = var_get_str_forkey (cc, "id");
