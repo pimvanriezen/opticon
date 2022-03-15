@@ -128,7 +128,7 @@ var *runprobe_net (probe *self) {
 var *runprobe_ipmi (probe *self) {
     FILE *F;
     char buf[1024];
-    var *res = var_alloc;
+    var *res = var_alloc();
     wordlist *args;
     
     const char *ipmi_interface = "open";
