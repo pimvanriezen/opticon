@@ -506,7 +506,7 @@ void print_generic_table (var *table) {
         }
         else {
             const char *d = var_get_str_forkey (mdef, "description");
-            if (d && strlen(d) < 10) header[i] = strdup (d);
+            if (d && strlen(d) < 16) header[i] = strdup (d);
             else header[i] = strdup (node->id);
         }
         for (c = header[i]; *c; ++c) *c = toupper (*c);

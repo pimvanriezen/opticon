@@ -171,8 +171,8 @@ int cmd_host_overview (int argc, const char *argv[]) {
         netio += var_get_int_forkey (crsr, "net/out_kbs");
         double cpu = var_get_double_forkey (crsr, "pcpu");
         int rcpu = (cpu+5.0) / 10;
-        printf ("\033[38;5;185m%-30s\033[0m %s %6.2f %8" PRIu64
-                " \033[1m%6.2f\033[0m %% -|",
+        printf (VT_YLW "%-30s" VT_RST " %s %6.2f %8" PRIu64
+                " " VT_BLD "%6.2f" VT_RST " %% -|",
                 shortname, decorate_status(hstat), load, netio, cpu);
         print_bar (12, 100, cpu);
         printf ("|+\n");
@@ -546,10 +546,11 @@ int cmd_host_list (int argc, const char *argv[]) {
             start[10] = ' ';
             end[10] = ' ';
 
-            printf ("\033[38;5;28m%s\033[0m \033[1m%4" PRIu64
-                    "\033[0m %s %s  %s\n",
+            printf (VT_GRN "%s" VT_RST " " VT_BLD "%4" PRIu64
+                    VT_RST " %s %s  %s\n",
                     var_get_str_forkey (crsr, "id"),
                     usage, unit, start, end);
+
             crsr = crsr->next;
         }
         print_line();
@@ -617,10 +618,10 @@ int cmd_get_record (int argc, const char *argv[]) {
     #define Vdone(x) var_delete_key(apires,x)
     /* -------------------------------------------------------------*/
     print_hdr ("HOST");
-    print_value ("UUID", "\033[38;5;28m%s\033[0m", OPTIONS.host);
-    print_value ("Hostname", "\033[38;5;185m%s\033[0m", Vstr("hostname"));
-    print_value ("Address", "\033[1m%s\033[0m (rtt: \033[1m%.2f\033[0m ms, "
-                            "\033[1m%.0f\033[0m %% loss)",
+    print_value ("UUID", VT_YLW "%s" VT_RST, OPTIONS.host);
+    print_value ("Hostname", VT_YLW "%s" VT_RST, Vstr("hostname"));
+    print_value ("Address", VT_BLD "%s" VT_RST " (rtt: " VT_BLD "%.2f"
+                            VT_RST " ms, " VT_BLD "%.0f" VT_RST " %% loss)",
                             VDstr("agent","ip"),
                             VDfrac("link","rtt"),
                             VDfrac("link","loss"));
@@ -657,33 +658,32 @@ int cmd_get_record (int argc, const char *argv[]) {
                      u_mins, (u_mins==1)?"":"s", u_sec, (u_sec==1)?"":"s");
         }
     
-        print_value ("Uptime","\033[38;5;28m%s\033[0m",uptimestr);
-        print_value ("OS/Hardware","\033[38;5;28m%s %s \033[0m(%s)",
+        print_value ("Uptime",VT_GRN "%s" VT_RST,uptimestr);
+        print_value ("OS/Hardware",VT_YLW "%s %s " VT_RST "(%s)",
                      VDstr("os","kernel"), VDstr("os","version"),
                      VDstr("os","arch"));
         const char *dist = VDstr("os","distro");
-        if (dist) print_value ("Distribution", "\033[38;5;28m%s\033[0m", dist);
+        if (dist) print_value ("Distribution", VT_GRN "%s" VT_RST, dist);
         Vdone("os");
     
         /* -------------------------------------------------------------*/
         print_hdr ("RESOURCES");
-        print_value ("Processes","\033[1m%" PRIu64 "\033[0m "
-                                 "(\033[1m%" PRIu64 "\033[0m running, "
-                                 "\033[1m%" PRIu64 "\033[0m stuck)",
+        print_value ("Processes",VT_BLD "%" PRIu64 VT_RST " "
+                                 "(" VT_BLD "%" PRIu64 VT_RST " running, "
+                                 VT_BLD "%" PRIu64 VT_RST " stuck)",
                                  VDint("proc","total"),
                                  VDint("proc","run"),
                                  VDint("proc","stuck"));
         Vdone("proc");
  
-         print_value ("Load Average", "\033[1m%6.2f\033[0m / "
-                                      "\033[1m%6.2f\033[0m / "
-                                      "\033[1m%6.2f\033[0m",
+        print_value ("Load Average", VT_BLD "%6.2f" VT_RST " / "
+                     VT_BLD "%6.2f" VT_RST " / " VT_BLD "%6.2f" VT_RST,
                      VAfrac ("loadavg",0), VAfrac ("loadavg", 1),
                      VAfrac ("loadavg",2));
         Vdone ("loadavg");
 
         char cpubuf[128];
-        sprintf (cpubuf, "\033[1m%6.2f \033[0m%%", Vfrac("pcpu"));
+        sprintf (cpubuf, VT_BLD "%6.2f " VT_RST "%%", Vfrac("pcpu"));
     
         char meter[32];
         strcpy (meter, "-[                      ]+");
@@ -701,24 +701,25 @@ int cmd_get_record (int argc, const char *argv[]) {
     
     
         print_gauge_value ("CPU", "%", pcpu, 100);
-        if (iowait>0.001) print_value ("CPU iowait", 
-                                       "\033[1m%6.2f \033[0m%%", iowait);
-        print_value ("Available RAM", "\033[1m%.2f\033[0m MB",
+        if (iowait>0.001) {
+            print_value ("CPU iowait", VT_BLD "%6.2f" VT_RST, iowait);
+        }
+        print_value ("Available RAM", VT_BLD "%.2f" VT_RST " MB",
                      ((double)VDint("mem","total"))/1024.0);
-        print_value ("Free RAM", "\033[1m%.2f\033[0m MB",
+        print_value ("Free RAM", VT_BLD "%.2f" VT_RST " MB",
                      ((double)VDint("mem","free"))/1024.0);
     
-        print_value ("Network in/out", "\033[1m%i\033[0m Kb/s "
-                                       "(\033[1m%i\033[0m pps) / "
-                                       "\033[1m%i\033[0m Kb/s "
-                                       "(\033[1m%i\033[0m pps)",
+        print_value ("Network in/out",     VT_BLD "%i" VT_RST " Kb/s "
+                                       "(" VT_BLD "%i" VT_RST " pps) / "
+                                           VT_BLD "%i" VT_RST " Kb/s "
+                                       "(" VT_BLD "%i" VT_RST " pps)",
                                        VDint("net","in_kbs"),
                                        VDint("net","in_pps"),
                                        VDint("net","out_kbs"),
                                        VDint("net","out_pps"));
     
-        print_value ("Disk i/o", "\033[1m%i\033[0m rdops / "
-                                 "\033[1m%i\033[0m wrops",
+        print_value ("Disk i/o", VT_BLD "%i" VT_RST " rdops / "
+                                 VT_BLD "%i" VT_RST " wrops",
                      VDint("io","rdops"), VDint("io","wrops"));
     
         Vdone("mem");
@@ -812,17 +813,35 @@ int cmd_session_list (int argc, const char *argv[]) {
 
     print_hdr ("SESSIONS");
     printf ("ID                SENDER"
-            "                                  LAST REFRESH\n");
+            "             TENANT    HOST      SERIAL        HEARTBEAT\n");
     
     var *v_session = var_get_array_forkey (v, "session");
     var *crsr = v_session->value.arr.first;
     while (crsr) {
-        printf ("\033[38;5;28m%08x-%08x\033[0m \033[1m%-39s\033[0m %s\n",
+        char *dt = strdup (var_get_str_forkey (crsr, "lastcycle"));
+        if (*dt) dt[strlen(dt)-1] = 0;
+        
+        char *shorthost = strdup (var_get_str_forkey (crsr, "hostid"));
+        char *shorttenant = strdup (var_get_str_forkey (crsr, "tenantid"));
+        
+        shorthost[8] = 0;
+        shorttenant[8] = 0;
+        
+        printf (VT_GRN "%08x-%08x" VT_RST " " VT_BLD "%-18s "
+                VT_RST "%-8s  %-8s  " VT_YLW "%-14i "
+                VT_RST "%s" VT_RST "\n",
                 (uint32_t) (var_get_int_forkey (crsr, "sessid")),
                 (uint32_t) (var_get_int_forkey (crsr, "addr")),
                 var_get_str_forkey (crsr, "remote"),
-                var_get_str_forkey (crsr, "lastcycle"));
+                shorttenant, shorthost,
+                var_get_int_forkey (crsr, "lastserial"),
+                dt+11);
+
         crsr = crsr->next;
+        
+        free (dt);
+        free (shorthost);
+        free (shorttenant);
     }
     print_line();
 
