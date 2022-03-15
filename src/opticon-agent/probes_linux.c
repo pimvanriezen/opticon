@@ -152,7 +152,9 @@ var *runprobe_ipmi (probe *self) {
         *buf = 0;
         fgets (buf, 255, F);
         if (! *buf) continue;
+        buf[strlen(buf)-1] = 0;
         args = wordlist_split (buf, ',');
+        log_debug ("probe_ipmi: raw '%s' count: %i", buf, args->argc);
         if (args->argc > 3) {
             log_debug ("probe_ipmi: match '%s'", args->argv[0]);
             var *crsr = var_first (vipmi_values);
@@ -188,8 +190,10 @@ var *runprobe_ipmi (probe *self) {
                 crsr = crsr->next;
             }
         }
+        wordlist_free (args);
     }
     pclose_safe (F);
+    log_debug ("probe_ipmi: run complete");
     return res;
 }
 
