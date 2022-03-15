@@ -16,6 +16,20 @@
 #include <string.h>
 #include <math.h>
 
+#if defined(__linux__)
+#  include <endian.h>
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
+#  include <sys/endian.h>
+#elif defined(__OpenBSD__)
+#  include <sys/types.h>
+#  define be16toh(x) betoh16(x)
+#  define be32toh(x) betoh32(x)
+#  define be64toh(x) betoh64(x)
+#else
+#  define be64toh(x) ntohll(x)
+#  define htobe64(x) htonll(x)
+#endif
+
 #define LOCALDB_OFFS_INVALID 0xffffffffffffffffULL
 #define LOCALDB_FLAG_NOCREATE 0x0000001
 
@@ -215,9 +229,7 @@ uint64_t localdb_read64 (FILE *fix) {
     if (fread (&dt, sizeof (res), 1, fix) == 0) {
         return 0;
     }
-    res = ((uint64_t) ntohl (dt & 0xffffffffLLU)) << 32;
-    res |= ntohl ((dt & 0xffffffff00000000LLU) >> 32);
-    return res;
+    return be64toh (dt);
 }
 
 /** Get the offset for the closest matching record to a given timestamp
