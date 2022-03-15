@@ -40,6 +40,23 @@ int wordcount (const char *string) {
     return cnt;
 }
 
+int wordsepcount (const char *string, char sep) {
+    int ln;
+    int cnt;
+    int i;
+    
+    cnt = 1;
+    ln = strlen (string);
+    i = 0;
+    
+    while (i < ln) {
+        if (string[i] == sep) ++cnt;
+        ++i;
+    }
+    
+    return cnt;
+}
+
 wordlist *wordlist_create (void) {
     wordlist *res;
     
@@ -93,6 +110,39 @@ wordlist *wordlist_make (const char *string) {
     }
     
     return result;
+}
+
+wordlist *wordlist_split (const char *string, char sep) {
+    wordlist    *result;
+    char         *rightbound;
+    char         *word;
+    char         *crsr;
+    int           count;
+    int           pos;
+    
+    crsr = (char *) string;
+
+    result = (wordlist *) malloc (sizeof (wordlist));
+    count = wordsepcount (crsr);
+    result->argc = count;
+    result->argv = (char **) malloc (count * sizeof (char *));
+
+    while ((rightbound = strchr (crsr, sep))) {
+        word = (char *) malloc ((rightbound-crsr+3) * sizeof (char));
+        memcpy (word, crsr, rightbound-crsr);
+        word[rightbound-crsr] = 0;
+        result->argv[pos++] = word;
+        crsr = rightbound;
+        crsr++;
+    }
+    if (*crsr) {
+        word = strdup (crsr);
+        if (*word) {
+            int ln = strlen(word);
+            if (word[ln-1] == '\n') word[ln-1] = 0;
+        }
+        result->argv[pos++] = word;
+    }
 }
 
 void wordlist_free (wordlist *lst) {

@@ -11,6 +11,7 @@
 #include <libopticon/log.h>
 #include <libopticon/var.h>
 #include <libopticon/thread.h>
+#include <libopticon/popen.h>
 #include <errno.h>
 #include <stdint.h>
 #include "tproc.h"
@@ -121,6 +122,68 @@ var *runprobe_net (probe *self) {
     NETPROBE.net_in_packets = totalin_packets;
     NETPROBE.net_out_packets = totalout_packets;
     NETPROBE.lastrun = ti;
+    return res;
+}
+
+var *runprobe_ipmi (probe *self) {
+    FILE *F;
+    char buf[1024];
+    var *res = var_alloc;
+    wordlist *args;
+    
+    const char *ipmi_interface = "open";
+    
+    strcpy (buf, "ipmitool -c ");
+    var *vipmi_options = var_get_dict_forkey (self->options, "ipmi");
+    var *vipmi_if = var_find_key (vipmi_options, "interface");
+    if (vipmi_if) ipmi_interface = var_get_str (vipmi_if);
+    var *vipmi_values = var_get_dict_forkey (self->options, "values");
+    
+    sprintf (buf, "ipmitool -c -I %s sdr", ipmi_interface);
+    F = popen_safe (buf, "r");
+    if (! F) {
+        log_warn ("probe_ipmi: Could not open ipmitool: %s", strerror(errno));
+        return res;
+    }
+    
+    while (! feof (F)) {
+        *buf = 0;
+        fgets (buf, 255, F);
+        if (! *buf) continue;
+        args = wordlist_split (buf, ',');
+        if (args->argc > 3) {
+            var *crsr = var_first (vipmi_values);
+            while (crsr) {
+                var *cc = var_first (crsr);
+                while (*cc) {
+                    const char *match = var_get_str_forkey (cc, "match");
+                    if (strcasecmp (match, args->argv[0]) == 0) {
+                        const char *key = crsr->id;
+                        const char *id = var_get_str_forkey (cc, "id");
+                        const char *unit = var_get_str_forkey (cc, "u");
+                        var *arr = var_get_array_forkey (res, key);
+                        var *nrow = var_add_dict (arr);
+                        
+                        if (strchr (args->argv[3], '.')) {
+                            var_set_double_forkey (nrow, "v",
+                                                   atof(args->argv[3]));
+                        }
+                        else {
+                            var_set_int_forkey (nrow, "v",
+                                                atoi(args->argv[3]));
+                        }
+                        var_set_str_forkey (nrow, "u", unit);
+                        var_set_str_forkey (nrow, "id", id);
+                        cc = cc->parent->value.arr.last;
+                        crsr = crsr->parent->value.arr.last;
+                    }
+                    cc = cc->next;
+                }
+                crsr = crsr->next;
+            }
+        }
+    }
+    pclose_safe (F);
     return res;
 }
 
@@ -256,7 +319,7 @@ var *runprobe_df (probe *self) {
                         if (strncmp (dev, "/dev/mapper", 11) == 0) {
                             char *ndev = malloc (strlen(dev) * sizeof(char));
                             ndev[0] = '@';
-                            char *dc = dev+12;
+                            const char *dc = dev+12;
                             int nc = 1;
                             while (*dc) {
                                 if (*dc == '-') {
@@ -928,6 +991,7 @@ builtinfunc BUILTINS[] = {
     {"probe_meminfo", runprobe_meminfo},
     {"probe_df", runprobe_df},
     {"probe_net", runprobe_net},
+    {"probe_ipmi", runprobe_ipmi},
     {"probe_distro", runprobe_distro},
     {NULL, NULL}
 };

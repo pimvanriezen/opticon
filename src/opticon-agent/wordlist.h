@@ -9,6 +9,7 @@ typedef struct wordlist_s {
 int          wordcount (const char *);
 wordlist    *wordlist_create (void);
 wordlist    *wordlist_make (const char *);
+wordlist    *wordlist_split (const char *, char);
 void         wordlist_add (wordlist *, const char *);
 void         wordlist_free (wordlist *);
 

@@ -1,3 +1,13 @@
+# -----------------------------------------------------------------------------
+# NETWORK CONFIGURATION
+# ---------------------
+# Note that the server's uuid is, if possible, grabbed from dmi. You can
+# override any derived uuid by adding it as
+#
+#   host: "{your server uuid}"
+#
+# to the configuration below.
+# -----------------------------------------------------------------------------
 collector {
     address: "opticon.example.com"
     port: 1047
@@ -6,16 +16,66 @@ collector {
 }
 
 probes {
-# Custom probes can be added here, as well as amendments for default
-# probes. Some examples:
+# -----------------------------------------------------------------------------
+# PROBE SETTING OVERRIDES
+# -----------------------
+# Copy any of these to add options to existing probes.
+#
 #   df {
 #       options: {
 #           skip: ["/dev/disk2s2"]
 #       }
 #   }
+#   net {
+#       options: {
+#           match: ["eth0","eth2"]
+#       }
+#   }
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# OPTIONAL PROBES
+# ---------------
+# The 'ipmi' probe invokes ipmitool to read certain values out of IPMI. For
+# this probe, the tool needs to be installed, and the values to monitor
+# configured. The 'id' matches are what you see in the output of running
+# 'ipmitool -I open sdr'.
+#
+#   ipmi {
+#      type: built-in
+#      call: probe_ipmi
+#      frequency: low
+#      options {
+#          ipmi {
+#              interface: open
+#          }
+#          values {
+#              fan [
+#                  { match: "Fan 1 DutyCycle", id: "Fan 1", u: "%" }
+#                  { match: "Fan 2 DutyCycle", id: "Fan 2", u: "%" }
+#                  { match: "Fan 3 DutyCycle", id: "Fan 3", u: "%" }
+#              ]
+#              temp [
+#                  { match: "02-CPU 1", id: CPU, u: C }
+#                  { match: "08-BMC", id: SMC, u: C }
+#                  { match: "10-System Board", id: "System Board", u: C }
+#              ]
+#          }
+#      }
+#  }
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# CUSTOM PROBES
+# -------------
+# Custom probes can be added here, as well as amendments for default
+# probes. Some examples:
+# 
 #   myprobe {
 #       type: exec
 #       call: /usr/local/scripts/myprobe.sh
 #       frequency: low
 #   }
+# -----------------------------------------------------------------------------
+
 }
