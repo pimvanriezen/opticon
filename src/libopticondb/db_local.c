@@ -19,6 +19,8 @@
 #define LOCALDB_OFFS_INVALID 0xffffffffffffffffULL
 #define LOCALDB_FLAG_NOCREATE 0x0000001
 
+const char *localdb_error = NULL;
+
 /** Convert epoch time to a GMT date stamp integer, to be used as part of
   * the filename of underlying database files.
   */
@@ -313,6 +315,7 @@ int localdb_get_record (db *d, time_t when, host *into) {
     if (! ixf) {
         fclose (dbf);
         flock (fileno (dbf), LOCK_UN);
+        localdb_error = "Could not open indexfile";
         return 0;
     }
     
@@ -321,12 +324,14 @@ int localdb_get_record (db *d, time_t when, host *into) {
         flock (fileno (dbf), LOCK_UN);
         fclose (dbf);
         fclose (ixf);
+        localdb_error = "Offset invalid";
         return 0;
     }
     if (fseek (dbf, offs, SEEK_SET) != 0) {
         flock (fileno (dbf), LOCK_UN);
         fclose (dbf);
         fclose (ixf);
+        localdb_error = "Could not seek";
         return 0;
     }
     ioport *dbport = ioport_create_filereader (dbf);
@@ -336,6 +341,7 @@ int localdb_get_record (db *d, time_t when, host *into) {
         fclose (dbf);
         fclose (ixf);
         ioport_close (dbport);
+        localdb_error = "Padding not zero";
         return 0;
     }
     (void) ioport_read_u64 (dbport);
