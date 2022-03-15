@@ -155,7 +155,7 @@ var *runprobe_ipmi (probe *self) {
             var *crsr = var_first (vipmi_values);
             while (crsr) {
                 var *cc = var_first (crsr);
-                while (*cc) {
+                while (cc) {
                     const char *match = var_get_str_forkey (cc, "match");
                     if (strcasecmp (match, args->argv[0]) == 0) {
                         const char *key = crsr->id;
