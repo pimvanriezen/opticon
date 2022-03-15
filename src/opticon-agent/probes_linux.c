@@ -336,6 +336,8 @@ var *runprobe_distro (probe *self) {
     }
     else {
         F = fopen ("/etc/redhat-release","r");
+        if (! F) F = fopen ("/etc/version","r");
+        
         if (F) {
             *buf = 0;
             fgets (buf, 255, F);
