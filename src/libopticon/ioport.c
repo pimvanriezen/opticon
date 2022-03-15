@@ -243,8 +243,7 @@ bool ioport_write_encint (ioport *io, uint64_t i) {
   * \return 1 on success, 0 on failure */
 /*/ ======================================================================= /*/
 bool ioport_write_u64 (ioport *io, uint64_t i) {
-    uint64_t netorder = ((uint64_t) htonl (i&0xffffffffLLU)) << 32;
-    netorder |= htonl ((i & 0xffffffff00000000LLU) >> 32);
+    uint64_t netorder = htonll (i);
     return ioport_write (io, (const char *)&netorder, sizeof (netorder));
 }
 
@@ -378,10 +377,7 @@ uint64_t ioport_read_u64 (ioport *io) {
     io->bitpos = io->bitbuffer = 0;
     uint64_t dt;
     if (! ioport_read (io, (char *) &dt, sizeof (dt))) return 0;
-    uint64_t res;
-    res = ((uint64_t) ntohl (dt & 0xffffffffLLU)) << 32;
-    res |= ntohl ((dt & 0xffffffff00000000LLU) >> 32);
-    return res;
+    return ntohll (dt);
 }
 
 /*/ ======================================================================= /*/
