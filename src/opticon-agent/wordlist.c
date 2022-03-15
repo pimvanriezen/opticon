@@ -118,7 +118,7 @@ wordlist *wordlist_split (const char *string, char sep) {
     char         *word;
     char         *crsr;
     int           count;
-    int           pos;
+    int           pos = 0;
     
     crsr = (char *) string;
 
