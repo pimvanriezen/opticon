@@ -146,6 +146,8 @@ var *runprobe_ipmi (probe *self) {
         return res;
     }
     
+    log_debug ("probe_ipmi: Called '%s'", buf);
+    
     while (! feof (F)) {
         *buf = 0;
         fgets (buf, 255, F);
