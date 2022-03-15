@@ -168,6 +168,7 @@ var *runprobe_ipmi (probe *self) {
                         const char *unit = var_get_str_forkey (cc, "u");
                         var *arr = var_get_array_forkey (res, key);
                         var *nrow = var_add_dict (arr);
+                        var_set_str_forkey (nrow, "id", id);
                         
                         if (strchr (args->argv[3], '.')) {
                             var_set_double_forkey (nrow, "v",
@@ -178,7 +179,6 @@ var *runprobe_ipmi (probe *self) {
                                                 atoi(args->argv[1]));
                         }
                         var_set_str_forkey (nrow, "u", unit);
-                        var_set_str_forkey (nrow, "id", id);
                         cc = cc->parent->value.arr.last;
                         crsr = crsr->parent->value.arr.last;
                     }
