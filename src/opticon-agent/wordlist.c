@@ -148,7 +148,11 @@ wordlist *wordlist_split (const char *string, char sep) {
 
 void wordlist_free (wordlist *lst) {
     int i;
-    for (i=0;i<lst->argc;++i) free (lst->argv[i]);
+    for (i=0;i<lst->argc;++i) {
+        free (lst->argv[i]);
+        lst->argv[i] = NULL;
+    }
     free (lst->argv);
+    lst->argv = NULL;
     free (lst);
 }
