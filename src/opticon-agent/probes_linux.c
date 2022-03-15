@@ -154,19 +154,15 @@ var *runprobe_ipmi (probe *self) {
         if (! *buf) continue;
         buf[strlen(buf)-1] = 0;
         args = wordlist_split (buf, ',');
-        log_debug ("probe_ipmi: raw '%s' count: %i", buf, args->argc);
         if (args->argc > 3) {
-            log_debug ("probe_ipmi: match '%s'", args->argv[0]);
             var *crsr = var_first (vipmi_values);
-            log_debug ("probe_ipmi: found %i value classes",
-                       vipmi_values->value.arr.count);
             while (crsr) {
                 var *cc = var_first (crsr);
                 while (cc) {
                     const char *match = var_get_str_forkey (cc, "match");
                     if (strcasecmp (match, args->argv[0]) == 0) {
                         log_debug ("probe_ipmi:   matching '%s' value '%s'",
-                                   match, args->argv[3]);
+                                   match, args->argv[4]);
                         const char *key = crsr->id;
                         const char *id = var_get_str_forkey (cc, "id");
                         const char *unit = var_get_str_forkey (cc, "u");
@@ -175,11 +171,11 @@ var *runprobe_ipmi (probe *self) {
                         
                         if (strchr (args->argv[3], '.')) {
                             var_set_double_forkey (nrow, "v",
-                                                   atof(args->argv[3]));
+                                                   atof(args->argv[4]));
                         }
                         else {
                             var_set_int_forkey (nrow, "v",
-                                                atoi(args->argv[3]));
+                                                atoi(args->argv[4]));
                         }
                         var_set_str_forkey (nrow, "u", unit);
                         var_set_str_forkey (nrow, "id", id);
