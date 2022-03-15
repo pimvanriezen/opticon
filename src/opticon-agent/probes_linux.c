@@ -162,7 +162,7 @@ var *runprobe_ipmi (probe *self) {
                     const char *match = var_get_str_forkey (cc, "match");
                     if (strcasecmp (match, args->argv[0]) == 0) {
                         log_debug ("probe_ipmi:   matching '%s' value '%s'",
-                                   match, args->argv[4]);
+                                   match, args->argv[1]);
                         const char *key = crsr->id;
                         const char *id = var_get_str_forkey (cc, "id");
                         const char *unit = var_get_str_forkey (cc, "u");
@@ -171,11 +171,11 @@ var *runprobe_ipmi (probe *self) {
                         
                         if (strchr (args->argv[3], '.')) {
                             var_set_double_forkey (nrow, "v",
-                                                   atof(args->argv[4]));
+                                                   atof(args->argv[1]));
                         }
                         else {
                             var_set_int_forkey (nrow, "v",
-                                                atoi(args->argv[4]));
+                                                atoi(args->argv[1]));
                         }
                         var_set_str_forkey (nrow, "u", unit);
                         var_set_str_forkey (nrow, "id", id);
