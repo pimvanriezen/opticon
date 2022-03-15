@@ -50,6 +50,7 @@ cp bin/opticon-agent $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-agent
 cp init/opticon-agent.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/etc/opticon/
+cp src/opticon-agent/opticon-defaultprobes.conf $BUILDROOT/etc/opticon/
 
 # Build the package
 dpkg-deb --build $BUILDROOT || exitfail Could not build
