@@ -123,7 +123,7 @@ wordlist *wordlist_split (const char *string, char sep) {
     crsr = (char *) string;
 
     result = (wordlist *) malloc (sizeof (wordlist));
-    count = wordsepcount (crsr);
+    count = wordsepcount (crsr, sep);
     result->argc = count;
     result->argv = (char **) malloc (count * sizeof (char *));
 
