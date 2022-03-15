@@ -189,6 +189,8 @@ uint64_t idmask (int sz) {
     return mask;
 }
 
+#define uuidbyte(xx,yy) (unsigned int)((xx >> (56-(8*yy))) & 0xff)
+
 /*/ ======================================================================= /*/
 /** Write out a UUID to a string in ASCII 
   * \param u The UUID
@@ -196,13 +198,24 @@ uint64_t idmask (int sz) {
   *             nul-terminator. */
 /*/ ======================================================================= /*/
 void uuid2str (uuid u, char *into) {
-    sprintf (into, "%08lx-%04lx-%04lx-"
-                   "%04lx-%012llx",
-                   ((u.msb & 0xffffffff00000000) >> 32),
-                   ((u.msb & 0x00000000ffff0000) >> 16),
-                   ((u.msb & 0x000000000000ffff)),
-                   ((u.lsb & 0xffff000000000000) >> 48),
-                   ((u.lsb & 0x0000ffffffffffff)));
+    sprintf (into, "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-"
+                   "%02x%02x%02x%02x%02x%02x",
+                   uuidbyte (u.msb, 0),
+                   uuidbyte (u.msb, 1),
+                   uuidbyte (u.msb, 2),
+                   uuidbyte (u.msb, 3),
+                   uuidbyte (u.msb, 4),
+                   uuidbyte (u.msb, 5),
+                   uuidbyte (u.msb, 6),
+                   uuidbyte (u.msb, 7),
+                   uuidbyte (u.lsb, 0),
+                   uuidbyte (u.lsb, 1),
+                   uuidbyte (u.lsb, 2),
+                   uuidbyte (u.lsb, 3),
+                   uuidbyte (u.lsb, 4),
+                   uuidbyte (u.lsb, 5),
+                   uuidbyte (u.lsb, 6),
+                   uuidbyte (u.lsb, 7));
 }
 
 /*/ ======================================================================= /*/
