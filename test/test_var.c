@@ -121,6 +121,7 @@ int main (int argc, const char *argv[]) {
     
     var_free (oparent);
     
+    /* test var sorting */
     var *unsorted = var_alloc();
     var *row = var_get_dict_forkey (unsorted, "0001");
     var_set_int_forkey (row, "weight",10);

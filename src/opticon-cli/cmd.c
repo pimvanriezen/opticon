@@ -120,7 +120,7 @@ int cmd_tenant_get_quota (int argc, const char *argv[]) {
     
     var *meta = api_get ("/%s/quota", OPTIONS.tenant);
     if (! meta) return 1;
-    printf ("Tenant storage quota: %llu MB\n",
+    printf ("Tenant storage quota: %" PRIu64 " MB\n",
             var_get_int_forkey (meta, "quota"));
     printf ("Current usage: %.2f %%\n",
             var_get_double_forkey (meta, "usage"));

@@ -554,7 +554,7 @@ void reaper_run (thread *self) {
                 if (totalsz > quota) {
                     char uuidstr[40];
                     uuid2str (tenants[i], uuidstr);
-                    log_info ("Tenant %s is %llu bytes over quota",
+                    log_info ("Tenant %s is %" PRIu64 " bytes over quota",
                               uuidstr, (totalsz-quota));
                     
                     if (tnow - earliest > 86399) {

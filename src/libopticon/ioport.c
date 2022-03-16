@@ -17,7 +17,6 @@
 #  define htobe64(x) htonll(x)
 #endif
 
-
 /*/ ======================================================================= /*/
 /** Get the amount of available buffer space for writing into an
   * ioport.  */

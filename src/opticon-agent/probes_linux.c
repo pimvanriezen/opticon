@@ -106,7 +106,8 @@ var *runprobe_net (probe *self) {
         diffout_kbits = totalout_kbits - NETPROBE.net_out_kbits;
         diffout_packets = totalout_packets - NETPROBE.net_out_packets;
         uint64_t tdiff = (ti - NETPROBE.lastrun);
-        log_debug ("probe_net: diffs: %llu, %llu, %llu, %llu",
+        log_debug ("probe_net: diffs: %" PRIu64 ", %" PRIu64 ", %"
+                   PRIu64 ", %" PRIu64,
                    diffin_kbits, diffin_packets,
                    diffout_kbits, diffout_packets);
         var_set_int_forkey (res_net, "in_kbs", diffin_kbits / tdiff);
@@ -605,8 +606,8 @@ var *runprobe_io (probe *self)
             totalblk_r += atoll (split->argv[3]);
             totalblk_w += atoll (split->argv[7]);
             
-            log_debug ("disk %s r/%llu w/%llu", split->argv[0], totalblk_r,
-                        totalblk_w);
+            log_debug ("disk %s r/%" PRIu64 " w/%" PRIu64,
+                        split->argv[0], totalblk_r, totalblk_w);
             
             wordlist_free (split);
         }

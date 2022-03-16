@@ -265,19 +265,19 @@ void print_array (const char *key, var *arr) {
         switch (crsr->type) {
             case VAR_INT:
                 snprintf (out+strlen(out), 4095-strlen(out), 
-                          "\033[1m%llu\033[0m", var_get_int (crsr));
+                          VT_BLD "%" PRIu64 VT_RST, var_get_int (crsr));
                 break;
             
             case VAR_DOUBLE:
                 snprintf (out+strlen(out), 4095-strlen(out), 
-                         "\033[1m%.2f\033[0m", var_get_double (crsr));
+                         VT_BLD "%.2f" VT_RST, var_get_double (crsr));
                 break;
             
             case VAR_STR:
                 str = var_get_str (crsr);
                 if (! str) break;
                 snprintf (out+strlen(out), 4095-strlen(out),
-                          "\033[38;5;28m%s\033[0m", var_get_str (crsr));
+                          VT_YLW "%s" VT_RST, var_get_str (crsr));
                 break;
             
             default:
@@ -325,19 +325,19 @@ void print_values (var *apires, const char *pfx) {
                 break;
             
             case VAR_STR:
-                sprintf (valbuf, "\033[38;5;28m%s\033[0m",
+                sprintf (valbuf, VT_YLW "%s" VT_RST,
                          var_get_str(crsr));
                 print_value (name, "%s", valbuf);
                 break;
             
             case VAR_INT:
-                sprintf (valbuf, "\033[1m%llu\033[0m %s",
+                sprintf (valbuf, VT_BLD "%" PRIu64 VT_RST " %s",
                          var_get_int(crsr), unit);
                 print_value (name, "%s", valbuf);
                 break;
             
             case VAR_DOUBLE:
-                sprintf (valbuf, "\033[1m%.2f\033[0m %s", 
+                sprintf (valbuf, VT_BLD "%.2f" VT_RST " %s", 
                          var_get_double(crsr), unit);
                 print_value (name, "%s", valbuf);
                 break;
@@ -418,7 +418,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
                         isbold = 1;
                     }
                     else {
-                        sprintf (buf, "%llu",
+                        sprintf (buf, "%" PRIu64,
                                  var_get_int_forkey (node, fld[col]));
                         isbold = 1;
                     }

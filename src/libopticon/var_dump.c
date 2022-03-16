@@ -64,7 +64,7 @@ int var_write_indented (var *v, ioport *into, int _indent) {
                     break;
                 
                 case VAR_INT:
-                    ioport_printf (into, "%llu", crsr->value.ival);
+                    ioport_printf (into, "%" PRIu64, crsr->value.ival);
                     break;
                     
                 case VAR_DOUBLE:
