@@ -10,7 +10,7 @@ typedef struct {
 
 _EOF_
 
-find rsrc -type dir | grep / | cut -f2 -d/ | while read fork; do
+find rsrc -type d | grep / | cut -f2 -d/ | while read fork; do
   echo "typedef struct {" >> rsrc.h
   find rsrc/$fork -type f | while read file; do
     id=$(echo "$file" | sed -e "s@.*/@@;s/[.]rsrc$//;s/[.]/_/g")
@@ -21,7 +21,7 @@ find rsrc -type dir | grep / | cut -f2 -d/ | while read fork; do
 done
 
 echo "typedef struct {" >> rsrc.h
-find rsrc -type dir | grep / | cut -f2 -d/ | while read fork; do
+find rsrc -type d | grep / | cut -f2 -d/ | while read fork; do
   echo "    rsrc_$fork $fork;" >> rsrc.h
 done
 
