@@ -22,7 +22,7 @@
         tenant-get-summary    --tenant <uuid>
         meter-list            --tenant <uuid>
         meter-create          --tenant <uuid> --meter <meterid> --type <TYPE>
-                             [--description <description>] [--unit <unitstr>]
+                              --description <description> [--unit <unitstr>]
         meter-delete          --tenant <uuid> --meter <meterid>
         watcher-list          --tenant <uuid> [--host <uuid>]
         watcher-set           --tenant <uuid> [--host <uuid>]
@@ -38,7 +38,7 @@
         host-delete           --tenant <uuid> --host <uuid>
 
   TYPE:
-        integer, string, or frac
+        table, integer, string, or frac
 
   TIMESPEC examples:
         2014-01-04T13:37
