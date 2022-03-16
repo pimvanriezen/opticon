@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 static pthread_key_t *TKEY = NULL;
 
@@ -146,7 +147,7 @@ void thread_init (thread *self, run_f run, cancel_f cancel) {
     self->cancel = cancel;
     self->isrunning = 0;
     self->cshutdown = conditional_create();
-    sprintf (self->name, "thread-%06" PRIx64 , ((uint64_t)self) & 0xffffff);
+    sprintf (self->name, "thread-%06" PRIx64, ((uint64_t)self) & 0xffffff);
     pthread_attr_init (&self->tattr);
     pthread_create (&self->thread, &self->tattr, thread_spawn, self);
 }
