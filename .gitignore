@@ -2,6 +2,8 @@ bin/
 doc/
 .DS_Store
 *.o
+src/opticon-cli/rsrc.c
+src/opticon-cli/rsrc.h
 test/bin/test_*
 test/out/*.*
 test/tmpdb

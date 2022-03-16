@@ -1,0 +1,48 @@
+%% Usage: %s <command> [options]
+  Options:
+        --json
+        --config-file <file>
+        --opticon-token <token>
+        --external-token <token>
+        --unithost-url <url>
+        --keystone-url <url>
+        --api-url <url>
+        --watch
+        --flip
+
+  Commands:
+        session-list
+        tenant-list
+        tenant-create        [--tenant <uuid>] [--key <base64>] [--name <name>]
+        tenant-delete         --tenant <uuid>
+        tenant-get-metadata   --tenant <uuid>
+        tenant-set-metadata   --tenant <uuid> <key> <value>
+        tenant-set-quota      --tenant <uuid> <quota megabytes>
+        tenant-get-quota      --tenant <uuid>
+        tenant-get-summary    --tenant <uuid>
+        meter-list            --tenant <uuid>
+        meter-create          --tenant <uuid> --meter <meterid> --type <TYPE>
+                             [--description <description>] [--unit <unitstr>]
+        meter-delete          --tenant <uuid> --meter <meterid>
+        watcher-list          --tenant <uuid> [--host <uuid>]
+        watcher-set           --tenant <uuid> [--host <uuid>]
+                              --meter <meterid>
+                              --level <warning|alert|critical>
+                              --match <gt|lt|eq> (only for tenant)
+                             [--weight <weight>] --value <value>
+        watcher-delete        --tenant <uuid> [--host <uuid>
+                              --meter <meterid>
+        host-list             --tenant <uuid>
+        host-overview         --tenant <uuid>
+        host-show             --tenant <uuid> --host <host> [--time <TIMESPEC>]
+        host-delete           --tenant <uuid> --host <uuid>
+
+  TYPE:
+        integer, string, or frac
+
+  TIMESPEC examples:
+        2014-01-04T13:37
+        11:13
+        -1d
+        -3h
+        now

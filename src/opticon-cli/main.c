@@ -17,6 +17,7 @@
 #include "api.h"
 #include "prettyprint.h"
 #include "debug.h"
+#include "rsrc.h"
 
 optinfo OPTIONS;
 
@@ -526,60 +527,7 @@ int conf_admin_token (const char *id, var *v, updatetype tp) {
   * \param cmdname argv[0]
   */
 void usage (const char *cmdname) {
-    fprintf (stderr,
-        "%% Usage: %s <command> [options]\n"
-         "  Options:\n"
-         "        --json\n"
-         "        --config-file <file>\n"
-         "        --opticon-token <token>\n"
-         "        --external-token <token>\n"
-         "        --unithost-url <url>\n"
-         "        --keystone-url <url>\n"
-         "        --api-url <url>\n"
-         "        --watch\n"
-         "        --flip\n"
-         "\n"
-         "  Commands:\n"
-         "        session-list\n"
-         "        tenant-list\n"
-         "        tenant-create        [--tenant <uuid>] [--key <base64>] "
-                                                        "[--name <name>]\n"
-         "        tenant-delete         --tenant <uuid>\n"
-         "        tenant-get-metadata   --tenant <uuid>\n"
-         "        tenant-set-metadata   --tenant <uuid> <key> <value>\n"
-         "        tenant-set-quota      --tenant <uuid> <quota megabytes>\n"
-         "        tenant-get-quota      --tenant <uuid>\n"
-         "        tenant-get-summary    --tenant <uuid>\n"
-         "        meter-list            --tenant <uuid>\n"
-         "        meter-create          --tenant <uuid> --meter <meterid> "
-                                                       "--type <TYPE>\n"
-         "                             [--description <description>] "
-                                      "[--unit <unitstr>]\n"
-         "        meter-delete          --tenant <uuid> --meter <meterid>\n"
-         "        watcher-list          --tenant <uuid> [--host <uuid>]\n"
-         "        watcher-set           --tenant <uuid> [--host <uuid>]\n"
-         "                              --meter <meterid>\n"
-         "                              --level <warning|alert|critical>\n"
-         "                              --match <gt|lt|eq> (only for tenant)\n"
-         "                             [--weight <weight>] --value <value>\n"
-         "        watcher-delete        --tenant <uuid> [--host <uuid>\n"
-         "                              --meter <meterid>\n"
-         "        host-list             --tenant <uuid>\n"
-         "        host-overview         --tenant <uuid>\n"
-         "        host-show             --tenant <uuid> --host <host> "
-                                                      "[--time <TIMESPEC>]\n"
-         "        host-delete           --tenant <uuid> --host <uuid>\n"
-         "\n"
-         "  TYPE:\n"
-         "        integer, string, or frac\n"
-         "\n"
-         "  TIMESPEC examples:\n"
-         "        2014-01-04T13:37\n"
-         "        11:13\n"
-         "        -1d\n"
-         "        -3h\n"
-         "        now\n",
-        cmdname);
+    fprintf (stderr, rsrc.text.usage.data, cmdname);
 }
 
 /** Main, uses cliopt to do the dirty. */

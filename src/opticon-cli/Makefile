@@ -26,16 +26,22 @@ ifeq (linux,$(OSNAME))
   LIBS+=-lm
 endif
 
-OBJS_OPTICONCLI = cmd.o main.o api.o prettyprint.o
-				  
+OBJS_OPTICONCLI = rsrc.o cmd.o main.o api.o prettyprint.o
+
 all: ../../bin/opticon
 
-../../bin/opticon: $(OBJS_OPTICONCLI) $(LIBS)
+rsrc.c: rsrc.h
+
+rsrc.h: rsrc/*/*.rsrc
+	@echo "[RSRC ] building resource file"
+	@./mkrsrc
+		  
+../../bin/opticon: rsrc.c $(OBJS_OPTICONCLI) $(LIBS)
 	@echo "[LINK ] opticon-cli"
 	@$(CC) $(LDFLAGS) -o ../../bin/opticon $(OBJS_OPTICONCLI) $(LIBS) $(LIBCURL) $(LPTHREAD) -lm -lz
 
 clean:
-	rm -f *.o ../../bin/opticon
+	rm -f *.o ../../bin/opticon rsrc.c rsrc.h
 
 .SUFFIXES: .c .o
 .c.o:
