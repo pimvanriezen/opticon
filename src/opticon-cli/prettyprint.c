@@ -439,12 +439,14 @@ void print_table (var *arr, const char **hdr, const char **fld,
                 strcpy (tsuffx, (suffx[col][0] != ' ') ? " " : "");
                 int wpos = strlen (tsuffx);
                 int i;
+                sufwidth = wpos;
                 for (i=0; i<62 && wpos<62 && suffx[col][i]; ++i) {
                     if (suffx[col][i] == '%') tsuffx[wpos++] = '%';
                     tsuffx[wpos++] = suffx[col][i];
+                    if (suffx[col][i] > 0) sufwidth++;
+                    else if (suffx[col][i] & 64) sufwidth++;
                 }
                 tsuffx[wpos] = 0;
-                sufwidth = i;
             }
             else {
                 tsuffx[0] = 0;

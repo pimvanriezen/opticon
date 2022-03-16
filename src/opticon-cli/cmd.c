@@ -616,6 +616,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     #define VDfrac(x,y) var_get_double_forkey(var_get_dict_forkey(apires,x),y)
     #define VAfrac(x,y) var_get_double_atindex(var_get_array_forkey(apires,x),y)
     #define Vdone(x) var_delete_key(apires,x)
+    #define Vexist(x) var_find_key(apires,x)
     /* -------------------------------------------------------------*/
     print_hdr ("HOST");
     print_value ("UUID", VT_YLW "%s" VT_RST, OPTIONS.host);
@@ -729,7 +730,41 @@ int cmd_get_record (int argc, const char *argv[]) {
 
         print_values (apires, NULL);
     
-        /* -------------------------------------------------------------*/
+        if (Vexist ("temp")) {
+            print_hdr ("SYSTEM TEMPERATURE");
+            
+            const char *temp_hdr[] = {"PROBE","TEMP",NULL};
+            const char *temp_fld[] = {"id","v",NULL};
+            columnalign temp_align[] = {CA_L, CA_R, CA_NULL};
+            vartype temp_tp[] = {VAR_STR,VAR_INT,VAR_NULL};
+            int temp_wid[] = {16, 8, 0};
+            int temp_div[] = {0, 0, 0};
+            const char *temp_suf[] = {"","°C",NULL};
+            
+            var *v_temp = var_get_array_forkey (apires, "temp");
+            print_table (v_temp, temp_hdr, temp_fld, temp_align, temp_tp,
+                         temp_wid, temp_suf, temp_div);
+            Vdone ("temp");
+        }
+    
+         if (Vexist ("fan")) {
+            print_hdr ("SYSTEM FANS");
+            
+            const char *fan_hdr[] = {"PROBE","SPEED",NULL};
+            const char *fan_fld[] = {"id","v",NULL};
+            columnalign fan_align[] = {CA_L, CA_R, CA_NULL};
+            vartype fan_tp[] = {VAR_STR,VAR_INT,VAR_NULL};
+            int fan_wid[] = {16, 8, 0};
+            int fan_div[] = {0, 0, 0};
+            const char *fan_suf[] = {"","%",NULL};
+            
+            var *v_fan = var_get_array_forkey (apires, "fan");
+            print_table (v_fan, fan_hdr, fan_fld, fan_align, fan_tp,
+                         fan_wid, fan_suf, fan_div);
+            Vdone ("fan");
+        }
+
+       /* -------------------------------------------------------------*/
         print_hdr ("PROCESS LIST");
     
         const char *top_hdr[] = {"USER","PID","CPU","MEM","NAME",NULL};
@@ -828,7 +863,7 @@ int cmd_session_list (int argc, const char *argv[]) {
         shorttenant[8] = 0;
         
         printf (VT_GRN "%08x-%08x" VT_RST " " VT_BLD "%-18s "
-                VT_RST "%-8s  %-8s  " VT_YLW "%-14i "
+                VT_RST "%-8s  %-8s  " VT_YLW "%-14" PRIu64 " "
                 VT_RST "%s" VT_RST "\n",
                 (uint32_t) (var_get_int_forkey (crsr, "sessid")),
                 (uint32_t) (var_get_int_forkey (crsr, "addr")),
