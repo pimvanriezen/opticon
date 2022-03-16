@@ -1,0 +1,30 @@
+#!/bin/bash
+
+PIDFILE=/var/run/opticon-agent.pid
+AGENT=$(which opticon-agent)
+if [ -z "$AGENT" ]; then
+    [ -e /usr/local/sbin/opticon-agent ] && AGENT="/usr/local/sbin/opticon-agent"
+    [ -e /config/scripts/opticon-agent ] && AGENT="/config/scripts/opticon-agent"
+    [ -e ./opticon-agent ] && AGENT="./opticon-agent"
+fi
+
+[ -z "$AGENT" ] && exitfail "Could not find agent"
+
+case "$1" in
+    start)
+        $AGENT
+        ;;
+    
+    stop)
+        [ -e $PIDFILE ] && kill -TERM $(cat $PIDFILE)
+        ;;
+    
+    restart)
+        [ -e $PIDFILE ] && kill -TERM $(cat $PIDFILE)
+        $AGENT
+        ;;
+        
+    *)
+        exitfail "Usage: $0 <start | stop | restart>"
+        ;;
+esac
