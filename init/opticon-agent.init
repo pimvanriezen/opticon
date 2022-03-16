@@ -10,6 +10,19 @@ fi
 
 [ -z "$AGENT" ] && exitfail "Could not find agent"
 
+if [ "$AGENT" = "/config/scripts/opticon-agent" ]; then
+  if [ ! -d /etc/opticon ]; then
+    mkdir /etc/opticon
+    id opticon >/dev/null 2>&1 || {
+      useradd -M -r -U opticon
+    }
+    chgrp opticon /etc/opticon
+    chmod 750 /etc/opticon
+    ln -s /config/opticon-agent.conf /etc/opticon-agent.conf
+    ln -s /config/opticon-defaultprobes.conf /etc/opticon-defaultprobes.conf
+  fi
+fi
+
 case "$1" in
     start)
         $AGENT
