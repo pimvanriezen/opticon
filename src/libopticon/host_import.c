@@ -90,7 +90,7 @@ bool host_import (host *h, var *val) {
     var *v = val->value.arr.first;
     int count;
     char firstlevel[16];
-    char tmpid[16];
+    char tmpid[192];
     while (v) {
         if (strlen (v->id) > 11) {
             log_error ("Error parsing meter result, label '%s' too long",

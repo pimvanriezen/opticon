@@ -281,7 +281,7 @@ void print_array (const char *key, var *arr) {
                 break;
             
             default:
-                strncat (out, "?", 4096);
+                strncat (out, "?", 4095);
                 break;
         }
         crsr = crsr->next;
@@ -472,7 +472,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
 
 /** Prepare data for print_table on a generic table */
 void print_generic_table (var *table) {
-    char fullkey[64];
+    char fullkey[192];
     sprintf (fullkey, "%s/", table->id);
     char *nodekey = fullkey+strlen(fullkey);
 
