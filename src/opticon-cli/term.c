@@ -52,7 +52,7 @@ int is_iterm (void) {
     FD_SET (0, &fds);
     
     tv.tv_sec = 0;
-    tv.tv_usec = 2000;
+    tv.tv_usec = 30000;
     
     fcntl (0, F_SETFL, oldflags | O_NONBLOCK);
     if (select (1, &fds, NULL, NULL, &tv) > 0) {
