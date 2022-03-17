@@ -3,6 +3,8 @@ rm -f rsrc.c
 rm -f rsrc.h
 
 cat > rsrc.h << _EOF_
+#ifndef _RSRC_H
+#define _RSRC_H 1
 typedef struct {
     const unsigned int sz;
     const char *data;
@@ -28,6 +30,7 @@ done
 echo "} resourcefork;" >> rsrc.h
 echo "" >> rsrc.h
 echo "extern resourcefork rsrc;" >> rsrc.h
+echo "#endif" >> rsrc.h
 
 cat > rsrc.c << _EOF_
 #include "rsrc.h"

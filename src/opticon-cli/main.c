@@ -541,6 +541,10 @@ int main (int _argc, const char *_argv[]) {
         usage (argv[0]);
         return 1;
     }
+    
+    const char *tp = getenv ("TERM_PROGRAM");
+    if (tp && strcmp (tp, "iTerm.app") == 0) OPTIONS.iterm = true;
+    else OPTIONS.iterm = false;
 
     opticonf_add_reaction ("endpoints/keystone", conf_endpoint_keystone);
     opticonf_add_reaction ("endpoints/unithost", conf_endpoint_unithost);

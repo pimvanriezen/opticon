@@ -16,11 +16,14 @@
 #include "cmd.h"
 
 static const char *PENDING_HDR = NULL;
+static resource *PENDING_RSRC = NULL;
 static var *MDEF = NULL;
 static enum termtype {
     TERM_UNSET,
     TERM_MODERN,
     TERM_PRIMITIVE } TERM = TERM_UNSET;
+
+static int PRINTED_FIRST = 0;
 
 enum termtype term (void) {
     if (TERM == TERM_UNSET) {
@@ -42,7 +45,10 @@ enum termtype term (void) {
 }
 
 void print_line (void) {
-    if (term() == TERM_MODERN) {
+    if (OPTIONS.iterm) {
+        printf ("\n");
+    }
+    else if (term() == TERM_MODERN) {
         printf ("\033[1m╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
                 "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
                 "╌╌╌╌╌╌╌╌\033[0m\n");
@@ -59,6 +65,8 @@ static int statusline = 0;
 
 void clear_pending_header (void) {
     PENDING_HDR = NULL;
+    PENDING_RSRC = NULL;
+    PRINTED_FIRST = 0;
     statusline = 0;
 }
 
@@ -188,7 +196,41 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
 }
 
 /** Display function for host-show section headers */
-void print_hdr (const char *hdr) {
+void print_hdr (const char *hdr, resource *rs) {
+    if (OPTIONS.iterm) {
+        int output_length = rs->sz / 4 * 3;
+        if (rs->data[rs->sz - 1] == '=') output_length--;
+        if (rs->data[rs->sz - 2] == '=') output_length--;
+        if (PRINTED_FIRST) {
+            /*
+            printf ("\n\n\033[48;2;48;52;61m \033[0m  ");
+            printf ("\033[s\033[1A");
+            printf ("\033]1337;File=name=aWNvbi5wbmcK;height=2;size=%i;"
+                    "inline=1:", output_length);
+            fwrite (rs->data, 1, rs->sz, stdout);
+            printf ("\007\033[u\033[5C \033[48;2;48;52;61m\033[1m   %-66s\033[0m\n\n", hdr);
+            return; */
+        }
+
+        printf ("\n");
+        printf ("\n\033[48;2;48;52;61m");
+        printf ("                                        "
+                "                                        ");
+        printf ("\033[0m\n\n\033[3A  ");
+        
+        printf ("\033]1337;File=name=aWNvbi5wbmcK;height=3;size=%i;"
+                "inline=1:", output_length);
+        fwrite (rs->data, 1, rs->sz, stdout);
+        printf ("\007\n");
+        
+        printf ("\033[s\033[2A\033[11C\033[1m\033[48;2;48;52;61m %s "
+                "\033[0m\033[u", hdr);
+        fflush (stdout);
+        printf ("\n");
+        PRINTED_FIRST=1;
+        return;
+    }
+    
     const char *mins = "-----------------------------------------------"
                       "-----------------------------------------------"
                       "-----------------------------------------------";
@@ -219,8 +261,9 @@ void print_hdr (const char *hdr) {
 /** Display function for host-show data */
 void print_value (const char *key, const char *fmt, ...) {
     if (PENDING_HDR) {
-        print_hdr (PENDING_HDR);
-        PENDING_HDR = 0;
+        print_hdr (PENDING_HDR, PENDING_RSRC);
+        PENDING_HDR = NULL;
+        PENDING_RSRC = NULL;
     }
     char val[4096];
     val[0] = 0;
@@ -232,7 +275,7 @@ void print_value (const char *key, const char *fmt, ...) {
 
     const char *dots = "......................";
     int dotspos = strlen(dots) - 18;
-    printf ("%s\033[2m", key);
+    printf (" %s\033[2m", key);
     dotspos += strlen (key);
     if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
     printf ("\033[0m: ");
@@ -244,11 +287,11 @@ void print_gauge_value (const char *key, const char *unit, double val,
                         double max) {
     const char *dots = "......................";
     int dotspos = strlen(dots) - 18;
-    printf ("%s\033[2m", key);
+    printf (" %s\033[2m", key);
     dotspos += strlen (key);
     if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
     printf ("\033[0m: ");
-    printf ("\033[1m%6.2f \033[0m%-23s-|",val, unit);
+    printf ("\033[1m%6.2f \033[0m%-20s-|",val, unit);
     print_bar (25, max, val);
     printf ("|+\n");
 }
@@ -301,7 +344,8 @@ void print_values (var *apires, const char *pfx) {
     if (! MDEF) MDEF = api_get ("/%s/meter", OPTIONS.tenant);
     var *meters = var_get_dict_forkey (MDEF, "meter");
     var *crsr = apires->value.arr.first;
-    PENDING_HDR = "MISC";
+    PENDING_HDR = "Misc";
+    PENDING_RSRC = &rsrc.icns.overview;
     while (crsr) {
         char valbuf[1024];
         const char *name = NULL;
@@ -379,6 +423,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
     const char *coltbl[] = { "\033[38;5;185m",
                              "\033[38;5;28m" };
     
+    printf (" ");
     while (hdr[col]) {
         strcpy (fmt, "%");
         if (align[col] == CA_L) strcat (fmt, "-");
@@ -389,7 +434,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
         printf (fmt, hdr[col]);
         col++;
     }
-    printf ("\n");
+    printf ("\n ");
     
     var *node = arr->value.arr.first;
     const char *str;
@@ -467,6 +512,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
         }
         printf ("\n");
         node = node->next;
+        if (node) printf(" ");
     }
 }
 
@@ -565,7 +611,9 @@ void print_generic_table (var *table) {
         if (c) title = c;
     }
     
-    print_hdr (title);
+    resource *rs = &rsrc.icns.overview;
+    if (strcmp (table->id, "who") == 0) rs = &rsrc.icns.remote;
+    print_hdr (title, rs);
     print_table (table, (const char **) header, (const char **) field,
                  align, type, width, (const char **) suffix, div);
     

@@ -24,6 +24,7 @@ typedef struct optinfo {
     char        *match;
     char        *value;
     char        *weight;
+    bool         iterm;
     time_t       time;
     int          json;
     int          watch;

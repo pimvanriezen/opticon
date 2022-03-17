@@ -2,6 +2,7 @@
 #define _PRETTYPRINT_H 1
 
 #include <libopticon/var.h>
+#include "rsrc.h"
 
 /** Table alignment indicator */
 typedef enum {
@@ -20,7 +21,7 @@ const char *decorate_status (const char *);
 void print_line (void);
 void print_bar (int, double, double);
 void print_graph (int, int, int, double, double *);
-void print_hdr (const char *);
+void print_hdr (const char *, resource *);
 void print_value (const char *, const char *, ...);
 void print_gauge_value (const char *, const char *, double, double);
 void print_array (const char *key, var *arr);

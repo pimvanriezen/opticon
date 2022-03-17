@@ -31,14 +31,14 @@ int cmd_tenant_list (int argc, const char *argv[]) {
         var_dump (res, stdout);
     }
     else {
-        printf ("UUID                                 Hosts  Name\n");
-        print_line();
+        print_hdr("Tenants", &rsrc.icns.people);
+        printf (" UUID                                 Hosts  Name\n");
 
         var *res_tenant = var_get_array_forkey (res, "tenant");
         if (var_get_count (res_tenant)) {
             var *crsr = res_tenant->value.arr.first;
             while (crsr) {
-                printf ("%s %5" PRIu64 "  %s\n",
+                printf (VT_GRN " %s" VT_RST " %5" PRIu64 VT_YLW "  %s" VT_RST "\n",
                         var_get_str_forkey (crsr, "id"),
                         var_get_int_forkey (crsr, "hostcount"),
                         var_get_str_forkey (crsr, "name"));
@@ -151,8 +151,8 @@ int cmd_host_overview (int argc, const char *argv[]) {
     var *ov = api_get ("/%s/host/overview", OPTIONS.tenant);
     if (! var_get_count (ov)) return 0;
 
-    print_hdr ("OVERVIEW");
-    printf ("NAME                           STATUS    "
+    print_hdr ("Overview", &rsrc.icns.overview);
+    printf (" NAME                         STATUS    "
             "LOAD  NET I/O      CPU      GRAPH\n");
     
     var *ov_dict = var_get_dict_forkey (ov, "overview");
@@ -171,7 +171,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
         netio += var_get_int_forkey (crsr, "net/out_kbs");
         double cpu = var_get_double_forkey (crsr, "pcpu");
         int rcpu = (cpu+5.0) / 10;
-        printf (VT_YLW "%-30s" VT_RST " %s %6.2f %8" PRIu64
+        printf (VT_YLW " %-28s" VT_RST " %s %6.2f %8" PRIu64
                 " " VT_BLD "%6.2f" VT_RST " %% -|",
                 shortname, decorate_status(hstat), load, netio, cpu);
         print_bar (12, 100, cpu);
@@ -522,7 +522,7 @@ int cmd_host_list (int argc, const char *argv[]) {
     
     var *v_hosts = var_get_array_forkey (apires, "host");
     if (var_get_count (v_hosts)) {
-        print_hdr ("HOSTS");
+        print_hdr ("Hosts", &rsrc.icns.overview);
         printf ("UUID                                    SIZE "
                 "FIRST             LAST\n");
         var *crsr = v_hosts->value.arr.first;
@@ -618,7 +618,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     #define Vdone(x) var_delete_key(apires,x)
     #define Vexist(x) var_find_key(apires,x)
     /* -------------------------------------------------------------*/
-    print_hdr ("HOST");
+    print_hdr ("Host", &rsrc.icns.computer);
     print_value ("UUID", VT_YLW "%s" VT_RST, OPTIONS.host);
     print_value ("Hostname", VT_YLW "%s" VT_RST, Vstr("hostname"));
     print_value ("Address", VT_BLD "%s" VT_RST " (rtt: " VT_BLD "%.2f"
@@ -668,7 +668,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         Vdone("os");
     
         /* -------------------------------------------------------------*/
-        print_hdr ("RESOURCES");
+        print_hdr ("Resources", &rsrc.icns.gauge);
         print_value ("Processes",VT_BLD "%" PRIu64 VT_RST " "
                                  "(" VT_BLD "%" PRIu64 VT_RST " running, "
                                  VT_BLD "%" PRIu64 VT_RST " stuck)",
@@ -731,7 +731,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         print_values (apires, NULL);
     
         if (Vexist ("temp")) {
-            print_hdr ("SYSTEM TEMPERATURE");
+            print_hdr ("System Temperature", &rsrc.icns.temp);
             
             const char *temp_hdr[] = {"PROBE","TEMP",NULL};
             const char *temp_fld[] = {"id","v",NULL};
@@ -748,7 +748,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         }
     
          if (Vexist ("fan")) {
-            print_hdr ("SYSTEM FANS");
+            print_hdr ("System Fans", &rsrc.icns.fan);
             
             const char *fan_hdr[] = {"PROBE","SPEED",NULL};
             const char *fan_fld[] = {"id","v",NULL};
@@ -765,7 +765,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         }
 
        /* -------------------------------------------------------------*/
-        print_hdr ("PROCESS LIST");
+        print_hdr ("Process List", &rsrc.icns.procs);
     
         const char *top_hdr[] = {"USER","PID","CPU","MEM","NAME",NULL};
         const char *top_fld[] = {"user","pid","pcpu","pmem","name",NULL};
@@ -782,7 +782,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     
         Vdone("top");
         /* -------------------------------------------------------------*/
-        print_hdr ("STORAGE");
+        print_hdr ("Storage", &rsrc.icns.disks);
     
         const char *df_hdr[] = {"DEVICE","SIZE","FS","USED","MOUNTPOINT",NULL};
         const char *df_fld[] = {"device","size","fs","pused","mount",NULL};
@@ -805,7 +805,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         print_tables (apires);
     }
     else {
-        print_hdr("GRAPHS");
+        print_hdr("Graphs", &rsrc.icns.graph);
         cmd_print_graph ("cpu","usage", 76, 2);
         printf ("\033[2m  12    ^     ^      ^     ^     ^      6     ^     "
                   "^      ^     ^     ^     0\033[0m\n");
@@ -846,9 +846,9 @@ int cmd_session_list (int argc, const char *argv[]) {
         return 0;
     }
 
-    print_hdr ("SESSIONS");
-    printf ("ID                SENDER"
-            "             TENANT    HOST      SERIAL        HEARTBEAT\n");
+    print_hdr ("Sessions", &rsrc.icns.sessions);
+    printf (" ID                SENDER"
+            "             TENANT    HOST      SERIAL      HEARTBEAT\n");
     
     var *v_session = var_get_array_forkey (v, "session");
     var *crsr = v_session->value.arr.first;
@@ -862,8 +862,8 @@ int cmd_session_list (int argc, const char *argv[]) {
         shorthost[8] = 0;
         shorttenant[8] = 0;
         
-        printf (VT_GRN "%08x-%08x" VT_RST " " VT_BLD "%-18s "
-                VT_RST "%-8s  %-8s  " VT_YLW "%-14" PRIu64 " "
+        printf (VT_GRN " %08x-%08x" VT_RST " " VT_BLD "%-18s "
+                VT_RST "%-8s  %-8s  " VT_YLW "%-12" PRIu64 " "
                 VT_RST "%s" VT_RST "\n",
                 (uint32_t) (var_get_int_forkey (crsr, "sessid")),
                 (uint32_t) (var_get_int_forkey (crsr, "addr")),
