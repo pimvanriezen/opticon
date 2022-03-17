@@ -26,7 +26,7 @@ ifeq (linux,$(OSNAME))
   LIBS+=-lm
 endif
 
-OBJS_OPTICONCLI = rsrc.o cmd.o main.o api.o prettyprint.o
+OBJS_OPTICONCLI = rsrc.o term.o cmd.o main.o api.o prettyprint.o
 
 all: ../../bin/opticon
 

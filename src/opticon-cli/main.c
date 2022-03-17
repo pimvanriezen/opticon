@@ -18,6 +18,7 @@
 #include "prettyprint.h"
 #include "debug.h"
 #include "rsrc.h"
+#include "term.h"
 
 optinfo OPTIONS;
 
@@ -544,8 +545,7 @@ int main (int _argc, const char *_argv[]) {
     int argc = _argc;
     struct stat st;
 
-    const char *tp = getenv ("TERM_PROGRAM");
-    if (tp && strcmp (tp, "iTerm.app") == 0) OPTIONS.iterm = true;
+    if (is_iterm()) OPTIONS.iterm = true;
     else OPTIONS.iterm = false;
 
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);

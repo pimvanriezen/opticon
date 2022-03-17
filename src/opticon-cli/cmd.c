@@ -772,7 +772,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         columnalign top_align[] = {CA_L, CA_R, CA_R, CA_R, CA_L, CA_NULL};
         vartype top_tp[] =
             {VAR_STR,VAR_INT,VAR_DOUBLE,VAR_DOUBLE,VAR_STR,VAR_NULL};
-        int top_wid[] = {15, 7, 9, 9, 0, 0};
+        int top_wid[] = {15, 7, 9, 9, 34, 0};
         int top_div[] = {0, 0, 0, 0, 0, 0};
         const char *top_suf[] = {"",""," %", " %", "", NULL};
     
