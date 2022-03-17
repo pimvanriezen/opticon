@@ -59,7 +59,8 @@ find rsrc -type d | grep / | cut -f2 -d/ | while read fork; do
     echo "        {" >> rsrc.c
     echo "            $sz," >> rsrc.c
     echo "            (const char[]) {" >> rsrc.c
-    xxd -c 10 -i < $file | sed -e "s/^/                /" >> rsrc.c
+    xxd -c 10 -i < $file | sed -e "s/^/              /" >> rsrc.c
+    echo "                ,0" >> rsrc.c
     echo "            }" >> rsrc.c
     echo "        }" >> rsrc.c
   done

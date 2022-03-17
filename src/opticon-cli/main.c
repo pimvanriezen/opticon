@@ -62,6 +62,20 @@ STRINGOPT(external_token)
 STRINGOPT(opticon_token)
 STRINGOPT(config_file)
 
+/** Print usage information.
+  * \param cmdname argv[0]
+  */
+void usage (const char *cmdname) {
+    print_hdr ("Opticon CLI",&rsrc.icns.appicon);
+    fprintf (stderr, rsrc.text.usage.data, cmdname);
+}
+
+/** Handler for the --help flag */
+int show_usage (const char *o, const char *v) {
+    usage("opticon");
+    exit(0);
+}
+
 /** Handle --type */
 int set_type (const char *o, const char *v) {
     if ( (strcmp (v, "integer") == 0) ||
@@ -342,7 +356,7 @@ char *resolve_unithost_service (const char *registry_url, const char *svcname) {
 /** Create a unithost-identity token. TODO: Add OTP support */
 int unithost_login (void) {
     char username[256];
-    printf ("%% Login required\n\n");
+    print_hdr ("Login required",&rsrc.icns.lock);
     char *domain = domain_from_url (OPTIONS.unithost_url);
     printf ("  UnitHost Domain: %s\n", domain);
     free (domain);
@@ -413,8 +427,8 @@ int unithost_login (void) {
 cliopt CLIOPT[] = {
     {"--tenant","-t",OPT_VALUE,"",set_tenant},
     {"--key","-k",OPT_VALUE,"",set_key},
-    {"--host","-h",OPT_VALUE,"",set_host},
-    {"--hostname","-H",OPT_VALUE,"",set_hostname},
+    {"--host","-H",OPT_VALUE,"",set_host},
+    {"--hostname","-N",OPT_VALUE,"",set_hostname},
     {"--time","-T",OPT_VALUE,"now",set_time},
     {"--path","-p",OPT_VALUE,"/var/opticon/db",set_path},
     {"--json","-j",OPT_FLAG,NULL,set_json},
@@ -438,6 +452,7 @@ cliopt CLIOPT[] = {
     {"--opticon-token","-O",OPT_VALUE,"",set_opticon_token},
     {"--config-file","-c",OPT_VALUE,
             "/etc/opticon/opticon-cli.conf",set_config_file},
+    {"--help","-h",OPT_FLAG,NULL,show_usage},
     {NULL,NULL,0,NULL,NULL}
 };
 
@@ -523,28 +538,24 @@ int conf_admin_token (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
-/** Print usage information.
-  * \param cmdname argv[0]
-  */
-void usage (const char *cmdname) {
-    fprintf (stderr, rsrc.text.usage.data, cmdname);
-}
-
 /** Main, uses cliopt to do the dirty. */
 int main (int _argc, const char *_argv[]) {
     const char *tstr;
     int argc = _argc;
     struct stat st;
+
+    const char *tp = getenv ("TERM_PROGRAM");
+    if (tp && strcmp (tp, "iTerm.app") == 0) OPTIONS.iterm = true;
+    else OPTIONS.iterm = false;
+
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);
     if (! argv) return 1;
+
     if (argc < 2) {
         usage (argv[0]);
         return 1;
     }
     
-    const char *tp = getenv ("TERM_PROGRAM");
-    if (tp && strcmp (tp, "iTerm.app") == 0) OPTIONS.iterm = true;
-    else OPTIONS.iterm = false;
 
     opticonf_add_reaction ("endpoints/keystone", conf_endpoint_keystone);
     opticonf_add_reaction ("endpoints/unithost", conf_endpoint_unithost);
