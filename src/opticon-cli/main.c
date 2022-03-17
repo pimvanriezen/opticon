@@ -358,7 +358,7 @@ int unithost_login (void) {
     char username[256];
     print_hdr ("Login required",&rsrc.icns.lock);
     char *domain = domain_from_url (OPTIONS.unithost_url);
-    printf ("  UnitHost Domain: %s\n", domain);
+    printf ("  UnitHost Domain: " VT_YLW "%s" VT_RST "\n", domain);
     free (domain);
     printf ("  Username.......: ");
     fflush (stdout);
