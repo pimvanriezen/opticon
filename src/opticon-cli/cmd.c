@@ -782,23 +782,33 @@ int cmd_get_record (int argc, const char *argv[]) {
     
         Vdone("top");
         /* -------------------------------------------------------------*/
-        print_hdr ("Storage", &rsrc.icns.disks);
-    
-        const char *df_hdr[] = {"DEVICE","SIZE","FS","USED","MOUNTPOINT",NULL};
-        const char *df_fld[] = {"device","size","fs","pused","mount",NULL};
-        columnalign df_aln[] = {CA_L,CA_R,CA_L,CA_R,CA_L,CA_NULL};
-        vartype df_tp[] = {VAR_STR,VAR_INT,VAR_STR,VAR_DOUBLE,VAR_STR,VAR_NULL};
-        int df_wid[] = {24, 14, 6, 8, 0};
-        int df_div[] = {0, (1024), 0, 0, 0, 0};
-        const char *df_suf[] = {""," GB", "", " %", "", ""};
-    
         var *v_df = var_get_array_forkey (apires, "df");
+        if (var_get_count (v_df) > 0) {
+            print_hdr ("Storage", &rsrc.icns.disks);
     
-        /*print_generic_table (v_df);*/
+            const char *df_hdr[] = {
+                "DEVICE","SIZE","FS","USED","MOUNTPOINT",NULL
+            };
+            const char *df_fld[] = {
+                "device","size","fs","pused","mount",NULL
+            };
+            columnalign df_aln[] = {
+                CA_L,CA_R,CA_L,CA_R,CA_L,CA_NULL
+            };
+            vartype df_tp[] = {
+                VAR_STR,VAR_INT,VAR_STR,VAR_DOUBLE,VAR_STR,VAR_NULL
+            };
+            int df_wid[] = {24, 14, 6, 8, 0};
+            int df_div[] = {0, (1024), 0, 0, 0, 0};
+            const char *df_suf[] = {""," GB", "", " %", "", ""};
     
-        print_table (v_df, df_hdr, df_fld,
-                     df_aln, df_tp, df_wid, df_suf, df_div);
+            var *v_df = var_get_array_forkey (apires, "df");
     
+            /*print_generic_table (v_df);*/
+    
+            print_table (v_df, df_hdr, df_fld,
+                         df_aln, df_tp, df_wid, df_suf, df_div);
+        }    
         Vdone("df");
     
         /** Print any remaining table data */
