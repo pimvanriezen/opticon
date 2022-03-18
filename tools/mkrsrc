@@ -61,7 +61,7 @@ find rsrc -type d | grep / | cut -f2 -d/ | while read fork; do
   find rsrc/$fork -type f | while read file; do
     sz=$(wc -c < $file | sed -e 's/ //g')
     id=$(echo "$file" | sed -e "s@.*/@@;s/[.]rsrc$//;s/[.]/_/g")
-    echo "        ${globalname}.${fork}.${id}: $sz bytes"
+    echo "        ${fork}.${id}: $sz bytes"
     if [ "$isfirst" = "0" ]; then
       echo "        ," >> rsrc.c
     fi
