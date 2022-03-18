@@ -3,7 +3,7 @@
 #include <string.h>
 #include <grp.h>
 
-int main (int argc, const char *argv[]) {
+int main (int argc, char *const *argv) {
     if (geteuid()) {
         fprintf (stderr, "%% Helper not suid\n");
         return 1;
