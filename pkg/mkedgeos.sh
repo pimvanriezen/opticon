@@ -29,7 +29,7 @@ strip $BUILDROOT/config/scripts/opticon-helper
 cp init/opticon-agent.init $BUILDROOT/config/scripts/
 cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/config/
 cp src/opticon-agent/opticon-defaultprobes.conf $BUILDROOT/config/
-cp src.opticon-agent/helpers.conf $BUILDROOT/config/opticon-helpers.conf
+cp src/opticon-agent/helpers.conf $BUILDROOT/config/opticon-helpers.conf
 cat > $BUILDROOT/config/scripts/post-config.d/opticon-agent << _EOF_
 #!/bin/sh
 /config/scripts/opticon-agent.init start
