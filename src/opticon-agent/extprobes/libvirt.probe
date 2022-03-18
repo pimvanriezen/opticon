@@ -1,18 +1,17 @@
-#!/bin/bash
 cat << _EOF_
 {
     "vm":[
 _EOF_
 
 mkdir -p /var/run/opticon/libvirt.probe
-virsh list | grep running | sed -e 's/^ [0-9]* *//;s/ *running//g' | while read vmname; do
-  ramkb=$(virsh dominfo "$vmname" | grep '^Used memory' | sed -e 's/.*: *//;s/ .*//')
-  numcpu=$(virsh dominfo "$vmname" | grep '^Used memory' | sed -e 's/.*: *//;s/ .*//')
+opticon-helper virsh list | grep running | sed -e 's/^ [0-9]* *//;s/ *running//g' | while read vmname; do
+  ramkb=$(opticon-helper virsh dominfo "$vmname" | grep '^Used memory' | sed -e 's/.*: *//;s/ .*//')
+  numcpu=$(opticon-helper virsh dominfo "$vmname" | grep '^CPU.s' | sed -e 's/.*: *//;s/ .*//')
   ram=$((ramkb / 1024))
   cachefile="/var/run/opticon/libvirt.probe/${vmname}.vm"
   [ -e "$cachefile" ] && . "$cachefile"
   nw_date=$(date +%s)
-  nw_cputime=$(virsh cpu-stats --total "$vmname" | grep cpu_time | sed -e 's/.*cpu_time *//' | cut -f1 -d.)
+  nw_cputime=$(opticon-helper virsh cpu-stats --total "$vmname" | grep cpu_time | sed -e 's/.*cpu_time *//' | cut -f1 -d.)
   if [ -z "$last_date" ]; then
     echo "        { name:\"$vmname\", cores:$numcpu, ram:$ram, cpu:0.0 }"
   else
@@ -22,7 +21,7 @@ virsh list | grep running | sed -e 's/^ [0-9]* *//;s/ *running//g' | while read 
     cpuperc=$((cpudiff / tdiff))
     echo "        { name:\"$vmname\", cores:$numcpu, ram:$ram, cpu:${cpuperc}.0 }"
   fi
-  
+
   printf 'last_date="%s"\n' "$nw_date" > $cachefile
   printf 'last_cputime="%s"\n' "$nw_cputime" >> $cachefile
 done

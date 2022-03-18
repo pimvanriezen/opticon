@@ -544,6 +544,7 @@ void print_generic_table (var *table) {
     
     resource *rs = &rsrc.icns.overview;
     if (strcmp (table->id, "who") == 0) rs = &rsrc.icns.remote;
+    else if (strcmp (table->id, "vm") == 0) rs = &rsrc.icns.vm;
     term_new_column();
     print_hdr (title, rs);
     print_table (table, (const char **) header, (const char **) field,
