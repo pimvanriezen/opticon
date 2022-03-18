@@ -705,7 +705,11 @@ int cmd_get_record (int argc, const char *argv[]) {
         }
     
         print_value ("Uptime",VT_GRN "%s" VT_RST,uptimestr);
-        print_value ("OS/Hardware",VT_YLW "%s %s " VT_RST "(%s)",
+
+        const char *hw = VDstr("os","hw");
+        if (hw) print_value ("Hardware", "%s", hw);
+
+        print_value ("OS/Arch",VT_YLW "%s %s " VT_RST "(%s)",
                      VDstr("os","kernel"), VDstr("os","version"),
                      VDstr("os","arch"));
         const char *dist = VDstr("os","distro");
@@ -860,6 +864,24 @@ int cmd_get_record (int argc, const char *argv[]) {
                          df_aln, df_tp, df_wid, df_suf, df_div);
         }    
         Vdone("df");
+        
+        var *v_vm = var_get_array_forkey (apires, "vm");
+        if (var_get_count (v_vm) > 0) {
+            term_new_column();
+            print_hdr ("Virtual Machines", rsrc(icns.vm));
+            
+            const char *vm_hdr[] = {"MACHINE NAME","CPU CORES","MEMORY",
+                                    "CPU USAGE",NULL};
+            const char *vm_fld[] = {"name","cores","ram","cpu",NULL};
+            columnalign vm_aln[] = {CA_L,CA_R,CA_R,CA_R,CA_NULL};
+            vartype vm_tp[] = {VAR_STR,VAR_INT,VAR_INT,VAR_DOUBLE,VAR_NULL};
+            int vm_wid[] = {28,10,10,20,0};
+            int vm_div[] = {0,0,0,0,0};
+            const char *vm_suf[] = {"","","MB","%",""};
+            print_table (v_vm, vm_hdr, vm_fld, vm_aln, vm_tp,
+                         vm_wid, vm_suf, vm_div);
+        }
+        Vdone("vm");
     
         /** Print any remaining table data */
         print_tables (apires);
