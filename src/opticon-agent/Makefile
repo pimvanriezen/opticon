@@ -28,12 +28,15 @@ CFLAGS+=-DOS_$(OSDEF) -DOSNAME=$(OSNAME) -DOSREL=$(OSREL) -DOSRELMAJOR=$(OSRELMA
 OBJS_OPTICONAGENT = main.o probelist.o probes.o resender.o tproc.o wordlist.o
 LIBS = ../../lib/libopticon.a ../../lib/libopticondb.a 
 				  
-all: ../../bin/opticon-agent
+all: ../../bin/opticon-agent ../../bin/opticon-helper
 
 ../../bin/opticon-agent: $(OBJS_OPTICONAGENT) $(LIBS)
 	@echo "[LINK ] opticon-agent"
 	@$(CC) $(LDFLAGS) -o ../../bin/opticon-agent \
 		$(OBJS_OPTICONAGENT) $(LIBS) $(LPTHREAD) -lm -lz
+
+../../bin/opticon-helper: helper.o
+	@$(CC) $(LDFLAGS) -o ../../bin/opticon-helper helper.o
 
 clean:
 	rm -f *.o ../../bin/opticon-agent
