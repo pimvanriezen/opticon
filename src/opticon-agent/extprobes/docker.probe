@@ -1,0 +1,34 @@
+#!/bin/bash
+cat << _EOF_
+{
+    "cntr":[
+_EOF_
+
+opticon-helper docker ps --format '{{.Image}}|{{.Names}}|{{.Size}}' | \
+  while read line; do
+    img=$(echo "$line" | cut -f1 -d'|')
+    nms=$(echo "$line" | cut -f2 -d'|')
+    szraw=$(echo "$line" | cut -f3 -d'|')
+    szunit=$(echo "$szraw" | cut -f3 -d' ' | cut -f1 -d')' | sed -e 's/[.][0-9]*//')
+    sz=$(echo "$szunit" | sed -e 's/[^0-9]//g')
+    unit=$(echo "$szunit" | sed -e 's/[0-9]//g')
+    case "$unit" in
+        B)
+            unit=0
+            ;;
+        
+        kB)
+            sz=$((sz / 1024))
+            ;;
+        
+        GB)
+            sz=$((sz * 1024))
+            ;;
+    esac
+    echo "        { name:\"${nms}\", image:\"${img}\", size:${sz} }"
+  done
+
+cat << _EOF_
+    ]
+}
+_EOF_

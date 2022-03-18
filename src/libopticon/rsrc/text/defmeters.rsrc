@@ -208,8 +208,9 @@
         description: "Unit"
     }
     fan/v {
-        type: string
+        type: integer
         description: "Speed"
+        unit: "%"
     }
     temp {
         type: table
@@ -224,7 +225,25 @@
         description: "Unit"
     }
     temp/v {
-        type: string
+        type: integer
         description: "Temperature"
+        unit: "C"
+    }
+    cnt {
+        type: table
+        description: "Containers"
+    }
+    cnt/name {
+        type: string
+        description: "Name"
+    }
+    cnt/image {
+        type: string
+        description: "Image"
+    }
+    cnt/size {
+        type: integer
+        description: "Size"
+        unit: "MB"
     }
 }
