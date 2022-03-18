@@ -28,6 +28,8 @@ mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/etc/opticon
 mkdir -p $BUILDROOT/lib/systemd/system
 mkdir -p $BUILDROOT/usr/sbin
+mkdir -p $BUILDROOT/var/opticon/probes
+mkdir -p $BUILDROOT/run/opticon
 mkdir -p $BUILDROOT/DEBIAN
 
 # Create debian control file
@@ -48,9 +50,12 @@ cp pkg/opticon-agent.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 # Copy binaries, scripts and example config
 cp bin/opticon-agent $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-agent
+cp bin/opticon-helper $BUILDROOT/usr/bin/opticon-helper
 cp init/opticon-agent.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/etc/opticon/
 cp src/opticon-agent/opticon-defaultprobes.conf $BUILDROOT/etc/opticon/
+cp src/opticon-agent/helpers.conf $BUILDROOT/etc/opticon/
+cp src/opticon-agent/extprobes/*.probe $BUILDROOT/var/opticon/probes
 
 # Build the package
 dpkg-deb --build $BUILDROOT || exitfail Could not build

@@ -140,7 +140,7 @@ var *runprobe_ipmi (probe *self) {
     if (vipmi_if) ipmi_interface = var_get_str (vipmi_if);
     var *vipmi_values = var_get_dict_forkey (self->options, "values");
     
-    sprintf (buf, "ipmitool -c -I %s sdr", ipmi_interface);
+    sprintf (buf, "opticon-helper ipmitool -c -I %s sdr", ipmi_interface);
     F = popen_safe (buf, "r");
     if (! F) {
         log_warn ("probe_ipmi: Could not open ipmitool: %s", strerror(errno));

@@ -20,6 +20,12 @@ if [ "$AGENT" = "/config/scripts/opticon-agent" ]; then
     chmod 750 /etc/opticon
     ln -s /config/opticon-agent.conf /etc/opticon/opticon-agent.conf
     ln -s /config/opticon-defaultprobes.conf /etc/opticon/opticon-defaultprobes.conf
+    ln -s /config/opticon-helpers.conf /etc/opticon/helpers.conf
+    if [ ! -e /usr/bin/opticon-helper ]; then
+      ln -s /config/scripts/opticon-helper /usr/bin/opticon-helper
+    fi
+    chgrp opticon /config/scripts/opticon-helper
+    chmod 4750 /config/scripts/opticon-helper
   fi
 fi
 

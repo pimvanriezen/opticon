@@ -211,7 +211,6 @@ void term_new_column (void) {
             TERMINFO.columnstart = TERMINFO.columnend = TERMINFO.y;
         }
         else {
-            //printf ("[%i,%i,%i]", TERMINFO.curcolumn, TERMINFO.y, TERMINFO.columnstart);
             if (TERMINFO.y > TERMINFO.columnstart) {
                 printf ("\033[%iA", TERMINFO.y - TERMINFO.columnstart);
                 TERMINFO.y = TERMINFO.columnstart;
@@ -285,7 +284,15 @@ void term_print_icns (int height, resource *icns) {
 void term_print_hdr (const char *title, resource *rs) {
     if (TERMINFO.attr & TERMATTR_INLINEGFX) {
         term_printf ("\n\n<B>           <b>%s", title);
-        term_fill_line (' ');
+        if (TERMINFO.curcolumn == 0) {
+            int tmp = TERMINFO.columnwidth;
+            TERMINFO.columnwidth = TERMINFO.cols;
+            term_fill_line (' ');
+            TERMINFO.columnwidth = tmp;
+        }
+        else {
+            term_fill_line (' ');
+        }
         term_printf ("</>\n\n");
         term_crsr_up (3);
         term_crsr_setx (2);
