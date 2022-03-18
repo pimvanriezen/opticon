@@ -14,6 +14,7 @@
 #include "prettyprint.h"
 #include "api.h"
 #include "cmd.h"
+#include "term.h"
 
 static const char *PENDING_HDR = NULL;
 static resource *PENDING_RSRC = NULL;
@@ -45,18 +46,11 @@ enum termtype term (void) {
 }
 
 void print_line (void) {
-    if (OPTIONS.iterm) {
-        printf ("\n");
-    }
-    else if (term() == TERM_MODERN) {
-        printf ("\033[1m╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
-                "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
-                "╌╌╌╌╌╌╌╌\033[0m\n");
+    if (TERMINFO.attr & TERMATTR_INLINEGFX) {
+        term_printf ("\n");
     }
     else {
-        printf ("\033[1m------------------------------------"
-                "------------------------------------"
-                "--------\033[0m\n");
+        term_fill_line ('-');
     }
 }
 
@@ -104,21 +98,21 @@ void print_bar (int width, double max, double v) {
         bars[8] = "#";
     }
     
-    printf ("\033[38;5;45m\033[48;5;239m");
+    term_printf ("\033[38;5;45m\033[48;5;239m");
     for (int i=0; i<width; ++i) {
         if ((i+1) <= (v/prop)) {
-            printf ("%s", (term()==TERM_MODERN) ? bars[8] : pbars[8]);
+            term_printf ("%s", (term()==TERM_MODERN) ? bars[8] : pbars[8]);
         }
         else if (i > (v/prop)) {
-            printf (" ");
+            term_printf (" ");
         }
         else {
             double diff = ((i+1) - (v/prop)) * 8;
-            printf ("%s", (term()==TERM_MODERN) ? bars[(int) (8-diff)]
-                                                : pbars[(int) (8-diff)]);
+            term_printf ("%s", (term()==TERM_MODERN) ? bars[(int) (8-diff)]
+                                                   : pbars[(int) (8-diff)]);
         }
     }
-    printf ("\033[0m");
+    term_printf ("</>");
 }
 
 void print_graph (int width, int height, int ind, double minmax, double *data) {
@@ -168,14 +162,14 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
     double gr = 60;
     
     for (y=0; y<height; ++y) {
-        printf ("\033[%iC", ind);
+        term_crsr_setx (ind); // printf ("\033[%iC", ind);
 
-        if (term() == TERM_MODERN) {
-            printf ("\033[38;2;%.0f;%.0f;%.0fm"
-                    "\033[48;2;%.0f;%.0f;%.0fm",
-                    r, g, b, gr, gr, gr);
+        if (TERMINFO.attr & TERMATTR_RGBCOLOR) {
+            term_printf ("\033[38;2;%.0f;%.0f;%.0fm"
+                         "\033[48;2;%.0f;%.0f;%.0fm",
+                         r, g, b, gr, gr, gr);
             for (x=0; x<width; ++x) {
-                printf ("%s", bars[map[x+(y*width)]]);
+                term_printf ("%s", bars[map[x+(y*width)]]);
             }
         
             r = r + dr;
@@ -185,11 +179,11 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
         }
         else {
             for (x=0; x<width; ++x) {
-                printf ("%s", pbars[map[x+(y*width)]]);
+                term_printf ("%s", pbars[map[x+(y*width)]]);
             }
         }
         
-        printf ("\033[0m\n");
+        term_printf ("</>\n");
     }
     
     free (map);    
@@ -197,65 +191,7 @@ void print_graph (int width, int height, int ind, double minmax, double *data) {
 
 /** Display function for host-show section headers */
 void print_hdr (const char *hdr, resource *rs) {
-    if (OPTIONS.iterm) {
-        int output_length = rs->sz / 4 * 3;
-        if (rs->data[rs->sz - 1] == '=') output_length--;
-        if (rs->data[rs->sz - 2] == '=') output_length--;
-        if (PRINTED_FIRST) {
-            /*
-            printf ("\n\n\033[48;2;48;52;61m \033[0m  ");
-            printf ("\033[s\033[1A");
-            printf ("\033]1337;File=name=aWNvbi5wbmcK;height=2;size=%i;"
-                    "inline=1:", output_length);
-            fwrite (rs->data, 1, rs->sz, stdout);
-            printf ("\007\033[u\033[5C \033[48;2;48;52;61m\033[1m   %-66s\033[0m\n\n", hdr);
-            return; */
-        }
-
-        printf ("\n");
-        printf ("\n\033[48;2;48;52;61m");
-        printf ("                                        "
-                "                                        ");
-        printf ("\033[0m\n\n\033[3A  ");
-        
-        printf ("\033]1337;File=name=aWNvbi5wbmcK;height=3;size=%i;"
-                "inline=1:", output_length);
-        fwrite (rs->data, 1, rs->sz, stdout);
-        printf ("\007\n");
-        
-        printf ("\033[s\033[2A\033[11C\033[1m\033[48;2;48;52;61m %s "
-                "\033[0m\033[u", hdr);
-        fflush (stdout);
-        printf ("\n");
-        PRINTED_FIRST=1;
-        return;
-    }
-    
-    const char *mins = "-----------------------------------------------"
-                      "-----------------------------------------------"
-                      "-----------------------------------------------";
-    
-    int minspos = strlen(mins) - 73;
-    const char *crsr = hdr;
-    if (term() == TERM_MODERN) {
-        printf ("\033[1m╌╌╌( \033[0m\033[38;5;45m");
-    }
-    else {
-        printf ("\033[1m---( \033[0m\033[38;5;45m");
-    }
-    while (*crsr) {
-        putc (toupper (*crsr), stdout);
-        minspos++;
-        crsr++;
-    }
-    printf ("\033[0m\033[1m )");
-    
-    crsr = mins+minspos;
-    while (*crsr) {
-        printf ((term() == TERM_MODERN) ? "╌" : "-");
-        crsr++;
-    }
-    printf ("\033[0m\n");
+    term_print_hdr (hdr, rs);
 }
 
 /** Display function for host-show data */
@@ -275,25 +211,22 @@ void print_value (const char *key, const char *fmt, ...) {
 
     const char *dots = "......................";
     int dotspos = strlen(dots) - 18;
-    printf (" %s\033[2m", key);
+    term_printf (" %s<l>", key);
     dotspos += strlen (key);
-    if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
-    printf ("\033[0m: ");
-    printf ("%s", val);
-    printf ("\n");
+    if (dotspos < strlen (dots)) term_printf ("%s", dots+dotspos);
+    term_printf ("</>: %s\n", val);
 }
 
 void print_gauge_value (const char *key, const char *unit, double val,
                         double max) {
     const char *dots = "......................";
     int dotspos = strlen(dots) - 18;
-    printf (" %s\033[2m", key);
+    term_printf (" %s<l>", key);
     dotspos += strlen (key);
-    if (dotspos < strlen (dots)) printf ("%s", dots+dotspos);
-    printf ("\033[0m: ");
-    printf ("\033[1m%6.2f \033[0m%-20s-|",val, unit);
+    if (dotspos < strlen (dots)) term_printf ("%s", dots+dotspos);
+    term_printf ("</>: <b>%6.2f </>%-20s-|", val, unit);
     print_bar (25, max, val);
-    printf ("|+\n");
+    term_printf ("|+\n");
 }
 
 /** Print out an array as a comma-separated list */
@@ -307,20 +240,20 @@ void print_array (const char *key, var *arr) {
         if (cnt) strncat (out, ",", 4095);
         switch (crsr->type) {
             case VAR_INT:
-                snprintf (out+strlen(out), 4095-strlen(out), 
-                          VT_BLD "%" PRIu64 VT_RST, var_get_int (crsr));
+                snprintf (out+strlen(out), 4095-strlen(out),
+                          "<b>%" PRIu64 "</>", var_get_int (crsr));
                 break;
             
             case VAR_DOUBLE:
                 snprintf (out+strlen(out), 4095-strlen(out), 
-                         VT_BLD "%.2f" VT_RST, var_get_double (crsr));
+                         "<b>%.2f</>", var_get_double (crsr));
                 break;
             
             case VAR_STR:
                 str = var_get_str (crsr);
                 if (! str) break;
                 snprintf (out+strlen(out), 4095-strlen(out),
-                          VT_YLW "%s" VT_RST, var_get_str (crsr));
+                          "<y>%s</>", var_get_str (crsr));
                 break;
             
             default:
@@ -363,26 +296,24 @@ void print_values (var *apires, const char *pfx) {
         switch (crsr->type) {
             case VAR_ARRAY:
                 if (crsr->value.arr.first &&
-                   crsr->value.arr.first->type != VAR_DICT) {
+                    crsr->value.arr.first->type != VAR_DICT) {
                     print_array (name, crsr);
                 }
                 break;
             
             case VAR_STR:
-                sprintf (valbuf, VT_YLW "%s" VT_RST,
-                         var_get_str(crsr));
+                sprintf (valbuf, "<y>%s</>", var_get_str(crsr));
                 print_value (name, "%s", valbuf);
                 break;
             
             case VAR_INT:
-                sprintf (valbuf, VT_BLD "%" PRIu64 VT_RST " %s",
+                sprintf (valbuf, "<b>%" PRIu64 "</> %s",
                          var_get_int(crsr), unit);
                 print_value (name, "%s", valbuf);
                 break;
             
             case VAR_DOUBLE:
-                sprintf (valbuf, VT_BLD "%.2f" VT_RST " %s", 
-                         var_get_double(crsr), unit);
+                sprintf (valbuf, "<b>%.2f</> %s", var_get_double(crsr), unit);
                 print_value (name, "%s", valbuf);
                 break;
             
@@ -423,7 +354,7 @@ void print_table (var *arr, const char **hdr, const char **fld,
     const char *coltbl[] = { "\033[38;5;185m",
                              "\033[38;5;28m" };
     
-    printf (" ");
+    term_printf (" ");
     while (hdr[col]) {
         strcpy (fmt, "%");
         if (align[col] == CA_L) strcat (fmt, "-");
@@ -431,10 +362,10 @@ void print_table (var *arr, const char **hdr, const char **fld,
             sprintf (fmt+strlen(fmt), "%i", wid[col]);
         }
         strcat (fmt, "s ");
-        printf (fmt, hdr[col]);
+        term_printf (fmt, hdr[col]);
         col++;
     }
-    printf ("\n ");
+    term_printf ("\n ");
     
     var *node = arr->value.arr.first;
     const char *str;
@@ -507,12 +438,12 @@ void print_table (var *arr, const char **hdr, const char **fld,
             if (iscolor) colorsdone++;
             strcat (fmt, tsuffx);
             strcat (fmt, " ");
-            printf (fmt, buf);
+            term_printf (fmt, buf);
             col++;
         }
-        printf ("\n");
+        term_printf ("\n");
         node = node->next;
-        if (node) printf(" ");
+        if (node) term_printf(" ");
     }
 }
 
@@ -613,6 +544,7 @@ void print_generic_table (var *table) {
     
     resource *rs = &rsrc.icns.overview;
     if (strcmp (table->id, "who") == 0) rs = &rsrc.icns.remote;
+    term_new_column();
     print_hdr (title, rs);
     print_table (table, (const char **) header, (const char **) field,
                  align, type, width, (const char **) suffix, div);

@@ -68,7 +68,7 @@ STRINGOPT(config_file)
   */
 void usage (const char *cmdname) {
     print_hdr ("Opticon CLI",&rsrc.icns.appicon);
-    fprintf (stderr, rsrc.text.usage.data, cmdname);
+    term_printf (rsrc.text.usage.data, cmdname);
 }
 
 /** Handler for the --help flag */
@@ -545,7 +545,8 @@ int main (int _argc, const char *_argv[]) {
     int argc = _argc;
     struct stat st;
 
-    if (is_iterm()) OPTIONS.iterm = true;
+    term_init();
+    if (term_is_iterm()) OPTIONS.iterm = true;
     else OPTIONS.iterm = false;
 
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);

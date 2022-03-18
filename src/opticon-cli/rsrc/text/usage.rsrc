@@ -1,48 +1,51 @@
-%% Usage: %s <command> [options]
-  Options:
-        --json
-        --config-file <file>
-        --opticon-token <token>
-        --external-token <token>
-        --unithost-url <url>
-        --keystone-url <url>
-        --api-url <url>
-        --watch
-        --flip
+ Usage: <b>%s</> <y><command><g> [options]</>
 
-  Commands:
-        session-list
-        tenant-list
-        tenant-create        [--tenant <uuid>] [--key <base64>] [--name <name>]
-        tenant-delete         --tenant <uuid>
-        tenant-get-metadata   --tenant <uuid>
-        tenant-set-metadata   --tenant <uuid> <key> <value>
-        tenant-set-quota      --tenant <uuid> <quota megabytes>
-        tenant-get-quota      --tenant <uuid>
-        tenant-get-summary    --tenant <uuid>
-        meter-list            --tenant <uuid>
-        meter-create          --tenant <uuid> --meter <meterid> --type <TYPE>
-                              --description <description> [--unit <unitstr>]
-        meter-delete          --tenant <uuid> --meter <meterid>
-        watcher-list          --tenant <uuid> [--host <uuid>]
-        watcher-set           --tenant <uuid> [--host <uuid>]
-                              --meter <meterid>
-                              --level <warning|alert|critical>
-                              --match <gt|lt|eq> (only for tenant)
-                             [--weight <weight>] --value <value>
-        watcher-delete        --tenant <uuid> [--host <uuid>
-                              --meter <meterid>
-        host-list             --tenant <uuid>
-        host-overview         --tenant <uuid>
-        host-show             --tenant <uuid> --host <host> [--time <TIMESPEC>]
-        host-delete           --tenant <uuid> --host <uuid>
+   Options:
+         <g>--json</>
+         <g>--config-file</> <file>
+         <g>--opticon-token</> <token>
+         <g>--external-token</> <token>
+         <g>--unithost-url</> <url>
+         <g>--keystone-url</> <url>
+         <g>--api-url</> <url>
+         <g>--watch</>
+         <g>--flip</>
 
-  TYPE:
-        table, integer, string, or frac
+   Commands:
+         <y>session-list
+         <y>tenant-list
+         <y>tenant-create        </>[<g>--tenant</> <uuid>] [<g>--key</> <base64>] [<g>--name</> <name>]
+         <y>tenant-delete        </> <g>--tenant</> <uuid>
+         <y>tenant-get-metadata  </> <g>--tenant</> <uuid>
+         <y>tenant-set-metadata  </> <g>--tenant</> <uuid> <key> <value>
+         <y>tenant-set-quota     </> <g>--tenant</> <uuid> <quota megabytes>
+         <y>tenant-get-quota     </> <g>--tenant</> <uuid>
+         <y>tenant-get-summary   </> <g>--tenant</> <uuid>
+         <y>meter-list           </> <g>--tenant</> <uuid>
+         <y>meter-create         </> <g>--tenant</> <uuid> <g>--meter</> <meterid> <g>--type</> <TYPE>
+         <y>                     </> <g>--description</> <description> [<g>--unit</> <unitstr>]
+         <y>meter-delete         </> <g>--tenant</> <uuid> <g>--meter</> <meterid>
+         <y>watcher-list         </> <g>--tenant</> <uuid> [<g>--host</> <uuid>]
+         <y>watcher-set          </> <g>--tenant</> <uuid> [<g>--host</> <uuid>]
+         <y>                     </> <g>--meter</> <meterid>
+         <y>                     </> <g>--level</> <warning|alert|critical>
+         <y>                     </> <g>--match</> <gt|lt|eq> (only for tenant)
+         <y>                     </>[<g>--weight</> <weight>] <g>--value</> <value>
+         <y>watcher-delete       </> <g>--tenant</> <uuid> [<g>--host</> <uuid>
+         <y>                     </> <g>--meter</> <meterid>
+         <y>host-list            </> <g>--tenant</> <uuid>
+         <y>host-overview        </> <g>--tenant</> <uuid>
+         <y>host-show            </> <g>--tenant</> <uuid> <g>--host</> <host> [<g>--time</> <TIMESPEC>]
+         <y>host-delete          </> <g>--tenant</> <uuid> <g>--host</> <uuid>
 
-  TIMESPEC examples:
-        2014-01-04T13:37
-        11:13
-        -1d
-        -3h
-        now
+   TYPE:
+         <g>table, integer, string, or frac</>
+
+   TIMESPEC examples:<g>
+         2014-01-04T13:37
+         11:13
+         -1d
+         -3h
+         now
+ </>
+ 

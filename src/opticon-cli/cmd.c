@@ -23,6 +23,7 @@
 #include "cmd.h"
 #include "api.h"
 #include "prettyprint.h"
+#include "term.h"
 
 /** The tenant-list command */
 int cmd_tenant_list (int argc, const char *argv[]) {
@@ -32,16 +33,16 @@ int cmd_tenant_list (int argc, const char *argv[]) {
     }
     else {
         print_hdr("Tenants", &rsrc.icns.people);
-        printf (" UUID                                 Hosts  Name\n");
+        term_printf (" UUID                                 Hosts  Name\n");
 
         var *res_tenant = var_get_array_forkey (res, "tenant");
         if (var_get_count (res_tenant)) {
             var *crsr = res_tenant->value.arr.first;
             while (crsr) {
-                printf (VT_GRN " %s" VT_RST " %5" PRIu64 VT_YLW "  %s" VT_RST "\n",
-                        var_get_str_forkey (crsr, "id"),
-                        var_get_int_forkey (crsr, "hostcount"),
-                        var_get_str_forkey (crsr, "name"));
+                term_printf ("<g> %s</> %5" PRIu64 "<y>  %s</>\n",
+                             var_get_str_forkey (crsr, "id"),
+                             var_get_int_forkey (crsr, "hostcount"),
+                             var_get_str_forkey (crsr, "name"));
                 crsr = crsr->next;
             }
         }
@@ -118,12 +119,13 @@ int cmd_tenant_get_quota (int argc, const char *argv[]) {
         return 1;
     }
     
+    print_hdr ("Quota", &rsrc.icns.disks);
     var *meta = api_get ("/%s/quota", OPTIONS.tenant);
     if (! meta) return 1;
-    printf ("Tenant storage quota: %" PRIu64 " MB\n",
-            var_get_int_forkey (meta, "quota"));
-    printf ("Current usage: %.2f %%\n",
-            var_get_double_forkey (meta, "usage"));
+    term_printf ("Tenant storage quota: <b>%" PRIu64 "</> MB\n",
+                 var_get_int_forkey (meta, "quota"));
+    term_printf ("Current usage: <b>%.2f</> %%\n",
+                 var_get_double_forkey (meta, "usage"));
     var_free (meta);
     return 0;
 }
@@ -151,16 +153,47 @@ int cmd_host_overview (int argc, const char *argv[]) {
     var *ov = api_get ("/%s/host/overview", OPTIONS.tenant);
     if (! var_get_count (ov)) return 0;
 
-    print_hdr ("Overview", &rsrc.icns.overview);
-    printf (" NAME                         STATUS    "
-            "LOAD  NET I/O      CPU      GRAPH\n");
+    const char *diskiofield = NULL;
+    const char *addrfield = NULL;
     
+    print_hdr ("Overview", &rsrc.icns.overview);
+    int namewidth=28;
+    if (TERMINFO.cols > 80) {
+        namewidth += (TERMINFO.cols-81);
+        if (TERMINFO.cols > 100) {
+            diskiofield = "DISK I/O";
+            namewidth -= 9;
+            
+            if (TERMINFO.cols > 120) {
+                addrfield = "IP";
+                namewidth -= 31;
+            }
+        }
+    }
+    
+    char namefmt[16];
+    sprintf (namefmt, "%%-%is", namewidth);
+    term_printf (" ");
+    term_printf (namefmt, "NAME");
+    term_printf (" ");
+    
+    if (addrfield) {
+        term_printf ("%-30s ", addrfield);
+    }
+    
+    term_printf (" STATUS   LOAD ");
+    if (diskiofield) {
+        term_printf ("%-9s", diskiofield);
+    }
+    
+    term_printf ("  NET I/O      CPU      GRAPH\n");
+
     var *ov_dict = var_get_dict_forkey (ov, "overview");
     if (! var_get_count (ov_dict)) return 0;
     var *crsr = ov_dict->value.arr.first;
     while (crsr) {
         const char *hname = var_get_str_forkey (crsr, "hostname");
-        if (! hname) hname = "";
+        if ((! hname) || (! *hname)) hname = crsr->id;
         char shortname[32];
         strncpy (shortname, hname, 31);
         shortname[31] = 0;
@@ -169,13 +202,24 @@ int cmd_host_overview (int argc, const char *argv[]) {
         double load = var_get_double_forkey (crsr, "loadavg");
         uint64_t netio = var_get_int_forkey (crsr, "net/in_kbs");
         netio += var_get_int_forkey (crsr, "net/out_kbs");
+        
+        uint64_t diskio = var_get_int_forkey (crsr, "io/rdops");
+        diskio += var_get_int_forkey (crsr, "io/wrops");
+        
+        const char *ip = var_get_str_forkey (crsr, "agent/ip");
         double cpu = var_get_double_forkey (crsr, "pcpu");
         int rcpu = (cpu+5.0) / 10;
-        printf (VT_YLW " %-28s" VT_RST " %s %6.2f %8" PRIu64
-                " " VT_BLD "%6.2f" VT_RST " %% -|",
-                shortname, decorate_status(hstat), load, netio, cpu);
+        term_printf ("<y> ");
+        term_printf (namefmt, shortname);
+        term_printf ("</> ");
+        if (addrfield) term_printf ("%-30s ", ip);
+        term_printf ("%s %6.2f ", decorate_status(hstat), load);
+        if (diskiofield) {
+            term_printf ("%8" PRIu64 " ", diskio);
+        }
+        term_printf (" %8" PRIu64 " <b>%6.2f</> %% -|", netio, cpu);
         print_bar (12, 100, cpu);
-        printf ("|+\n");
+        term_printf ("|+\n");
         crsr = crsr->next;
     }
     var_free (ov);
@@ -246,7 +290,7 @@ int cmd_meter_list (int argc, const char *argv[]) {
     else {
         var *res_meter = var_get_dict_forkey (apires, "meter");
         if (var_get_count (res_meter)) {
-            printf ("From     Meter        Type      Unit    Description\n");
+            term_printf ("From     Meter        Type      Unit    Description\n");
             print_line();
             var *crsr = res_meter->value.arr.first;
             while (crsr) {
@@ -260,7 +304,7 @@ int cmd_meter_list (int argc, const char *argv[]) {
                 if (!unit) unit = "";
                 if (!org) org = "default";
             
-                printf ("%-8s %-12s %-8s  %-7s %s\n", org, crsr->id,
+                term_printf ("%-8s %-12s %-8s  %-7s %s\n", org, crsr->id,
                         type, unit, desc);
                 crsr = crsr->next;
             }
@@ -386,9 +430,9 @@ void print_data (const char *meterid, const char *trig, var *v) {
             break;
     }
     
-    printf ("%-8s %-12s %-9s %-6s %21s %18.1f\n", origin, meterid,
-            trig, var_get_str_forkey (v, "cmp"), valst,
-            var_get_double_forkey (v, "weight"));
+    term_printf ("%-8s %-12s %-9s %-6s %21s %18.1f\n", origin, meterid,
+                 trig, var_get_str_forkey (v, "cmp"), valst,
+                 var_get_double_forkey (v, "weight"));
 }
 
 /** The watcher-list command */
@@ -412,8 +456,8 @@ int cmd_watcher_list (int argc, const char *argv[]) {
         return 0;
     }
 
-    printf ("From     Meter        Trigger   Match                  "
-            "Value             Weight\n");
+    term_printf ("From     Meter        Trigger   Match                  "
+                 "Value             Weight\n");
     print_line();
 
     var *apiwatch = var_get_dict_forkey (apires, "watcher");
@@ -487,14 +531,14 @@ int cmd_tenant_create (int argc, const char *argv[]) {
     var *apires = api_call ("POST", req, "/%s", OPTIONS.tenant);
     if (apires) {
         var *r = var_get_dict_forkey (apires, "tenant");
-        printf ("Tenant created:\n");
+        term_printf ("Tenant created:\n");
         print_line();
-        printf ("     Name: %s\n"
-                "     UUID: %s\n"
-                "  AES Key: %s\n",
-                var_get_str_forkey (r, "name"),
-                OPTIONS.tenant,
-                var_get_str_forkey (r, "key"));
+        term_printf ("     Name: %s\n"
+                     "     UUID: %s\n"
+                     "  AES Key: %s\n",
+                     var_get_str_forkey (r, "name"),
+                     OPTIONS.tenant,
+                     var_get_str_forkey (r, "key"));
         print_line();
     }
     
@@ -523,8 +567,8 @@ int cmd_host_list (int argc, const char *argv[]) {
     var *v_hosts = var_get_array_forkey (apires, "host");
     if (var_get_count (v_hosts)) {
         print_hdr ("Hosts", &rsrc.icns.overview);
-        printf ("UUID                                    SIZE "
-                "FIRST             LAST\n");
+        term_printf ("UUID                                    SIZE "
+                     "FIRST             LAST\n");
         var *crsr = v_hosts->value.arr.first;
         
         while (crsr) {
@@ -546,10 +590,9 @@ int cmd_host_list (int argc, const char *argv[]) {
             start[10] = ' ';
             end[10] = ' ';
 
-            printf (VT_GRN "%s" VT_RST " " VT_BLD "%4" PRIu64
-                    VT_RST " %s %s  %s\n",
-                    var_get_str_forkey (crsr, "id"),
-                    usage, unit, start, end);
+            term_printf ("<g>%s</> <b>%4" PRIu64 "</> %s %s  %s\n",
+                         var_get_str_forkey (crsr, "id"),
+                         usage, unit, start, end);
 
             crsr = crsr->next;
         }
@@ -618,6 +661,8 @@ int cmd_get_record (int argc, const char *argv[]) {
     #define Vdone(x) var_delete_key(apires,x)
     #define Vexist(x) var_find_key(apires,x)
     /* -------------------------------------------------------------*/
+    
+    term_new_column();
     print_hdr ("Host", &rsrc.icns.computer);
     print_value ("UUID", VT_YLW "%s" VT_RST, OPTIONS.host);
     print_value ("Hostname", VT_YLW "%s" VT_RST, Vstr("hostname"));
@@ -668,6 +713,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         Vdone("os");
     
         /* -------------------------------------------------------------*/
+        term_new_column();
         print_hdr ("Resources", &rsrc.icns.gauge);
         print_value ("Processes",VT_BLD "%" PRIu64 VT_RST " "
                                  "(" VT_BLD "%" PRIu64 VT_RST " running, "
@@ -731,6 +777,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         print_values (apires, NULL);
     
         if (Vexist ("temp")) {
+            term_new_column();
             print_hdr ("System Temperature", &rsrc.icns.temp);
             
             const char *temp_hdr[] = {"PROBE","TEMP",NULL};
@@ -748,6 +795,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         }
     
          if (Vexist ("fan")) {
+            term_new_column();
             print_hdr ("System Fans", &rsrc.icns.fan);
             
             const char *fan_hdr[] = {"PROBE","SPEED",NULL};
@@ -765,6 +813,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         }
 
        /* -------------------------------------------------------------*/
+        term_new_column();
         print_hdr ("Process List", &rsrc.icns.procs);
     
         const char *top_hdr[] = {"USER","PID","CPU","MEM","NAME",NULL};
@@ -784,6 +833,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         /* -------------------------------------------------------------*/
         var *v_df = var_get_array_forkey (apires, "df");
         if (var_get_count (v_df) > 0) {
+            term_new_column();
             print_hdr ("Storage", &rsrc.icns.disks);
     
             const char *df_hdr[] = {
@@ -813,31 +863,36 @@ int cmd_get_record (int argc, const char *argv[]) {
     
         /** Print any remaining table data */
         print_tables (apires);
+        term_end_column();
     }
     else {
+        term_end_column();
         print_hdr("Graphs", &rsrc.icns.graph);
+        term_new_column();
         cmd_print_graph ("cpu","usage", 76, 2);
-        printf ("\033[2m  12    ^     ^      ^     ^     ^      6     ^     "
-                  "^      ^     ^     ^     0\033[0m\n");
+        term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^     "
+                  "^      ^     ^     ^     0</>\n");
 
+        term_new_column();
         cmd_print_graph ("link","rtt", 76, 2);
-        printf ("\033[2m  12    ^     ^      ^     ^     ^      6     ^     "
-                  "^      ^     ^     ^     0\033[0m\n");
+        term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^     "
+                  "^      ^     ^     ^     0</>\n");
+        term_new_column();
         cmd_print_graph ("net","input", 37, 2);
-        printf ("\033[7A");
+        term_crsr_up (7);
         cmd_print_graph ("net","output", 37, 41);
-        printf ("\033[2m"
-                "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
-                "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  "
-                "\033[0m\n");
+        term_printf ("<l>"
+                     "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
+                     "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  </>\n");
 
+        term_new_column();
         cmd_print_graph ("io","read", 37, 2);
-        printf ("\033[7A");
+        term_crsr_up (7);
         cmd_print_graph ("io","write", 37, 41);
-        printf ("\033[2m"
-                "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
-                "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  "
-                "\033[0m\n");
+        term_printf ("<l>"
+                     "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
+                     "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  </>\n");
+        term_end_column();
     }
     print_line();
 
@@ -857,8 +912,13 @@ int cmd_session_list (int argc, const char *argv[]) {
     }
 
     print_hdr ("Sessions", &rsrc.icns.sessions);
-    printf (" ID                SENDER"
-            "             TENANT    HOST      SERIAL      HEARTBEAT\n");
+    const char *spc = "                            ";
+    
+    term_printf (" ID                SENDER             TENANT    ");
+    if (TERMINFO.cols>135) term_printf (spc);
+    term_printf ("HOST      ");
+    if (TERMINFO.cols>107) term_printf (spc);
+    term_printf ("SERIAL      HEARTBEAT\n");
     
     var *v_session = var_get_array_forkey (v, "session");
     var *crsr = v_session->value.arr.first;
@@ -869,18 +929,17 @@ int cmd_session_list (int argc, const char *argv[]) {
         char *shorthost = strdup (var_get_str_forkey (crsr, "hostid"));
         char *shorttenant = strdup (var_get_str_forkey (crsr, "tenantid"));
         
-        shorthost[8] = 0;
-        shorttenant[8] = 0;
+        if (TERMINFO.cols < 108) shorthost[8] = 0;
+        if (TERMINFO.cols < 136) shorttenant[8] = 0;
         
-        printf (VT_GRN " %08x-%08x" VT_RST " " VT_BLD "%-18s "
-                VT_RST "%-8s  %-8s  " VT_YLW "%-12" PRIu64 " "
-                VT_RST "%s" VT_RST "\n",
-                (uint32_t) (var_get_int_forkey (crsr, "sessid")),
-                (uint32_t) (var_get_int_forkey (crsr, "addr")),
-                var_get_str_forkey (crsr, "remote"),
-                shorttenant, shorthost,
-                var_get_int_forkey (crsr, "lastserial"),
-                dt+11);
+        term_printf (" <g>%08x-%08x</> <b>%-18s</> %s  %s  <y>%-12" PRIu64
+                     "</> <b>%s</>\n",
+                     (uint32_t) (var_get_int_forkey (crsr, "sessid")),
+                     (uint32_t) (var_get_int_forkey (crsr, "addr")),
+                     var_get_str_forkey (crsr, "remote"),
+                     shorttenant, shorthost,
+                     var_get_int_forkey (crsr, "lastserial"),
+                     dt+11);
 
         crsr = crsr->next;
         
@@ -900,16 +959,16 @@ void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
                            OPTIONS.tenant, OPTIONS.host,
                            graph_id, datum_id, width);
     if (! apires) {
-        printf ("\033[%iC", indent);
-        printf ("%s: no graph\n\n\n\n\n\n\n", datum_id);
+        term_crsr_setx (indent);
+        term_printf ("%s: no graph\n\n\n\n\n\n\n", datum_id);
         return;
     }
     
     double max = var_get_double_forkey (apires, "max");
     var *arr = var_get_array_forkey (apires, "data");
     if (! arr) {
-        printf ("\033[%iC", indent);
-        printf ("%s: no graph\n\n\n\n\n\n\n", datum_id);
+        term_crsr_setx (indent);
+        term_printf ("%s: no graph\n\n\n\n\n\n\n", datum_id);
         var_free (apires);
         return;
     }
@@ -918,11 +977,13 @@ void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
     const char *unit = var_get_str_forkey (apires, "unit");
     if (!title) title = "Untitled";
     
-    printf ("\033[%iC%s", indent, title);
+    term_crsr_setx (indent);
+    term_printf ("%s", title);
+
     if (unit && unit[0]!='%') {
-        printf (" (max %.1f %s)", max, unit);
+        term_printf (" (max %.1f %s)", max, unit);
     }
-    printf ("\n");
+    term_printf ("\n");
 
     double *dat = (double *) malloc (width*sizeof(double));
     for (int i=0; i<width; ++i) {
