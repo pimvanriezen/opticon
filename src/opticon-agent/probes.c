@@ -1,5 +1,7 @@
 #include <sys/utsname.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <libopticon/log.h>
 #include <libopticon/var.h>
 #include "probes.h"
@@ -23,6 +25,81 @@ var *runprobe_uname (probe *self) {
     var_set_str_forkey (v_os, "kernel", uts.sysname);
     var_set_str_forkey (v_os, "version", uts.release);
     var_set_str_forkey (v_os, "arch", uts.machine);
+
+    FILE *f;
+    char pname[32];
+    char vendor[32];
+    char platform[96];
+    pname[0] = 0;
+    vendor[0] = 0;
+    platform[0] = 0;
+    
+    if (strcmp (uts.sysname, "Darwin") == 0) {
+        char buf[256];
+
+        f = popen ("system_profiler SPHardwareDataType","r");
+        if (f) {
+            while (! feof (f)) {
+                fgets (buf, 255, f);
+                buf[255] = 0;
+                if (strstr (buf, "Model Identifier")) {
+                    char *c = strchr (buf, ':');
+                    if (c) {
+                        c[strlen(c)-1] = 0;
+                        strncpy (pname, c, 31);
+                        pname[31] = 0;
+                        sprintf (platform, "Apple %s", pname);
+                        var_set_str_forkey (v_os, "hw", platform);
+                        pclose (f);
+                        return res;
+                    }
+                }
+            }
+            pclose (f);
+        }
+    }
+    
+    f = fopen ("/sys/devices/virtual/dmi/id/product_name","r");
+    if (f) {
+        fgets (pname, 31, f);
+        pname[31] = 0;
+        if (*pname) pname[strlen(pname)-1] = 0;
+        fclose (f);
+    }
+        
+    f = fopen ("/sys/devices/virtual/dmi/id/sys_vendor","r");
+    if (f) {
+        fgets (vendor, 31, f);
+        vendor[31] = 0;
+        if (*vendor) vendor[strlen(vendor)-1] = 0;
+        fclose (f);
+    }
+    
+    if (strcmp (vendor, "Microsoft Corporation") == 0) {
+        strcpy (vendor, "Microsoft");
+        if (strcmp (pname, "Virtual Machine") == 0) {
+            strcpy (pname, "Hyper-V");
+        }
+    }
+    
+    if (*vendor && *pname) {
+        sprintf (platform, "%s %s", vendor, pname);
+        var_set_str_forkey (v_os, "hw", platform);
+        return res;
+    }
+    
+    struct stat st;
+    if (stat ("/sbin/getcfg", &st) == 0) {
+        f = popen ("/sbin/getcfg System Model","r");
+        fgets (pname, 31, f);
+        pname[31] = 0;
+        if (*pname) pname[strlen(pname)-1] = 0;
+        fclose (f);
+        sprintf (platform, "QNAP %s", pname);
+        var_set_str_forkey (v_os, "hw", platform);
+        return res;
+    }
+    
     return res;
 }
 

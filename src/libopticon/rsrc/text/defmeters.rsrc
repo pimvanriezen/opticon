@@ -39,6 +39,10 @@
         type: string
         description: Distribution
     }
+    os/hw {
+        type: string
+        description: Hardware Platform
+    }
     df {
         type: table
         description: "Storage"
