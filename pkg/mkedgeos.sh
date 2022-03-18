@@ -23,10 +23,13 @@ BUILDROOT=/var/build/opticon-agent-$VERSION
 mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/config/scripts/post-config.d
 cp bin/opticon-agent $BUILDROOT/config/scripts/
+cp bin/opticon-helper $BUILDROOT/config/scripts/
 strip $BUILDROOT/config/scripts/opticon-agent
+strip $BUILDROOT/config/scripts/opticon-helper
 cp init/opticon-agent.init $BUILDROOT/config/scripts/
 cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/config/
 cp src/opticon-agent/opticon-defaultprobes.conf $BUILDROOT/config/
+cp src.opticon-agent/helpers.conf $BUILDROOT/config/opticon-helpers.conf
 cat > $BUILDROOT/config/scripts/post-config.d/opticon-agent << _EOF_
 #!/bin/sh
 /config/scripts/opticon-agent.init start
