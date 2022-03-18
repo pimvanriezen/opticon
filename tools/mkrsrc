@@ -2,10 +2,11 @@
 rm -f rsrc.c
 rm -f rsrc.h
 
-globalname="rsrc";
-if [ ! -z "$1" ]; then
-  globalname="$1"
-fi
+pwd=$(pwd)
+projectid=$(basename "$pwd" | sed -e 's/[-. ]/_/g')
+
+
+globalname="rsrc_$projectid";
 
 cat > rsrc.h << _EOF_
 #ifndef _RSRC_H
@@ -35,6 +36,10 @@ done
 echo "} resourcefork;" >> rsrc.h
 echo "" >> rsrc.h
 echo "extern resourcefork ${globalname};" >> rsrc.h
+echo "" >> rsrc.h
+echo "#define rsrc(xxx) &${globalname}. xxx"  >> rsrc.h
+echo "#define rsdata(x) rsrc(x)->data" >> rsrc.h
+echo "#define rstext(xxx) ${globalname}.text. xxx .data" >> rsrc.h
 echo "#endif" >> rsrc.h
 
 cat > rsrc.c << _EOF_

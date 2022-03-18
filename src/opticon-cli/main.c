@@ -67,8 +67,8 @@ STRINGOPT(config_file)
   * \param cmdname argv[0]
   */
 void usage (const char *cmdname) {
-    print_hdr ("Opticon CLI",&rsrc.icns.appicon);
-    term_printf (rsrc.text.usage.data, cmdname);
+    print_hdr ("Opticon CLI", rsrc(icns.appicon));
+    term_printf (rstext(usage), cmdname);
 }
 
 /** Handler for the --help flag */
@@ -357,7 +357,7 @@ char *resolve_unithost_service (const char *registry_url, const char *svcname) {
 /** Create a unithost-identity token. TODO: Add OTP support */
 int unithost_login (void) {
     char username[256];
-    print_hdr ("Login required",&rsrc.icns.lock);
+    print_hdr ("Login required", rsrc(icns.lock));
     char *domain = domain_from_url (OPTIONS.unithost_url);
     printf ("  UnitHost Domain: " VT_YLW "%s" VT_RST "\n", domain);
     free (domain);

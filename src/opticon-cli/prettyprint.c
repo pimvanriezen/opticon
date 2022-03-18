@@ -278,7 +278,7 @@ void print_values (var *apires, const char *pfx) {
     var *meters = var_get_dict_forkey (MDEF, "meter");
     var *crsr = apires->value.arr.first;
     PENDING_HDR = "Misc";
-    PENDING_RSRC = &rsrc.icns.overview;
+    PENDING_RSRC = rsrc(icns.overview);
     while (crsr) {
         char valbuf[1024];
         const char *name = NULL;
@@ -542,9 +542,9 @@ void print_generic_table (var *table) {
         if (c) title = c;
     }
     
-    resource *rs = &rsrc.icns.overview;
-    if (strcmp (table->id, "who") == 0) rs = &rsrc.icns.remote;
-    else if (strcmp (table->id, "vm") == 0) rs = &rsrc.icns.vm;
+    resource *rs = rsrc(icns.overview);
+    if (strcmp (table->id, "who") == 0) rs = rsrc(icns.remote);
+    else if (strcmp (table->id, "vm") == 0) rs = rsrc(icns.vm);
     term_new_column();
     print_hdr (title, rs);
     print_table (table, (const char **) header, (const char **) field,

@@ -12,7 +12,7 @@ static var *PARSED_DEFMETERS = NULL;
 var *get_default_meterdef (void) {
     if (! PARSED_DEFMETERS) {
         PARSED_DEFMETERS = var_alloc();
-        if (! var_parse_json (PARSED_DEFMETERS, librsrc.text.defmeters.data)) {
+        if (! var_parse_json (PARSED_DEFMETERS, rstext(defmeters))) {
             log_error ("Parse error: %s", parse_error());
         }
     }
@@ -27,8 +27,7 @@ static var *PARSED_DEFSUMMARY = NULL;
 var *get_default_summarydef (void) {
     if (! PARSED_DEFSUMMARY) {
         PARSED_DEFSUMMARY = var_alloc();
-        if (! var_parse_json (PARSED_DEFSUMMARY,
-                              librsrc.text.defsummary.data)) {
+        if (! var_parse_json (PARSED_DEFSUMMARY, rstext(defsummary))) {
             log_error ("Parse error (defsum): %s", parse_error());
         }
     }
@@ -43,7 +42,7 @@ static var *PARSED_DEFGRAPHS = NULL;
 var *get_default_graphs (void) {
     if (! PARSED_DEFGRAPHS) {
         PARSED_DEFGRAPHS = var_alloc();
-        if (! var_parse_json (PARSED_DEFGRAPHS, librsrc.text.defgraphs.data )) {
+        if (! var_parse_json (PARSED_DEFGRAPHS, rstext(defgraphs))) {
             log_error ("Parse error (defgraphs): %s", parse_error());
         }
     }

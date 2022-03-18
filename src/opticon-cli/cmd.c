@@ -32,7 +32,7 @@ int cmd_tenant_list (int argc, const char *argv[]) {
         var_dump (res, stdout);
     }
     else {
-        print_hdr("Tenants", &rsrc.icns.people);
+        print_hdr("Tenants", rsrc(icns.people));
         term_printf (" UUID                                 Hosts  Name\n");
 
         var *res_tenant = var_get_array_forkey (res, "tenant");
@@ -119,7 +119,7 @@ int cmd_tenant_get_quota (int argc, const char *argv[]) {
         return 1;
     }
     
-    print_hdr ("Quota", &rsrc.icns.disks);
+    print_hdr ("Quota", rsrc(icns.disks));
     var *meta = api_get ("/%s/quota", OPTIONS.tenant);
     if (! meta) return 1;
     term_printf ("Tenant storage quota: <b>%" PRIu64 "</> MB\n",
@@ -156,7 +156,7 @@ int cmd_host_overview (int argc, const char *argv[]) {
     const char *diskiofield = NULL;
     const char *addrfield = NULL;
     
-    print_hdr ("Overview", &rsrc.icns.overview);
+    print_hdr ("Overview", rsrc(icns.overview));
     int namewidth=28;
     if (TERMINFO.cols > 80) {
         namewidth += (TERMINFO.cols-81);
@@ -566,7 +566,7 @@ int cmd_host_list (int argc, const char *argv[]) {
     
     var *v_hosts = var_get_array_forkey (apires, "host");
     if (var_get_count (v_hosts)) {
-        print_hdr ("Hosts", &rsrc.icns.overview);
+        print_hdr ("Hosts", rsrc(icns.overview));
         term_printf ("UUID                                    SIZE "
                      "FIRST             LAST\n");
         var *crsr = v_hosts->value.arr.first;
@@ -663,7 +663,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     /* -------------------------------------------------------------*/
     
     term_new_column();
-    print_hdr ("Host", &rsrc.icns.computer);
+    print_hdr ("Host", rsrc(icns.computer));
     print_value ("UUID", VT_YLW "%s" VT_RST, OPTIONS.host);
     print_value ("Hostname", VT_YLW "%s" VT_RST, Vstr("hostname"));
     print_value ("Address", VT_BLD "%s" VT_RST " (rtt: " VT_BLD "%.2f"
@@ -714,7 +714,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     
         /* -------------------------------------------------------------*/
         term_new_column();
-        print_hdr ("Resources", &rsrc.icns.gauge);
+        print_hdr ("Resources", rsrc(icns.gauge));
         print_value ("Processes",VT_BLD "%" PRIu64 VT_RST " "
                                  "(" VT_BLD "%" PRIu64 VT_RST " running, "
                                  VT_BLD "%" PRIu64 VT_RST " stuck)",
@@ -778,7 +778,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     
         if (Vexist ("temp")) {
             term_new_column();
-            print_hdr ("System Temperature", &rsrc.icns.temp);
+            print_hdr ("System Temperature", rsrc(icns.temp));
             
             const char *temp_hdr[] = {"PROBE","TEMP",NULL};
             const char *temp_fld[] = {"id","v",NULL};
@@ -796,7 +796,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     
          if (Vexist ("fan")) {
             term_new_column();
-            print_hdr ("System Fans", &rsrc.icns.fan);
+            print_hdr ("System Fans", rsrc(icns.fan));
             
             const char *fan_hdr[] = {"PROBE","SPEED",NULL};
             const char *fan_fld[] = {"id","v",NULL};
@@ -814,7 +814,7 @@ int cmd_get_record (int argc, const char *argv[]) {
 
        /* -------------------------------------------------------------*/
         term_new_column();
-        print_hdr ("Process List", &rsrc.icns.procs);
+        print_hdr ("Process List", rsrc(icns.procs));
     
         const char *top_hdr[] = {"USER","PID","CPU","MEM","NAME",NULL};
         const char *top_fld[] = {"user","pid","pcpu","pmem","name",NULL};
@@ -834,7 +834,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         var *v_df = var_get_array_forkey (apires, "df");
         if (var_get_count (v_df) > 0) {
             term_new_column();
-            print_hdr ("Storage", &rsrc.icns.disks);
+            print_hdr ("Storage", rsrc(icns.disks));
     
             const char *df_hdr[] = {
                 "DEVICE","SIZE","FS","USED","MOUNTPOINT",NULL
@@ -867,7 +867,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     }
     else {
         term_end_column();
-        print_hdr("Graphs", &rsrc.icns.graph);
+        print_hdr("Graphs", rsrc(icns.graph));
         term_new_column();
         cmd_print_graph ("cpu","usage", 76, 2);
         term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^     "
@@ -911,7 +911,7 @@ int cmd_session_list (int argc, const char *argv[]) {
         return 0;
     }
 
-    print_hdr ("Sessions", &rsrc.icns.sessions);
+    print_hdr ("Sessions", rsrc(icns.sessions));
     const char *spc = "                            ";
     
     term_printf (" ID                SENDER             TENANT    ");
