@@ -143,6 +143,7 @@ wordlist *wordlist_split (const char *string, char sep) {
         }
         result->argv[pos++] = word;
     }
+    if (pos < result->argc) result->argc = pos;
     return result;
 }
 
