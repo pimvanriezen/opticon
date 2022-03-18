@@ -27,6 +27,7 @@ BUILDROOT=/var/build/opticon-agent_$VERSION
 mkdir -p $BUILDROOT || exitfail Could not create build dir
 mkdir -p $BUILDROOT/etc/opticon
 mkdir -p $BUILDROOT/lib/systemd/system
+mkdir -p $BUILDROOT/usr/bin
 mkdir -p $BUILDROOT/usr/sbin
 mkdir -p $BUILDROOT/var/lib/opticon/probes
 mkdir -p $BUILDROOT/run/opticon
