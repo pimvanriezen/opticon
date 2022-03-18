@@ -4,6 +4,8 @@ doc/
 *.o
 src/opticon-cli/rsrc.c
 src/opticon-cli/rsrc.h
+src/libopticon/rsrc.c
+src/libopticon/rsrc.h
 test/bin/test_*
 test/out/*.*
 test/tmpdb

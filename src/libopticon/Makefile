@@ -22,7 +22,7 @@ endif
 CFLAGS+=-DOSNAME=$(OSNAME) -DOSREL=$(OSREL) -DOSRELMAJOR=$(OSRELMAJOR)
 
 OBJS_TEST = test/test_roundtrip_encoding.o
-OBJS_LIBOPTICON = adjust.o aes.o host.o tenant.o \
+OBJS_LIBOPTICON = rsrc.o adjust.o aes.o host.o tenant.o \
 				  util.o auth.o base64.o host_import.o glob.o \
 				  ioport.o ioport_file.o meter.o \
 				  ioport_buffer.o codec.o \
@@ -36,12 +36,18 @@ OBJS_LIBOPTICON = adjust.o aes.o host.o tenant.o \
 				  popen.o summary.o notify.o timer.o
 all: ../../lib/libopticon.a
 
-../../lib/libopticon.a: $(OBJS_LIBOPTICON)
+rsrc.c: rsrc.h
+
+rsrc.h: rsrc/*/*.rsrc
+	@echo "[RSRC ] building resource file"
+	@../../tools/mkrsrc librsrc
+
+../../lib/libopticon.a: rsrc.c $(OBJS_LIBOPTICON)
 	@echo "[LINK ] libopticon.a"
 	@ar cr ../../lib/libopticon.a $(OBJS_LIBOPTICON) $(LPTHREAD)
 
 clean:
-	rm -f *.o ../../lib/libopticon.a
+	rm -f *.o ../../lib/libopticon.a rsrc.c rsrc.h
 
 .SUFFIXES: .c .o
 .c.o:

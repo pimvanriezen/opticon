@@ -34,7 +34,7 @@ rsrc.c: rsrc.h
 
 rsrc.h: rsrc/*/*.rsrc
 	@echo "[RSRC ] building resource file"
-	@./mkrsrc
+	@../../tools/mkrsrc
 		  
 ../../bin/opticon: rsrc.c $(OBJS_OPTICONCLI) $(LIBS)
 	@echo "[LINK ] opticon-cli"
