@@ -125,7 +125,7 @@ wordlist *wordlist_split (const char *string, char sep) {
     result = (wordlist *) malloc (sizeof (wordlist));
     count = wordsepcount (crsr, sep);
     result->argc = count;
-    result->argv = (char **) malloc (count * sizeof (char *));
+    result->argv = (char **) calloc (count, sizeof (char *));
 
     while ((rightbound = strchr (crsr, sep))) {
         word = (char *) malloc ((rightbound-crsr+3) * sizeof (char));
