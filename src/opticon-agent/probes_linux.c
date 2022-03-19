@@ -658,7 +658,7 @@ var *runprobe_io (probe *self)
     var_set_double_forkey (res, "pcpu", (100.0 * (cpudelta/ncpu) / (ti - IOPROBE.lastrun));
     if (IOPROBE.io_wait) {
         var *res_io = var_get_dict_forkey (res, "io");
-        var_set_double_forkey (res_io, "pwait", (100.0 * (delta/ncpu)) / (ti - IOPROBE.lastrun));
+        var_set_double_forkey (res_io, "pwait", (100.0 * (delta/ncpu) / (ti - IOPROBE.lastrun));
     }
 
     IOPROBE.io_blk_r = totalblk_r;
