@@ -12,14 +12,13 @@ opticon-helper virsh list | grep running | sed -e 's/^ [0-9]* *//;s/ *running//g
   cachefile="/var/run/opticon/libvirt.probe/${vmname}.vm"
   [ -e "$cachefile" ] && . "$cachefile"
   nw_date=$(date +%s)
-  nw_cputime=$(opticon-helper virsh cpu-stats --total "$vmname" | grep cpu_time | sed -e 's/.*cpu_time *//' | cut -f1 -d.)
+  nw_cputime=$(opticon-helper virsh cpu-stats --total "$vmname" | grep cpu_time | sed -e 's/.*cpu_time *//;s/ .*//')
   if [ -z "$last_date" ]; then
     echo "        { name:\"$vmname\", cores:$numcpu, ram:$ram, cpu:0.0 }"
   else
     tdiff=$((nw_date - last_date))
     [ $tdiff -lt 1 ] && tdiff=1
-    cpudiff=$((nw_cputime - last_cputime))
-    cpuperc=$(echo "scale=2; 100 * $cpudiff / $tdiff" | bc -q)
+    cpuperc=$(echo "scale=2; 100 * ($nw_cputime - $last_cputime) / $tdiff" | bc -q)
     echo "        { name:\"$vmname\", cores:$numcpu, ram:$ram, cpu:${cpuperc} }"
   fi
 
