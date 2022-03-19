@@ -551,8 +551,8 @@ var *runprobe_io (probe *self)
     uint64_t totalblk_w = 0;
     uint64_t delta_r;
     uint64_t delta_w;
-    uint64_t delta;
-    uint64_t cpudelta;
+    double   delta;
+    double   cpudelta;
     uint64_t totalcpu;
     uint64_t totalwait = 0;
     int ncpu = 1;
@@ -656,10 +656,10 @@ var *runprobe_io (probe *self)
         }
     }
 
-    delta = (totalwait - IOPROBE.io_wait) / CLK_TCK;
-    cpudelta = (totalcpu - IOPROBE.total_cpu) / CLK_TCK;
+    delta = (totalwait - IOPROBE.io_wait) / (CLK_TCK * 1.0);
+    cpudelta = (totalcpu - IOPROBE.total_cpu) / (CLK_TCK * 1.0);
 
-    log_debug ("cpudelta: %" PRIu64 ", ncpu %i, tdelta: %i tck:%i",
+    log_debug ("cpudelta: %.1f, ncpu %i, tdelta: %i tck:%i",
                cpudelta, ncpu, ti - IOPROBE.lastrun, CLK_TCK);
 
     var_set_double_forkey (res, "pcpu", (100.0 * (cpudelta/ncpu)) / (ti - IOPROBE.lastrun));
