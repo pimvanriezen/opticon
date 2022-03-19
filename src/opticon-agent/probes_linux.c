@@ -624,7 +624,7 @@ var *runprobe_io (probe *self)
         split = wordlist_make (buf);
         totalwait = (atoll (split->argv[5])) / CLK_TCK;
         totalcpu = (atoll (split->argv[1]) + atoll (split->argv[2]) +
-                    atoll (split->argv[3]) + atoll (split->argv[4])) / CLK_TCK;
+                    atoll (split->argv[3]);
         wordlist_free (split);
         
         ncpu = 0;
@@ -652,8 +652,8 @@ var *runprobe_io (probe *self)
         }
     }
 
-    delta = totalwait - IOPROBE.io_wait;
-    cpudelta = totalcpu - IOPROBE.total_cpu;
+    delta = (totalwait - IOPROBE.io_wait) / CLK_TCK;
+    cpudelta = (totalcpu - IOPROBE.total_cpu) / CLK_TCK;
 
     var_set_double_forkey (res, "pcpu", (100.0 * (cpudelta/ncpu)) / (ti - IOPROBE.lastrun));
     if (IOPROBE.io_wait) {
