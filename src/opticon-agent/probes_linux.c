@@ -627,6 +627,10 @@ var *runprobe_io (probe *self)
                    atoll (split->argv[3]);
         wordlist_free (split);
         
+        log_debug ("cpustat: %lli %lli %lli",
+                   atoll (split->argv[1]), atoll (split->argv[2]),
+                   atoll (split->argv[3]));
+        
         ncpu = 0;
         
         while (!feof (F)) {
@@ -655,8 +659,8 @@ var *runprobe_io (probe *self)
     delta = (totalwait - IOPROBE.io_wait) / CLK_TCK;
     cpudelta = (totalcpu - IOPROBE.total_cpu) / CLK_TCK;
 
-    log_debug ("cpudelta: %" PRIu64 ", ncpu %i, tdelta: %i",
-               cpudelta, ncpu, ti - IOPROBE.lastrun);
+    log_debug ("cpudelta: %" PRIu64 ", ncpu %i, tdelta: %i tck:%i",
+               cpudelta, ncpu, ti - IOPROBE.lastrun, CLK_TCK);
 
     var_set_double_forkey (res, "pcpu", (100.0 * (cpudelta/ncpu)) / (ti - IOPROBE.lastrun));
     if (IOPROBE.io_wait) {
