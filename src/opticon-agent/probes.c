@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <libopticon/log.h>
 #include <libopticon/var.h>
 #include "probes.h"
@@ -98,6 +99,30 @@ var *runprobe_uname (probe *self) {
         sprintf (platform, "QNAP %s", pname);
         var_set_str_forkey (v_os, "hw", platform);
         return res;
+    }
+    
+    if (stat ("/usr/sbin/ubnt-hal", &st) == 0) {
+        f = popen ("opticon-helper /usr/sbin/ubnt-hal show-version","r");
+        if (f) {
+            char buf[256];
+            buf[0] = 0;
+            
+            while (! feof (f)) {
+                fgets (buf, 255, f);
+                buf[255] = 0;
+                if (memcmp (buf, "HW model:", 9) == 0) {
+                    buf[strlen(buf)-1] = 0;
+                    char *c = buf+9;
+                    while (isspace (*c)) c++;
+                    strncpy (pname, buf, 31);
+                    pname[31] = 0;
+                    sprintf (platform, "Ubiquiti %s", pname);
+                    var_set_str_forkey (v_os, "hw", platform);
+                    return res;
+                }
+            }
+            pclose (f);
+        }
     }
     
     return res;

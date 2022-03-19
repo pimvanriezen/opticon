@@ -13,11 +13,6 @@ int main (int argc, char *const *argv) {
         return 0;
     }
     
-    if (strchr (argv[1], '/')) {
-        fprintf (stderr, "%% No paths allowed\n");
-        return 1;
-    }
-    
     gid_t curgroupid = getgid();
     struct group *curgroup = getgrgid (curgroupid);
     if (strcmp (curgroup->gr_name, "opticon")) {

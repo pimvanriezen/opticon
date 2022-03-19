@@ -646,9 +646,10 @@ var *runprobe_io (probe *self)
     delta = totalwait - IOPROBE.io_wait;
     cpudelta = totalcpu - IOPROBE.total_cpu;
 
+    var_set_double_forkey (res, "pcpu", (100.0 * cpudelta) / (ti - IOPROBE.lastrun));
     if (IOPROBE.io_wait) {
         var *res_io = var_get_dict_forkey (res, "io");
-        var_set_double_forkey (res_io, "pwait", (100.0 * delta) / (1.0 * cpudelta));
+        var_set_double_forkey (res_io, "pwait", (100.0 * delta) / (ti - IOPROBE.lastrun));
     }
 
     IOPROBE.io_blk_r = totalblk_r;
@@ -837,7 +838,7 @@ var *gather_tprocs (procrun *procs) {
     sample_tprocs (procs);
     procrun_calc (procs);
     
-    var_set_double_forkey (res, "pcpu",procs->pcpu);
+    //var_set_double_forkey (res, "pcpu",procs->pcpu);
     for (i=0; i<procs->count; ++i) {
         inserted = 0;
         if (! procs->array[i].pid) continue;

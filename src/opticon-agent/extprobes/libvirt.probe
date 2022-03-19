@@ -19,8 +19,8 @@ opticon-helper virsh list | grep running | sed -e 's/^ [0-9]* *//;s/ *running//g
     tdiff=$((nw_date - last_date))
     [ $tdiff -lt 1 ] && tdiff=1
     cpudiff=$((nw_cputime - last_cputime))
-    cpuperc=$((cpudiff / tdiff))
-    echo "        { name:\"$vmname\", cores:$numcpu, ram:$ram, cpu:${cpuperc}.0 }"
+    cpuperc=$(echo "scale=2; 100 * $cpudiff / $tdiff" | bc -q)
+    echo "        { name:\"$vmname\", cores:$numcpu, ram:$ram, cpu:${cpuperc} }"
   fi
 
   printf 'last_date="%s"\n' "$nw_date" > $cachefile
