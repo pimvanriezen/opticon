@@ -625,12 +625,12 @@ var *runprobe_io (probe *self)
         totalwait = atoll (split->argv[5]);
         totalcpu = atoll (split->argv[1]) + atoll (split->argv[2]) +
                    atoll (split->argv[3]);
-        wordlist_free (split);
         
         log_debug ("cpustat: %lli %lli %lli",
                    atoll (split->argv[1]), atoll (split->argv[2]),
                    atoll (split->argv[3]));
         
+        wordlist_free (split);
         ncpu = 0;
         
         while (!feof (F)) {
