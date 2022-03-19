@@ -655,6 +655,9 @@ var *runprobe_io (probe *self)
     delta = (totalwait - IOPROBE.io_wait) / CLK_TCK;
     cpudelta = (totalcpu - IOPROBE.total_cpu) / CLK_TCK;
 
+    log_debug ("cpudelta: %" PRIu64 ", ncpu %i, tdelta: %i",
+               cpudelta, ncpu, ti - IOPROBE.lastrun);
+
     var_set_double_forkey (res, "pcpu", (100.0 * (cpudelta/ncpu)) / (ti - IOPROBE.lastrun));
     if (IOPROBE.io_wait) {
         var *res_io = var_get_dict_forkey (res, "io");
