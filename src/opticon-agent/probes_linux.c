@@ -555,6 +555,7 @@ var *runprobe_io (probe *self)
     uint64_t cpudelta;
     uint64_t totalcpu;
     uint64_t totalwait = 0;
+    int ncpu = 1;
     var *res = var_alloc();
     var *toplevels = var_alloc(); /* to skip hda1 if we already did hda */
     var *skipdevices = var_get_array_forkey (self->options, "skip");
@@ -625,6 +626,14 @@ var *runprobe_io (probe *self)
         totalcpu = atoll (split->argv[1]) + atoll (split->argv[2]) +
                    atoll (split->argv[3]) + atoll (split->argv[4]);
         wordlist_free (split);
+        
+        ncpu = 0;
+        
+        while (!feof (F)) {
+            buf[0] = 0;
+            fgets (buf, 255, F);
+            if (memcmp (buf, "cpu", 3) == 0) ncpu++;
+        }
         fclose (F);
     }
     
@@ -646,10 +655,10 @@ var *runprobe_io (probe *self)
     delta = totalwait - IOPROBE.io_wait;
     cpudelta = totalcpu - IOPROBE.total_cpu;
 
-    var_set_double_forkey (res, "pcpu", (100.0 * cpudelta) / (ti - IOPROBE.lastrun));
+    var_set_double_forkey (res, "pcpu", (100.0 * (cpudelta/ncpu) / (ti - IOPROBE.lastrun));
     if (IOPROBE.io_wait) {
         var *res_io = var_get_dict_forkey (res, "io");
-        var_set_double_forkey (res_io, "pwait", (100.0 * delta) / (ti - IOPROBE.lastrun));
+        var_set_double_forkey (res_io, "pwait", (100.0 * (delta/ncpu)) / (ti - IOPROBE.lastrun));
     }
 
     IOPROBE.io_blk_r = totalblk_r;
