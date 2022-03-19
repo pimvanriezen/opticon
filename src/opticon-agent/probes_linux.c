@@ -622,9 +622,9 @@ var *runprobe_io (probe *self)
     if (F) {
         fgets (buf, 255, F);
         split = wordlist_make (buf);
-        totalwait = atoll (split->argv[5]);
-        totalcpu = atoll (split->argv[1]) + atoll (split->argv[2]) +
-                   atoll (split->argv[3]) + atoll (split->argv[4]);
+        totalwait = (atoll (split->argv[5])) / CLK_TCK;
+        totalcpu = (atoll (split->argv[1]) + atoll (split->argv[2]) +
+                    atoll (split->argv[3]) + atoll (split->argv[4])) / CLK_TCK;
         wordlist_free (split);
         
         ncpu = 0;
