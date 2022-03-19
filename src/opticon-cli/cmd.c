@@ -894,27 +894,53 @@ int cmd_get_record (int argc, const char *argv[]) {
         cmd_print_graph ("cpu","usage", 76, 2);
         term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^     "
                   "^      ^     ^     ^     0</>\n");
+        if (TERMINFO.cols >= 160) term_printf ("\n");
 
         term_new_column();
         cmd_print_graph ("link","rtt", 76, 2);
         term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^     "
                   "^      ^     ^     ^     0</>\n");
-        term_new_column();
-        cmd_print_graph ("net","input", 37, 2);
-        term_crsr_up (7);
-        cmd_print_graph ("net","output", 37, 41);
-        term_printf ("<l>"
-                     "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
-                     "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  </>\n");
+        if (TERMINFO.cols >= 160) term_printf ("\n");
 
-        term_new_column();
-        cmd_print_graph ("io","read", 37, 2);
-        term_crsr_up (7);
-        cmd_print_graph ("io","write", 37, 41);
-        term_printf ("<l>"
-                     "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
-                     "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  </>\n");
-        term_end_column();
+        if ((TERMINFO.cols >= 160) && (TERMINFO.rows >= 50)) {
+            term_new_column();
+            cmd_print_graph ("net","input", 76, 2);
+            term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^"
+                          "     ^      ^     ^     ^     0</>\n\n");
+            term_new_column();
+            cmd_print_graph ("net","output", 76, 2);
+            term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^"
+                          "     ^      ^     ^     ^     0</>\n\n");
+            term_new_column();
+            cmd_print_graph ("io","read", 76, 2);
+            term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^"
+                          "     ^      ^     ^     ^     0</>\n\n");
+            term_new_column();
+            cmd_print_graph ("io","write", 76, 2);
+            term_printf ("<l>  12    ^     ^      ^     ^     ^      6     ^"
+                          "     ^      ^     ^     ^     0</>\n\n");
+            term_end_column();
+        }
+        else {
+            term_new_column();
+            cmd_print_graph ("net","input", 37, 2);
+            term_crsr_up (7);
+            cmd_print_graph ("net","output", 37, 41);
+            term_printf ("<l>"
+                         "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
+                         "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  </>\n");
+
+            if (TERMINFO.cols >= 160) term_printf ("\n");
+            term_new_column();
+            cmd_print_graph ("io","read", 37, 2);
+            term_crsr_up (7);
+            cmd_print_graph ("io","write", 37, 41);
+            term_printf ("<l>"
+                         "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0"
+                         "  12 ^  ^  ^  ^  ^  6  ^  ^  ^  ^  ^  0  </>\n");
+            if (TERMINFO.cols >= 160) term_printf ("\n");
+            term_end_column();
+        }
     }
     print_line();
 
