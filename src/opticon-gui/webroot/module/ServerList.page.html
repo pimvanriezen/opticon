@@ -23,7 +23,7 @@
           </td>
           <td width="240">
             {{o["agent/ip"]}}
-            <span v-if="o['link/ip']"> -> {{o["link/ip"]}}</span>
+            <span v-if="o['link/ip'] &&(o['link/ip']!=o['agent/ip'])"> -> {{o["link/ip"]}}</span>
           </td>
           <td align="right" width="64">{{parseFloat(o.pcpu).toFixed(2)}} %</td>
           <td align="right" width="56">{{parseFloat(o.loadavg).toFixed(2)}}</td>
