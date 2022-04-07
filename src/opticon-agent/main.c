@@ -13,6 +13,7 @@
 #include <libopticon/host_import.h>
 #include <libopticon/ioport_file.h>
 #include <libopticon/codec_json.h>
+#include <libopticon/popen.h>
 #include <arpa/inet.h>
 #include <syslog.h>
 #include <errno.h>
@@ -33,6 +34,7 @@ int daemon_main (int argc, const char *argv[]) {
         log_open_file (APP.logpath, APP.loglevel);
     }
     
+    popen_init();
     probelist_start (&APP.probes);
     APP.resender = authresender_create (APP.transport);
     

@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <libopticon/log.h>
 #include <libopticon/var.h>
+#include <libopticon/popen.h>
 #include "probes.h"
 #include "wordlist.h"
 
