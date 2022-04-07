@@ -446,12 +446,12 @@ int main (int _argc, const char *_argv[]) {
     }
 #elif defined (OS_DARWIN)
     char buffer[1024];
-    FILE *F = popen ("ioreg -d2 -c IOPlatformExpertDevice | "
-                     "awk -F\\\" '/IOPlatformUUID/{print $(NF-1)}'","r");
+    FILE *F = popen_safe ("ioreg -d2 -c IOPlatformExpertDevice | "
+                          "awk -F\\\" '/IOPlatformUUID/{print $(NF-1)}'","r");
     if (F) {
         fgets (buffer, 1023, F);
         APP.hostid = mkuuid (buffer);
-        fclose (F);
+        pclose_safe (F);
     }
 #endif
     
