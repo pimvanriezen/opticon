@@ -13,6 +13,8 @@ test/*.db
 test/*.idx
 lib/*.a
 pkg/deb
+pkg/tmp
+pkg/rpm
 playground/
 makeinclude
 platform.h
