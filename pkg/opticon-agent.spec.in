@@ -11,7 +11,7 @@ Source:     opticon-<<VERSION>>-<<RELEASE>>.tar.gz
 This is the server agent program for the Opticon monitoring system.
 
 %prep
-%setup -q
+%setup -n opticon-<<VERSION>>-<<RELEASE>>
 
 %build
 %configure
