@@ -10,6 +10,8 @@ Source:     opticon-<<VERSION>>-<<RELEASE>>.tar.gz
 %description
 This is the server agent program for the Opticon monitoring system.
 
+%global debug_package %{nil}
+
 %prep
 %setup -n opticon-<<VERSION>>-<<RELEASE>>
 
