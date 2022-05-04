@@ -1,11 +1,11 @@
 Name:       opticon-agent
-Version:    $VERSION
+Version:    <<VERSION>>
 Release:    1%{?dist}
 Summary:    Agent software for the Opticon monitoring system
 
 License:    GPL
 URL:        
-Source0:    opticon-${VERSION}.tar.gz
+Source0:    opticon-<<VERSION>>.tar.gz
 
 %description
 This is the server agent program for the Opticon monitoring system.
