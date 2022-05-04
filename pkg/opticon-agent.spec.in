@@ -28,7 +28,7 @@ mkdir -p $RPM_BUILD_ROOT/usr/sbin
 mkdir -p $RPM_BUILD_ROOT/var/lib/opticon/probes
 mkdir -p $RPM_BUILD_ROOT/run/opticon
 
-install -m 0755 bin/opticon-agent $RPM_BUILD_ROOT/usr/bin
+install -m 0755 bin/opticon-agent $RPM_BUILD_ROOT/usr/sbin
 install -m 0755 bin/opticon-helper $RPM_BUILD_ROOT/usr/bin
 install -m 0755 init/opticon-agent.service $RPM_BUILD_ROOT/lib/systemd/system
 install -m 0640 src/opticon-agent/opticon-agent.conf.example $RPM_BUILD_ROOT/etc/opticon
@@ -47,7 +47,7 @@ chgrp opticon /run/opticon
 chmod 770 /run/opticon
 chgrp opticon /usr/bin/opticon-helper
 chmod 4750 /usr/bin/opticon-helper
-systemctl is-active --quiet opticon-agent && systemctl restart opticon-agent
+if systemctl is-active --quiet opticon-agent; then systemctl restart opticon-agent; fi
 
 %files
 /etc/opticon/*
