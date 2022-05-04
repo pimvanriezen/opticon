@@ -11,8 +11,7 @@ Source:     %{expand:%%(pwd)}
 This is the server agent program for the Opticon monitoring system.
 
 %prep
-find . -mindepth 1 -delete
-cp -af %{SOURCEURL0}/. .
+rsync -av --delete ${SOURCEURL0}/ ./
 
 %build
 %configure
