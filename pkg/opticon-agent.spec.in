@@ -14,7 +14,7 @@ This is the server agent program for the Opticon monitoring system.
 %setup -n opticon-<<VERSION>>-<<RELEASE>>
 
 %build
-%configure
+./configure
 make
 
 %install
