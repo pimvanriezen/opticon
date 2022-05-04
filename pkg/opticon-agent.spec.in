@@ -51,7 +51,7 @@ if systemctl is-active --quiet opticon-agent; then systemctl restart opticon-age
 
 %files
 /etc/opticon/*
-/usr/bin/opticon-agent
+/usr/sbin/opticon-agent
 /usr/bin/opticon-helper
 /var/lib/opticon/probes/*
 /lib/systemd/system/opticon-agent.service
