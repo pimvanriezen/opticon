@@ -5,13 +5,14 @@ Summary:    Agent software for the Opticon monitoring system
 
 License:    GPL
 URL:        http://localhost/opticon-<<VERSION>>-<<RELEASE>>.tar.gz
-Source:     opticon-<<VERSION>>-<<RELEASE>>.tar.gz
+Source:     %{expand:%%(pwd)}
 
 %description
 This is the server agent program for the Opticon monitoring system.
 
 %prep
-%setup -q
+find . -mindepth 1 -delete
+cp -af %{SOURCEURL0}/. .
 
 %build
 %configure
