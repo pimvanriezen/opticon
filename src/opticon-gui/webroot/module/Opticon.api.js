@@ -4,7 +4,9 @@ API.Opticon = new Module.API("Opticon");
 API.Opticon.create = function() {
 }
 
-API.Opticon.Host = {}
+API.Opticon.Host = {
+    tcache: {}
+}
 
 API.Opticon.Host.getOverview = function(cb) {
     let tenant = "any"
@@ -15,13 +17,21 @@ API.Opticon.Host.getOverview = function(cb) {
 }
 
 API.Opticon.Host.resolveTenant = function(hostuuid, cb) {
+    let self = API.Opticon.Host;
+    
     if (API.Auth.credentials.access != "admin") {
         cb (API.Auth.credentials.tenant);
         return;
     }
     
+    if (self.tcache[hostuuid] !== undefined) {
+        cb (self.tcache[hostuuid]);
+        return;
+    }
+    
     API.get ("opticon", "/any/host/"+hostuuid+"/tenant", function (err, res) {
         if ((!err) && res.tenant) {
+            self.tcache[hostuuid] = res.tenant;
             cb (res.tenant);
         }
         else {
