@@ -163,7 +163,57 @@
       </table>
     </div>
   </div>
+
+  <div v-if="data.temp && data.temp.length" class="uEditContainer">
+    <h2>System Temperatures</h2>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Name</th>
+          <th align="right">Value</th>
+        </tr>
+        <tr v-for="dat in data.temp">
+          <td>{{dat.id}}</td>
+          <td align="right">{{dat.v}} <span class="unit">º{{dat.u}}</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div v-if="data.temp && data.temp.length" class="uEditContainer">
+    <h2>System Fans</h2>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Name</th>
+          <th align="right">Value</th>
+        </tr>
+        <tr v-for="dat in data.fan">
+          <td>{{dat.id}}</td>
+          <td align="right">{{dat.v}} <span class="unit">{{dat.u}}</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
   
+  <div v-if="data.who && data.who.length" class="uEditContainer">
+    <h2>User Sessions</h2>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">User</th>
+          <th align="right">TTY</th>
+          <th align="left">Remote</th>
+        </tr>
+        <tr v-for="ses in data.who">
+          <td>{{ses.user}}</td>
+          <td width="10%" align="right">{{ses.tty}}</td>
+          <td>{{ses.remote}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+    
   <div class="uEditContainer">
     <h2>Processes</h2>
     <div class="uServerData table wide">
