@@ -1,20 +1,22 @@
 Name:       opticon-agent
-Version:    $VERSION
-Release:    1%{?dist}
+Version:    <<VERSION>>
+Release:    <<RELEASE>>%{?dist}
 Summary:    Agent software for the Opticon monitoring system
 
 License:    GPL
-URL:        
-Source0:    opticon-${VERSION}.tar.gz
+URL:        http://localhost/opticon-<<VERSION>>-<<RELEASE>>.tar.gz
+Source:     opticon-<<VERSION>>-<<RELEASE>>.tar.gz
 
 %description
 This is the server agent program for the Opticon monitoring system.
 
+%global debug_package %{nil}
+
 %prep
-%setup -q
+%setup -n opticon-<<VERSION>>-<<RELEASE>>
 
 %build
-%configure
+./configure
 make
 
 %install
@@ -26,7 +28,7 @@ mkdir -p $RPM_BUILD_ROOT/usr/sbin
 mkdir -p $RPM_BUILD_ROOT/var/lib/opticon/probes
 mkdir -p $RPM_BUILD_ROOT/run/opticon
 
-install -m 0755 bin/opticon-agent $RPM_BUILD_ROOT/usr/bin
+install -m 0755 bin/opticon-agent $RPM_BUILD_ROOT/usr/sbin
 install -m 0755 bin/opticon-helper $RPM_BUILD_ROOT/usr/bin
 install -m 0755 init/opticon-agent.service $RPM_BUILD_ROOT/lib/systemd/system
 install -m 0640 src/opticon-agent/opticon-agent.conf.example $RPM_BUILD_ROOT/etc/opticon
@@ -40,15 +42,17 @@ id opticon >/dev/null 2>&1 || {
 }
 chgrp opticon /etc/opticon
 chmod 750 /etc/opticon
+mkdir -p /run/opticon
 chgrp opticon /run/opticon
 chmod 770 /run/opticon
 chgrp opticon /usr/bin/opticon-helper
 chmod 4750 /usr/bin/opticon-helper
-systemctl is-active --quiet opticon-agent && systemctl restart opticon-agent
+systemctl daemon-reload
+if systemctl is-active --quiet opticon-agent; then systemctl restart opticon-agent; fi
 
 %files
 /etc/opticon/*
-/usr/bin/opticon-agent
+/usr/sbin/opticon-agent
 /usr/bin/opticon-helper
 /var/lib/opticon/probes/*
 /lib/systemd/system/opticon-agent.service
