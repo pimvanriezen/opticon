@@ -64,3 +64,10 @@ API.Opticon.Tenant.getQuota = function(tenant, cb) {
         cb (res);
     });
 }
+
+API.Opticon.Tenant.getMeta = function(tenant, cb) {
+    API.get ("opticon", "/"+tenant+"/meta", function (err, res) {
+        if (err) cb (null);
+        cb (res);
+    });
+}

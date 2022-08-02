@@ -88,16 +88,7 @@ ServerList.statusClass = function (server) {
 // Click handler for result row.
 // --------------------------------------------------------------------------
 ServerList.rowClick = function (data, event) {
-    $(".uOrderList li.selected").removeClass("selected");
-    $(".uOrderList li#orderList-" + data.id).addClass("selected");
-    var self = ServerList;
-    setTimeout(function () {
-        self.Vidi.lock();
-        self.View.selected = data.id;
-        self.View.haveselection = true;
-        self.selectedObject = data;
-        self.Vidi.unlock();
-    }, 50);
+    App.go ("/Server/"+data);
     if (event) event.stopPropagation();
     return false;
 }
