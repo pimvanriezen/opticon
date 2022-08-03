@@ -115,7 +115,6 @@ html, body
 {
     position: relative;
     top: 0;
-    max-width: 1680px;
     border-right: 1px solid black;
     bottom: 0;
     left: 0;
@@ -127,6 +126,7 @@ html, body
     width: 100%;
     padding: 0;
     height: 100%;
+    text-align: center;
     /*background-color: white;*/
     overflow: hidden;
 }
@@ -319,6 +319,23 @@ form.uSearch
     /*border-top: 1px solid #c0c0c0;*/
 }
 
+form.uToolbar
+{
+    display: table;
+    width: 100%;
+    margin-top: 0;
+    margin-right: -5px;
+    padding-left: 8px;
+    padding: 0;
+    padding-top: 5px;
+    height: 51px;
+    background-color: #444444;
+    background: linear-gradient(to bottom, #555555 0%,#383838 100%);
+    text-align: left;
+    border-bottom: 1px solid #222222;
+    /*border-top: 1px solid #c0c0c0;*/
+}
+
 form.uSearch.embedded
 {
     background: linear-gradient(to bottom, #b8b8b8 0%, #d8d8d8 100%);
@@ -448,28 +465,6 @@ img.uDelete {
     opacity: 0.4;
 }
 
-img.uDeleteNote, .uDeleteConfidential {
-    margin-top: -5px;
-    opacity: 0.2;
-}
-
-img.uDeleteConfidential {
-    position: relative;
-    top: 2px;
-}
-
-img.uDisplayConfidential
-{
-    position: relative;
-    top: 3px;
-    opacity: 0.75;
-}
-
-img.uDeleteNote:hover, img.uDelete:hover, img.uDisplayConfidential:hover, .uDeleteConfidential:hover {
-    cursor: pointer;
-    opacity: 1;
-}
-
 button
 {
     width: auto;
@@ -497,29 +492,6 @@ button
 }
 
 @media (max-width: 1300px) {
-    .uSidebar {
-        width: 152px;
-    }
-    .uSideBar .uMenuItem > img {
-        opacity: 0;
-        width: 1px;
-    }
-    form.uEditable.uSingleColumn {
-        width: 650px !important;
-    }
-    form.uEditable hr {
-        margin-left: -4px;
-        margin-right: -4px;
-    }
-    label {
-        margin-left: 5px;
-        margin-bottom: 2px;
-        text-align: left;
-        display: block;
-    }
-    .uContainer {
-        padding-left: 152px;
-    }
     button.compacted
     {
         padding-right: 0;
@@ -549,10 +521,6 @@ button
         overflow: hidden;
     }
 
-    form.uEditable.uSingleColumn {
-        width: 610px !important;
-    }
-
     button.withicon.mini:not(.tabgroup):not(.ui-tab)
     {
         padding-right: 0 !important;
@@ -564,55 +532,6 @@ button
     {
         padding-right: 10px !important;
         width:auto;
-    }
-}
-
-@media (max-width: 881px) {
-    button.withicon:not(.active)
-    {
-        padding-right: 0 !important;
-        width:24px;
-        overflow: hidden;
-    }
-
-    form.uEditable.uSingleColumn {
-        width: 500px !important;
-    }
-
-    form.uEditable label {
-        margin-left: 5px;
-        margin-bottom: 2px;
-        text-align: left;
-        display: block;
-        width: auto !important;
-    }
-
-    button.withicon.mini
-    {
-        padding-right: 0 !important;
-        width: 10px;
-        overflow: hidden;
-    }
-
-    button.withicon.hover
-    {
-        padding-right: 10px !important;
-        width:auto;
-    }
-}
-
-@media (max-width: 830px) {
-    .uSidebar {
-        display: none;
-    }
-
-    .badge.nonzero
-    {
-        display: none !important;
-    }
-
-    .uContainer {
-        padding-left: 0;
     }
 }
 
@@ -855,7 +774,7 @@ button.tabgroup.middle,
     padding-top: 20px;
     overflow-y: auto;
     overflow-x: hidden;
-    text-align: left;
+    text-align: center;
     -webkit-overflow-scrolling: touch;
     background: linear-gradient(#ccc, #eee);
     box-shadow: inset 8px 8px 10px -27px #777777;
@@ -1528,193 +1447,6 @@ h2.uLogin {
     right: 0;
 }
 
-@media (min-width: 1630px) {
-    #notes {
-        width: 520px;
-    }
-    form.uEditable, .uRevenueInfo {
-        width: 690px;
-    }
-    .uMapFrame {
-        width: 550px;
-        height: 300px;
-    }
-    .uEditContainer.second {
-        max-width: 591px !important;
-    }
-}
-
-@media (max-width: 1629px) and (min-width: 1530px) {
-    #notes {
-        width: 400px;
-    }
-    form.uEditable, .uRevenueInfo {
-        width: 690px;
-    }
-    .uMapFrame {
-        width: 450px;
-        height: 300px;
-    }
-    .uEditContainer.second {
-        max-width: 472px !important;
-    }
-}
-
-@media (max-width: 1529px) and (min-width: 1430px) {
-    #notes {
-        width: 330px;
-    }
-    form.uEditable.uAddressDetails, .uRevenueInfo, .uOrderDetails {
-        width: 660px;
-    }
-    form.uEditable {
-        width: 940px;
-    }
-    .uMapFrame {
-        width: 380px;
-        height: 300px;
-    }
-    .uEditContainer.second {
-        max-width: 402px !important;
-    }
-}
-
-@media (max-width: 1429px) and (min-width: 1360px) {
-    #notes {
-        width: 300px;
-    }
-    form.uEditable.uAddressDetails,.uRevenueInfo,.uOrderDetails {
-        width: 640px;
-    }
-    form.uEditable {
-        width: 940px;
-    }
-    .uMapFrame {
-        width: 350px;
-        height: 300px;
-    }
-    .uEditContainer.second {
-        max-width: 372px !important;
-    }
-}
-
-@media (max-width: 1500px) {
-    span.customerName {
-        display: none;
-    }
-}
-
-@media (max-width: 1359px) and (min-width: 1230px) {
-    #notes {
-        width: 430px;
-    }
-    form.uEditable,.uRevenueInfo {
-        width: 940px;
-    }
-    .uMapFrame {
-        width: 480px;
-        height: 300px;
-    }
-}
-
-@media (max-width: 1229px) and (min-width: 1180px) {
-    #notes {
-        width: 410px;
-    }
-    form.uEditable,.uRevenueInfo {
-        width: 900px;
-    }
-    .uMapFrame {
-        width: 460px;
-        height: 350px;
-    }
-}
-
-@media (max-width: 1179px) and (min-width: 1130px) {
-    #notes {
-        width: 390px;
-    }
-    form.uEditable,.uRevenueInfo {
-        width: 860px;
-    }
-    .uMapFrame {
-        width: 440px;
-        height: 350px;
-    }
-}
-
-@media (max-width: 1129px) and (min-width: 1070px) {
-    #notes {
-        width: 370px;
-    }
-    form.uEditable,.uRevenueInfo {
-        width: 820px;
-    }
-    .uMapFrame {
-        width: 420px;
-        height: 350px;
-    }
-}
-
-@media (max-width: 1069px) and (min-width: 990px) {
-    form.uEditable,.uRevenueInfo {
-        width: 740px;
-    }
-}
-@media (max-width: 989px) and (min-width: 882px) {
-    form.uEditable,.uRevenueInfo {
-        width: 640px;
-    }
-}
-
-@media (max-width: 881px) {
-    form.uEditable,.uRevenueInfo {
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-    form.uEditable hr {
-        margin-left: -4px;
-        margin-right: -4px;
-    }
-}
-
-@media (max-width: 700px) {
-    form.uEditable,.uRevenueInfo {
-        width: 550px;
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-    form.uEditable hr {
-        margin-left: -4px;
-        margin-right: -4px;
-    }
-    label {
-        margin-left: 5px;
-        margin-bottom: 2px;
-        text-align: left;
-        width: auto !important;
-        display: block;
-    }
-}
-
-@media (max-width: 600px) {
-    form.uEditable,.uRevenueInfo {
-        width: 450px;
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-    form.uEditable hr {
-        margin-left: -4px;
-        margin-right: -4px;
-    }
-    label {
-        margin-left: 5px;
-        text-align: left;
-        margin-bottom: 2px;
-        width: auto !important;
-        display: block;
-    }
-}
 
 .notifyjs-system-base {
     font-family: "Verdana", sans-serif;

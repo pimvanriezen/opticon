@@ -1,14 +1,11 @@
-<form class="uSearch">
+<form class="uToolbar">
   <div class="uToolbarButton">
     <u-button class="green backbutton" icon="toolbar-back.png" cb="back()">
       Back
     </u-button>
   </div>
-  <span class="customerName">
-    Host foo.bar.baz
-  </span>
 </form>
-<div class="uEditPane">
+<div class="uEditPane"><div style="text-align:left;">
   <div class="uEditContainer">
     <u-header icon="header-info.png">Host Information</u-header>
     <div class="uServerData">
@@ -34,13 +31,13 @@
         <tr>
           <td style="color:#888888;" width="22%">Kernel</td>
           <td>
-            {{data.os.kernel}} <b>{{data.os.version}}</b>
+            {{data.os.kernel}} {{data.os.version}}
             <span class="unit">({{data.os.arch}})</span>
           </td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%" valign="top">Distribution</td>
-          <td valign="top">{{data.os.distro}}</td>
+          <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Session IP</td>
@@ -238,4 +235,4 @@
     </div>
   </div>
   
-</div>
+</div></div>

@@ -34,6 +34,9 @@ ServerList.activate = function (argv) {
     Module.backgroundInterval = 30000;
     Module.setBackground (self.refresh);
     self.show();
+    self.checkTimer = setTimeout (function() {
+        $("#honking-checkmark").fadeIn(5000);
+    }, 8000);
 }
 
 // --------------------------------------------------------------------------
@@ -67,11 +70,17 @@ ServerList.refresh = function () {
 // Handler for switching between filter tab
 // --------------------------------------------------------------------------
 ServerList.switchTab = function (status) {
+    $("#honking-checkmark").hide();
     let self = ServerList;
+    if (self.checkTimer) clearTimeout (self.checkTimer);
+    self.checkTimer = null;
     self.View.selected = "";
     self.View.haveselection = false;
     self.View.server_status = status;
     self.refresh();
+    self.checkTimer = setTimeout (function() {
+        $("#honking-checkmark").fadeIn(5000);
+    }, 8000);
 }
 
 // --------------------------------------------------------------------------

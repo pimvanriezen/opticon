@@ -1,58 +1,60 @@
 <!-- toolbar -->
-<form class="uSearch">
-        <div class="uToolbarButton">
-            <u-tabgroup cb="switchTab" name="server_status"
+<form class="uToolbar">
+  <div class="uToolbarButton">
+    <u-tabgroup cb="switchTab" name="server_status"
                 tabs="ALERT:Alert,WARN:Warnings,ALL:All"></u-tabgroup>
-        </div>
+  </div>
 </form>
 
 <u-listkeyboard></u-listkeyboard>
 
 <div class="uSelectList uServerList" v-on:click="deSelect">
-    <div v-if="empty" class="uNoResults">
-        <center>No servers in the {{server_status}} state.</center>
-    </div>
-    <span v-if="!empty">
-      <table cellspacing="0" border="0" class="tbserverlist" width="100%">
-        <tr height="32" v-for="o,idx,count in overview" v-on:click="rowClick(idx)">
-          <td width="*">
-            <b>{{o.hostname}}</b>
-          </td>
-          <td width="80">
-            <span v-bind:class="statusClass(o)">{{o.status}}</span>
-          </td>
-          <td width="240">
-            {{o["agent/ip"]}}
-            <span v-if="o['link/ip'] &&(o['link/ip']!=o['agent/ip'])"> -> {{o["link/ip"]}}</span>
-          </td>
-          <td align="right" width="64">
-            <meter low="50%" high="80%" max="100.0" value="{{o.pcpu}}">{{parseFloat(o.pcpu).toFixed(2)}} %</meter>
-          </td>
-          <td align="right" width="56">{{parseFloat(o.loadavg).toFixed(2)}}</td>
-          <td align="right" width="80">
-            {{parseInt(o["io/rdops"])+parseInt(o["io/wrops"])}} iops
-          </td>
-          <td align="right" width="88">
-            <span v-if="o['net/in_kbs'] > 1023">
-              {{(o["net/in_kbs"] / 1024.0).toFixed(1)}} Mb/s
-            </span>
-            <span v-if="o['net/in_kbs'] < 1024">
-              {{parseInt(o["net/in_kbs"]).toFixed(1)}} Kb/s
-            </span>
-          </td>
-          <td align="right" width="88">
-            <span v-if="o['net/out_kbs'] > 1023">
-              {{(o["net/out_kbs"] / 1024.0).toFixed(1)}} Mb/s
-            </span>
-            <span v-if="o['net/out_kbs'] < 1024">
-              {{parseInt(o["net/out_kbs"]).toFixed(1)}} Kb/s
-            </span>
-          </td>
-          <td align="right" width="80">
-            {{parseInt(o["net/in_pps"])+parseInt(o["net/out_pps"])}} pps
-          </td>
-          <td align="right" width="80">{{parseFloat(o["link/rtt"]).toFixed(2)}} ms</td>
-        </tr>
-      </table>
-    </span>
+  <div v-show="empty" class="uNoResults">
+    <center>No servers in the {{server_status}} state.<br>
+    <table height="100%"><tr><td valign="center">
+    <img v-static="keep" id="honking-checkmark" src="icon/honking-checkmark.png" style="display:none;"></td></tr></table></center>
+  </div>
+  <span v-if="!empty">
+    <table cellspacing="0" border="0" class="tbserverlist" width="100%">
+      <tr height="32" v-for="o,idx,count in overview" v-on:click="rowClick(idx)">
+        <td width="*">
+          <b>{{o.hostname}}</b>
+        </td>
+        <td width="80">
+          <span v-bind:class="statusClass(o)">{{o.status}}</span>
+        </td>
+        <td width="240">
+          {{o["agent/ip"]}}
+          <span v-if="o['link/ip'] &&(o['link/ip']!=o['agent/ip'])"> -> {{o["link/ip"]}}</span>
+        </td>
+        <td align="right" width="64">
+          <meter low="50%" high="80%" max="100.0" value="{{o.pcpu}}">{{parseFloat(o.pcpu).toFixed(2)}} %</meter>
+        </td>
+        <td align="right" width="56">{{parseFloat(o.loadavg).toFixed(2)}}</td>
+        <td align="right" width="80">
+          {{parseInt(o["io/rdops"])+parseInt(o["io/wrops"])}} iops
+        </td>
+        <td align="right" width="88">
+          <span v-if="o['net/in_kbs'] > 1023">
+            {{(o["net/in_kbs"] / 1024.0).toFixed(1)}} Mb/s
+          </span>
+          <span v-if="o['net/in_kbs'] < 1024">
+            {{parseInt(o["net/in_kbs"]).toFixed(1)}} Kb/s
+          </span>
+        </td>
+        <td align="right" width="88">
+          <span v-if="o['net/out_kbs'] > 1023">
+            {{(o["net/out_kbs"] / 1024.0).toFixed(1)}} Mb/s
+          </span>
+          <span v-if="o['net/out_kbs'] < 1024">
+            {{parseInt(o["net/out_kbs"]).toFixed(1)}} Kb/s
+          </span>
+        </td>
+        <td align="right" width="80">
+          {{parseInt(o["net/in_pps"])+parseInt(o["net/out_pps"])}} pps
+        </td>
+        <td align="right" width="80">{{parseFloat(o["link/rtt"]).toFixed(2)}} ms</td>
+      </tr>
+    </table>
+  </span>
 </div>
