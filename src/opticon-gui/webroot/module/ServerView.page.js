@@ -35,10 +35,10 @@ ServerView.back = function() {
 }
 
 ServerView.statusClass = function (st) {
-    if (st == "OK") return "status green";
-    if (st == "WARN") return "status orange";
-    if (st == "ALERT") return "status red";
-    return "status grey";
+    if (st == "OK") return "status small green";
+    if (st == "WARN") return "status small orange";
+    if (st == "ALERT") return "status small red";
+    return "status small grey";
 }
 
 ServerView.ktoh = function (kb,isbps) {
@@ -51,6 +51,11 @@ ServerView.ktoh = function (kb,isbps) {
             kb = kb / 1024;
             res.size = kb;
             res.unit = "GB";
+            if (kb > 1023) {
+                kb = kb / 1024;
+                res.size = kb;
+                res.unit = "TB";
+            }
         }
     }
     res.size = parseFloat(res.size).toFixed(2);

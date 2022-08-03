@@ -10,40 +10,40 @@
 </form>
 <div class="uEditPane">
   <div class="uEditContainer">
-    <h2>Host Information</h2>
+    <u-header icon="header-info.png">Host Information</u-header>
     <div class="uServerData">
       <table width="100%">
         <tr>
-          <td style="color:#888888;" width="20%">Hostname</td>
+          <td style="color:#888888;" width="22%">Hostname</td>
           <td>{{data.hostname}}</td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">Status</td>
+          <td style="color:#888888;" width="22%">Status</td>
           <td><span v-bind:class="statusClass(data.status)">{{data.status}}</span></td>
         </tr>
         <tr>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr v-if="meta.name">
-          <td style="color:#888888;" width="20%">Tenant</td>
+          <td style="color:#888888;" width="22%">Tenant</td>
           <td>{{meta.name}}</td>
         </tr>
         <tr v-if="meta.name">
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">Kernel</td>
+          <td style="color:#888888;" width="22%">Kernel</td>
           <td>
             {{data.os.kernel}} <b>{{data.os.version}}</b>
             <span class="unit">({{data.os.arch}})</span>
           </td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%" valign="top">Distribution</td>
+          <td style="color:#888888;" width="22%" valign="top">Distribution</td>
           <td valign="top">{{data.os.distro}}</td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">Session IP</td>
+          <td style="color:#888888;" width="22%">Session IP</td>
           <td>{{data.agent.ip}}
             <span v-if="data.link.ip" style="color:#666666;">
               (Local {{data.link.ip}})
@@ -51,7 +51,7 @@
           </td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">RTT</td>
+          <td style="color:#888888;" width="22%">RTT</td>
           <td>{{data.link.rtt}} <span class="unit">ms</span>
             <span v-if="data.link.loss>0">
               <b>({{data.link.loss}}% packet loss)</b>
@@ -63,18 +63,18 @@
   </div>
   
   <div class="uEditContainer">
-    <h2>Performance Data</h2>
+    <u-header icon="header-performance.png">Performance Data</u-header>
     <div class="uServerData">
       <table width="100%">
         <tr>
-          <td style="color:#888888;" width="20%">CPU Usage</td>
+          <td style="color:#888888;" width="22%">CPU Usage</td>
           <td>
-            <meter style="width:180px;" max="100" value="{{data.pcpu}}"></meter>
+            <meter style="width:120px; margin-right: 8px;" max="100" value="{{data.pcpu}}"></meter>
             {{parseFloat(data.pcpu).toFixed(2)}} %
           </td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">LoadAvg</td>
+          <td style="color:#888888;" width="22%">LoadAvg</td>
           <td>{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
               {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
               {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
@@ -83,7 +83,7 @@
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">Memory</td>
+          <td style="color:#888888;" width="22%">Memory</td>
           <td>
             {{ktoh(data.mem.free).size}} <span class="unit">{{ktoh(data.mem.free).unit}}</span>
             free ({{ktoh(data.mem.total).size}} <span class="unit">{{ktoh(data.mem.total).unit}}</span>
@@ -94,14 +94,14 @@
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">Network In</td>
+          <td style="color:#888888;" width="22%">Network In</td>
           <td>
             {{ktoh(data.net.in_kbs).size}} <span class="unit">{{ktoh(data.net.in_kbs,true).unit}}</span>
             ({{data.net.in_pps}} <span class="unit">pps</span>)
           </td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">Network Out</td>
+          <td style="color:#888888;" width="22%">Network Out</td>
           <td>
             {{ktoh(data.net.out_kbs).size}} <span class="unit">{{ktoh(data.net.out_kbs,true).unit}}</span>
             ({{data.net.out_pps}} <span class="unit">pps</span>)
@@ -111,7 +111,7 @@
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td style="color:#888888;" width="20%">Disk i/o</td>
+          <td style="color:#888888;" width="22%">Disk i/o</td>
           <td>
             {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
           </td>
@@ -121,7 +121,7 @@
   </div>
   
   <div v-if="data.df && data.df.length" class="uEditContainer">
-    <h2>Disk Usage</h2>
+    <u-header icon="header-disk.png">Disk Usage</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
@@ -146,7 +146,7 @@
   </div>
 
   <div v-if="data.vm && data.vm.length" class="uEditContainer">
-    <h2>Virtual Machines</h2>
+    <u-header icon="header-vm.png">Virtual Machines</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
@@ -165,8 +165,8 @@
   </div>
 
   <div v-if="data.temp && data.temp.length" class="uEditContainer">
-    <h2>System Temperatures</h2>
-    <div class="uServerData table">
+    <u-header icon="header-temp.png">Temperatures</u-header>
+    <div class="uServerData table narrow">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
           <th align="left">Name</th>
@@ -181,8 +181,8 @@
   </div>
 
   <div v-if="data.temp && data.temp.length" class="uEditContainer">
-    <h2>System Fans</h2>
-    <div class="uServerData table">
+    <u-header icon="header-fans.png">Fans</u-header>
+    <div class="uServerData table narrow">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
           <th align="left">Name</th>
@@ -197,7 +197,7 @@
   </div>
   
   <div v-if="data.who && data.who.length" class="uEditContainer">
-    <h2>User Sessions</h2>
+    <u-header icon="header-who.png">User Sessions</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
@@ -215,7 +215,7 @@
   </div>
     
   <div class="uEditContainer">
-    <h2>Processes</h2>
+    <u-header icon="header-top.png">Processes</u-header>
     <div class="uServerData table wide">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
