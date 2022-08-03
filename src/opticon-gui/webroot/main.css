@@ -1241,7 +1241,8 @@ form.uEditable,.uServerData
     background-size: 18px 18px;
     background-repeat: no-repeat;
     margin-bottom: -3px;
-    margin-right: 8px;
+    margin-right: 6px;
+    margin-left: 6px;
 }
 
 .iconheader {

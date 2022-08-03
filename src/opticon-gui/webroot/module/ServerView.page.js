@@ -20,11 +20,18 @@ ServerView.activate = function(argv) {
             API.Opticon.Tenant.getMeta (self.tenantid, function (res) {
                 if (res) self.View.meta = res.metadata;
             });
-            API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
-                self.apires = res;
-                self.View.data = self.apires;
-            });
+            Module.backgroundInterval = 30000;
+            Module.setBackground (self.refresh);
+            self.refresh();
         }
+    });
+}
+
+ServerView.refresh = function() {
+    var self = ServerView;
+    API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
+        self.apires = res;
+        self.View.data = self.apires;
     });
 }
 
