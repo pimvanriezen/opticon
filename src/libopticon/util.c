@@ -63,10 +63,10 @@ meterid_t id2mask (meterid_t id) {
 }
 
 /*/ ======================================================================= /*/
-/** Determine whether one meterid is prefix for another one. The mask of the prefix
-  * part of prefixfor should be provided pre-calculated.
-  * Example: isidprefix ('top','top/pcpu', '***') would be true. With meterids in stead
-  * of strings.
+/** Determine whether one meterid is prefix for another one. The mask of the
+  * prefix part of prefixfor should be provided pre-calculated.
+  * Example: isidprefix ('top','top/pcpu', '***') would be true. With meterids
+  * instead of strings.
   * \param potential The potential prefix node
   * \param prefixfor The potential 'child' node
   * \param mask Mask for the prefix part of the potential child.

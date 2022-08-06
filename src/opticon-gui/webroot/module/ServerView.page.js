@@ -73,7 +73,8 @@ ServerView.ktoh = function (kb,isbps) {
 ServerView.devName = function (dev) {
     if (dev[0] != '@') return "★ " + dev;
     if (dev.indexOf('/')>=0) return "⇨ " + dev.replace(/@/,'');
-    return "⇨ " + dev.replace(/@/,'').replace(/--/g,'@').replace(/-/g,'/').replace(/@/g,'-');
+    return "⇨ " + dev.replace(/@/,'').replace(/--/g,'@').
+                      replace(/-/g,'/').replace(/@/g,'-');
 }
 
 ServerView.devClass = function (dev) {
