@@ -120,3 +120,32 @@ ServerList.deSelect = function () {
     return false;
 }
 
+// --------------------------------------------------------------------------
+// Display string for amounts. Examples:
+// translateUnit (4230, "", "iops") -> "4.23 Kiops"
+// translateUnit (832, "K", "B") -> 823.00 KB
+// translateUnit (4096 "M", "B") -> 4.00 GB
+// --------------------------------------------------------------------------
+ServerList.translateUnit = function (val, base, unit) {
+    while ((base != "G") && (val > 2047)) {
+        val = val / 1024.0;
+        switch (base) {
+            case "":
+                base = "K";
+                break;
+            
+            case "K":
+                base = "M";
+                break;
+            
+            case "M":
+                base = "G";
+                
+            case "G":
+                base = "T";
+                break;
+        }
+    }
+    if (base == "") return parseInt(val) + " " + unit;
+    return parseFloat(val).toFixed(2) + " " + base + unit;
+}
