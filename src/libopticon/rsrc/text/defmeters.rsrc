@@ -246,4 +246,22 @@
         description: "Size"
         unit: "MB"
     }
+    port/if {
+        type: string
+        description: "Interface"
+    }
+    port/in {
+        type: integer
+        description: "Input"
+        unit: "Kb/s"
+    }
+    port/out {
+        type: integer
+        description: "Output"
+        unit: "Kb/s"
+    }
+    port/st {
+        type: string
+        description: "State"
+    }
 }
