@@ -246,6 +246,10 @@
         description: "Size"
         unit: "MB"
     }
+    port {
+        type: table
+        description: "Network Ports"
+    }
     port/if {
         type: string
         description: "Interface"

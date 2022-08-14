@@ -33,7 +33,7 @@ probe *probe_alloc (void) {
 }
 
 /** Implementation of the exec probe type. Reads JSON from the
-  * stdout of the callde program. */
+  * stdout of the called program. */
 var *runprobe_exec (probe *self) {
     char buffer[4096];
     buffer[0] = 0;

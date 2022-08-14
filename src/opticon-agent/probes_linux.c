@@ -160,6 +160,13 @@ portinfo *portinfo_create (const char *devname) {
     return res;
 }
 
+/** Handles data for a specific interface. Updates the counters and
+ *  calculates the rate.
+ *  \param self The portinfo object to update
+ *  \param up True if the associated interface is currently up.
+ *  \param in Current input bytes counter for the interface.
+ *  \param out Current output bytes counter for the interface.
+ */
 void portinfo_handle_data (portinfo *self, bool up, uint64_t in, uint64_t out) {
     time_t now = time (NULL);
     self->up = up;
@@ -185,6 +192,11 @@ void portinfo_handle_data (portinfo *self, bool up, uint64_t in, uint64_t out) {
     self->lastrun = now;
 }
 
+/** Locates a portinfo object in a portlist, or creates a new one
+ *  if none exists with the given name.
+ *  \param self The portlist object
+ *  \param dev The requested device name.
+ */
 portinfo *portlist_get_port (portlist *self, const char *dev) {
     portinfo *res = self->first;
     while (res) {
@@ -205,6 +217,7 @@ portinfo *portlist_get_port (portlist *self, const char *dev) {
     return res;
 }
 
+/** Probe implementation */
 var *runprobe_portinfo (probe *self) {
     FILE *fproc;
     FILE *fsys;
@@ -238,6 +251,14 @@ var *runprobe_portinfo (probe *self) {
         
         if (var_get_count (matchdevices)) {
             if (! matchlist (devstart, matchdevices)) {
+                wordlist_free (args);
+                continue;
+            }
+        }
+        else if (! var_get_count (skipdevices)) {
+            /* If no match/skip devices are given, assume a default
+               match on only 'ethX' devices. */
+            if (strncmp (devstart, "eth", 3) != 0) {
                 wordlist_free (args);
                 continue;
             }
@@ -814,10 +835,10 @@ var *runprobe_io (probe *self)
     if (IOPROBE.io_blk_r || IOPROBE.io_blk_w) {
         var *res_io = var_get_dict_forkey (res, "io");
         if (IOPROBE.io_blk_r) {
-            var_set_int_forkey (res_io, "rdops", delta_r / (ti - IOPROBE.lastrun));
+            var_set_int_forkey (res_io, "rdops", delta_r/(ti-IOPROBE.lastrun));
         }
         if (IOPROBE.io_blk_w) {
-            var_set_int_forkey (res_io, "wrops", delta_w / (ti - IOPROBE.lastrun));
+            var_set_int_forkey (res_io, "wrops", delta_w/(t -IOPROBE.lastrun));
         }
     }
 
@@ -827,10 +848,12 @@ var *runprobe_io (probe *self)
     log_debug ("cpudelta: %.1f, ncpu %i, tdelta: %i tck:%i",
                cpudelta, ncpu, ti - IOPROBE.lastrun, CLK_TCK);
 
-    var_set_double_forkey (res, "pcpu", (100.0 * (cpudelta/ncpu)) / (ti - IOPROBE.lastrun));
+    var_set_double_forkey (res, "pcpu",
+                        (100.0 * (cpudelta/ncpu)) / (ti - IOPROBE.lastrun));
     if (IOPROBE.io_wait) {
         var *res_io = var_get_dict_forkey (res, "io");
-        var_set_double_forkey (res_io, "pwait", (100.0 * (delta/ncpu)) / (ti - IOPROBE.lastrun));
+        var_set_double_forkey (res_io, "pwait",
+                        (100.0 * (delta/ncpu)) / (ti - IOPROBE.lastrun));
     }
 
     IOPROBE.io_blk_r = totalblk_r;
