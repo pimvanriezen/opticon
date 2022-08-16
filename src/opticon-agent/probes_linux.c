@@ -838,7 +838,7 @@ var *runprobe_io (probe *self)
             var_set_int_forkey (res_io, "rdops", delta_r/(ti-IOPROBE.lastrun));
         }
         if (IOPROBE.io_blk_w) {
-            var_set_int_forkey (res_io, "wrops", delta_w/(t -IOPROBE.lastrun));
+            var_set_int_forkey (res_io, "wrops", delta_w/(ti-IOPROBE.lastrun));
         }
     }
 
