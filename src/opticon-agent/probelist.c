@@ -132,6 +132,11 @@ probefunc_f probe_find_builtin (const char *id) {
     return NULL;
 }
 
+/** Initialize a probelist */
+void probelist_init (probelist *self) {
+    self->first = self->last = NULL;
+}
+
 /** Add a probe to a list */
 int probelist_add (probelist *self, probetype t, const char *call, 
                    const char *id, int iv, var *opt) {
