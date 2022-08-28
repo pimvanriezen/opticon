@@ -1,5 +1,6 @@
 #include <libopticon/codec_json.h>
 #include <libopticon/util.h>
+#include <libopticon/var.h>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -31,6 +32,8 @@ void jsoncodec_dump_val (metertype_t type, meter *m, int pos, ioport *into) {
     }
     
     char buf[1024];
+    char *tstr;
+    
     switch (type) {
         case MTYPE_INT:
             sprintf (buf, "%" PRIu64 , m->d.u64[pos]);
@@ -41,7 +44,9 @@ void jsoncodec_dump_val (metertype_t type, meter *m, int pos, ioport *into) {
             break;
         
         case MTYPE_STR:
-            sprintf (buf, "\"%s\"", m->d.str[pos].str);
+            tstr = var_escape_str (m->d.str[pos].str);
+            sprintf (buf, "\"%s\"", tstr);
+            free (tstr);
             break;
             
         default:

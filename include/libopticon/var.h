@@ -129,4 +129,6 @@ var         *var_add_array (var *);
 var         *var_add_dict (var *);
 int          var_contains_str (var *, const char *);
 int          var_indexof (var *, const char *);
+
+char        *var_escape_str (const char *);
 #endif
