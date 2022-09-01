@@ -1,0 +1,238 @@
+<form class="uToolbar">
+  <div class="uToolbarButton">
+    <u-button class="green backbutton" icon="toolbar-back.png" cb="back()">
+      Back
+    </u-button>
+  </div>
+</form>
+<div class="uEditPane"><div style="text-align:left;">
+  <div class="uEditContainer">
+    <u-header icon="header-info.png">Host Information</u-header>
+    <div class="uServerData">
+      <table width="100%">
+        <tr>
+          <td style="color:#888888;" width="22%">Hostname</td>
+          <td>{{data.hostname}}</td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">Status</td>
+          <td><span v-bind:class="statusClass(data.status)">{{data.status}}</span></td>
+        </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr v-if="meta.name">
+          <td style="color:#888888;" width="22%">Tenant</td>
+          <td>{{meta.name}}</td>
+        </tr>
+        <tr v-if="meta.name">
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">Kernel</td>
+          <td>
+            {{data.os.kernel}} {{data.os.version}}
+            <span class="unit">({{data.os.arch}})</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%" valign="top">Distribution</td>
+          <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">Session IP</td>
+          <td>{{data.agent.ip}}
+            <span v-if="data.link.ip" style="color:#666666;">
+              (Local {{data.link.ip}})
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">RTT</td>
+          <td>{{data.link.rtt}} <span class="unit">ms</span>
+            <span v-if="data.link.loss>0">
+              <b>({{data.link.loss}}% packet loss)</b>
+            </span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  
+  <div class="uEditContainer">
+    <u-header icon="header-performance.png">Performance Data</u-header>
+    <div class="uServerData">
+      <table width="100%">
+        <tr>
+          <td style="color:#888888;" width="22%">CPU Usage</td>
+          <td>
+            <meter style="width:120px; margin-right: 8px;" max="100" value="{{data.pcpu}}"></meter>
+            {{parseFloat(data.pcpu).toFixed(2)}} %
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">LoadAvg</td>
+          <td>{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
+              {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
+              {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
+        </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">Memory</td>
+          <td>
+            {{ktoh(data.mem.free).size}} <span class="unit">{{ktoh(data.mem.free).unit}}</span>
+            free ({{ktoh(data.mem.total).size}} <span class="unit">{{ktoh(data.mem.total).unit}}</span>
+            total)
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">Network In</td>
+          <td>
+            {{ktoh(data.net.in_kbs).size}} <span class="unit">{{ktoh(data.net.in_kbs,true).unit}}</span>
+            ({{data.net.in_pps}} <span class="unit">pps</span>)
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">Network Out</td>
+          <td>
+            {{ktoh(data.net.out_kbs).size}} <span class="unit">{{ktoh(data.net.out_kbs,true).unit}}</span>
+            ({{data.net.out_pps}} <span class="unit">pps</span>)
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">Disk i/o</td>
+          <td>
+            {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
+          </td>
+        <tr>
+      </table>
+    </div>
+  </div>
+  
+  <div v-if="data.df && data.df.length" class="uEditContainer">
+    <u-header icon="header-disk.png">Disk Usage</u-header>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Device</th>
+          <th align="left">FS</th>
+          <th align="right">Size</th>
+          <th align="center">Usage</th>
+          <th align="left">Mount</th>
+        </tr>
+        <tr v-for="dsk in data.df">
+          <td width="20%" style="color:#555555;white-space: nowrap;"
+              v-bind:class="devClass(dsk.device)">{{devName(dsk.device)}}</td>
+          <td width="5%">{{dsk.fs}}</td>
+          <td align="right" width="20%">{{ktoh(dsk.size*1024).size}} <span class="unit">{{ktoh(dsk.size*1024).unit}}</span></td>
+          <td align="center" width="20%">
+            <meter max="100" value="{{dsk.pused}}"></meter>
+          </td>
+          <td>{{dsk.mount}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div v-if="data.vm && data.vm.length" class="uEditContainer">
+    <u-header icon="header-vm.png">Virtual Machines</u-header>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Name</th>
+          <th align="right">Cores</th>
+          <th align="right">RAM</th>
+        </tr>
+        <tr v-for="vm in data.vm">
+          <td>{{vm.name}}</td>
+          <td width="10%" align="right">{{vm.cores}}</td>
+          <td width="20%" align="right">{{ktoh(vm.ram*1024).size}}
+            <span class="unit">{{ktoh(vm.ram*1024).unit}}</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div v-if="data.temp && data.temp.length" class="uEditContainer">
+    <u-header icon="header-temp.png">Temperatures</u-header>
+    <div class="uServerData table narrow">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Name</th>
+          <th align="right">Value</th>
+        </tr>
+        <tr v-for="dat in data.temp">
+          <td>{{dat.id}}</td>
+          <td align="right">{{dat.v}} <span class="unit">º{{dat.u}}</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div v-if="data.temp && data.temp.length" class="uEditContainer">
+    <u-header icon="header-fans.png">Fans</u-header>
+    <div class="uServerData table narrow">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Name</th>
+          <th align="right">Value</th>
+        </tr>
+        <tr v-for="dat in data.fan">
+          <td>{{dat.id}}</td>
+          <td align="right">{{dat.v}} <span class="unit">{{dat.u}}</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  
+  <div v-if="data.who && data.who.length" class="uEditContainer">
+    <u-header icon="header-who.png">User Sessions</u-header>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">User</th>
+          <th align="right">TTY</th>
+          <th align="left">Remote</th>
+        </tr>
+        <tr v-for="ses in data.who">
+          <td>{{ses.user}}</td>
+          <td width="10%" align="right">{{ses.tty}}</td>
+          <td>{{ses.remote}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+    
+  <div class="uEditContainer">
+    <u-header icon="header-top.png">Processes</u-header>
+    <div class="uServerData table wide">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">PID</td>
+          <th align="left">User</td>
+          <th align="right">CPU %</td>
+          <th align="right">Mem %</td>
+          <th></th>
+          <th align="left">Name</td>
+        </tr>
+        <tr v-for="proc in data.top">
+          <td width="5%">{{proc.pid}}</td>
+          <td width="15%">{{proc.user}}</td>
+          <td width="8%" align="right">{{parseFloat(proc.pcpu).toFixed(2)}}</td>
+          <td width="8%" align="right">{{parseFloat(proc.pmem).toFixed(2)}}</td>
+          <td width="2%">&nbsp;</td>
+          <td>{{proc.name}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  
+</div></div>

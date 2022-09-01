@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <libopticon/log.h>
 #include <libopticon/var.h>
+#include <libopticon/popen.h>
 #include "probes.h"
 #include "wordlist.h"
 
@@ -38,7 +39,7 @@ var *runprobe_uname (probe *self) {
     if (strcmp (uts.sysname, "Darwin") == 0) {
         char buf[256];
 
-        f = popen ("system_profiler SPHardwareDataType","r");
+        f = popen_safe ("system_profiler SPHardwareDataType","r");
         if (f) {
             while (! feof (f)) {
                 fgets (buf, 255, f);
@@ -56,7 +57,7 @@ var *runprobe_uname (probe *self) {
                     }
                 }
             }
-            pclose (f);
+            pclose_safe (f);
         }
     }
     
@@ -91,18 +92,18 @@ var *runprobe_uname (probe *self) {
     
     struct stat st;
     if (stat ("/sbin/getcfg", &st) == 0) {
-        f = popen ("/sbin/getcfg System Model","r");
+        f = popen_safe ("/sbin/getcfg System Model","r");
         fgets (pname, 31, f);
         pname[31] = 0;
         if (*pname) pname[strlen(pname)-1] = 0;
-        fclose (f);
+        pclose_safe (f);
         sprintf (platform, "QNAP %s", pname);
         var_set_str_forkey (v_os, "hw", platform);
         return res;
     }
     
     if (stat ("/usr/sbin/ubnt-hal", &st) == 0) {
-        f = popen ("opticon-helper /usr/sbin/ubnt-hal show-version","r");
+        f = popen_safe ("opticon-helper /usr/sbin/ubnt-hal show-version","r");
         if (f) {
             char buf[256];
             buf[0] = 0;
@@ -121,7 +122,7 @@ var *runprobe_uname (probe *self) {
                     return res;
                 }
             }
-            pclose (f);
+            pclose_safe (f);
         }
     }
     
@@ -136,7 +137,7 @@ var *runprobe_who (probe *self) {
     char *cremote;
     char *c;
     wordlist *args;
-    FILE *f = popen ("/usr/bin/who","r");
+    FILE *f = popen_safe ("/usr/bin/who","r");
     int fd = fileno (f);
     fd_set fds;
     struct timeval tv;
@@ -171,7 +172,7 @@ var *runprobe_who (probe *self) {
         }
         wordlist_free (args);
     }
-    pclose (f);
+    pclose_safe (f);
     return res;
 }
 
@@ -192,7 +193,7 @@ var *runprobe_localip (probe *self) {
     const char *cmd = "ifconfig | grep -v 127.0.0.1";
 #endif
     
-    FILE *f = popen (cmd, "r");
+    FILE *f = popen_safe (cmd, "r");
     if (! f) return res;
 
     int fd = fileno (f);
@@ -224,7 +225,7 @@ var *runprobe_localip (probe *self) {
             break;
         }
     }
-    pclose (f);
+    pclose_safe (f);
     return res;
 }
 

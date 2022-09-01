@@ -341,6 +341,11 @@ int cmd_watcher_set (int argc, const char *argv[]) {
     var *mde_meter = var_get_dict_forkey (mdef_m, OPTIONS.meter);
     const char *inftype = var_get_str_forkey (mde_meter, "type");
     
+    if (! inftype) {
+        fprintf (stderr, "%% Meter '%s' not found in tenant\n", OPTIONS.meter);
+        return 1;
+    }
+    
     var *req = var_alloc();
     var *req_watcher = var_get_dict_forkey (req, "watcher");
     var *reql = var_get_dict_forkey (req_watcher, OPTIONS.level);

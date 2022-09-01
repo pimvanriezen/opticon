@@ -1335,3 +1335,24 @@ int var_indexof (var *self, const char *str) {
     }
     return -1;
 }
+
+/** Escape quoted string content with backslash */
+char *var_escape_str (const char *str) {
+    char *res = (char *) malloc (2*strlen(str)+1);
+    const char *icrsr = str;
+    char *ocrsr = res;
+    while (*icrsr) {
+        if (*icrsr == '\\' || *icrsr == '\"') {
+            *ocrsr++ = '\\';
+        }
+        else if (*icrsr == '\n') {
+            *ocrsr++ = '\\';
+            *ocrsr++ = 'n';
+            icrsr++;
+            continue;
+        }
+        *ocrsr++ = *icrsr++;
+    }
+    *ocrsr = 0;
+    return res;
+}

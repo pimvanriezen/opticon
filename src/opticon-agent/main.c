@@ -13,6 +13,7 @@
 #include <libopticon/host_import.h>
 #include <libopticon/ioport_file.h>
 #include <libopticon/codec_json.h>
+#include <libopticon/popen.h>
 #include <arpa/inet.h>
 #include <syslog.h>
 #include <errno.h>
@@ -33,16 +34,18 @@ int daemon_main (int argc, const char *argv[]) {
         log_open_file (APP.logpath, APP.loglevel);
     }
     
+    popen_init();
     probelist_start (&APP.probes);
-    APP.resender = authresender_create (APP.transport);
+    collectorlist_start (&APP.collectors);
     
     time_t tlast = time (NULL);
     time_t nextslow = tlast + 5;
     time_t nextsend = tlast + 10;
-    time_t lastkeyrotate = 0;
+
     int slowround = 0;
 
     log_info ("Daemonized");
+    
     while (1) {
         time_t tnow = tlast = time (NULL);
         
@@ -52,30 +55,33 @@ int daemon_main (int argc, const char *argv[]) {
            authentication packet */
         if (nextslow <= tnow) {
             slowround = 1;
-            uint32_t sid = APP.auth.sessionid;
-            if (! sid) sid = gen_sessionid();
-            log_debug ("Authenticating session <%08x>", sid);
-            APP.auth.sessionid = sid;
-            APP.auth.serial = 0;
-            APP.auth.tenantid = APP.tenantid;
-            APP.auth.hostid = APP.hostid;
+            collector *c = APP.collectors.first;
+            while (c) {
+                
+                uint32_t sid = c->auth.sessionid;
+                if (! sid) sid = gen_sessionid();
+                log_debug ("Authenticating session <%08x>", sid);
+                c->auth.sessionid = sid;
+                c->auth.serial = 0;
             
-            /* Only rotate the AES key every half hour */
-            if (tnow - lastkeyrotate > 1800) {
-                APP.auth.sessionkey = aeskey_create();
-                lastkeyrotate = tnow;
+                /* Only rotate the AES key every half hour */
+                if (tnow - c->lastkeyrotate > 1800) {
+                    c->auth.sessionkey = aeskey_create();
+                    c->lastkeyrotate = tnow;
+                }
+            
+                /* Dispatch */
+                ioport *io_authpkt = ioport_wrap_authdata (&c->auth,
+                                                           gen_serial());
+            
+                sz = ioport_read_available (io_authpkt);
+                buf = ioport_get_buffer (io_authpkt);
+                outtransport_send (c->transport, (void*) buf, sz);
+                authresender_schedule (c->resender, buf, sz);
+                ioport_close (io_authpkt);
+                
+                c = c->next;
             }
-            APP.auth.tenantkey = APP.collectorkey;
-            
-            /* Dispatch */
-            ioport *io_authpkt = ioport_wrap_authdata (&APP.auth,
-                                                       gen_serial());
-            
-            sz = ioport_read_available (io_authpkt);
-            buf = ioport_get_buffer (io_authpkt);
-            outtransport_send (APP.transport, (void*) buf, sz);
-            authresender_schedule (APP.resender, buf, sz);
-            ioport_close (io_authpkt);
             
             /* Schedule next slow round */
             nextslow = nextslow + 300;
@@ -207,28 +213,30 @@ int daemon_main (int argc, const char *argv[]) {
         
             log_debug ("Encoded %i bytes", ioport_read_available (encoded));
 
-            ioport *wrapped = ioport_wrap_meterdata (APP.auth.sessionid,
-                                                     gen_serial(),
-                                                     APP.auth.sessionkey,
-                                                     encoded);
+            collector *c = APP.collectors.first;
+            while (c) {
+                ioport *wrapped = ioport_wrap_meterdata (c->auth.sessionid,
+                                                         gen_serial(),
+                                                         c->auth.sessionkey,
+                                                         encoded);
         
         
-            if (! wrapped) {
-                log_error ("Error wrapping");
-                ioport_close (encoded);
-                host_delete (h);
-                continue;
+                if (! wrapped) {
+                    log_error ("Error wrapping");
+                }
+                else {
+                    sz = ioport_read_available (wrapped);
+                    buf = ioport_get_buffer (wrapped);
+        
+                    /* Send it off into space */
+                    outtransport_send (c->transport, (void*) buf, sz);
+                    log_info ("%s lane packet sent: %i bytes", 
+                              slowround ? "Slow":"Fast", sz);
+                }
+                ioport_close (wrapped);
+                
+                c = c->next;
             }
-        
-            sz = ioport_read_available (wrapped);
-            buf = ioport_get_buffer (wrapped);
-        
-            /* Send it off into space */
-            outtransport_send (APP.transport, (void*) buf, sz);
-            log_info ("%s lane packet sent: %i bytes", 
-                      slowround ? "Slow":"Fast", sz);
-
-            ioport_close (wrapped);
             ioport_close (encoded);
         }
         
@@ -248,42 +256,25 @@ int daemon_main (int argc, const char *argv[]) {
     return 666;
 }
 
-/** Parse /collector/address */
-int conf_collector_address (const char *id, var *v, updatetype tp) {
+/** Parse /collector */
+int conf_collector (const char *id, var *v, updatetype tp) {
     if (tp == UPDATE_REMOVE) exit (0);
-    APP.collectoraddr = strdup (var_get_str (v));
-    return 1;
-}
-
-/** Parse /collector/tenant */
-int conf_tenant (const char *id, var *v, updatetype tp) {
-    if (tp == UPDATE_REMOVE) exit (0);
-    APP.tenantid = mkuuid (var_get_str (v));
-    return 1;
-}
-
-/** Parse /collector/host */
-int conf_host (const char *id, var *v, updatetype tp) {
-    if (tp == UPDATE_REMOVE) exit (0);
-    APP.hostid = mkuuid (var_get_str (v));
-    if (! uuidvalid (APP.hostid)) {
-        log_error ("Invalid host uuid: %s", var_get_str (v));
+    if (v->type == VAR_DICT) {
+        collectorlist_add_host (&APP.collectors, v);
+    }
+    else if (v->type == VAR_ARRAY) {
+        var *crsr = var_first(v);
+        while (crsr) {
+            log_info ("Adding collector host <%s>",
+                      var_get_str_forkey (crsr, "address"));
+            collectorlist_add_host (&APP.collectors, crsr);
+            crsr = crsr->next;
+        }
+    }
+    else {
+        log_error ("Invalid collector specification");
         return 0;
     }
-    return 1;
-}
-
-/** Parse /collector/port */
-int conf_collector_port (const char *id, var *v, updatetype tp) {
-    if (tp == UPDATE_REMOVE) exit (0);
-    APP.collectorport = var_get_int (v);
-    return 1;
-}
-
-/** Parse /collector/key */
-int conf_collector_key (const char *id, var *v, updatetype tp) {
-    if (tp == UPDATE_REMOVE) exit (0);
-    APP.collectorkey = aeskey_from_base64 (var_get_str (v));
     return 1;
 }
 
@@ -446,25 +437,26 @@ int main (int _argc, const char *_argv[]) {
     }
 #elif defined (OS_DARWIN)
     char buffer[1024];
-    FILE *F = popen ("ioreg -d2 -c IOPlatformExpertDevice | "
-                     "awk -F\\\" '/IOPlatformUUID/{print $(NF-1)}'","r");
+    FILE *F = popen_safe ("ioreg -d2 -c IOPlatformExpertDevice | "
+                          "awk -F\\\" '/IOPlatformUUID/{print $(NF-1)}'","r");
     if (F) {
         fgets (buffer, 1023, F);
         APP.hostid = mkuuid (buffer);
-        fclose (F);
+        pclose_safe (F);
     }
 #endif
     
-    opticonf_add_reaction ("collector/address", conf_collector_address);
-    opticonf_add_reaction ("collector/port", conf_collector_port);
-    opticonf_add_reaction ("collector/key", conf_collector_key);
-    opticonf_add_reaction ("collector/tenant", conf_tenant);
-    opticonf_add_reaction ("collector/host", conf_host);
+    opticonf_add_reaction ("collector", conf_collector);
     opticonf_add_reaction ("probes/*", conf_probe);
     
-    APP.transport = outtransport_create_udp();
     APP.codec = codec_create_pkt();
     APP.conf = var_alloc();
+
+    probelist_init (&APP.probes);
+    collectorlist_init (&APP.collectors);
+    
+    /* For now, we just create one instance */
+    (void) collector_new (&APP.collectors);
 
     if (! var_load_json (APP.conf, APP.confpath)) {
         log_error ("Error loading %s: %s\n", APP.confpath, parse_error());
@@ -509,11 +501,6 @@ int main (int _argc, const char *_argv[]) {
 
     if (! uuidvalid (APP.hostid)) {
         log_error ("No hostid configured and could not auto-recognise");
-    }
-    
-    if (! outtransport_setremote (APP.transport, APP.collectoraddr,
-                                  APP.collectorport)) {
-        log_error ("Error setting remote address");
         return 1;
     }
     

@@ -33,7 +33,7 @@ probe *probe_alloc (void) {
 }
 
 /** Implementation of the exec probe type. Reads JSON from the
-  * stdout of the callde program. */
+  * stdout of the called program. */
 var *runprobe_exec (probe *self) {
     char buffer[4096];
     buffer[0] = 0;
@@ -130,6 +130,11 @@ probefunc_f probe_find_builtin (const char *id) {
         i++;
     }
     return NULL;
+}
+
+/** Initialize a probelist */
+void probelist_init (probelist *self) {
+    self->first = self->last = NULL;
 }
 
 /** Add a probe to a list */

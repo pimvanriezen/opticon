@@ -311,6 +311,27 @@ MarkupDecorators.radiogroup = function (e, mname) {
     }
 }
 
+MarkupDecorators.header = function (e, mname) {
+    var label = e.innerHTML;
+    var icon = e.getAttribute ("icon");
+    
+    var span = document.createElement ("div");
+    span.className = "iconheader"
+    var nelm;
+
+    nelm = document.createElement ("div");
+    nelm.className = "headericon";
+    nelm.style.backgroundImage = "url('icon/" + icon + "')";
+    
+    span.appendChild (nelm);
+    
+    nelm = document.createElement ("span");
+    nelm.innerHTML = label;
+    span.appendChild (nelm);
+    
+    $(span).insertAfter (e);
+}
+
 // --------------------------------------------------------------------------
 // Decorator for <u-button>.
 // --------------------------------------------------------------------------

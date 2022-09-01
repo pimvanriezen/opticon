@@ -126,6 +126,192 @@ var *runprobe_net (probe *self) {
     return res;
 }
 
+/* ======================================================================= */
+/* PROBE probe_portinfo                                                    */
+/* ======================================================================= */
+
+typedef struct portinfo_s {
+    struct portinfo_s   *next;
+    struct portinfo_s   *prev;
+    char                *devname;
+    time_t               lastrun;
+    uint64_t             in_bytes;
+    uint64_t             out_bytes;
+    uint32_t             in_kbps;
+    uint32_t             out_kbps;
+    bool                 up;
+} portinfo;
+
+typedef struct portlist_s {
+    portinfo    *first;
+    portinfo    *last;
+} portlist;
+
+static portlist PORTS = {NULL,NULL};
+
+portinfo *portinfo_create (const char *devname) {
+    portinfo *res = (portinfo *) malloc (sizeof (portinfo));
+    res->next = res->prev = 0;
+    res->in_bytes = res->out_bytes = 0;
+    res->in_kbps = res->out_kbps = 0;
+    res->up = false;
+    res->devname = strdup (devname);
+    res->lastrun = 0;
+    return res;
+}
+
+/** Handles data for a specific interface. Updates the counters and
+ *  calculates the rate.
+ *  \param self The portinfo object to update
+ *  \param up True if the associated interface is currently up.
+ *  \param in Current input bytes counter for the interface.
+ *  \param out Current output bytes counter for the interface.
+ */
+void portinfo_handle_data (portinfo *self, bool up, uint64_t in, uint64_t out) {
+    time_t now = time (NULL);
+    self->up = up;
+
+    if ((! self->lastrun) || (self->lastrun >= now)) {
+        self->in_bytes = in;
+        self->out_bytes = out;
+        self->lastrun = now;
+        return;
+    }
+    
+    uint64_t diff_in;
+    uint64_t diff_out;
+    int tdiff = now - self->lastrun;
+    
+    diff_in = in - self->in_bytes;
+    diff_out = out - self->out_bytes;
+    
+    self->in_kbps = (diff_in/128) / tdiff;
+    self->out_kbps = (diff_out/128) / tdiff;
+    self->in_bytes = in;
+    self->out_bytes = out;
+    self->lastrun = now;
+}
+
+/** Locates a portinfo object in a portlist, or creates a new one
+ *  if none exists with the given name.
+ *  \param self The portlist object
+ *  \param dev The requested device name.
+ */
+portinfo *portlist_get_port (portlist *self, const char *dev) {
+    portinfo *res = self->first;
+    while (res) {
+        if (strcmp (res->devname, dev) == 0) return res;
+        res = res->next;
+    }
+    
+    res = portinfo_create (dev);
+    if (! self->first) {
+        self->first = self->last = res;
+    }
+    else {
+        res->prev = self->last;
+        self->last->next = res;
+        self->last = res;
+    }
+    
+    return res;
+}
+
+/** Probe implementation */
+var *runprobe_portinfo (probe *self) {
+    FILE *fproc;
+    FILE *fsys;
+    char buf[512];
+    char sysbuf[512];
+    wordlist *args;
+    char *colon;
+    char *devstart;
+    portinfo *port;
+    var *res = var_alloc();
+    var *skipdevices = var_get_array_forkey (self->options, "skip");
+    var *matchdevices = var_get_array_forkey (self->options, "match");
+    
+    fproc = fopen ("/proc/net/dev","r");
+    if (! fproc) {
+        log_warn ("probe_portinfo: Can't read /proc/net/dev: %s",
+                  strerror (errno));
+        return res;
+    }
+    
+    fgets (buf, 511, fproc);
+    while (! feof (fproc)) {
+        *buf = 0;
+        fgets (buf, 511, fproc);
+        if (! *buf) continue;
+        if (! colon) continue;
+        args = wordlist_make (colon);
+        *colon = 0;
+        devstart = buf;
+        while (*devstart == ' ') devstart++;
+        
+        if (var_get_count (matchdevices)) {
+            if (! matchlist (devstart, matchdevices)) {
+                wordlist_free (args);
+                continue;
+            }
+        }
+        else if (! var_get_count (skipdevices)) {
+            /* If no match/skip devices are given, assume a default
+               match on only 'ethX' devices. */
+            if (strncmp (devstart, "eth", 3) != 0) {
+                wordlist_free (args);
+                continue;
+            }
+        }
+        
+        if (matchlist (devstart, skipdevices)) {
+            wordlist_free (args);
+            continue;
+        }
+
+        if (args->argc < 11) {
+            wordlist_free (args);
+            continue;
+        }
+        
+        uint64_t in = strtoull (args->argv[1], NULL, 10);
+        uint64_t out = strtoull (args->argv[9], NULL, 10);
+        bool up = false;
+        sprintf (sysbuf, "/sys/class/net/%s/operstate", devstart);
+        fsys = fopen (sysbuf, "r");
+        if (fsys) {
+            fgets (sysbuf, 511, fsys);
+            if (sysbuf[0] == 'u' && sysbuf[1] == 'p') up = true;
+            fclose (fsys);
+        }
+
+        port = portlist_get_port (&PORTS, devstart);
+        if (port) {
+            portinfo_handle_data (port, up, in, out);
+        }
+    }
+    fclose (fproc);
+    
+    var *res_ports = var_get_array_forkey (res, "port");
+    
+    port = PORTS.first;
+    while (port) {
+        var *res_port = var_add_dict (res_ports);
+        var_set_str_forkey (res_port, "if", port->devname);
+        var_set_int_forkey (res_port, "in", port->in_kbps);
+        var_set_int_forkey (res_port, "out", port->out_kbps);
+        var_set_str_forkey (res_port, "st", port->up ? "up" : "down");
+        
+        port = port->next;
+    }
+    
+    return res;
+}
+
+/* ======================================================================= */
+/* PROBE probe_ipmi                                                        */
+/* ======================================================================= */
+
 var *runprobe_ipmi (probe *self) {
     FILE *F;
     char buf[1024];
@@ -649,10 +835,10 @@ var *runprobe_io (probe *self)
     if (IOPROBE.io_blk_r || IOPROBE.io_blk_w) {
         var *res_io = var_get_dict_forkey (res, "io");
         if (IOPROBE.io_blk_r) {
-            var_set_int_forkey (res_io, "rdops", delta_r / (ti - IOPROBE.lastrun));
+            var_set_int_forkey (res_io, "rdops", delta_r/(ti-IOPROBE.lastrun));
         }
         if (IOPROBE.io_blk_w) {
-            var_set_int_forkey (res_io, "wrops", delta_w / (ti - IOPROBE.lastrun));
+            var_set_int_forkey (res_io, "wrops", delta_w/(ti-IOPROBE.lastrun));
         }
     }
 
@@ -662,10 +848,12 @@ var *runprobe_io (probe *self)
     log_debug ("cpudelta: %.1f, ncpu %i, tdelta: %i tck:%i",
                cpudelta, ncpu, ti - IOPROBE.lastrun, CLK_TCK);
 
-    var_set_double_forkey (res, "pcpu", (100.0 * (cpudelta/ncpu)) / (ti - IOPROBE.lastrun));
+    var_set_double_forkey (res, "pcpu",
+                        (100.0 * (cpudelta/ncpu)) / (ti - IOPROBE.lastrun));
     if (IOPROBE.io_wait) {
         var *res_io = var_get_dict_forkey (res, "io");
-        var_set_double_forkey (res_io, "pwait", (100.0 * (delta/ncpu)) / (ti - IOPROBE.lastrun));
+        var_set_double_forkey (res_io, "pwait",
+                        (100.0 * (delta/ncpu)) / (ti - IOPROBE.lastrun));
     }
 
     IOPROBE.io_blk_r = totalblk_r;
@@ -1016,6 +1204,7 @@ builtinfunc BUILTINS[] = {
     {"probe_meminfo", runprobe_meminfo},
     {"probe_df", runprobe_df},
     {"probe_net", runprobe_net},
+    {"probe_portinfo", runprobe_portinfo},
     {"probe_ipmi", runprobe_ipmi},
     {"probe_distro", runprobe_distro},
     {NULL, NULL}

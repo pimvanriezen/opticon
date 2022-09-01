@@ -34,6 +34,9 @@ ServerList.activate = function (argv) {
     Module.backgroundInterval = 30000;
     Module.setBackground (self.refresh);
     self.show();
+    self.checkTimer = setTimeout (function() {
+        $("#honking-checkmark").fadeIn(5000);
+    }, 8000);
 }
 
 // --------------------------------------------------------------------------
@@ -67,11 +70,17 @@ ServerList.refresh = function () {
 // Handler for switching between filter tab
 // --------------------------------------------------------------------------
 ServerList.switchTab = function (status) {
+    $("#honking-checkmark").hide();
     let self = ServerList;
+    if (self.checkTimer) clearTimeout (self.checkTimer);
+    self.checkTimer = null;
     self.View.selected = "";
     self.View.haveselection = false;
     self.View.server_status = status;
     self.refresh();
+    self.checkTimer = setTimeout (function() {
+        $("#honking-checkmark").fadeIn(5000);
+    }, 8000);
 }
 
 // --------------------------------------------------------------------------
@@ -88,16 +97,7 @@ ServerList.statusClass = function (server) {
 // Click handler for result row.
 // --------------------------------------------------------------------------
 ServerList.rowClick = function (data, event) {
-    $(".uOrderList li.selected").removeClass("selected");
-    $(".uOrderList li#orderList-" + data.id).addClass("selected");
-    var self = ServerList;
-    setTimeout(function () {
-        self.Vidi.lock();
-        self.View.selected = data.id;
-        self.View.haveselection = true;
-        self.selectedObject = data;
-        self.Vidi.unlock();
-    }, 50);
+    App.go ("/Server/"+data);
     if (event) event.stopPropagation();
     return false;
 }
@@ -120,3 +120,32 @@ ServerList.deSelect = function () {
     return false;
 }
 
+// --------------------------------------------------------------------------
+// Display string for amounts. Examples:
+// translateUnit (4230, "", "iops") -> "4.23 Kiops"
+// translateUnit (832, "K", "B") -> 823.00 KB
+// translateUnit (4096 "M", "B") -> 4.00 GB
+// --------------------------------------------------------------------------
+ServerList.translateUnit = function (val, base, unit) {
+    while ((base != "G") && (val > 2047)) {
+        val = val / 1024.0;
+        switch (base) {
+            case "":
+                base = "K";
+                break;
+            
+            case "K":
+                base = "M";
+                break;
+            
+            case "M":
+                base = "G";
+                
+            case "G":
+                base = "T";
+                break;
+        }
+    }
+    if (base == "") return parseInt(val) + " " + unit;
+    return parseFloat(val).toFixed(2) + " " + base + unit;
+}

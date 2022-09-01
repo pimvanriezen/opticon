@@ -64,13 +64,27 @@ typedef struct authresender_s {
     conditional     *cond;
     outtransport    *trans;
     pktbuf           buf;
-} authresender;   
+} authresender;
+
+typedef struct collector_s {
+    struct collector_s  *prev;
+    struct collector_s  *next;
+    int                  port;
+    const char          *addr;
+    authinfo             auth;
+    time_t               lastkeyrotate;
+    outtransport        *transport;
+    authresender        *resender;
+} collector;
+
+typedef struct collectorlist_s {
+    collector           *first;
+    collector           *last;
+} collectorlist;
 
 /** Useful access to application parts and configuration */
 typedef struct appcontext_s {
     codec           *codec;
-    outtransport    *transport;
-    authresender    *resender;
     probelist        probes;
     var             *conf;
     int              loglevel;
@@ -80,12 +94,8 @@ typedef struct appcontext_s {
     const char      *defaultspath;
     const char      *pidfile;
     int              foreground;
-    int              collectorport;
-    const char      *collectoraddr;
-    aeskey           collectorkey;
-    uuid             tenantid;
     uuid             hostid;
-    authinfo         auth;
+    collectorlist    collectors;
 } appcontext;
 
 /* ============================== GLOBALS ============================== */
@@ -96,6 +106,7 @@ extern appcontext APP; /**< The keep-it-all-together blob */
 /* ============================= FUNCTIONS ============================= */
 
 probe           *probe_alloc (void);
+void             probelist_init (probelist *);
 int              probelist_add (probelist *, probetype, const char *,
                                 const char *, int, var *);
 void             probelist_start (probelist *);
@@ -104,5 +115,10 @@ authresender    *authresender_create (outtransport *);
 void             authresender_schedule (authresender *, const void *, size_t);
 
 bool             matchlist (const char *, var *);
+
+collector       *collector_new (collectorlist *);
+void             collectorlist_init (collectorlist *);
+void             collectorlist_add_host (collectorlist *, var *);
+void             collectorlist_start (collectorlist *);
 
 #endif

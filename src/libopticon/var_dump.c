@@ -11,27 +11,6 @@ static const char *SPC = "                                "
                          "                                "
                          "                                ";
 
-/** Escape quoted string content with backslash */
-char *dump_escape (const char *str) {
-    char *res = (char *) malloc (2*strlen(str)+1);
-    const char *icrsr = str;
-    char *ocrsr = res;
-    while (*icrsr) {
-        if (*icrsr == '\\' || *icrsr == '\"') {
-            *ocrsr++ = '\\';
-        }
-        else if (*icrsr == '\n') {
-            *ocrsr++ = '\\';
-            *ocrsr++ = 'n';
-            icrsr++;
-            continue;
-        }
-        *ocrsr++ = *icrsr++;
-    }
-    *ocrsr = 0;
-    return res;
-}
-
 /** Recursive implementation function for var_dump().
   * \param v The (dict) var at the current level to print out.
   * \param into The file to write to.
@@ -54,7 +33,7 @@ int var_write_indented (var *v, ioport *into, int _indent) {
             if (indent) ioport_printf (into, "%s", SPC+(128-indent));
             
             if (v->type == VAR_DICT) {
-                tstr = dump_escape (crsr->id);
+                tstr = var_escape_str (crsr->id);
                 ioport_printf (into, "\"%s\": ", tstr);
                 free (tstr);
             }
@@ -72,7 +51,7 @@ int var_write_indented (var *v, ioport *into, int _indent) {
                     break;
                 
                 case VAR_STR:
-                    tstr = dump_escape (crsr->value.sval);
+                    tstr = var_escape_str (crsr->value.sval);
                     ioport_printf (into, "\"%s\"", tstr);
                     free (tstr);
                     break;

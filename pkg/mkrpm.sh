@@ -3,6 +3,11 @@ versionstr=$(git describe --tags | sed -e 's/-g.*//')
 version=$(echo "$versionstr" | cut -f1 -d-)
 release=$(echo "$versionstr" | cut -f2 -d-)
 
+if [ "$release" = "$version" ]; then
+  release="0"
+  verionstr="${versionstr}-0"
+fi
+
 mkdir -p pkg/tmp
 git archive --format=tar.gz -o ~/rpmbuild/SOURCES/opticon-${versionstr}.tar.gz --prefix=opticon-${versionstr}/ master
 sed -e "s/<<VERSION>>/$version/g;s/<<RELEASE>>/$release/g" \
