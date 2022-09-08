@@ -425,13 +425,14 @@ static int var_parse_json_level (var *v, const char **buf,
   */
 int var_load_json (var *into, const char *path) {
     struct stat st;
+    size_t sz;
     int res = 0;
     if (stat (path, &st) == 0) {
         char *txt = (char *) malloc (st.st_size+2);
         FILE *F = fopen (path, "r");
         if (F) {
-            fread (txt, st.st_size, 1, F);
-            txt[st.st_size] = 0;
+            sz = fread (txt, st.st_size, 1, F);
+            txt[sz>0 ? sz : 0] = 0;
             res = var_parse_json (into, txt);
             fclose (F);
         }
