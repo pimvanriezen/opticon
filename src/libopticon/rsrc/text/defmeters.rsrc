@@ -27,10 +27,6 @@
         type: string
         description: "Operating System"
     }
-    os/kernel {
-        type: string
-        description: "Version"
-    }
     os/arch {
         type: string
         description: "CPU Architecture"
@@ -41,7 +37,7 @@
     }
     os/hw {
         type: string
-        description: Hardware Platform
+        description: "Hardware Platform"
     }
     df {
         type: table

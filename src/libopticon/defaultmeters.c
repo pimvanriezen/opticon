@@ -13,7 +13,7 @@ var *get_default_meterdef (void) {
     if (! PARSED_DEFMETERS) {
         PARSED_DEFMETERS = var_alloc();
         if (! var_parse_json (PARSED_DEFMETERS, rstext(defmeters))) {
-            log_error ("Parse error: %s", parse_error());
+            log_error ("Parse error (defmeters): %s", parse_error());
         }
     }
     return PARSED_DEFMETERS;
