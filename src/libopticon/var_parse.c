@@ -138,7 +138,7 @@ static int var_parse_json_level (var *v, const char **buf,
                 }
                 if (! strchr (VALIDUNQUOTED, *c)) {
                     sprintf (LAST_PARSE_ERROR, "Invalid character in "
-                             "value '%c'", *c);
+                             "key '%c'", *c);
                     return 0;
                 }
                 if (keybuf_pos >= 4095) return 0;
@@ -429,9 +429,9 @@ int var_load_json (var *into, const char *path) {
     int res = 0;
     if (stat (path, &st) == 0) {
         char *txt = (char *) malloc (st.st_size+2);
-        FILE *F = fopen (path, "r");
+        FILE *F = fopen (path, "rb");
         if (F) {
-            sz = fread (txt, st.st_size, 1, F);
+            sz = fread (txt, 1, st.st_size, F);
             txt[sz>0 ? sz : 0] = 0;
             res = var_parse_json (into, txt);
             fclose (F);
