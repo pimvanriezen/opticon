@@ -171,20 +171,5 @@ int main (int argc, const char *argv[]) {
     assert (var_get_int_forkey (row, "quality") == 20);
 
     var_free (sorted);
-    
-    const char *windowsenc = "# --\r\n"
-                             "top {\r\n"
-                             "    type: built-in\r\n"
-                             "    call: probe_top\r\n"
-                             "    frequency: high\r\n"
-                             "}";
-    var *parsed = var_alloc();
-    if (! var_parse_json (parsed, windowsenc)) {
-        fprintf (stderr, "Error: %s", parse_error);
-    }
-    else {
-        var_dump (parsed, stdout);
-    }
-    
     return 0;
 }
