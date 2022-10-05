@@ -436,7 +436,13 @@ int var_load_json (var *into, const char *path) {
             res = var_parse_json (into, txt);
             fclose (F);
         }
+        else {
+            snprintf (LAST_PARSE_ERROR, "I/O Error: %s", strerror(errno));
+        }
         free (txt);
+    }
+    else {
+        strncpy (LAST_PARSE_ERROR, "File not found", 4095);
     }
     return res;
 }

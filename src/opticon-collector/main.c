@@ -850,7 +850,7 @@ int main (int _argc, const char *_argv[]) {
     /* Load other meters from meter.conf */
     if (! var_load_json (defmeters, APP.mconfpath)) {
         log_error ("Error loading %s: %s\n",
-                   APP.confpath, parse_error());
+                   APP.mconfpath, parse_error());
         return 1;
     }
     
