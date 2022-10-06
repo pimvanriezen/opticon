@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 static const char *VALIDUNQUOTED = "abcdefghijklmnopqrstuvwxyz"
                                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
