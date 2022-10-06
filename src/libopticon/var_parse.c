@@ -437,7 +437,7 @@ int var_load_json (var *into, const char *path) {
             fclose (F);
         }
         else {
-            snprintf (LAST_PARSE_ERROR, "I/O Error: %s", strerror(errno));
+            sprintf (LAST_PARSE_ERROR, "I/O Error: %s", strerror(errno));
         }
         free (txt);
     }
