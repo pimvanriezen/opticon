@@ -460,9 +460,6 @@ int main (int _argc, const char *_argv[]) {
     probelist_init (&APP.probes);
     collectorlist_init (&APP.collectors);
     
-    /* For now, we just create one instance */
-    (void) collector_new (&APP.collectors);
-
     if (! var_load_json (APP.conf, APP.confpath)) {
         log_error ("Error loading %s: %s\n", APP.confpath, parse_error());
         return 1;
