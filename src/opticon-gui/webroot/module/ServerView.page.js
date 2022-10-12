@@ -3,7 +3,9 @@ ServerView = new Module.Page("ServerView","/Server/%", 2);
 ServerView.create = function() {
     var self = ServerView;
     self.createView({
-        data:{}
+        data:{
+        },
+        tab:"Overview"
     });
     self.apires = {};
     self.id = null;
