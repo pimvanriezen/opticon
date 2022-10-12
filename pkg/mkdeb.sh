@@ -130,7 +130,7 @@ Package: opticon-api
 Version: $VERSION
 Section: base
 Priority: optional
-Requires: libmicrohttpd12
+Depends: libmicrohttpd12
 Architecture: amd64
 Maintainer: NewVM <info@newvm.com>
 Description: Opticon API Server
@@ -171,7 +171,7 @@ Package: opticon-cli
 Version: $VERSION
 Section: base
 Priority: optional
-Requires: libcurl4
+Depends: libcurl4
 Architecture: amd64
 Maintainer: NewVM <info@newvm.com>
 Description: Opticon CLI client

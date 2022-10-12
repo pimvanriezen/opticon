@@ -1,5 +1,6 @@
 #include <libopticon/var.h>
 #include <libopticon/var_dump.h>
+#include <libopticon/var_parse.h>
 #include <libopticon/util.h>
 #include <stdio.h>
 #include <assert.h>

@@ -8,4 +8,9 @@ chgrp opticon /run/opticon
 chmod 770 /run/opticon
 chgrp opticon /usr/bin/opticon-helper
 chmod 4750 /usr/bin/opticon-helper
-systemctl is-active --quiet opticon-agent && systemctl restart opticon-agent
+systemctl is-active --quiet opticon-agent 
+if [ $? = 0 ]; then
+  systemctl restart opticon-agent
+fi
+exit 0
+

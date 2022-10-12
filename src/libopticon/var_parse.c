@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 static const char *VALIDUNQUOTED = "abcdefghijklmnopqrstuvwxyz"
                                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -138,7 +139,7 @@ static int var_parse_json_level (var *v, const char **buf,
                 }
                 if (! strchr (VALIDUNQUOTED, *c)) {
                     sprintf (LAST_PARSE_ERROR, "Invalid character in "
-                             "value '%c'", *c);
+                             "key '%c'", *c);
                     return 0;
                 }
                 if (keybuf_pos >= 4095) return 0;
@@ -425,17 +426,24 @@ static int var_parse_json_level (var *v, const char **buf,
   */
 int var_load_json (var *into, const char *path) {
     struct stat st;
+    size_t sz;
     int res = 0;
     if (stat (path, &st) == 0) {
         char *txt = (char *) malloc (st.st_size+2);
-        FILE *F = fopen (path, "r");
+        FILE *F = fopen (path, "rb");
         if (F) {
-            fread (txt, st.st_size, 1, F);
-            txt[st.st_size] = 0;
+            sz = fread (txt, 1, st.st_size, F);
+            txt[sz>0 ? sz : 0] = 0;
             res = var_parse_json (into, txt);
             fclose (F);
         }
+        else {
+            sprintf (LAST_PARSE_ERROR, "I/O Error: %s", strerror(errno));
+        }
         free (txt);
+    }
+    else {
+        strncpy (LAST_PARSE_ERROR, "File not found", 4095);
     }
     return res;
 }

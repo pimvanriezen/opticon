@@ -116,9 +116,9 @@ int daemon_main (int argc, const char *argv[]) {
         var *vchkwarn = var_get_array_forkey (vnagios, "chkwarn");
         var *vchkalert = var_get_array_forkey (vnagios, "chkalert");
         
-        /* If we're in a slow round, we already know we're scheduled. Otherwise,
-           see if the next scheduled moment for sending a (fast lane) packet
-           has passed. */
+        /* If we're in a slow round, we already know we're scheduled.
+           Otherwise, see if the next scheduled moment for sending a
+           (fast lane) packet has passed. */
         if (slowround || (tnow >= nextsend)) {
             h->uuid = APP.hostid;
             host_begin_update (h, time (NULL));
@@ -132,7 +132,8 @@ int daemon_main (int argc, const char *argv[]) {
             while (p) {
                 pthread_mutex_lock (&p->vlock);
                 volatile var *v = p->vcurrent;
-                /* See if data for this probe has been collected since the last kick */
+                /* See if data for this probe has been collected since the 
+                   last kick */
                 if (v && (p->lastdispatch <= p->lastreply)) {
                     /* Filter probes for the current lane */
                     if ((slowround && p->interval>60) ||
@@ -142,7 +143,9 @@ int daemon_main (int argc, const char *argv[]) {
                         if (p->type == PROBE_NAGIOS) {
                             /* Check for alert/warning state and
                              * summarize before adding to host struct */
-                             int pstatus = var_get_int_forkey ((var*)v, "status");
+                             int pstatus =
+                                    var_get_int_forkey ((var*)v, "status");
+                                    
                              if (pstatus) {
                                  var *arr;
                                  switch (pstatus) {
@@ -260,6 +263,8 @@ int daemon_main (int argc, const char *argv[]) {
 int conf_collector (const char *id, var *v, updatetype tp) {
     if (tp == UPDATE_REMOVE) exit (0);
     if (v->type == VAR_DICT) {
+        log_info ("Adding single collector host <%s>",
+                  var_get_str_forkey (v, "address"));
         collectorlist_add_host (&APP.collectors, v);
     }
     else if (v->type == VAR_ARRAY) {
@@ -455,9 +460,6 @@ int main (int _argc, const char *_argv[]) {
     probelist_init (&APP.probes);
     collectorlist_init (&APP.collectors);
     
-    /* For now, we just create one instance */
-    (void) collector_new (&APP.collectors);
-
     if (! var_load_json (APP.conf, APP.confpath)) {
         log_error ("Error loading %s: %s\n", APP.confpath, parse_error());
         return 1;
@@ -480,10 +482,12 @@ int main (int _argc, const char *_argv[]) {
                     var *ee = var_find_key (existing, cc->id);
                     if (! ee) {
                         if (cc->type == VAR_INT) {
-                            var_set_int_forkey (existing, cc->id, var_get_int(cc));
+                            var_set_int_forkey (existing, cc->id,
+                                                var_get_int(cc));
                         }
                         else if (cc->type == VAR_STR) {
-                            var_set_str_forkey (existing, cc->id, var_get_str(cc));
+                            var_set_str_forkey (existing, cc->id,
+                                                var_get_str(cc));
                         }
                         else if (cc->type == VAR_DICT) {
                             ee = var_get_dict_forkey (existing, cc->id);

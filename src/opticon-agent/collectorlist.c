@@ -29,12 +29,32 @@ void collectorlist_init (collectorlist *self) {
 }
 
 void collectorlist_add_host (collectorlist *self, var *data) {
+    const char *addr = var_get_str_forkey (data, "address");
+    const char *tenantid = var_get_str_forkey (data, "tenant");
+    const char *tenantkey = var_get_str_forkey (data, "key");
+    
+    if (! addr) {
+        log_error ("No address specification for collector");
+        return;
+    }
+    
+    if (! tenantid) {
+        log_error ("No tenant specification for collector");
+        return;
+    }
+    
+    if (! tenantkey) {
+        log_error ("No tenant key provided for collector");
+        return;
+    }
+        
     collector *c = collector_new (self);
-    c->addr = strdup (var_get_str_forkey (data, "address"));
+    
+    c->addr = strdup (addr);
     c->auth.sessionid = 0;
     c->auth.serial = 0;
-    c->auth.tenantid = mkuuid (var_get_str_forkey (data, "tenant"));
-    c->auth.tenantkey = aeskey_from_base64 (var_get_str_forkey (data, "key"));
+    c->auth.tenantid = mkuuid (tenantid);
+    c->auth.tenantkey = aeskey_from_base64 (tenantkey);
     c->auth.hostid = APP.hostid;
     c->port = var_get_int_forkey (data, "port");
     c->transport = outtransport_create_udp();
