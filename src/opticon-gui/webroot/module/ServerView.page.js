@@ -5,6 +5,9 @@ ServerView.create = function() {
     self.createView({
         data:{
         },
+        graph:{
+            cpu:[]
+        },
         tab:"Overview"
     });
     self.apires = {};
@@ -34,7 +37,59 @@ ServerView.refresh = function() {
     API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
         self.apires = res;
         self.View.data = self.apires;
+        if (self.View.graph.cpu.length == 0) {
+            var ngraphy = [];
+            var ngraphx = [];
+            var i = 0;
+            for (i=0; i<107; ++i) {
+                ngraphy.push (30 + Math.random() * 50);
+                ngraphx.push (10*i);
+            }
+            console.log (ngraphy);
+            const spline = new Spline (ngraphx, ngraphy);
+            var ngraph = [];
+            for (i=0; i<1060; ++i) {
+                ngraph.push (spline.at(i));
+            }
+            self.View.graph.cpu = ngraph;
+            self.drawGraph ("cpu");
+        }
     });
+}
+
+ServerView.drawGraph = function (graphid) {
+    let self = ServerView;
+    let id = "graph-"+graphid;
+    const canvas = document.getElementById (id);
+    if (! canvas) return;
+    const ctx = canvas.getContext("2d");
+    var gradient = ctx.createLinearGradient(0,0,0,200);
+    gradient.addColorStop(0.00, '#305090c0');
+    gradient.addColorStop(1.00, '#50c0c0c0');
+    var gradient2 = ctx.createLinearGradient(0,0,0,200);
+    gradient2.addColorStop(0.00, '#30509060');
+    gradient2.addColorStop(1.00, '#50c0c060');
+    
+    ctx.transform(1,0,0,-1,0,canvas.height);
+    
+    let width = 1;
+    let arr = self.View.graph[graphid];
+    if (! arr) return;
+    ctx.clearRect(0,0,530,200);
+    ctx.width = 1060;
+    ctx.height = 400;
+    ctx.scale (0.5,0.5);
+    
+    for (let i=0; i<1060; ++i) {
+        let x = i;
+        let y = (arr[i]*2);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x,0,1,2*y);
+        if (i<1059) {
+            ctx.fillStyle = gradient2;
+            ctx.fillRect(x+1,0,2,2*y);
+        }
+    }
 }
 
 ServerView.back = function() {

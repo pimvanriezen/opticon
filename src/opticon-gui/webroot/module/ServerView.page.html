@@ -240,12 +240,19 @@
   
 </div></div>
 </span>
-<span v-if="tab=='Graphs'">
+<span v-show="tab=='Graphs'">
 <div class="uEditPane"><div style="text-align:left;">
-  <div class="uEditContainer">
+  <div class="uEditContainer" v-static="keep">
     <u-header icon="header-performance.png">CPU</u-header>
-    <div class="uServerData table narrow">
-      <canvas id="graph-cpu" width="400" height="200"
+    <div class="uServerData table" v-static="keep">
+      <canvas id="graph-cpu" width="530" height="200"
+              style="border:1px solid grey"></canvas>
+    </div>
+  </div>
+  <div class="uEditContainer" v-static="keep">
+    <u-header icon="header-memory.png">Memory</u-header>
+    <div class="uServerData table">
+      <canvas id="graph-ram" width="530" height="200"
               style="border:1px solid grey"></canvas>
     </div>
   </div>
