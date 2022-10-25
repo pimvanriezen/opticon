@@ -445,6 +445,7 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     session *S = NULL;
     ioport *unwrap;
     time_t tnow = time (NULL);
+    char uuidstr[40];
     
     /* Unwrap the outer packet layer (crypto and compression) */
     unwrap = ioport_unwrap_meterdata (netid, pktbuf,
@@ -462,7 +463,18 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     
     /* Write the new meterdata into the host */
     host *H = S->host;
-    pthread_rwlock_wrlock (&H->lock);
+
+    int i = 0;    
+    for (i=0; i<4; ++i) {
+      if (pthread_rwlock_trywrlock (&H->lock) == 0) break;
+      sleep (1);
+    }
+    if (i>3) {
+        uuid2str (H->uuid, uuidstr);
+        log_error ("Host deadlock for <%s>", uuidstr);
+        ioport_close (unwrap);
+        return;
+    }
     
     /* Check if we need to sync up metadata */
     if (tnow - H->lastmetasync > 300) {

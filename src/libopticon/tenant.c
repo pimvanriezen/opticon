@@ -166,6 +166,22 @@ tenant *tenant_first (tenantlock lockt) {
 }
 
 /*/ ======================================================================= /*/
+/** Relock an already locked tenant to a different lock type. */
+/*/ ======================================================================= /*/
+void tenant_relock (tenant *t, tenantlock lockt) {
+    if (! t) return;
+    pthread_rwlock_rdlock (&TENANTS.lock);
+    pthread_rwlock_unlock (&t->lock);
+    if (lockt == TENANT_LOCK_READ) {
+        pthread_rwlock_rdlock (&t->lock);
+    }
+    else {
+        pthread_rwlock_wrlock (&t->lock);
+    }
+    pthread_rwlock_unlock (&TENANTS.lock);
+}
+
+/*/ ======================================================================= /*/
 /** Get a pointer to the next tenant, it will be locked with the required
   * lock type. */
 /*/ ======================================================================= /*/

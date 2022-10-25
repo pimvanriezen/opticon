@@ -18,7 +18,7 @@ int udp_outtransport_setremote (outtransport *t, const char *addr,
     hints.ai_socktype = SOCK_DGRAM;
     sprintf (portstr, "%i", port);
     
-    if (getaddrinfo (addr, portstr, &hints, &(self->peeraddr)) < 0) {
+    if (getaddrinfo (addr, portstr, &hints, &(self->peeraddr)) != 0) {
         return 0;
     }
  
