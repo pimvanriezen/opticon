@@ -95,6 +95,6 @@ uuid uuidnil (void) {
 /** Check whether a uuid is not nil */
 /*/ ======================================================================= /*/
 bool uuidvalid (uuid u) {
-    return (u.msb && u.lsb);
+    return (u.msb || u.lsb);
 }
 
