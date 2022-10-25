@@ -59,6 +59,11 @@ API.Opticon.Host.getCurrent = function (tenant, host, cb) {
     });
 }
 
+API.Option.Host.getGraph = function (hostuuid, graph, datum,
+                                     timespan, width) {
+    //API.get ("opticon","/any/host/"+hostuuid+"");
+}
+
 API.Opticon.Tenant = {}
 
 API.Opticon.Tenant.list = function (cb) {

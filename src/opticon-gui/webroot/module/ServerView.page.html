@@ -3,8 +3,11 @@
     <u-button class="green backbutton" icon="toolbar-back.png" cb="back()">
       Back
     </u-button>
+    <u-tabgroup name="tab" tabs="Overview,Graphs,Log"></u-tabgroup>
   </div>
 </form>
+
+<span v-if="tab=='Overview'">
 <div class="uEditPane"><div style="text-align:left;">
   <div class="uEditContainer">
     <u-header icon="header-info.png">Host Information</u-header>
@@ -236,3 +239,22 @@
   </div>
   
 </div></div>
+</span>
+<span v-show="tab=='Graphs'">
+<div class="uEditPane"><div style="text-align:left;">
+  <div class="uEditContainer" v-static="keep">
+    <u-header icon="header-performance.png">CPU</u-header>
+    <div class="uServerData table" v-static="keep">
+      <canvas id="graph-cpu" width="530" height="200"
+              style="border:1px solid grey"></canvas>
+    </div>
+  </div>
+  <div class="uEditContainer" v-static="keep">
+    <u-header icon="header-memory.png">Memory</u-header>
+    <div class="uServerData table">
+      <canvas id="graph-ram" width="530" height="200"
+              style="border:1px solid grey"></canvas>
+    </div>
+  </div>
+</div></div>
+</span>
