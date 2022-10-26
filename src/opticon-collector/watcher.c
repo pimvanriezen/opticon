@@ -76,9 +76,9 @@ var *tenant_overview (tenant *t) {
     var *ov = var_get_dict_forkey (res, "overview");
     host *h = t->first;
     while (h) {
-        pthread_wrlock_rlock (&h->lock);
+        pthread_rwlock_rdlock (&h->lock);
         host_to_overview (h, ov);
-        pthread_wrlock_unlock (&h->lock);
+        pthread_rwlock_unlock (&h->lock);
         h = h->next;
     }
     return res;
