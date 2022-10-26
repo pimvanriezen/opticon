@@ -65,6 +65,7 @@ void collectorlist_start (collectorlist *self) {
     while (c) {
         if (! outtransport_setremote (c->transport, c->addr, c->port)) {
             log_error ("Error setting remote address '%s'", c->addr);
+            exit (1);
         }
         else {
             c->resender = authresender_create (c->transport);
