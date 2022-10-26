@@ -302,10 +302,11 @@ void watchthread_handle_host (host *host) {
                 log_info ("Removing STALE host <%s> that no longer exists in "
                           "the database.", uuidstr);
                 pthread_rwlock_unlock (&host->lock);
+                tenant *T = host->tenant;
                 
-                tenant_relock (host->tenant, TENANT_LOCK_WRITE);
+                tenant_relock (T, TENANT_LOCK_WRITE);
                 host_delete (host);
-                tenant_relock (host->tenant, TENANT_LOCK_READ);
+                tenant_relock (T, TENANT_LOCK_READ);
                 
                 db_close (APP.writedb);
                 return;
