@@ -57,6 +57,7 @@ int daemon_main (int argc, const char *argv[]) {
     }
     
     
+#if defined (OS_WINDOWS)
     if (APP.win.servicecommand != NULL) {
         if (strcmp (APP.win.servicecommand, "install") == 0) return installWindowsService(false);
         else if (strcmp (APP.win.servicecommand, "installAndStart") == 0) return installWindowsService(true);
@@ -71,6 +72,7 @@ int daemon_main (int argc, const char *argv[]) {
         if (strcmp (APP.win.updatecommand, "check") == 0) return checkUpdate(APP.win.updateurl, APP.win.updatechannel);
         else if (strcmp (APP.win.updatecommand, "update") == 0) return checkAndInstallUpdate(APP.win.updateurl, APP.win.updatechannel);
     }
+#endif
     
     
     popen_init();
@@ -556,7 +558,7 @@ int app_main (int _argc, const char *_argv[]) {
     if (! argv) return 1;
     
     if (APP.showversionflag) {
-        printf(VERSION);
+        printf("%s", VERSION);
         return 0;
     }
     
