@@ -1207,6 +1207,7 @@ builtinfunc BUILTINS[] = {
     {"probe_portinfo", runprobe_portinfo},
     {"probe_ipmi", runprobe_ipmi},
     {"probe_distro", runprobe_distro},
+    {"proe_version", runprobe_version},
     {NULL, NULL}
 };
 

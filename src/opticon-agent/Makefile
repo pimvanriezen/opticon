@@ -40,7 +40,7 @@ all: ../../bin/opticon-agent ../../bin/opticon-helper
 	@$(CC) $(LDFLAGS) -o ../../bin/opticon-helper helper.o
 
 clean:
-	rm -f *.o ../../bin/opticon-agent
+	rm -f *.o version.c ../../bin/opticon-agent
 	
 version.c:
 	@./mkversion.sh
