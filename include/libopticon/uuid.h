@@ -14,5 +14,6 @@ uuid         uuidgen (void);
 uuid         uuidnil (void);
 bool         uuidvalid (uuid);
 void         uuid2str (uuid u, char *into);
+uuid         bytes2uuid (uint8_t *bytes);
 
 #endif

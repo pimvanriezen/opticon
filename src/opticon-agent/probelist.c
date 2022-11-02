@@ -4,6 +4,7 @@
 #include <libopticon/glob.h>
 #include "opticon-agent.h"
 #include "probes.h"
+#include "version.h"
 #include <sys/select.h>
 
 bool matchlist (const char *val, var *defarr) {
@@ -32,6 +33,12 @@ probe *probe_alloc (void) {
     return res;
 }
 
+var *runprobe_version (probe *self) {
+    var *res = var_alloc();
+    var_set_str_forkey (res, "version", VERSION);
+    return res;
+}
+
 /** Implementation of the exec probe type. Reads JSON from the
   * stdout of the called program. */
 var *runprobe_exec (probe *self) {
@@ -48,17 +55,22 @@ var *runprobe_exec (probe *self) {
         tv.tv_usec = 0;
         FD_ZERO (&fds);
         FD_SET (procfd, &fds);
+// @todo Windows does not have timeouts for synchronous file operations (select() is for sockets), need to use overlapped io instead)
+#if !defined (OS_WINDOWS)
         if (select (procfd+1, &fds, NULL, NULL, &tv) > 0) {
+#endif
             size_t res = fread (buffer, 1, 4096, proc);
             if (res && res < 4096) {
                 buffer[res] = 0;
                 break;
             }
+#if !defined (OS_WINDOWS)
         }
         else {
             log_error ("probe_exec timeout on '%s'", self->call);
             break;
         }
+#endif
     }
     int pret = pclose_safe (proc);
     int status = WEXITSTATUS (pret);

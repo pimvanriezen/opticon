@@ -19,6 +19,7 @@
 */
 #include <libopticon/aes.h>
 #include <libopticon/base64.h>
+#include <libopticon/fillrandom.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -303,9 +304,7 @@ void aes256_decrypt_ecb(aes256_context *ctx, uint8_t *buf)
 /** Generate a random AES256 key */
 aeskey aeskey_create (void) {
     aeskey res;
-    int fdevr = open ("/dev/random",O_RDONLY);
-    read (fdevr, res.data, 32);
-    close (fdevr);
+    fillrandom(res.data, 32);
     return res;
 }
 

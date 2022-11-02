@@ -96,6 +96,14 @@ typedef struct appcontext_s {
     int              foreground;
     uuid             hostid;
     collectorlist    collectors;
+    int              showversionflag;
+    struct win_s {
+        const char      *servicecommand;
+        const char      *updatecommand;
+        const char      *updateurl;
+        const char      *updatechannel;
+        bool             updateenabled;
+    } win;
 } appcontext;
 
 /* ============================== GLOBALS ============================== */
