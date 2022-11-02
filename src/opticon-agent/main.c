@@ -71,6 +71,7 @@ int daemon_main (int argc, const char *argv[]) {
         
         if (strcmp (APP.win.updatecommand, "check") == 0) return checkUpdate(APP.win.updateurl, APP.win.updatechannel);
         else if (strcmp (APP.win.updatecommand, "update") == 0) return checkAndInstallUpdate(APP.win.updateurl, APP.win.updatechannel);
+        else if (strcmp (APP.win.updatecommand, "installLatest") == 0) return installLatest(APP.win.updateurl, APP.win.updatechannel);
     }
 #endif
     

@@ -6,3 +6,4 @@
 
 uint32_t checkUpdate(const char *url, const char *channel);
 uint32_t checkAndInstallUpdate(const char *url, const char *channel);
+uint32_t installLatest(const char *url, const char *channel);

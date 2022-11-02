@@ -45,6 +45,12 @@ BOOLAPI InternetCrackUrlA(LPCSTR lpszUrl,DWORD dwUrlLength,DWORD dwFlags,LPURL_C
 
 
 
+typedef enum DInstallType {
+    INSTALLTYPE_UPDATE,
+    INSTALLTYPE_INSTALLLATEST       // @note This does not force a reinstall if the exact msi package is already installed
+} DInstallType;
+
+
 uint32_t loadUrlAlloc(const char *url, void **outBuffer) {
     uint32_t e;
     
@@ -378,12 +384,17 @@ error_1:
     return e;
 }
 
-uint32_t checkAndInstallUpdate(const char *url, const char *channel) {
+static uint32_t _install(const char *url, const char *channel, DInstallType installType) {
     uint32_t e;
     
     // @todo request/response headers + http response status code != 200
     
-    log_info("Checking for update of the opticon agent at: %s in channel %s", url, channel);
+    if (installType == INSTALLTYPE_UPDATE) {
+        log_info("Checking for update of the opticon agent at: %s in channel %s", url, channel);
+    }
+    else if (installType == INSTALLTYPE_INSTALLLATEST) {
+        log_info("Getting latest version of the opticon agent at: %s in channel %s", url, channel);
+    }
     
     // @note Can't get InternetCrackUrlA to work without user provided buffers
     char scheme[256] = {0};
@@ -466,14 +477,22 @@ uint32_t checkAndInstallUpdate(const char *url, const char *channel) {
         goto error_1;
     }
     
-    if (strcmp(targetVersion, VERSION) == 0) {
-        log_info("No new version available");
+    bool doInstall = false;
+    if (installType == INSTALLTYPE_UPDATE) {
+        
+        if (strcmp(targetVersion, VERSION) == 0) {
+            log_info("No new version available");
+        }
+        else {
+            log_info("Found new version: %s", targetVersion);
+            doInstall = true;
+        }
     }
-    else {
-        log_info("Found new version: %s", targetVersion);
-        
-        
-        
+    else if (installType == INSTALLTYPE_INSTALLLATEST) {
+        doInstall = true;
+    }
+    
+    if (doInstall) {
         var *msiVar = var_find_key(chosenChannelDict, "msi");
         if (msiVar == NULL) {
             log_error("Did not find any msi name");
@@ -555,4 +574,12 @@ error_1:
     freeLoadUrl(json);
     
     return e;
+}
+
+uint32_t checkAndInstallUpdate(const char *url, const char *channel) {
+    return _install(url, channel, INSTALLTYPE_UPDATE);
+}
+
+uint32_t installLatest(const char *url, const char *channel) {
+    return _install(url, channel, INSTALLTYPE_INSTALLLATEST);
 }
