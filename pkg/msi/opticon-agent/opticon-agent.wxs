@@ -1,0 +1,300 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+	<!-- Install via CLI (run as administrator): -->
+	<!-- opticon-agent.msi /quiet PROP_TENANT_ID="x" PROP_TENANT_KEY="y" -->
+	<!-- or -->
+	<!-- msiexec /quiet /i opticon-agent.msi PROP_TENANT_ID="x" PROP_TENANT_KEY="y" -->
+	<!-- or with logging -->
+	<!-- msiexec /quiet /L*V "C:\install.log" /i opticon-agent.msi PROP_TENANT_ID="x" PROP_TENANT_KEY="y" -->
+	
+	<!-- Additional properties: -->
+	<!-- PROP_ADDRESS -->
+	<!-- PROP_PORT -->
+	<!-- PROP_UPDATE_URL -->
+	
+	<!-- Uninstall via CLI (fails if the process is running, except when running as a service): -->
+	<!-- msiexec /quiet /uninstall opticon-agent.msi -->
+	
+	<!-- Keep the UpgradeCode the same for all future releases -->
+	<!-- Update the Version for newer releases (upgrades) -->
+	<Product Id="*"
+		UpgradeCode="188511cd-732b-4444-9420-ce187ca236af"
+		Language="1033"
+		Manufacturer="NewVM"
+		Name="Opticon Agent"
+		Version="$(var.versionNumber)"
+	>
+		<!-- Windows Installer 4.0 or Windows Installer 4.5 on Windows Server 2008 or Windows Vista -->
+		<Package InstallerVersion="400" Compressed="yes" InstallScope="perMachine" Comments="Opticon Agent Installer" Platform="x64" />
+		<MajorUpgrade Schedule="afterInstallExecute" AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate EmbedCab="yes" />
+		
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="INSTALLDIR" Name="Opticon-Agent">
+					<Component Id="opticonAgent.exeFileComponent" Guid="8d5ae613-dfc9-400d-837f-e0f7dca9833e" Win64="yes">
+						<!-- The KeyPath for a Component is a single resource that the Windows Installer uses to determine if a Component "exists" on a machine -->
+						<!-- This means that when Windows Installer decides whether to install your component, it will first look whether the keypath resource is already present. If it is, none of the resources in the component are installed -->
+						<!-- The presence of the keypath resource also determines whether a component has been damaged or has gone missing when you "repair" an MSI -->
+						<File Id="opticonAgent.exeFile" KeyPath="yes" Source="../../../bin/opticon-agent.exe" />
+						
+						<!-- The service executable installed will point to the KeyPath for the Component -->
+						<ServiceInstall Id="opticonAgent.serviceInstall" Name="opticon-agent" DisplayName="Opticon Agent" Start="auto" Type="ownProcess" ErrorControl="normal" Account="LocalSystem" Vital="yes" Interactive="no">
+							<util:ServiceConfig FirstFailureActionType="restart" SecondFailureActionType="restart" ThirdFailureActionType="restart" ResetPeriodInDays="1" RestartServiceDelayInSeconds="60" />
+						</ServiceInstall>
+						<ServiceControl Id="opticonAgent.serviceControl" Name="opticon-agent" Start="install" Stop="both" Remove="uninstall" Wait="yes" />
+						
+						<!-- 'Manually' store the install path in the registry, so it can be used for upgrades (will use to the the default otherwise) -->
+						<!-- We store this just to be sure (as a fallback) because we use ComponentSearch to get the existing install path -->
+						<RegistryValue Root="HKLM" Key="Software\Opticon-Agent" Name="installPath" Type="string" Value="[INSTALLDIR]" />
+						<!-- 'Manually' store the generated product id (ProductCode) in the registry, so it can be used to check if the agent is installed as an msi or not -->
+						<RegistryValue Root="HKLM" Key="Software\Opticon-Agent" Name="msiProductCode" Type="string" Value="[ProductCode]" />
+					</Component>
+					<Component Id="opticonAgent.defaultProbesFileComponent" Guid="0f9a7cf2-7b09-452b-b17e-dba8d01bc96d" Win64="yes">
+						<File Id="opticonAgent.defaultProbesFile" KeyPath="yes" Source="../../../src/opticon-agent/opticon-defaultprobes.win.conf" Name="opticon-defaultprobes.conf" />
+					</Component>
+					<Component Id="opticonAgent.exampleConfigFileComponent" Guid="1cff4680-48c3-41c7-afe0-bc7da0a60670" Win64="yes">
+						<File Id="opticonAgent.exampleConfigFile" KeyPath="yes" Source="../../../src/opticon-agent/opticon-agent.conf.example" />
+					</Component>
+				</Directory>
+			</Directory>
+		</Directory>
+		
+		<Feature Id="opticonAgent.defaultFeature" Level="1">
+			<!-- Using a Component per File as recommended by the docs (or the internet) -->
+			<ComponentRef Id="opticonAgent.exeFileComponent" />
+			<ComponentRef Id="opticonAgent.defaultProbesFileComponent" />
+			<ComponentRef Id="opticonAgent.exampleConfigFileComponent" />
+		</Feature>
+		
+		
+		<!-- Store the existing installdir -->
+		<Property Id="PROP_EXISTING_INSTALLDIR">
+			<ComponentSearch Id="opticonAgent.existingInstallDirComponentSearch1" Guid="{8d5ae613-dfc9-400d-837f-e0f7dca9833e}" />
+		</Property>
+		<!-- This Property is only needed to pre-set the INSTALLDIR property to the existing path for an upgrade -->
+		<Property Id="INSTALLDIR">
+			<ComponentSearch Id="opticonAgent.existingInstallDirComponentSearch2" Guid="{8d5ae613-dfc9-400d-837f-e0f7dca9833e}" />
+			
+			<!-- This is a way to read the installdir from the registry (but we use ComponentSearch now instead): -->
+			<!-- <RegistrySearch Id="opticonAgent.existingInstallDirRegistrySearch" Type="raw" Root="HKLM" Key="Software\Opticon-Agent" Name="installPath" /> -->
+		</Property>
+		
+		<!-- Public property names cannot contain lowercase letters (https://docs.microsoft.com/en-us/windows/win32/msi/public-properties) -->
+		<!-- For the value of the property to be passed to the execute sequence it needs Secure="yes" -->
+		
+		<!-- WIXUI_INSTALLDIR is a reference to the property name INSTALLDIR -->
+		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+		<Property Id="PROP_INSTALL_TYPE" Secure="yes" />
+		<Property Id="PROP_HAS_READ_CONFIG_IN_UI" Secure="yes" Value="0" />
+		
+		<Property Id="PROP_TENANT_ID" Secure="yes" />
+		<Property Id="PROP_TENANT_KEY" Secure="yes" />
+		
+		<?if $(var.buildMode) = dev ?>
+			<Property Id="PROP_ADDRESS" Value="opticon.dev.newvm.net" Secure="yes" />
+			<Property Id="PROP_UPDATE_URL" Value="https://download.dev.newvm.net/windows/opticon/versions.json" Secure="yes" />
+		<?elseif $(var.buildMode) = production ?>
+			<Property Id="PROP_ADDRESS" Value="opticon.newvm.com" Secure="yes" />
+			<Property Id="PROP_UPDATE_URL" Value="https://download.newvm.com/windows/opticon/versions.json" Secure="yes" />
+		<?endif?>
+		
+		<Property Id="PROP_PORT" Value="1047" Secure="yes" />
+		
+		
+		<!-- This sets the Add/Remove Programs's "InstallLocation" registry key (we don't know what it's used for though) -->
+		<SetProperty Id="ARPINSTALLLOCATION" Value="[INSTALLDIR]" After="CostFinalize" />
+		
+		
+		<!--
+			@note An msi always uninstalls *itself* when upgrading (so the existing (saved) msi is used to uninstall itself, then the new msi installs itself).
+			The old msi does not have access to the properties of the new install.
+			The MajorUpgrade Schedule="afterInstallExecute" attribute makes it so that the new msi is installed before the existing one is uninstalled
+			(and Windows uses component reference counting to make sure not to delete files that are still in the new msi).
+			
+			The text inside the SetProperty element is the conditions for when to set that value to the property.
+			
+											Install 	Repair ARP	Repair button				Change		Uninstall ARP	Uninstall button	Upgrade [existing msi]						Upgrade [new msi]
+			PROP_EXISTING_INSTALLDIR		""			{path}		""							""			{path}			""					{path}										{path}
+			Installed						""			"00:00:00"	"00:00:00"					"00:00:00"	"00:00:00"		"00:00:00"			"00:00:00"									""
+			REINSTALL						""			"ALL"		"opticonAgent.defaultFeature"	""			""				""					""											""
+			UPGRADINGPRODUCTCODE			""			""			""							""			""				""					"{73BB3628-0D88-42A0-AD05-01FC09ADDB56}"	""
+			REMOVE							""			""			""							""			"ALL"			"ALL"				"ALL"										""
+			
+			{path} is the INSTALLDIR chosen during install e.g. "C:\Program Files\Opticon-Agent\"
+			Uprade [existing msi] is really an uninstall of the existing msi triggered by the upgrade/install of the new msi
+			@note For some reason the Repair button and Remove (Uninstall) button clicked from within the msi will NOT have the PROP_EXISTING_INSTALLDIR set
+		-->
+		<SetProperty Sequence="ui" Action="SetPropInstallTypeUi0" Id="PROP_INSTALL_TYPE" Value="install" After="CostFinalize"><![CDATA[Installed = ""]]></SetProperty>
+		<SetProperty Sequence="ui" Action="SetPropInstallTypeUi1" Id="PROP_INSTALL_TYPE" Value="repair" After="CostFinalize"><![CDATA[REINSTALL <> ""]]></SetProperty>
+		<SetProperty Sequence="ui" Action="SetPropInstallTypeUi2" Id="PROP_INSTALL_TYPE" Value="change" After="CostFinalize"><![CDATA[Installed <> "" AND REINSTALL = "" AND UPGRADINGPRODUCTCODE = "" AND REMOVE = ""]]></SetProperty>
+		<SetProperty Sequence="ui" Action="SetPropInstallTypeUi3" Id="PROP_INSTALL_TYPE" Value="uninstall" After="CostFinalize"><![CDATA[UPGRADINGPRODUCTCODE = "" AND REMOVE = "ALL"]]></SetProperty>
+		<SetProperty Sequence="ui" Action="SetPropInstallTypeUi4" Id="PROP_INSTALL_TYPE" Value="upgradeExistingMsi" After="CostFinalize"><![CDATA[UPGRADINGPRODUCTCODE <> ""]]></SetProperty>
+		<SetProperty Sequence="ui" Action="SetPropInstallTypeUi5" Id="PROP_INSTALL_TYPE" Value="upgradeNewMsi" After="CostFinalize"><![CDATA[Installed = "" AND PROP_EXISTING_INSTALLDIR <> ""]]></SetProperty>
+		
+		<!-- The REMOVE="ALL" property for an uninstall via the button inside the msi is set in the InstallValidate action -->
+		<SetProperty Sequence="execute" Action="SetPropInstallTypeExecute0" Id="PROP_INSTALL_TYPE" Value="install" After="InstallValidate"><![CDATA[Installed = ""]]></SetProperty>
+		<SetProperty Sequence="execute" Action="SetPropInstallTypeExecute1" Id="PROP_INSTALL_TYPE" Value="repair" After="InstallValidate"><![CDATA[REINSTALL <> ""]]></SetProperty>
+		<SetProperty Sequence="execute" Action="SetPropInstallTypeExecute2" Id="PROP_INSTALL_TYPE" Value="change" After="InstallValidate"><![CDATA[Installed <> "" AND REINSTALL = "" AND UPGRADINGPRODUCTCODE = "" AND REMOVE = ""]]></SetProperty>
+		<SetProperty Sequence="execute" Action="SetPropInstallTypeExecute3" Id="PROP_INSTALL_TYPE" Value="uninstall" After="InstallValidate"><![CDATA[UPGRADINGPRODUCTCODE = "" AND REMOVE = "ALL"]]></SetProperty>
+		<SetProperty Sequence="execute" Action="SetPropInstallTypeExecute4" Id="PROP_INSTALL_TYPE" Value="upgradeExistingMsi" After="InstallValidate"><![CDATA[UPGRADINGPRODUCTCODE <> ""]]></SetProperty>
+		<SetProperty Sequence="execute" Action="SetPropInstallTypeExecute5" Id="PROP_INSTALL_TYPE" Value="upgradeNewMsi" After="InstallValidate"><![CDATA[Installed = "" AND PROP_EXISTING_INSTALLDIR <> ""]]></SetProperty>
+		
+		
+		<Binary Id="opticonAgent.msiCustomActionBinary" SourceFile="../../../build/opticon-agent/msi/msiCustomAction.dll" />
+		
+		<CustomAction Id="opticonAgent.readPropsFromConfigFile" BinaryKey="opticonAgent.msiCustomActionBinary" DllEntry="readPropsFromConfigFile" Execute="immediate" Return="check" />
+		
+		<!-- This SetProperty schedules a Type 51 custom action that sets the property after reading the config -->
+		<SetProperty Sequence="ui" Id="PROP_HAS_READ_CONFIG_IN_UI" Value="1" After="opticonAgent.readPropsFromConfigFile" />
+		
+		<InstallUISequence>
+			<Custom Action="opticonAgent.readPropsFromConfigFile" After="CostFinalize" />
+		</InstallUISequence>
+		
+		<!-- The INSTALLDIR folder only exists in a deferred action (for a fresh install), and elevated privileges are only available in deferred actions, also we need Impersonate "no" to prevent access denied -->
+		<!-- We need a separate custom action to pass any properties to our deferred dll custom action as a "CustomActionData" property -->
+		<!-- The Property attribute of that 'passer' custom action *must* be the Id of the dll CustomAction -->
+		<!-- The Value is passed a string with the [PROPNAME] vars replaced (you can parse the resulting string yourself in the dll, e.g. semicolon separated) -->
+		
+		<!-- <CustomAction Id="opticonAgent.debugProperties.setCustomDataAction" Property="opticonAgent.debugProperties.dllAction" Value="installPath=[INSTALLDIR];existingInstallPath=[PROP_EXISTING_INSTALLDIR];installType=[PROP_INSTALL_TYPE];Installed=[Installed];REINSTALL=[REINSTALL];UPGRADINGPRODUCTCODE=[UPGRADINGPRODUCTCODE];REMOVE=[REMOVE]" Return="check" /> -->
+		<!-- <CustomAction Id="opticonAgent.debugProperties.setCustomDataAction" Property="opticonAgent.debugProperties.dllAction" Value="tenantId=[PROP_TENANT_ID]" Return="check" /> -->
+		<!-- <CustomAction Id="opticonAgent.debugProperties.dllAction" BinaryKey="opticonAgent.msiCustomActionBinary" DllEntry="debugProperties" Execute="deferred" Impersonate="no" Return="check" /> -->
+		
+		<CustomAction Id="opticonAgent.moveConfigFileFromExistingInstall.setCustomDataAction" Property="opticonAgent.moveConfigFileFromExistingInstall.dllAction" Value="installPath=[INSTALLDIR];existingInstallPath=[PROP_EXISTING_INSTALLDIR]" Return="check" />
+		<CustomAction Id="opticonAgent.moveConfigFileFromExistingInstall.dllAction" BinaryKey="opticonAgent.msiCustomActionBinary" DllEntry="moveConfigFileFromExistingInstall" Execute="deferred" Impersonate="no" Return="check" />
+		
+		<CustomAction Id="opticonAgent.writePropsToConfigFile.setCustomDataAction" Property="opticonAgent.writePropsToConfigFile.dllAction" Value="installPath=[INSTALLDIR];tenantId=[PROP_TENANT_ID];tenantKey=[PROP_TENANT_KEY];address=[PROP_ADDRESS];port=[PROP_PORT];updateUrl=[PROP_UPDATE_URL]" Return="check" />
+		<CustomAction Id="opticonAgent.writePropsToConfigFile.dllAction" BinaryKey="opticonAgent.msiCustomActionBinary" DllEntry="writePropsToConfigFile" Execute="deferred" Impersonate="no" Return="check" />
+		
+		<CustomAction Id="opticonAgent.deleteGeneratedFiles.setCustomDataAction" Property="opticonAgent.deleteGeneratedFiles.dllAction" Value="installPath=[INSTALLDIR]" Return="check" />
+		<CustomAction Id="opticonAgent.deleteGeneratedFiles.dllAction" BinaryKey="opticonAgent.msiCustomActionBinary" DllEntry="deleteGeneratedFiles" Execute="deferred" Impersonate="no" Return="check" />
+		
+		<InstallExecuteSequence>
+			<!-- The text inside the Custom element is the conditions for when to execute that custom action. -->
+			
+<!-- @todo if cli props are given, then use THOSE instead of the values read from config -->
+			<!-- Only run in the new msi for an upgrade or in the existing msi for a change, and only if config hasn't already been read in the UI -->
+			<Custom Action="opticonAgent.readPropsFromConfigFile" After="InstallFiles"><![CDATA[PROP_HAS_READ_CONFIG_IN_UI = "0" AND (PROP_INSTALL_TYPE = "upgradeNewMsi" OR PROP_INSTALL_TYPE = "change")]]></Custom>
+  			
+  			<!-- Only run in the new msi for an upgrade (RemoveExistingProducts is scheduled between InstallExecute and InstallFinalize, so after InstallFiles, so we have access to the previous installed files -->
+			<Custom Action="opticonAgent.moveConfigFileFromExistingInstall.setCustomDataAction" After="opticonAgent.readPropsFromConfigFile"></Custom>
+  			<Custom Action="opticonAgent.moveConfigFileFromExistingInstall.dllAction" After="opticonAgent.moveConfigFileFromExistingInstall.setCustomDataAction"><![CDATA[PROP_INSTALL_TYPE = "upgradeNewMsi"]]></Custom>
+  			
+  			<!-- Only run in the new msi for an install or upgrade or in the existing msi for a change -->
+			<Custom Action="opticonAgent.writePropsToConfigFile.setCustomDataAction" After="opticonAgent.moveConfigFileFromExistingInstall.dllAction"></Custom>
+  			<Custom Action="opticonAgent.writePropsToConfigFile.dllAction" After="opticonAgent.writePropsToConfigFile.setCustomDataAction"><![CDATA[PROP_INSTALL_TYPE = "install" OR PROP_INSTALL_TYPE = "upgradeNewMsi" OR PROP_INSTALL_TYPE = "change"]]></Custom>
+  			
+  			<!-- <Custom Action="opticonAgent.debugProperties.setCustomDataAction" After="opticonAgent.moveConfigFileFromExistingInstall.dllAction"></Custom> -->
+  			<!-- <Custom Action="opticonAgent.debugProperties.setCustomDataAction" After="InstallFiles"></Custom> -->
+  			<!-- <Custom Action="opticonAgent.debugProperties.dllAction" After="opticonAgent.debugProperties.setCustomDataAction"></Custom> -->
+  			
+			<!-- Only run in the existing msi for an uninstall (full uninstall, not a "remove" because of an upgrade) -->
+			<Custom Action="opticonAgent.deleteGeneratedFiles.setCustomDataAction" After="MsiUnpublishAssemblies"></Custom>
+  			<Custom Action="opticonAgent.deleteGeneratedFiles.dllAction" After="opticonAgent.deleteGeneratedFiles.setCustomDataAction"><![CDATA[PROP_INSTALL_TYPE = "uninstall"]]></Custom>
+		</InstallExecuteSequence>
+		
+		<UI>
+			<TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+			<TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+			<TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+			
+			<Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+			<Property Id="WixUI_Mode" Value="InstallDir" />
+			
+			<Property Id="clickedNextOnConfig" Value="0" />
+			
+			<!-- Make sure to include custom dialogs in the installer database via a DialogRef command, especially if they are not included explicitly in the publish chain below -->
+			<UIRef Id="WixUI_Common" />
+			
+			<DialogRef Id="BrowseDlg" />
+			<DialogRef Id="DiskCostDlg" />
+			<DialogRef Id="ErrorDlg" />
+			<DialogRef Id="FatalError" />
+			<DialogRef Id="FilesInUse" />
+			<DialogRef Id="MsiRMFilesInUse" />
+			<DialogRef Id="PrepareDlg" />
+			<DialogRef Id="ProgressDlg" />
+			<DialogRef Id="ResumeDlg" />
+			<DialogRef Id="UserExit" />
+			<DialogRef Id="InvalidDirDlg" />
+			
+			<DialogRef Id="opticonAgent.configDialog" />
+			
+			<!-- Make the "change" button in the MaintenanceTypeDlg go to the opticonAgent.configDialog -->
+			<Publish Dialog="MaintenanceTypeDlg" Control="ChangeButton" Event="NewDialog" Value="opticonAgent.configDialog">1</Publish>
+			
+			
+			<Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
+			<Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+			
+			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+			
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">NOT Installed</Publish>
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
+			
+			<Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+			<Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="opticonAgent.configDialog" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+			<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+			<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
+			
+			<Publish Dialog="opticonAgent.configDialog" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg">Installed</Publish>
+			<Publish Dialog="opticonAgent.configDialog" Control="Back" Event="NewDialog" Value="InstallDirDlg">NOT Installed</Publish>
+			
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="opticonAgent.configDialog" Order="1">NOT Installed</Publish>
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed</Publish>
+			
+			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+			
+			<Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+			
+			<Dialog Id="opticonAgent.configDialog" Width="370" Height="270" Title="[ProductName] Setup">
+				<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)">
+					<!-- @note Conditions are only updated on user interaction (which for edit controls is only on unfocus, not on input) -->
+					<Condition Action="disable"><![CDATA[(PROP_TENANT_ID = "" OR PROP_TENANT_KEY = "") AND clickedNextOnConfig = "1" AND continueWithoutConfig = ""]]></Condition>
+					<Condition Action="enable"><![CDATA[(PROP_TENANT_ID <> "" AND PROP_TENANT_KEY <> "") OR clickedNextOnConfig = "0" OR continueWithoutConfig = "1"]]></Condition>
+					
+					<Publish Property="clickedNextOnConfig" Value="1" Order="1">1</Publish>
+					<Publish Event="NewDialog" Value="VerifyReadyDlg" Order="2"><![CDATA[(PROP_TENANT_ID <> "" AND PROP_TENANT_KEY <> "") OR (clickedNextOnConfig = "1" AND continueWithoutConfig = "1")]]></Publish>
+				</Control>
+				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+				<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+					<Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+				</Control>
+				
+				<Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Insert your configuration values" />
+				<Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Configuration options" />
+				<Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="WixUI_Bmp_Banner" />
+				<Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+				<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+				
+				<Control Id="tenantIdLabel" Type="Text" X="20" Y="60" Width="290" Height="10" NoPrefix="yes" Text="Tenant ID" />
+				<Control Id="tenantIdEdit" Type="Edit" X="20" Y="75" Width="320" Height="18" Property="PROP_TENANT_ID" Indirect="no" />
+				<Control Id="tenantKeyLabel" Type="Text" X="20" Y="100" Width="290" Height="10" NoPrefix="yes" Text="Tenant key" />
+				<Control Id="tenantKeyEdit" Type="Edit" X="20" Y="115" Width="320" Height="18" Property="PROP_TENANT_KEY" Indirect="no" />
+				
+				<Control Id="continueWithoutConfigLine" Type="Line" X="0" Y="145" Width="370" Height="0">
+					<Condition Action="hide"><![CDATA[(PROP_TENANT_ID <> "" AND PROP_TENANT_KEY <> "") OR clickedNextOnConfig = "0"]]></Condition>
+					<Condition Action="show"><![CDATA[(PROP_TENANT_ID = "" OR PROP_TENANT_KEY = "") AND clickedNextOnConfig = "1"]]></Condition>
+				</Control>
+				<Control Id="continueWithoutConfigIcon" Type="Icon" X="20" Y="155" Width="24" Height="24" FixedSize="yes" IconSize="32" Text="WixUI_Ico_Exclam">
+					<Condition Action="hide"><![CDATA[(PROP_TENANT_ID <> "" AND PROP_TENANT_KEY <> "") OR clickedNextOnConfig = "0"]]></Condition>
+					<Condition Action="show"><![CDATA[(PROP_TENANT_ID = "" OR PROP_TENANT_KEY = "") AND clickedNextOnConfig = "1"]]></Condition>
+				</Control>
+				<Control Id="continueWithoutConfigLabel" Type="Text" X="60" Y="155" Width="290" Height="10" NoPrefix="yes" Text="Are you sure you want to proceed without all configuration values?">
+					<Condition Action="hide"><![CDATA[(PROP_TENANT_ID <> "" AND PROP_TENANT_KEY <> "") OR clickedNextOnConfig = "0"]]></Condition>
+					<Condition Action="show"><![CDATA[(PROP_TENANT_ID = "" OR PROP_TENANT_KEY = "") AND clickedNextOnConfig = "1"]]></Condition>
+				</Control>
+				<Control Id="continueWithoutConfigCheckbox" Type="CheckBox" X="60" Y="165" Width="290" Height="18" CheckBoxValue="1" Property="continueWithoutConfig" Text="Yes continue">
+					<Condition Action="hide"><![CDATA[(PROP_TENANT_ID <> "" AND PROP_TENANT_KEY <> "") OR clickedNextOnConfig = "0"]]></Condition>
+					<Condition Action="show"><![CDATA[(PROP_TENANT_ID = "" OR PROP_TENANT_KEY = "") AND clickedNextOnConfig = "1"]]></Condition>
+				</Control>
+			</Dialog>
+		</UI>
+	</Product>
+</Wix>

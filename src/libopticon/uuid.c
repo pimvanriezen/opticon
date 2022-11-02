@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <libopticon/uuid.h>
+#include <libopticon/fillrandom.h>
 
 /*/ ======================================================================= /*/
 /** Compare two UUIDs.
@@ -77,9 +78,7 @@ bool isuuid (const char *str) {
 /*/ ======================================================================= /*/
 uuid uuidgen (void) {
     uuid res = {0,0};
-    int fdevr = open ("/dev/random",O_RDONLY);
-    read (fdevr, &res, sizeof(res));
-    close (fdevr);
+    fillrandom(&res, sizeof(res));
     return res;
 }
 
@@ -95,6 +94,6 @@ uuid uuidnil (void) {
 /** Check whether a uuid is not nil */
 /*/ ======================================================================= /*/
 bool uuidvalid (uuid u) {
-    return (u.msb || u.lsb);
+    return ((u.msb || u.lsb) && (u.msb != 0xffffffffffffffff || u.lsb != 0xffffffffffffffff));
 }
 

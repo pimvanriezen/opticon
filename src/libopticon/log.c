@@ -14,7 +14,14 @@ loghandle *LOG = NULL;
 /** Implementation of log_write */
 /*/ ======================================================================= /*/
 void syslog_write (loghandle *h, int prio, const char *dt) {
+#if defined(OS_WINDOWS)
+    // @todo windows event log implementation?
+    (void)h;
+    (void)prio;
+    (void)dt;
+#else
     syslog (prio, "%s", dt);
+#endif
 }
 
 /*/ ======================================================================= /*/
@@ -72,11 +79,17 @@ void logfile_write (loghandle *h, int prio, const char *dt) {
   * \param name Name of our program. */
 /*/ ======================================================================= /*/
 void log_open_syslog (const char *name, int maxprio) {
+#if defined(OS_WINDOWS)
+    // @todo windows event log implementation?
+    (void)name;
+    (void)maxprio;
+#else
     LOG = (loghandle *) malloc (sizeof (loghandle));
     LOG->write = syslog_write;
     LOG->maxprio = maxprio;
     LOG->data = NULL;
     openlog (name, 0, LOG_DAEMON);
+#endif
 }
 
 /*/ ======================================================================= /*/

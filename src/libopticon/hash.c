@@ -1,4 +1,5 @@
 #include <libopticon/hash.h>
+#include <libopticon/fillrandom.h>
 
 static uint32_t IHASH = 0;
 
@@ -16,13 +17,14 @@ uint32_t hash_token (const char *str) {
     /* Set up a random intial hash once */
     if (! IHASH)
     {
-        sdf = open ("/dev/urandom", O_RDONLY);
-        if (sdf<0) sdf = open ("/dev/random", O_RDONLY);
-        if (sdf>=0)
-        {
-            (void) read (sdf, &IHASH, sizeof(IHASH));
-            close (sdf);
-        }
+        //sdf = open ("/dev/urandom", O_RDONLY);
+        //if (sdf<0) sdf = open ("/dev/random", O_RDONLY);
+        //if (sdf>=0)
+        //{
+        //    (void) read (sdf, &IHASH, sizeof(IHASH));
+        //    close (sdf);
+        //}
+        fillrandom(&IHASH, sizeof(IHASH));
         if (! IHASH) IHASH = 5138; /* fair dice roll */
     }
     

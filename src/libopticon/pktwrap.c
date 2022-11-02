@@ -1,6 +1,7 @@
 #include <libopticon/pktwrap.h>
 #include <libopticon/compress.h>
 #include <libopticon/aes.h>
+#include <libopticon/fillrandom.h>
 #include <netinet/in.h>
 #include <fcntl.h>
 
@@ -33,9 +34,7 @@ uint32_t gen_networkid (struct sockaddr_storage *stor) {
 /*/ ======================================================================= /*/
 uint32_t gen_sessionid (void) {
     uint32_t res;
-    int fdevr = open ("/dev/random",O_RDONLY);
-    read (fdevr, &res, sizeof (uint32_t));
-    close (fdevr);
+    fillrandom(&res, sizeof (uint32_t));
     return res;
 }
 

@@ -9,6 +9,7 @@
 #include <libopticon/log.h>
 #include <libopticon/var.h>
 #include <arpa/inet.h>
+#include <netinet/in.h> // For INET6_ADDRSTRLEN
 
 sessiondb SESSIONS;
 

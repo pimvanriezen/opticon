@@ -1,4 +1,5 @@
 #include "opticon-agent.h"
+#include "version.h"
 #include <libopticon/ioport.h>
 #include <libopticon/codec_pkt.h>
 #include <libopticon/pktwrap.h>
@@ -18,6 +19,27 @@
 #include <syslog.h>
 #include <errno.h>
 
+#if defined (OS_WINDOWS)
+    // Need to include winsock2.h before windows.h
+    #include <winsock2.h>
+    #include <windows.h>
+    
+    #include <fcntl.h> // For _O_BINARY
+    
+    #include "win/systemFirmwareInfo.h"
+    #include "win/winService.h"
+    #include "win/updater.h"
+    
+    // Save the MinGW _fmode define using push_macro
+    #pragma push_macro("_fmode")
+        // Clear the MinGW define
+        #undef _fmode
+        // Set the global filemode to binary (instead of text mode that converts \r\n to \n in fread())
+        int _fmode = _O_BINARY;
+    #pragma pop_macro("_fmode")
+#endif
+
+
 appcontext APP;
 
 void __breakme (void) {}
@@ -34,6 +56,23 @@ int daemon_main (int argc, const char *argv[]) {
         log_open_file (APP.logpath, APP.loglevel);
     }
     
+    
+    if (APP.win.servicecommand != NULL) {
+        if (strcmp (APP.win.servicecommand, "install") == 0) return installWindowsService(false);
+        else if (strcmp (APP.win.servicecommand, "installAndStart") == 0) return installWindowsService(true);
+        else if (strcmp (APP.win.servicecommand, "uninstall") == 0) return uninstallWindowsService();
+    }
+    else if (APP.win.updatecommand != NULL) {
+        if (APP.win.updateurl == NULL) {
+            log_error ("Update url not specified in config");
+            return 0xdae8eaa8;
+        }
+        
+        if (strcmp (APP.win.updatecommand, "check") == 0) return checkUpdate(APP.win.updateurl, APP.win.updatechannel);
+        else if (strcmp (APP.win.updatecommand, "update") == 0) return checkAndInstallUpdate(APP.win.updateurl, APP.win.updatechannel);
+    }
+    
+    
     popen_init();
     probelist_start (&APP.probes);
     collectorlist_start (&APP.collectors);
@@ -41,6 +80,8 @@ int daemon_main (int argc, const char *argv[]) {
     time_t tlast = time (NULL);
     time_t nextslow = tlast + 5;
     time_t nextsend = tlast + 10;
+    // Schedule somewhere in the next 24 hours (to spread out calls to the update server more or less evenly across the day)
+    time_t nextupdate = tlast + 300 + (rand() % 86400);
 
     int slowround = 0;
 
@@ -247,10 +288,28 @@ int daemon_main (int argc, const char *argv[]) {
         host_delete (h);
         var_free (vnagios);
 
+#if defined (OS_WINDOWS)
+        /* See if it's time for an update check */
+        if (tnow >= nextupdate) {
+            if (APP.win.updateenabled) {
+                if (APP.win.updateurl == NULL) {
+                    log_warn ("Update url not specified in config");
+                }
+                else {
+                    checkAndInstallUpdate(APP.win.updateurl, APP.win.updatechannel);
+                }
+            }
+            
+            /* Schedule next update round in 24 hours */
+            nextupdate = nextupdate + 86400;
+        }
+#endif
+
         /* Figure out what the next scheduled wake-up time is */
         tnow = time (NULL);
         if (nextsend < wakenext) wakenext = nextsend;
         if (nextslow < wakenext) wakenext = nextslow;
+        if (nextupdate < wakenext) wakenext = nextupdate;
         if (wakenext > tnow) {
             log_debug ("Sleeping for %i seconds", (wakenext-tnow));
             sleep (wakenext-tnow);
@@ -321,6 +380,32 @@ int conf_probe (const char *id, var *v, updatetype tp) {
     return 0;
 }
 
+/** Parse /update */
+int conf_winupdate (const char *id, var *v, updatetype tp) {
+    if (v->type != VAR_DICT) {
+        log_error ("Invalid update specification");
+        return 0;
+    }
+    
+    APP.win.updateurl = var_get_str_forkey (v, "url");
+    const char *channel = var_get_str_forkey (v, "channel");
+    APP.win.updatechannel = channel ? channel : "stable";
+    APP.win.updateenabled = var_find_key (v, "enabled") ? (var_get_int_forkey (v, "enabled") == 1) : 1;
+    
+    return 1;
+}
+
+/** Handle --winservice */
+int set_win_servicecommand (const char *i, const char *v) {
+    if (*v) APP.win.servicecommand = v;
+    return 1;
+}
+/** Handle --winupdate */
+int set_win_updatecommand (const char *i, const char *v) {
+    if (*v) APP.win.updatecommand = v;
+    return 1;
+}
+
 /** Handle --foreground */
 int set_foreground (const char *i, const char *v) {
     APP.foreground = 1;
@@ -367,6 +452,12 @@ int set_loglevel (const char *i, const char *v) {
     return 1;
 }
 
+/** Handle --foreground */
+int set_showversionflag (const char *i, const char *v) {
+    APP.showversionflag = 1;
+    return 1;
+}
+
 /** Command line options */
 cliopt CLIOPT[] = {
     {
@@ -387,7 +478,13 @@ cliopt CLIOPT[] = {
         "--logfile",
         "-l",
         OPT_VALUE,
+#if defined (OS_WINDOWS)
+//        "D:\opticon-agent.log",
+        "opticon-agent.log",
+//        "@syslog",
+#else
         "@syslog",
+#endif
         set_logpath
     },
     {
@@ -408,15 +505,44 @@ cliopt CLIOPT[] = {
         "--config-path",
         "-c",
         OPT_VALUE,
+#if defined (OS_WINDOWS)
+        "opticon-agent.conf",
+#else
         "/etc/opticon/opticon-agent.conf",
+#endif
         set_confpath
     },
     {
         "--defaults-path",
         "-d",
         OPT_VALUE,
+#if defined (OS_WINDOWS)
+        "opticon-defaultprobes.conf",
+#else
         "/etc/opticon/opticon-defaultprobes.conf",
+#endif
         set_defaultspath
+    },
+    {
+        "--winservice",
+        "-w",
+        OPT_VALUE,
+        "",
+        set_win_servicecommand
+    },
+    {
+        "--winupdate",
+        "-u",
+        OPT_VALUE,
+        "",
+        set_win_updatecommand
+    },
+    {
+        "--version",
+        "-v",
+        OPT_FLAG, // @todo need OPT_ISSET instead?
+        NULL,
+        set_showversionflag
     },
     {NULL,NULL,0,NULL,NULL}
 };
@@ -424,10 +550,15 @@ cliopt CLIOPT[] = {
 /** Application main. Handles configuration and command line flags,
   * then daemonizes.
   */
-int main (int _argc, const char *_argv[]) {
+int app_main (int _argc, const char *_argv[]) {
     int argc = _argc;
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);
     if (! argv) return 1;
+    
+    if (APP.showversionflag) {
+        printf(VERSION);
+        return 0;
+    }
     
 #if defined (OS_LINUX)    
     char buffer[1024];
@@ -449,10 +580,34 @@ int main (int _argc, const char *_argv[]) {
         APP.hostid = mkuuid (buffer);
         pclose_safe (F);
     }
+#elif defined (OS_WINDOWS)
+    uint32_t e;
+    
+    APP.win.updateurl = NULL;
+    APP.win.updatechannel = "stable";
+    APP.win.updateenabled = 1;
+    
+    //log_open_file(APP.logpath, APP.loglevel);
+    
+    // Initialize winsock
+    WSADATA wsaData;
+    if ((e = WSAStartup(MAKEWORD(2, 2), &wsaData)) != NO_ERROR) {
+        log_error("Failed to initialize winsock: %ux\n", e);
+        return e;
+    }
+    
+    DSystemFirmwareInfo systemFirmwareInfo;
+    if ((e = getSystemFirmwareInfoAlloc(&systemFirmwareInfo))) {
+        log_warn("Failed to load system firmware info: %" PRIx32, e);
+        return e;
+    }
+    APP.hostid = bytes2uuid(systemFirmwareInfo.systemInfo.uuid);
+    freeSystemFirmwareInfo(&systemFirmwareInfo);
 #endif
     
     opticonf_add_reaction ("collector", conf_collector);
     opticonf_add_reaction ("probes/*", conf_probe);
+    opticonf_add_reaction ("update", conf_winupdate);
     
     APP.codec = codec_create_pkt();
     APP.conf = var_alloc();
@@ -508,10 +663,22 @@ int main (int _argc, const char *_argv[]) {
         return 1;
     }
     
+#if defined (OS_WINDOWS)
+    return daemon_main(argc, argv);
+#else
     if (! daemonize (APP.pidfile, argc, argv, daemon_main, APP.foreground)) {
         log_error ("Error spawning");
         return 1;
     }
+#endif
     
     return 0;
+}
+
+int main (int argc, const char *argv[]) {
+#if defined (OS_WINDOWS)
+    return mainWithServiceSupport(argc, argv, app_main);
+#else
+    return app_main (argc, argv);
+#endif
 }

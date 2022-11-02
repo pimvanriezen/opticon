@@ -1,9 +1,13 @@
+// Needed for localtime_r declaration in time.h
+#define _POSIX_THREAD_SAFE_FUNCTIONS
+
 #include <libopticon/util.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <netinet/in.h> // For struct sockaddr_in6
 
 /* 5 bit character mapping for ids */
 const char *IDTABLE = " abcdefghijklmnopqrstuvwxyz.-_/@";
@@ -216,6 +220,34 @@ void uuid2str (uuid u, char *into) {
                    uuidbyte (u.lsb, 5),
                    uuidbyte (u.lsb, 6),
                    uuidbyte (u.lsb, 7));
+}
+
+/*/ ======================================================================= /*/
+/** Convert 16 bytes to uuid struct
+  * \param bytes Array of 16 bytes */
+/*/ ======================================================================= /*/
+uuid bytes2uuid (uint8_t *bytes) {
+    uuid u;
+    u.msb = (uint64_t)bytes[0] << 56 |
+        (uint64_t)bytes[1] << 48 |
+        (uint64_t)bytes[2] << 40 |
+        (uint64_t)bytes[3] << 32 |
+        (uint64_t)bytes[4] << 24 |
+        (uint64_t)bytes[5] << 16 |
+        (uint64_t)bytes[6] << 8 |
+        (uint64_t)bytes[7]
+    ;
+    u.lsb = (uint64_t)bytes[8] << 56 |
+        (uint64_t)bytes[9] << 48 |
+        (uint64_t)bytes[10] << 40 |
+        (uint64_t)bytes[11] << 32 |
+        (uint64_t)bytes[12] << 24 |
+        (uint64_t)bytes[13] << 16 |
+        (uint64_t)bytes[14] << 8 |
+        (uint64_t)bytes[15]
+    ;
+    
+    return u;
 }
 
 /*/ ======================================================================= /*/
