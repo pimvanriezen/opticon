@@ -81,6 +81,8 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
     for (int c = 0; c<uuidcount; ++c) {
         if (db_open (DB, uuids[c], NULL)) {
             var *res = db_get_overview (DB);
+            if (! res) continue;
+            
             var *ov = var_get_dict_forkey (res, "overview");
             var *crsr = NULL;
             
