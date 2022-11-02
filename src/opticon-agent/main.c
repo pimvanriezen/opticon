@@ -313,7 +313,10 @@ int daemon_main (int argc, const char *argv[]) {
         tnow = time (NULL);
         if (nextsend < wakenext) wakenext = nextsend;
         if (nextslow < wakenext) wakenext = nextslow;
+
+#if defined (OS_WINDOWS)        
         if (nextupdate < wakenext) wakenext = nextupdate;
+#endif
         if (wakenext > tnow) {
             log_debug ("Sleeping for %i seconds", (wakenext-tnow));
             sleep (wakenext-tnow);
