@@ -82,9 +82,9 @@ int daemon_main (int argc, const char *argv[]) {
     time_t tlast = time (NULL);
     time_t nextslow = tlast + 5;
     time_t nextsend = tlast + 10;
-    // Schedule somewhere in the next 24 hours (to spread out calls to the update server more or less evenly across the day)
-    time_t nextupdate = tlast + 300 + (rand() % 86400);
+    time_t nextupdate = tlast + 10;
 
+    bool firstround = true;
     int slowround = 0;
 
     log_info ("Daemonized");
@@ -302,8 +302,9 @@ int daemon_main (int argc, const char *argv[]) {
                 }
             }
             
-            /* Schedule next update round in 24 hours */
-            nextupdate = nextupdate + 86400;
+            /* Schedule somewhere in the next 24 hours (to spread out calls to the update server more or less evenly across the day) */
+            nextupdate = firstround ? nextupdate + 300 + (rand() % 86400) : nextupdate + 86400;
+            log_debug ("Scheduling next update check in %i seconds", nextupdate - tnow);
         }
 #endif
 
@@ -316,6 +317,8 @@ int daemon_main (int argc, const char *argv[]) {
             log_debug ("Sleeping for %i seconds", (wakenext-tnow));
             sleep (wakenext-tnow);
         }
+        
+        firstround = false;
     }
     return 666;
 }
