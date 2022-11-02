@@ -677,8 +677,8 @@ int cmd_get_record (int argc, const char *argv[]) {
                             VDfrac("link","rtt"),
                             VDfrac("link","loss"));
                             
+    print_value ("Version", VT_YLW "%s" VT_RST, Vstr("version"));
     print_value ("Status", "%s", decorate_status(Vstr("status")));
-    
     print_array ("Problems", Arr("problems"));
     
     Vdone("hostname");
@@ -686,6 +686,7 @@ int cmd_get_record (int argc, const char *argv[]) {
     Vdone("link");
     Vdone("status");
     Vdone("problems");
+    Vdone("version");
     
     if (! OPTIONS.showgraphs) {
         char uptimestr[128];

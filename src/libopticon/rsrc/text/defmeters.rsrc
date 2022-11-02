@@ -264,4 +264,8 @@
         type: string
         description: "State"
     }
+    version {
+        type: string
+        description: "Agent Version"
+    }
 }

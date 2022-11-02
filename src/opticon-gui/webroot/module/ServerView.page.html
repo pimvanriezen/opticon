@@ -42,6 +42,12 @@
           <td style="color:#888888;" width="22%" valign="top">Distribution</td>
           <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
         </tr>
+        <tr v-if="data.version">
+          <td style="color:#888888;" width="22%">Agent Version</td>
+          <td>
+            {{data.version}}
+          </td>
+        </tr>
         <tr>
           <td style="color:#888888;" width="22%">Session IP</td>
           <td>{{data.agent.ip}}
