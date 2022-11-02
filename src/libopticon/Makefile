@@ -29,6 +29,7 @@ OBJS_LIBOPTICON = rsrc.o adjust.o aes.o host.o tenant.o \
 				  codec_json.o codec_pkt.o \
 				  compress.o pktwrap.o \
 				  watchlist.o defaults.o \
+				  fillrandom.o \
 				  var_dump.o var.o react.o var_parse.o \
 				  cliopt.o daemon.o log.o thread.o transport.o \
 				  transport_udp.o timestr.o packetqueue.o \

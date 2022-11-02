@@ -26,7 +26,7 @@ endif
 CFLAGS+=-DOS_$(OSDEF) -DOSNAME=$(OSNAME) -DOSREL=$(OSREL) -DOSRELMAJOR=$(OSRELMAJOR)
 
 OBJS_OPTICONAGENT = main.o probelist.o probes.o resender.o \
-                    collectorlist.o tproc.o wordlist.o
+                    collectorlist.o tproc.o wordlist.o version.o
 LIBS = ../../lib/libopticon.a ../../lib/libopticondb.a 
 				  
 all: ../../bin/opticon-agent ../../bin/opticon-helper
@@ -41,6 +41,9 @@ all: ../../bin/opticon-agent ../../bin/opticon-helper
 
 clean:
 	rm -f *.o ../../bin/opticon-agent
+	
+version.c:
+	@./mkversion.sh
 
 probes.o: probes.c probes_linux.c probes_darwin.c
 	@echo "[BUILD] probes.c"

@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <fcntl.h>
+
 #include <libopticon/fillrandom.h>
 
 #if defined (OS_WINDOWS)
     #include <windows.h>
     #include <bcrypt.h>
+#else
+    #include <sys/types.h>
+    #include <sys/uio.h>
+    #include <unistd.h>
 #endif
 
 /*/ ======================================================================= /*/
@@ -15,8 +20,7 @@ void fillrandom (void *out, size_t sz) {
         BCryptGenRandom(NULL, out, sz, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
     #else
         int fdevr = open ("/dev/random",O_RDONLY);
-        read (fdevr, &res, sizeof(res));
+        read (fdevr, out, sz);
         close (fdevr);
-        return res;
     #endif
 }
