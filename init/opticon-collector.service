@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=forking
 ExecStart=/usr/sbin/opticon-collector
-PIDFile=opticon-collector.pid
+PIDFile=/run/opticon-collector.pid
 KillSignal=SIGTERM
 
 [Install]
