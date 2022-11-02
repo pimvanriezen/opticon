@@ -52,7 +52,7 @@ cp pkg/opticon-agent.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 cp bin/opticon-agent $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-agent
 cp bin/opticon-helper $BUILDROOT/usr/bin/opticon-helper
-cp init/opticon-agent.service $BUILDROOT/lib/systemd/system/
+cp -p init/opticon-agent.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/etc/opticon/
 cp src/opticon-agent/opticon-defaultprobes.conf $BUILDROOT/etc/opticon/
 cp src/opticon-agent/helpers.conf $BUILDROOT/etc/opticon/
@@ -98,7 +98,7 @@ cp pkg/opticon-collector.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 # Copy binaries, scripts and example config
 cp bin/opticon-collector $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-collector
-cp init/opticon-collector.service $BUILDROOT/lib/systemd/system/
+cp -p init/opticon-collector.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-collector/opticon-collector.conf.example $BUILDROOT/etc/opticon/
 cp src/opticon-collector/opticon-meter.conf.example $BUILDROOT/etc/opticon/
 cp src/opticon-collector/opticon-graph.conf.example $BUILDROOT/etc/opticon/
@@ -143,7 +143,7 @@ cp pkg/opticon-api.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 # Copy binaries, scripts and example config
 cp bin/opticon-api $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-api
-cp init/opticon-api.service $BUILDROOT/lib/systemd/system/
+cp -p init/opticon-api.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-api/opticon-api.conf.example $BUILDROOT/etc/opticon/
 
 # Build the package
