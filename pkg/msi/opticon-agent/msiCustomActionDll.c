@@ -262,11 +262,8 @@ __declspec(dllexport) UINT __stdcall writePropsToConfigFile(MSIHANDLE session) {
     fwrite(comment, 1, strlen(comment), configFileHandle);
     
     // @note var_write_indented writes proper json, not relaxed conf format, so we can just use var_dump instead
-    //ioport *io = ioport_create_filewriter(configFileHandle);
-    //var_write_indented(config, io, 0);
-    //ioport_close(io);
-    //fclose(configFileHandle);
     var_dump(config, configFileHandle);
+    fclose(configFileHandle);
     
     var_free(config);
     
