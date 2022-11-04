@@ -621,23 +621,42 @@ var *runprobe_distro (probe *self) {
         else {
             F = fopen ("/etc/version_info","r");
             if (! F) {
-                log_debug ("No distro files found");
-                return res;
-            }
-            while (! feof (F)) {
-                *buf = 0;
-                fgets (buf, 255, F);
-                buf[255] = 0;
-                if (strncmp (buf, "* ",2) == 0) {
-                    c = distro = buf+2;
-                    while (*c) {
-                        if (*c == '_') *c = ' ';
-                        c++;
-                    }
-                    break;
+                /* Fuck my life */
+                F = fopen ("/etc/os-release","r");
+                if (! F) {
+                    log_debug ("No distro files found");
+                    return res;
                 }
+                while (! feof (F)) {
+                    *buf = 0;
+                    fgets (buf, 255, F);
+                    if (strncmp (buf, "PRETTY_NAME=", 12) == 0) {
+                        c = distro = buf+13;
+                        while (*c) {
+                            if (*c == '\"') *c = 0;
+                            else c++;
+                        }
+                        break;
+                    }
+                }
+                fclose (F);
             }
-            fclose (F);
+            else {
+                while (! feof (F)) {
+                    *buf = 0;
+                    fgets (buf, 255, F);
+                    buf[255] = 0;
+                    if (strncmp (buf, "* ",2) == 0) {
+                        c = distro = buf+2;
+                        while (*c) {
+                            if (*c == '_') *c = ' ';
+                            c++;
+                        }
+                        break;
+                    }
+                }
+                fclose (F);
+            }
         }
     }
     
