@@ -273,6 +273,9 @@ int cmd_tenant_get_quota (req_context *ctx, req_arg *a, var *env, int *st) {
   */
 int cmd_tenant_create (req_context *ctx, req_arg *a, var *env, int *status) {
     aeskey key;
+    if (! var_find_key (ctx->bodyjson, "tenant")) {
+        return err_bad_request (ctx, a, env, status);
+    }
     var *vopts = var_get_dict_forkey (ctx->bodyjson, "tenant");
     var *vkey = var_find_key (vopts, "key");
     char *strkey;
