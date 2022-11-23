@@ -91,7 +91,8 @@ MHDResult answer_to_connection (void *cls, struct MHD_Connection *connection,
     
     const char *lvl = "AUTH_GUEST";
     if (ctx->userlevel == AUTH_USER) lvl = "AUTH_USER ";
-    if (ctx->userlevel == AUTH_ADMIN) lvl = "AUTH_ADMIN";
+    else if (ctx->userlevel == AUTH_ADMIN) lvl = "AUTH_ADMIN";
+    else if (ctx->userlevel == AUTH_PROV) lvl = "AUTH_PROV";
     
     timer_end (&ctx->ti);
     
@@ -262,6 +263,10 @@ int handle_external_token_unithost (req_context *ctx) {
                         retcode = 1;
                         ctx->userlevel = AUTH_ADMIN;
                     }
+                    else if (var_contains_str (roles, "PROVISIONING")) {
+                        retcode = 1;
+                        ctx->userlevel = AUTH_PROV;
+                    }
                 }
             }
         }
@@ -366,6 +371,14 @@ int flt_check_admin (req_context *ctx, req_arg *a, var *out, int *status) {
     return 0;
 }
 
+/** Filter that requires ADMIN or PROVISIONING role */
+int flt_check_prov (req_context *ctx, req_arg *a, var *out, int *status) {
+    if ((ctx->userlevel != AUTH_ADMIN) && (ctx->userlevel != AUTH_PROV)) {
+        return err_not_allowed (ctx, a, out, status);
+    }
+    return 0;
+}
+
 /** Filter that extracts the tenantid argumnt from the url, and croaks
   * when it is invalid.
   */
@@ -378,6 +391,7 @@ int flt_check_tenant (req_context *ctx, req_arg *a, var *out, int *status) {
     
     /* Admin user is ok now */
     if (ctx->userlevel == AUTH_ADMIN) return 0;
+    if (ctx->userlevel == AUTH_PROV) return 0;
     
     /* Other users need to match the tenant */
     for (int i=0; i<ctx->auth_tenantcount; ++i) {
