@@ -5,14 +5,12 @@ ServerView.create = function() {
     self.createView({
         data:{
         },
-        graph:{
-            cpu:[]
-        },
         tab:"Overview"
     });
     self.apires = {};
     self.id = null;
     self.tenantid = null;
+    self.graph = {};
 }
 
 ServerView.activate = function(argv) {
@@ -37,31 +35,49 @@ ServerView.refresh = function() {
     API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
         self.apires = res;
         self.View.data = self.apires;
-        if (self.View.graph.cpu.length == 0) {
-            var ngraphy = [];
-            var ngraphx = [];
-            var i = 0;
-            for (i=0; i<107; ++i) {
-                ngraphy.push (30 + Math.random() * 50);
-                ngraphx.push (10*i);
+        
+        self.refreshGraph ("cpu","usage");
+        self.refreshGraph ("link","rtt");
+    });
+}
+
+ServerView.refreshGraph = function(graph,datum) {
+    var self = ServerView;
+    API.Opticon.Host.getGraph (self.tenantid, self.id, graph, datum,
+                               86400, 1000, function (res) {
+        if (res) {
+            console.log ("getgraph:",res);
+            if (self.graph[graph] === undefined) {
+                self.graph[graph] = {};
             }
-            console.log (ngraphy);
-            const spline = new Spline (ngraphx, ngraphy);
-            var ngraph = [];
-            for (i=0; i<1060; ++i) {
-                ngraph.push (spline.at(i));
+            delete self.graph[graph][datum];
+
+            let numsamples = res.data.length;
+            if (numsamples < 2) return;
+            
+            let step = 1000 / (numsamples-1);
+            let xcoords = [];
+            let ycoords = [];
+            for (let i=0;i<numsamples;++i) {
+                xcoords.push (i * step);
+                ycoords.push (res.data[i]);
             }
-            self.View.graph.cpu = ngraph;
-            self.drawGraph ("cpu");
+
+            self.graph[graph][datum] = {
+                max: res.max,
+                data: new Spline (xcoords,ycoords)
+            }
+            self.drawGraph (graph, datum);
         }
     });
 }
 
-ServerView.drawGraph = function (graphid) {
+ServerView.drawGraph = function (graphid,datumid) {
     let self = ServerView;
-    let id = "graph-"+graphid;
+    let id = "graph-"+graphid+"-"+datumid;
     const canvas = document.getElementById (id);
     if (! canvas) return;
+    
     const ctx = canvas.getContext("2d");
     var gradient = ctx.createLinearGradient(0,0,0,200);
     gradient.addColorStop(0.00, '#305090c0');
@@ -73,19 +89,22 @@ ServerView.drawGraph = function (graphid) {
     ctx.transform(1,0,0,-1,0,canvas.height);
     
     let width = 1;
-    let arr = self.View.graph[graphid];
-    if (! arr) return;
+    if (self.graph[graphid] === undefined) return;
+    let obj = self.graph[graphid][datumid];
+    if (! obj) return;
+    if (! obj.max) obj.max = 1;
+
     ctx.clearRect(0,0,530,200);
     ctx.width = 1060;
     ctx.height = 400;
     ctx.scale (0.5,0.5);
     
-    for (let i=0; i<1060; ++i) {
+    for (let i=0; i<1000; ++i) {
         let x = i;
-        let y = (arr[i]*2);
+        let y = 200 * (obj.data.at(i)/obj.max);
         ctx.fillStyle = gradient;
         ctx.fillRect(x,0,1,2*y);
-        if (i<1059) {
+        if (i<999) {
             ctx.fillStyle = gradient2;
             ctx.fillRect(x+1,0,2,2*y);
         }
