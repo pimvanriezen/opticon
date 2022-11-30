@@ -11,6 +11,7 @@ ServerView.create = function() {
     self.id = null;
     self.tenantid = null;
     self.graph = {};
+    self.canvasbuilt = {};
 }
 
 ServerView.activate = function(argv) {
@@ -26,6 +27,8 @@ ServerView.activate = function(argv) {
             Module.backgroundInterval = 30000;
             Module.setBackground (self.refresh);
             self.refresh();
+            self.refreshGraph ("cpu","usage");
+            self.refreshGraph ("link","rtt");
         }
     });
 }
@@ -36,8 +39,6 @@ ServerView.refresh = function() {
         self.apires = res;
         self.View.data = self.apires;
         
-        self.refreshGraph ("cpu","usage");
-        self.refreshGraph ("link","rtt");
     });
 }
 
@@ -55,7 +56,7 @@ ServerView.refreshGraph = function(graph,datum) {
             let numsamples = res.data.length;
             if (numsamples < 2) return;
             
-            let step = 1000 / (numsamples-1);
+            let step = 1060 / (numsamples-1);
             let xcoords = [];
             let ycoords = [];
             for (let i=0;i<numsamples;++i) {
@@ -85,8 +86,13 @@ ServerView.drawGraph = function (graphid,datumid) {
     var gradient2 = ctx.createLinearGradient(0,0,0,200);
     gradient2.addColorStop(0.00, '#30509060');
     gradient2.addColorStop(1.00, '#50c0c060');
-    
-    ctx.transform(1,0,0,-1,0,canvas.height);
+
+    if (! self.canvasbuilt[id]) {    
+        ctx.transform(1,0,0,-1,0,canvas.height);
+        ctx.scale (0.5,0.5);
+        ctx.width = 1060;
+        ctx.height = 400;
+    }
     
     let width = 1;
     if (self.graph[graphid] === undefined) return;
@@ -94,21 +100,22 @@ ServerView.drawGraph = function (graphid,datumid) {
     if (! obj) return;
     if (! obj.max) obj.max = 1;
 
-    ctx.clearRect(0,0,530,200);
-    ctx.width = 1060;
-    ctx.height = 400;
-    ctx.scale (0.5,0.5);
+    ctx.clearRect(0,0,ctx.width, ctx.height);
     
-    for (let i=0; i<1000; ++i) {
+    
+    for (let i=0; i<1060; ++i) {
         let x = i;
         let y = 200 * (obj.data.at(i)/obj.max);
         ctx.fillStyle = gradient;
         ctx.fillRect(x,0,1,2*y);
-        if (i<999) {
+        if (i<1059) {
             ctx.fillStyle = gradient2;
             ctx.fillRect(x+1,0,2,2*y);
         }
     }
+    
+    ctx.scale (1,1);
+    self.canvasbuilt[id] = true;
 }
 
 ServerView.back = function() {
