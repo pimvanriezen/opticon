@@ -7,6 +7,8 @@
   </div>
 </form>
 
+<!-- OVERVIEW TAB -->
+
 <span v-if="tab=='Overview'">
 <div class="uEditPane"><div style="text-align:left;">
   <div class="uEditContainer">
@@ -246,49 +248,57 @@
   
 </div></div>
 </span>
+
+<!-- GRAPH TAB -->
+
 <span v-show="tab=='Graphs'">
-<div class="uEditPane"><div style="text-align:left;">
-  <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-performance.png">CPU</u-header>
-    <div class="uServerData table" v-static="keep">
-      <canvas id="graph-cpu-usage" width="530" height="200"
-              style="border:1px solid grey"></canvas>
+  <div class="uEditPane"><div style="text-align:left;">
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-performance.png">CPU</u-header>
+      <div class="uServerData table" v-static="keep">
+        <canvas id="graph-cpu-usage" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
     </div>
-  </div>
-  <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-rtt.png">RTT</u-header>
-    <div class="uServerData table">
-      <canvas id="graph-link-rtt" width="530" height="200"
-              style="border:1px solid grey"></canvas>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-rtt.png">RTT</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-link-rtt" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
     </div>
-  </div>
-  <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-netio.png">Network in</u-header>
-    <div class="uServerData table">
-      <canvas id="graph-net-input" width="530" height="200"
-              style="border:1px solid grey"></canvas>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-netio.png">Network in</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-net-input" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
     </div>
-  </div>
-  <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-netio.png">Network out</u-header>
-    <div class="uServerData table">
-      <canvas id="graph-net-output" width="530" height="200"
-              style="border:1px solid grey"></canvas>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-netio.png">Network out</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-net-output" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
     </div>
-  </div>
-  <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-disk.png">Disk i/o (read)</u-header>
-    <div class="uServerData table">
-      <canvas id="graph-io-read" width="530" height="200"
-              style="border:1px solid grey"></canvas>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-disk.png">Disk i/o (read)</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-io-read" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
     </div>
-  </div>
-  <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-disk.png">Disk i/o (write)</u-header>
-    <div class="uServerData table">
-      <canvas id="graph-io-write" width="530" height="200"
-              style="border:1px solid grey"></canvas>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-disk.png">Disk i/o (write)</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-io-write" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
     </div>
-  </div>
-</div></div>
+  </div></div>
+</span>
+
+<!-- LOG TAB -->
+
+<span v-if="tab=='Log'">
 </span>

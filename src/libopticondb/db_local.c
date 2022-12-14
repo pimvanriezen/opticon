@@ -1134,7 +1134,7 @@ var *localdb_get_log (db *d, uuid hostid) {
     hostloghandle *log = localdb_open_log (self, hostid);
     var *res = var_alloc();
     if (log && log->data) {
-        uint32_t rpos = (log->data->writepos-1) % 63;
+        uint32_t rpos = (log->data->writepos) ? (log->data->writepos-1) : 63;
         while (rpos != log->data->writepos) {        
             hostlogrecord *irec = &log->data->rec[rpos];
             if (irec->when) {
@@ -1143,7 +1143,7 @@ var *localdb_get_log (db *d, uuid hostid) {
                 var_set_str_forkey (orec, "subsystem", irec->subsystem);
                 var_set_str_forkey (orec, "message", irec->message);
             }
-            rpos = (rpos-1) % 63;
+            rpos = rpos ? (rpos-1) : 63;
         }
     }
     if (log) localdb_close_log (log);
