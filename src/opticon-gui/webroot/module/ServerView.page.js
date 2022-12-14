@@ -29,6 +29,10 @@ ServerView.activate = function(argv) {
             self.refresh();
             self.refreshGraph ("cpu","usage");
             self.refreshGraph ("link","rtt");
+            self.refreshGraph ("net","input");
+            self.refreshGraph ("net","output");
+            self.refreshGraph ("io","read");
+            self.refreshGraph ("io","write");
         }
     });
 }

@@ -256,9 +256,37 @@
     </div>
   </div>
   <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-memory.png">RTT</u-header>
+    <u-header icon="header-rtt.png">RTT</u-header>
     <div class="uServerData table">
       <canvas id="graph-link-rtt" width="530" height="200"
+              style="border:1px solid grey"></canvas>
+    </div>
+  </div>
+  <div class="uEditContainer" v-static="keep">
+    <u-header icon="header-netio.png">Network in</u-header>
+    <div class="uServerData table">
+      <canvas id="graph-net-input" width="530" height="200"
+              style="border:1px solid grey"></canvas>
+    </div>
+  </div>
+  <div class="uEditContainer" v-static="keep">
+    <u-header icon="header-netio.png">Network out</u-header>
+    <div class="uServerData table">
+      <canvas id="graph-net-output" width="530" height="200"
+              style="border:1px solid grey"></canvas>
+    </div>
+  </div>
+  <div class="uEditContainer" v-static="keep">
+    <u-header icon="header-disk.png">Disk i/o (read)</u-header>
+    <div class="uServerData table">
+      <canvas id="graph-io-read" width="530" height="200"
+              style="border:1px solid grey"></canvas>
+    </div>
+  </div>
+  <div class="uEditContainer" v-static="keep">
+    <u-header icon="header-disk.png">Disk i/o (write)</u-header>
+    <div class="uServerData table">
+      <canvas id="graph-io-write" width="530" height="200"
               style="border:1px solid grey"></canvas>
     </div>
   </div>
