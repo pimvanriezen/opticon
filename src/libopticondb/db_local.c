@@ -1135,6 +1135,7 @@ var *localdb_get_log (db *d, uuid hostid) {
     var *res = var_alloc();
     if (log && log->data) {
         uint32_t rpos = (log->data->writepos) ? (log->data->writepos-1) : 63;
+        if (rpos>63) rpos = 63;
         while (rpos != log->data->writepos) {        
             hostlogrecord *irec = &log->data->rec[rpos];
             if (irec->when) {

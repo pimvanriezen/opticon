@@ -301,4 +301,18 @@
 <!-- LOG TAB -->
 
 <span v-if="tab=='Log'">
+<div class="uSelectList uServerList" v-on:click="deSelect">
+  <div v-show="empty" class="uNoResults">
+    <center>No log entries.</center>
+  </div>
+  <span v-if="!empty">
+    <table cellspacing="0" border="0" class="tbserverlist" width="100%">
+      <tr height="32" v-for="entry in log">
+        <td width="200">{{translateTimestamp(entry.when)}}</td>
+        <td width="80">{{entry.subsystem}}</td>
+        <td width="*">{{entry.message}}</td>
+      </tr>
+    </table>
+  </span>
+</div>
 </span>

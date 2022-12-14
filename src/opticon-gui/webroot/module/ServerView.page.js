@@ -3,9 +3,11 @@ ServerView = new Module.Page("ServerView","/Server/%", 2);
 ServerView.create = function() {
     var self = ServerView;
     self.createView({
+        empty:true,
         data:{
         },
-        tab:"Overview"
+        tab:"Overview",
+        log:[]
     });
     self.apires = {};
     self.id = null;
@@ -42,7 +44,13 @@ ServerView.refresh = function() {
     API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
         self.apires = res;
         self.View.data = self.apires;
-        
+        API.Opticon.Host.getLog (self.tenantid, self.id, function (res) {
+            if (res) {
+                self.View.empty = false;
+                self.View.log = res.log;
+            }
+            else self.View.empty = true;
+        });
     });
 }
 
@@ -167,4 +175,9 @@ ServerView.devName = function (dev) {
 ServerView.devClass = function (dev) {
     if (dev[0] != '@') return "devtype-device";
     return "devtype-volume";
+}
+
+ServerView.translateTimestamp = function (ts) {
+    var dt = new Date(ts * 1000);
+    return dt.toLocaleString();
 }
