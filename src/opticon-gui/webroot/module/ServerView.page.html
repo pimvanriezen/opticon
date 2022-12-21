@@ -245,7 +245,7 @@
         </tr>
         <tr v-for="proc in data.top">
           <td width="5%">{{proc.pid}}</td>
-          <td width="15%">{{proc.user}}</td>
+          <td width="15%">{{translateUser(proc.user)}}</td>
           <td width="8%" align="right">{{parseFloat(proc.pcpu).toFixed(2)}}</td>
           <td width="8%" align="right">{{parseFloat(proc.pmem).toFixed(2)}}</td>
           <td width="2%">&nbsp;</td>

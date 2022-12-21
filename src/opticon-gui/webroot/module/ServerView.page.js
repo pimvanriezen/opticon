@@ -181,3 +181,11 @@ ServerView.translateTimestamp = function (ts) {
     var dt = new Date(ts * 1000);
     return dt.toLocaleString();
 }
+
+ServerView.translateUser = function (u) {
+  var lu = (""+u).toLowerCase();
+  if (/([a-f\d]{8}(-[a-f\d]{4}){3}-[a-f\d]{12}?)/.test(lu)) {
+    return lu.substring(0,12)+"...";
+  }
+  return lu;
+}
