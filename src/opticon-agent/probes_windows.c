@@ -613,6 +613,10 @@ var *runprobe_uptime(probe *self) {
     log_debug("probe_uptime: %" PRIu64, seconds);
     var_set_int_forkey(res, "uptime", seconds);
     
+    // Include agent uptime
+    time_t tnow = time(NULL);
+    var_set_int_forkey(res, "uptimea", (tnow - APP.starttime));
+    
     return res;
 }
 

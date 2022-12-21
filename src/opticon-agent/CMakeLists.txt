@@ -22,10 +22,10 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic")
 
-if(BUILD_MODE STREQUAL "production")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -flto")
-else()
+if(BUILD_MODE STREQUAL "dev")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+else()
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -flto")
 endif()
 unset(BUILD_MODE CACHE) # Prevent caching the cli options
 
