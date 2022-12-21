@@ -97,6 +97,7 @@ typedef struct appcontext_s {
     uuid             hostid;
     collectorlist    collectors;
     int              showversionflag;
+    time_t           starttime;
     struct win_s {
         const char      *servicecommand;
         const char      *updatecommand;
