@@ -21,7 +21,10 @@
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Status</td>
-          <td><span v-bind:class="statusClass(data.status)">{{data.status}}</span></td>
+          <td>
+            <span v-bind:class="statusClass(data.status)">{{data.status}}</span>
+            <span v-if="data.problems">{{data.problems.join(',')}}</span>
+          </td>
         </tr>
         <tr>
           <td colspan="2">&nbsp;</td>
