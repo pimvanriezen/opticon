@@ -4,6 +4,11 @@
 set buildMode=dev
 if NOT [%1]==[] (set buildMode=%1)
 
+set buildFileNameAddition=-%buildMode%
+if %buildMode% == production (
+	set buildFileNameAddition=
+)
+
 
 @rem set /p versionNumber=<version.txt
 
@@ -33,7 +38,7 @@ goto exit
 call :echoCommand candle opticon-agent.wxs -arch x64 -dbuildMode="%buildMode%" -dversionNumber="%versionNumber%" -ext WixUIExtension -ext WixUtilExtension -o ../../../build/opticon-agent/msi/opticon-agent.wixobj
 if %ERRORLEVEL% EQU 0 (
 	@rem -spdb suppresses the output of opticon-agent.wixpdb (it contains extra symbol information about the .msi, it may be useful to archive this file to build patch files)
-	call :echoCommand light ../../../build/opticon-agent/msi/opticon-agent.wixobj -spdb -ext WixUIExtension -ext WixUtilExtension -cultures:en-us -o ../../../bin/opticon-agent-%versionNumber%.msi
+	call :echoCommand light ../../../build/opticon-agent/msi/opticon-agent.wixobj -spdb -ext WixUIExtension -ext WixUtilExtension -cultures:en-us -o ../../../bin/opticon-agent-%versionNumber%%buildFileNameAddition%.msi
 )
 
 

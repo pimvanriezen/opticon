@@ -6,7 +6,7 @@ set buildMode=dev
 if NOT [%1]==[] (set buildMode=%1)
 
 
-call :echoCommand call build-msiCustomActionDll-gcc.bat
+call :echoCommand call build-msiCustomActionDll-gcc.bat %buildMode%
 if %ERRORLEVEL% EQU 0 (
 	call :echoCommand call build-msi-wix.bat %buildMode%
 )

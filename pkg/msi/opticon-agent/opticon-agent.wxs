@@ -91,10 +91,10 @@
 		<Property Id="PROP_TENANT_ID" Secure="yes" />
 		<Property Id="PROP_TENANT_KEY" Secure="yes" />
 		
-		<?if $(var.buildMode) = dev ?>
+		<?if $(var.buildMode) = dev or $(var.buildMode) = staging ?>
 			<Property Id="PROP_ADDRESS" Value="opticon.dev.newvm.net" Secure="yes" />
 			<Property Id="PROP_UPDATE_URL" Value="https://download.dev.newvm.net/windows/opticon/versions.json" Secure="yes" />
-		<?elseif $(var.buildMode) = production ?>
+		<?else ?>
 			<Property Id="PROP_ADDRESS" Value="opticon.newvm.com" Secure="yes" />
 			<Property Id="PROP_UPDATE_URL" Value="https://download.newvm.com/windows/opticon/versions.json" Secure="yes" />
 		<?endif?>
