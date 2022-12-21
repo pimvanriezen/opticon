@@ -80,7 +80,7 @@ int daemon_main (int argc, const char *argv[]) {
     probelist_start (&APP.probes);
     collectorlist_start (&APP.collectors);
     
-    time_t tlast = time (NULL);
+    time_t tlast = APP.starttime = time (NULL);
     time_t nextslow = tlast + 5;
     time_t nextsend = tlast + 10;
     time_t nextupdate = tlast + 10;

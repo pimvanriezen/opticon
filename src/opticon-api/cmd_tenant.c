@@ -213,6 +213,10 @@ int cmd_token (req_context *ctx, req_arg *a, var *env, int *status) {
         case AUTH_ADMIN:
             var_set_str_forkey (env_token, "userlevel", "AUTH_ADMIN");
             break;
+            
+        case AUTH_PROV:
+            var_set_str_forkey (env_token, "userlevel", "AUTH_PROV");
+            break;
     }
     *status = 200;
     return 1;
@@ -332,13 +336,14 @@ int cmd_tenant_update (req_context *ctx, req_arg *a, var *env, int *status) {
     const char *sname = var_get_str_forkey (vopts, "name");
     uint64_t iquota = var_get_int_forkey (vopts, "quota");
     
-   
-    if (sname && (ctx->userlevel != AUTH_ADMIN)) {
-        return err_not_allowed (ctx, a, env, status);
-    }
+    if ((ctx->userlevel != AUTH_ADMIN) && (ctx->userlevel != AUTH_PROV)) {
+        if (sname) {
+            return err_not_allowed (ctx, a, env, status);
+        }
     
-    if (iquota && (ctx->userlevel != AUTH_ADMIN)) {
-        return err_not_allowed (ctx, a, env, status);
+        if (iquota) {
+            return err_not_allowed (ctx, a, env, status);
+        }
     }
 
     var *outmeta = var_get_dict_forkey (env, "tenant");

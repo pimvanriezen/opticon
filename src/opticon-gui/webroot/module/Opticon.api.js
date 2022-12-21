@@ -59,9 +59,36 @@ API.Opticon.Host.getCurrent = function (tenant, host, cb) {
     });
 }
 
-API.Opticon.Host.getGraph = function (hostuuid, graph, datum,
-                                     timespan, width) {
-    //API.get ("opticon","/any/host/"+hostuuid+"");
+API.Opticon.Host.getLog = function (tenant, host, cb) {
+    if (tenant == "any") {
+        API.Opticon.Host.resolveTenant (host, function(t) {
+            if (t) {
+                API.Opticon.Host.getLog (t, host, cb);
+            }
+            else {
+                cb (null);
+            }
+        });
+        return;
+    }
+    
+    API.get ("opticon","/"+tenant+"/host/"+host+"/log", function (err, res) {
+        if (err) cb (null);
+        else cb (res);
+    });
+}
+
+API.Opticon.Host.getGraph = function (tenantid, hostuuid, graph, datum,
+                                     timespan, width, cb) {
+    var numsamples = Math.floor (timespan/300);
+    if (numsamples > 64) numsamples = 64;
+    
+    API.get ("opticon","/"+tenantid+"/host/"+hostuuid+
+             "/graph/"+graph+"/"+datum+"/"+Math.floor(timespan)+
+             "/"+numsamples, function (err, res) {
+        if (err) cb (null);
+        else cb (res);       
+    });
 }
 
 API.Opticon.Tenant = {}

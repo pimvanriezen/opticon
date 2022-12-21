@@ -726,6 +726,8 @@ var *runprobe_uptime (probe *self) {
         fclose (F);
         var_set_int_forkey (res, "uptime", strtoull (buf, NULL, 10));
     }
+    time_t tnow = time (NULL);
+    var_set_int_forkey (res, "uptimea", (tnow - APP.starttime));
     return res;
 }
 

@@ -20,6 +20,7 @@ typedef uint8_t req_method;
 typedef enum {
     AUTH_GUEST,
     AUTH_USER,
+    AUTH_PROV,
     AUTH_ADMIN
 } auth_level;
 

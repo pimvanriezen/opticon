@@ -453,6 +453,7 @@ var *runprobe_uptime (probe *self) {
     }
     time_t tnow = time (NULL);
     var_set_int_forkey (res, "uptime", tnow - boottime.tv_sec);
+    var_set_int_forkey (res, "uptimea", tnow - APP.starttime);
     return res;
 }
 

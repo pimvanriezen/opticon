@@ -181,8 +181,10 @@ int cmd_host_get_log (req_context *ctx, req_arg *a, var *env, int *status) {
     
     var *log = db_get_log (DB, ctx->hostid);
     var *env_log = var_get_array_forkey (env, "log");
-    var_copy (env_log, log);
-    var_free (log);
+    if (log) {
+        var_copy (env_log, log);
+        var_free (log);
+    }
     db_free (DB);
 
     *status = 200;

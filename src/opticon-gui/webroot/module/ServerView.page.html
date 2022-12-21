@@ -7,6 +7,8 @@
   </div>
 </form>
 
+<!-- OVERVIEW TAB -->
+
 <span v-if="tab=='Overview'">
 <div class="uEditPane"><div style="text-align:left;">
   <div class="uEditContainer">
@@ -19,7 +21,10 @@
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Status</td>
-          <td><span v-bind:class="statusClass(data.status)">{{data.status}}</span></td>
+          <td>
+            <span v-bind:class="statusClass(data.status)">{{data.status}}</span>
+            <span v-if="data.problems">{{data.problems.join(',')}}</span>
+          </td>
         </tr>
         <tr>
           <td colspan="2">&nbsp;</td>
@@ -36,6 +41,12 @@
           <td>
             {{data.os.kernel}} {{data.os.version}}
             <span class="unit">({{data.os.arch}})</span>
+          </td>
+        </tr>
+        <tr v-if="data.os.hw">
+          <td style="color:#888888;" width="22%">Platform</td>
+          <td>
+            {{data.os.hw}}
           </td>
         </tr>
         <tr>
@@ -213,7 +224,7 @@
         </tr>
         <tr v-for="ses in data.who">
           <td>{{ses.user}}</td>
-          <td width="10%" align="right">{{ses.tty}}</td>
+          <td width="20%" align="right">{{ses.tty}}</td>
           <td>{{ses.remote}}</td>
         </tr>
       </table>
@@ -234,7 +245,7 @@
         </tr>
         <tr v-for="proc in data.top">
           <td width="5%">{{proc.pid}}</td>
-          <td width="15%">{{proc.user}}</td>
+          <td width="15%">{{translateUser(proc.user)}}</td>
           <td width="8%" align="right">{{parseFloat(proc.pcpu).toFixed(2)}}</td>
           <td width="8%" align="right">{{parseFloat(proc.pmem).toFixed(2)}}</td>
           <td width="2%">&nbsp;</td>
@@ -246,21 +257,71 @@
   
 </div></div>
 </span>
+
+<!-- GRAPH TAB -->
+
 <span v-show="tab=='Graphs'">
-<div class="uEditPane"><div style="text-align:left;">
-  <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-performance.png">CPU</u-header>
-    <div class="uServerData table" v-static="keep">
-      <canvas id="graph-cpu" width="530" height="200"
-              style="border:1px solid grey"></canvas>
+  <div class="uEditPane"><div style="text-align:left;">
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-performance.png">CPU</u-header>
+      <div class="uServerData table" v-static="keep">
+        <canvas id="graph-cpu-usage" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
     </div>
-  </div>
-  <div class="uEditContainer" v-static="keep">
-    <u-header icon="header-memory.png">Memory</u-header>
-    <div class="uServerData table">
-      <canvas id="graph-ram" width="530" height="200"
-              style="border:1px solid grey"></canvas>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-rtt.png">RTT</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-link-rtt" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
     </div>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-netio.png">Network in</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-net-input" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
+    </div>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-netio.png">Network out</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-net-output" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
+    </div>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-disk.png">Disk i/o (read)</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-io-read" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
+    </div>
+    <div class="uEditContainer" v-static="keep">
+      <u-header icon="header-disk.png">Disk i/o (write)</u-header>
+      <div class="uServerData table">
+        <canvas id="graph-io-write" width="530" height="200"
+                style="border:1px solid grey"></canvas>
+      </div>
+    </div>
+  </div></div>
+</span>
+
+<!-- LOG TAB -->
+
+<span v-if="tab=='Log'">
+<div class="uSelectList uServerList" v-on:click="deSelect">
+  <div v-show="empty" class="uNoResults">
+    <center>No log entries.</center>
   </div>
-</div></div>
+  <span v-if="!empty">
+    <table cellspacing="0" border="0" class="tbserverlist" width="100%">
+      <tr height="32" v-for="entry in log">
+        <td width="200">{{translateTimestamp(entry.when)}}</td>
+        <td width="80">{{entry.subsystem}}</td>
+        <td width="*">{{entry.message}}</td>
+      </tr>
+    </table>
+  </span>
+</div>
 </span>

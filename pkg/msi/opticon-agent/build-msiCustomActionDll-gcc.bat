@@ -1,10 +1,19 @@
-@rem	-g ^
-@rem	-O2 -flto ^
+@echo off
+
+set buildMode=dev
+if NOT [%1]==[] (set buildMode=%1)
+
+set gccOptions=-O2 -flto
+if %buildMode% == dev (
+	set gccOptions=-g
+)
+
+@echo on
 
 mkdir "../../../build/opticon-agent/msi"
 
 gcc -std=c17 -Wall -Wextra -Wpedantic ^
-	-O2 -flto ^
+	%gccOptions% ^
 	-s -shared ^
 	^
 	-isystem ../../../lib/winlibc/additional/include ^

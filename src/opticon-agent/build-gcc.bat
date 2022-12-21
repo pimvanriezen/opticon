@@ -3,9 +3,9 @@
 set buildMode=dev
 if NOT [%1]==[] (set buildMode=%1)
 
-set gccOptions=-g
-if %buildMode% == production (
-	set gccOptions=-O2 -flto
+set gccOptions=-O2 -flto
+if %buildMode% == dev (
+	set gccOptions=-g
 )
 
 @echo on
