@@ -236,6 +236,7 @@ int handle_external_token_unithost (req_context *ctx) {
     if (ctx->auth_tenants) {
         free (ctx->auth_tenants);
         ctx->auth_tenants = NULL;
+        ctx->auth_tenantcount = 0;
     }
 
     if (res) {
