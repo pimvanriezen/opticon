@@ -7,6 +7,8 @@ exitfail() {
 # Make sure we're root
 [ $UID -eq 0 ] || exitfail Not root
 
+[ -e bin/opticon-agent ] || exitfail Binaries not built
+
 # Set up build dir
 VERSION=$(git describe --tags | cut -f1 -d' ' | cut -f1-2 -d-)
 
