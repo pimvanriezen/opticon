@@ -1,5 +1,5 @@
-const GRAPH_MARGIN_L = 200;
-const GRAPH_MARGIN_R = 20;
+const GRAPH_MARGIN_L = 150;
+const GRAPH_MARGIN_R = 50;
 const GRAPH_MARGIN_T = 20;
 const GRAPH_MARGIN_B = 60;
 
@@ -99,5 +99,58 @@ class Graph {
         ctx.strokeStyle = "black";
         ctx.rect (GRAPH_MARGIN_L-1, GRAPH_MARGIN_B-1, bwidth+1, bheight+1);
         ctx.stroke();
+    }
+    
+    mklabel(dt, display) {
+        if (display == "hm") {
+            return dt.getHours() + ":" +
+                   dt.getMinutes().toString().padStart(2, '0');
+        }
+        else {
+            return dt.getDate() + "-" +
+                   (1+dt.getMonth()).toString().padStart(2, '0');
+        }
+    }
+    
+    getxaxis() {
+        var matrix = [
+            {div:86400,display:"day"},
+            {div:21600,display:"hm"},
+            {div:10800,display:"hm"},
+            {div:3600,display:"hm"},
+            {div:300,display:"hm"}
+        ];
+        let ctx = this.ctx;
+        let bwidth = ctx.width - GRAPH_MARGIN_L - GRAPH_MARGIN_R;
+        let self = this;
+        let div=86400;
+        let display = "day";
+        let res = [];
+        for (let it of matrix) {
+            if ((self.graph.timespan / it.div) > 1) {
+                if ((self.graph.timespan / it.div) < 6) {
+                    let div = it.div;
+                    let display = it.display;
+                    
+                    let dt = new Date();
+                    let tnow = dt.getTime()/1000;
+                    let x = tnow - (tnow % div);
+                    while (x > (tnow - self.graph.timespan)) {
+                        let outd = new Date();
+                        outd.setTime (x*1000);
+                        let offs = bwidth * ((tnow-x)/self.graph.timespan);
+                        offs = bwidth - offs;
+                        res.push({
+                            offs: offs,
+                            label: self.mklabel (outd, display)
+                        });
+                        
+                        x = x - div;
+                    }
+                    break;
+                }
+            }
+        }
+        return res;
     }
 }
