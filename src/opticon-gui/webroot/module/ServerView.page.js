@@ -29,12 +29,12 @@ ServerView.activate = function(argv) {
             Module.backgroundInterval = 30000;
             Module.setBackground (self.refresh);
             self.refresh();
-            self.refreshGraph ("cpu","usage");
-            self.refreshGraph ("link","rtt");
-            self.refreshGraph ("net","input");
-            self.refreshGraph ("net","output");
-            self.refreshGraph ("io","read");
-            self.refreshGraph ("io","write");
+            self.refreshGraph ("cpu","usage","Usage %");
+            self.refreshGraph ("link","rtt","RTT ms");
+            self.refreshGraph ("net","input","Traffic Kb/s");
+            self.refreshGraph ("net","output","Traffic Kb/s");
+            self.refreshGraph ("io","read","ops/s");
+            self.refreshGraph ("io","write","ops/s");
         }
     });
 }
@@ -54,7 +54,7 @@ ServerView.refresh = function() {
     });
 }
 
-ServerView.refreshGraph = function(graph,datum) {
+ServerView.refreshGraph = function(graph,datum,unit) {
     var self = ServerView;
     API.Opticon.Host.getGraph (self.tenantid, self.id, graph, datum,
                                86400, 1000, function (res) {
@@ -71,7 +71,7 @@ ServerView.refreshGraph = function(graph,datum) {
                 self.graph[graph][datum].initialize();
             }
 
-            self.graph[graph][datum].set (res.data, res.max, 86400, "");
+            self.graph[graph][datum].set (res.data, res.max, 86400, unit);
             self.graph[graph][datum].drawGraph();
         }
     });

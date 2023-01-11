@@ -1,6 +1,6 @@
 const GRAPH_MARGIN_L = 150;
 const GRAPH_MARGIN_R = 50;
-const GRAPH_MARGIN_T = 20;
+const GRAPH_MARGIN_T = 30;
 const GRAPH_MARGIN_B = 60;
 
 class Graph {
@@ -65,7 +65,10 @@ class Graph {
         let ctx = this.ctx;
         let max = this.graph.max;
         let gr = this.gradients;
+        let unit = this.graph.unit;
         let self = this;
+
+        ctx.clearRect (0, 0, ctx.width, ctx.height);
         
         let bwidth = ctx.width - GRAPH_MARGIN_L - GRAPH_MARGIN_R;
         let bheight = ctx.height - GRAPH_MARGIN_T - GRAPH_MARGIN_B;
@@ -99,6 +102,53 @@ class Graph {
         ctx.strokeStyle = "black";
         ctx.rect (GRAPH_MARGIN_L-1, GRAPH_MARGIN_B-1, bwidth+1, bheight+1);
         ctx.stroke();
+        
+        ctx.font = "24px helvetica";
+
+        var xdat = self.getxaxis();
+        for (let datum of xdat) {
+            let measure = ctx.measureText (datum.label);
+            let w = measure.width;
+            let offs = datum.offs + GRAPH_MARGIN_L - (w/2);
+
+            ctx.transform (1, 0, 0, -1, 0, ctx.height);
+            ctx.fillStyle = "#282828";
+            ctx.fillText (datum.label, offs, ctx.height - 24);
+            ctx.transform (1, 0, 0, -1, 0, ctx.height);
+            
+            ctx.beginPath();
+            ctx.moveTo (GRAPH_MARGIN_L + datum.offs, GRAPH_MARGIN_B);
+            ctx.lineTo (GRAPH_MARGIN_L + datum.offs, ctx.height - GRAPH_MARGIN_T);
+            ctx.strokeStyle = "#ffffff50";
+            ctx.stroke();
+        }
+
+        let ydat = self.getyaxis();
+        for (let datum of ydat) {
+            let measure = ctx.measureText (datum.label);
+            let w = measure.width;
+            
+            ctx.transform (1, 0, 0, -1, 0, ctx.height);
+            ctx.fillStyle = "#282828";
+            ctx.fillText (datum.label, GRAPH_MARGIN_L - (w + 20), datum.offs+8);
+            ctx.transform (1, 0, 0, -1, 0, ctx.height);
+
+            let offs = (ctx.height-GRAPH_MARGIN_B) - datum.offs;
+
+            ctx.beginPath();
+            ctx.moveTo (GRAPH_MARGIN_L, GRAPH_MARGIN_B+offs);
+            ctx.lineTo (ctx.width - GRAPH_MARGIN_R, GRAPH_MARGIN_B+offs);
+            ctx.strokeStyle = "#ffffff50";
+            ctx.stroke();
+        }
+        
+        let unitmsr = ctx.measureText (unit);
+        ctx.save();
+        ctx.transform (1, 0, 0, -1, 0, ctx.height);
+        ctx.translate (30, (ctx.height + unitmsr.width)/2);
+        ctx.rotate (-Math.PI/2);
+        ctx.fillText (unit, 0, 0);
+        ctx.restore();
     }
     
     mklabel(dt, display) {
@@ -149,6 +199,56 @@ class Graph {
                     }
                     break;
                 }
+            }
+        }
+        return res;
+    }
+    
+    getyaxis() {
+        var matrix = [
+            {div:1000000000,display:"G"},
+            {div:100000000,display:"M"},
+            {div:10000000,display:"M"},
+            {div:1000000,display:"M"},
+            {div:100000,display:"K"},
+            {div:10000,display:"K"},
+            {div:1000,display:""},
+            {div:100,display:""},
+            {div:10,display:""},
+            {div:5,display:""},
+            {div:1, display:""},
+            {div:0.5, display:""},
+            {div:0.1, display:""},
+            {div:0.05, display:""}
+        ];
+        let ctx = this.ctx;
+        let bwidth = ctx.width - GRAPH_MARGIN_L - GRAPH_MARGIN_R;
+        let bheight = ctx.height - GRAPH_MARGIN_T - GRAPH_MARGIN_B;
+        let bottomy = GRAPH_MARGIN_T + bheight;
+        let self = this;
+        let div=1000000000;
+        let display = "G";
+        let res = [];
+        for (let it of matrix) {
+            //console.log ("max: "+self.graph.max+" div: "+it.div+" count:"+(self.graph.max/it.div));
+            if ((self.graph.max / it.div) > 4) {
+                if ((self.graph.max / it.div) > 14) {
+                    it.div = it.div * 2;
+                }
+                //console.log ("match");
+                let div = it.div;
+                let display = it.display;
+                let y = 0;
+                
+                while (y <= self.graph.max) {
+                    res.push ({
+                        offs: bottomy - (bheight * (y / self.graph.max)),
+                        label: y.toFixed (1)
+                    });
+                    
+                    y = y + (2*div);
+                }
+                break;
             }
         }
         return res;
