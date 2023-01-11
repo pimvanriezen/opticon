@@ -77,51 +77,6 @@ ServerView.refreshGraph = function(graph,datum) {
     });
 }
 
-ServerView.drawGraph = function (graphid,datumid) {
-    let self = ServerView;
-    let id = "graph-"+graphid+"-"+datumid;
-    const canvas = document.getElementById (id);
-    if (! canvas) return;
-    
-    const ctx = canvas.getContext("2d");
-    var gradient = ctx.createLinearGradient(0,0,0,200);
-    gradient.addColorStop(0.00, '#305090c0');
-    gradient.addColorStop(1.00, '#50c0c0c0');
-    var gradient2 = ctx.createLinearGradient(0,0,0,200);
-    gradient2.addColorStop(0.00, '#30509060');
-    gradient2.addColorStop(1.00, '#50c0c060');
-
-    if (! self.canvasbuilt[id]) {    
-        ctx.transform(1,0,0,-1,0,canvas.height);
-        ctx.scale (0.5,0.5);
-        ctx.width = 1060;
-        ctx.height = 400;
-    }
-    
-    let width = 1;
-    if (self.graph[graphid] === undefined) return;
-    let obj = self.graph[graphid][datumid];
-    if (! obj) return;
-    if (! obj.max) obj.max = 1;
-
-    ctx.clearRect(0,0,ctx.width, ctx.height);
-    
-    
-    for (let i=0; i<1060; ++i) {
-        let x = i;
-        let y = 200 * (obj.data.at(i)/obj.max);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(x,0,1,2*y);
-        if (i<1059) {
-            ctx.fillStyle = gradient2;
-            ctx.fillRect(x+1,0,2,2*y);
-        }
-    }
-    
-    ctx.scale (1,1);
-    self.canvasbuilt[id] = true;
-}
-
 ServerView.back = function() {
     var self = ServerView;
     self.hide();
