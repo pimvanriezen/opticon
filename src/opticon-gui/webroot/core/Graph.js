@@ -15,19 +15,24 @@ class Graph {
         if (this.initialized) return;
         var ctx = this.target.getContext("2d");
         this.ctx = ctx;
-        var fg = ctx.createLinearGradient(0,0,0,200);
+        var fg = ctx.createLinearGradient(0,0,0,this.height);
         fg.addColorStop (0.00, '#305090c0');
         fg.addColorStop (1.00, '#50c0c0c0');
-        var bg = ctx.createLinearGradient(0,0,0,200);
+        var bg = ctx.createLinearGradient(0,0,0,this.height);
         bg.addColorStop (0.00, '#30509060');
         bg.addColorStop (1.00, '#50c0c060');
+        var fil = ctx.createLinearGradient(0,0,0,this.height);
+        fil.addColorStop (0.00, '#585858ff');
+        fil.addColorStop (1.00, '#383838ff');
         
-        this.gradients = { fg: fg, bg: bg };
+        this.gradients = { fg: fg, bg: bg, fil: fil };
         ctx.width = this.width * 2;
         ctx.height = this.height * 2;
         ctx.transform (1, 0, 0, -1, 0, this.target.height);
         ctx.scale (0.5, 0.5);
         ctx.clearRect (0, 0, ctx.width, ctx.height);
+        
+        this.initialized = true;
     }
     
     set(data, max, timespan, unit) {
@@ -49,7 +54,8 @@ class Graph {
             max: max,
             timespan: timespan,
             unit: unit,
-            data: new Spline (xcoords, ycoords);
+            data: new Spline (xcoords, ycoords),
+            in: data
         }
     }
     
@@ -57,22 +63,29 @@ class Graph {
         if (! this.initialized) return;
         if (! this.graph) return;
         let ctx = this.ctx;
-        let data = this.graph.data;
+        let max = this.graph.max;
         let gr = this.gradients;
+        let self = this;
         
         let bwidth = ctx.width - GRAPH_MARGIN_L - GRAPH_MARGIN_R;
         let bheight = ctx.height - GRAPH_MARGIN_T - GRAPH_MARGIN_B;
         
-        ctx.clearRect (GRAPH_MARGIN_L, GRAPH_MARGIN_B, bwidth, bheight);
         ctx.beginPath();
-        ctx.lineWidth = "1";
+        ctx.lineWidth = "2";
         ctx.strokeStyle = "black";
         ctx.rect (GRAPH_MARGIN_L-1, GRAPH_MARGIN_B-1, bwidth+1, bheight+1);
         ctx.stroke();
+
+        ctx.fillStyle = gr.fil;
+        ctx.fillRect (GRAPH_MARGIN_L, GRAPH_MARGIN_B, bwidth, bheight);
         
         for (let i=0; i < bwidth; ++i) {
+            let index = (1000/bwidth) * i;
             let x = GRAPH_MARGIN_L + i;
-            let y = bheight * (data.at(i) / obj.max);
+            let y = (bheight-1) * (self.graph.data.at(index) / max);
+            if (y<0) y=0;
+            if (y>bheight) y = bheight;
+
             ctx.fillStyle = gr.fg;
             ctx.fillRect(x, GRAPH_MARGIN_B, 1, y);
             if (i < (bwidth-1)) {
@@ -80,5 +93,11 @@ class Graph {
                 ctx.fillRect (x+1, GRAPH_MARGIN_B, 1, y);
             }
         }
+
+        ctx.beginPath();
+        ctx.lineWidth = "2";
+        ctx.strokeStyle = "black";
+        ctx.rect (GRAPH_MARGIN_L-1, GRAPH_MARGIN_B-1, bwidth+1, bheight+1);
+        ctx.stroke();
     }
 }

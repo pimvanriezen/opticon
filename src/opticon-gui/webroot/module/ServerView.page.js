@@ -63,24 +63,16 @@ ServerView.refreshGraph = function(graph,datum) {
             if (self.graph[graph] === undefined) {
                 self.graph[graph] = {};
             }
-            delete self.graph[graph][datum];
-
-            let numsamples = res.data.length;
-            if (numsamples < 2) return;
-            
-            let step = 1060 / (numsamples-1);
-            let xcoords = [];
-            let ycoords = [];
-            for (let i=0;i<numsamples;++i) {
-                xcoords.push (i * step);
-                ycoords.push (res.data[i]);
+            if (self.graph[graph][datum] === undefined) {
+                let id = "graph-"+graph+"-"+datum;
+                const canvas = document.getElementById (id);
+                if (! canvas) return;
+                self.graph[graph][datum] = new Graph (canvas, 530, 200);
+                self.graph[graph][datum].initialize();
             }
 
-            self.graph[graph][datum] = {
-                max: res.max,
-                data: new Spline (xcoords,ycoords)
-            }
-            self.drawGraph (graph, datum);
+            self.graph[graph][datum].set (res.data, res.max, 86400, "");
+            self.graph[graph][datum].drawGraph();
         }
     });
 }
