@@ -29,12 +29,12 @@ ServerView.activate = function(argv) {
             Module.backgroundInterval = 30000;
             Module.setBackground (self.refresh);
             self.refresh();
-            self.refreshGraph ("cpu","usage","Usage %");
-            self.refreshGraph ("link","rtt","RTT ms");
-            self.refreshGraph ("net","input","Traffic Kb/s");
-            self.refreshGraph ("net","output","Traffic Kb/s");
-            self.refreshGraph ("io","read","ops/s");
-            self.refreshGraph ("io","write","ops/s");
+            self.refreshGraph ("cpu","usage","Usage","%");
+            self.refreshGraph ("link","rtt","RTT","ms");
+            self.refreshGraph ("net","input","Traffic","Kb/s");
+            self.refreshGraph ("net","output","Traffic","Kb/s");
+            self.refreshGraph ("io","read","i/o","ops/s");
+            self.refreshGraph ("io","write","i/o","ops/s");
         }
     });
 }
@@ -54,7 +54,7 @@ ServerView.refresh = function() {
     });
 }
 
-ServerView.refreshGraph = function(graph,datum,unit) {
+ServerView.refreshGraph = function(graph,datum,title,unit) {
     var self = ServerView;
     API.Opticon.Host.getGraph (self.tenantid, self.id, graph, datum,
                                86400, 1000, function (res) {
@@ -67,7 +67,7 @@ ServerView.refreshGraph = function(graph,datum,unit) {
                 let id = "graph-"+graph+"-"+datum;
                 const canvas = document.getElementById (id);
                 if (! canvas) return;
-                self.graph[graph][datum] = new Graph (canvas, 530, 200);
+                self.graph[graph][datum] = new Graph (canvas, title, 530, 200);
                 self.graph[graph][datum].initialize();
             }
 

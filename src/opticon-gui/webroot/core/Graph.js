@@ -4,8 +4,9 @@ const GRAPH_MARGIN_T = 30;
 const GRAPH_MARGIN_B = 60;
 
 class Graph {
-    constructor (target, width, height) {
+    constructor (target, title, width, height) {
         this.target = target;
+        this.title = title;
         this.width = width;
         this.height = height;
         this.initialized = false;
@@ -142,12 +143,22 @@ class Graph {
             ctx.stroke();
         }
         
-        let unitmsr = ctx.measureText (unit);
+        if (unit[0] == 'K') {
+            if (self.outunit == 'K') self.outunit = 'M';
+            else if (self.outunit == 'M') self.outunit = 'G';
+            else if (self.outunit == 'G') self.outunit = 'T';
+            else self.outunit = 'K';
+            unit = self.outunit + unit.substring(1);
+        }
+        else unit = self.outunit + unit;
+        let labelstr = self.title + " " + unit;
+        
+        let unitmsr = ctx.measureText (labelstr);
         ctx.save();
         ctx.transform (1, 0, 0, -1, 0, ctx.height);
         ctx.translate (30, (ctx.height + unitmsr.width)/2);
         ctx.rotate (-Math.PI/2);
-        ctx.fillText (unit, 0, 0);
+        ctx.fillText (labelstr, 0, 0);
         ctx.restore();
     }
     
@@ -206,13 +217,13 @@ class Graph {
     
     getyaxis() {
         var matrix = [
-            {div:1000000000,display:"G"},
-            {div:100000000,display:"M"},
-            {div:10000000,display:"M"},
-            {div:1000000,display:"M"},
-            {div:100000,display:"K"},
-            {div:10000,display:"K"},
-            {div:1000,display:""},
+            {div:1000000000,display:"G",scale:1000000000},
+            {div:100000000,display:"M",scale:1000000},
+            {div:10000000,display:"M",scale:1000000},
+            {div:1000000,display:"M",scale:1000000},
+            {div:100000,display:"K",scale:1000},
+            {div:10000,display:"K",scale:1000},
+            {div:1000,display:"K",scale:1000},
             {div:100,display:""},
             {div:10,display:""},
             {div:5,display:""},
@@ -240,10 +251,15 @@ class Graph {
                 let display = it.display;
                 let y = 0;
                 
+                self.outunit = display;
+                
                 while (y <= self.graph.max) {
+                    let yy = y;
+                    if (it.scale) yy = y / it.scale;
+
                     res.push ({
                         offs: bottomy - (bheight * (y / self.graph.max)),
-                        label: y.toFixed (1)
+                        label: yy.toFixed (1)
                     });
                     
                     y = y + (2*div);
