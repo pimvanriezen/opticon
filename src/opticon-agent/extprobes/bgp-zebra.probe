@@ -2,12 +2,12 @@
 echo '"bgp":['
 opticon-helper vtysh -c 'show ip bgp summary' | \
           grep --after-context=999 ^Neighbor | \
-          grep '^[0-9]' | while read n ps as mr ms tv iq oq ud pr; do
+          grep '^[0-9]' | while read n v as mr ms tv iq oq ud pr; do
 cat << _EOF_
   {
     peer: "$n"
-    sent: $ps
-    recv: $pr
+    sent: $ms
+    recv: $mr
     up: "$ud"
     as: $as
   }
