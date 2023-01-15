@@ -127,7 +127,7 @@ ServerList.deSelect = function () {
 // translateUnit (4096 "M", "B") -> 4.00 GB
 // --------------------------------------------------------------------------
 ServerList.translateUnit = function (val, base, unit) {
-    while ((base != "G") && (val > 2047)) {
+    while ((base != "G") && (val >= 1000)) {
         val = val / 1024.0;
         switch (base) {
             case "":
