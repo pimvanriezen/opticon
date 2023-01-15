@@ -63,6 +63,9 @@ void collectorlist_add_host (collectorlist *self, var *data) {
             APP.hostid = hostid;
         }
     }
+    else {
+        c->auth.hostid = APP.hostid;
+    }
     c->port = var_get_int_forkey (data, "port");
     c->transport = outtransport_create_udp();
 }
