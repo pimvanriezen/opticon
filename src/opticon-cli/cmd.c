@@ -714,10 +714,10 @@ int cmd_get_record (int argc, const char *argv[]) {
         char uptimeastr[128];
         uptimeastr[0] = 0;
         uint64_t uptimea = Vint("uptimea"); Vdone("uptimea");
-        uint64_t ua_days = uptime / 86400ULL;
-        uint64_t ua_hours = (uptime - (86400 * u_days)) / 3600ULL;
-        uint64_t ua_mins = (uptime - (86400 * u_days) - (3600 * u_hours)) / 60ULL;
-        uint64_t ua_sec = uptime % 60;
+        uint64_t ua_days = uptimea / 86400ULL;
+        uint64_t ua_hours = (uptimea - (86400 * ua_days)) / 3600ULL;
+        uint64_t ua_mins = (uptimea - (86400 * ua_days) - (3600 * ua_hours)) / 60ULL;
+        uint64_t ua_sec = uptimea % 60;
         
         if (uptimea) {
             if (ua_days) {
