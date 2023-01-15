@@ -710,7 +710,37 @@ int cmd_get_record (int argc, const char *argv[]) {
                      u_mins, (u_mins==1)?"":"s", u_sec, (u_sec==1)?"":"s");
         }
     
-        print_value ("Uptime",VT_GRN "%s" VT_RST,uptimestr);
+
+        char uptimeastr[128];
+        uptimeastr[0] = 0;
+        uint64_t uptimea = Vint("uptimea"); Vdone("uptimea");
+        uint64_t ua_days = uptime / 86400ULL;
+        uint64_t ua_hours = (uptime - (86400 * u_days)) / 3600ULL;
+        uint64_t ua_mins = (uptime - (86400 * u_days) - (3600 * u_hours)) / 60ULL;
+        uint64_t ua_sec = uptime % 60;
+        
+        if (uptimea) {
+            if (ua_days) {
+                sprintf (uptimeastr, "%" PRIu64 " day%s, %" PRIu64 ":%02" PRIu64
+                         ":%02" PRIu64 "", ua_days, (ua_days==1)?"":"s",
+                         ua_hours, ua_mins, ua_sec);
+            }
+            else if (ua_hours) {
+                sprintf (uptimeastr, "%" PRIu64 ":%02" PRIu64 ":%02"
+                         PRIu64, ua_hours, ua_mins, ua_sec);
+            }
+            else {
+                sprintf (uptimeastr, "%" PRIu64 " minute%s, %" PRIu64 
+                                     " second%s", ua_mins, (u_mins==1)?"":"s", 
+                                     ua_sec, (ua_sec==1)?"":"s");
+            }
+            
+            print_value ("Uptime",VT_GRN "%s" VT_RST " (Agent: %s)",
+                                  uptimestr, uptimeastr);
+        }
+        else {
+            print_value ("Uptime",VT_GRN "%s" VT_RST,uptimestr);
+        }
 
         const char *hw = VDstr("os","hw");
         if (hw) print_value ("Hardware", "%s", hw);

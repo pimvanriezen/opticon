@@ -65,6 +65,11 @@
         description: "Uptime"
         unit: s
     }
+    uptimea {
+        type: integer
+        description: "Agent Uptime"
+        unit: s
+    }
     top {
         type: table
         description: "Process List"
@@ -267,5 +272,68 @@
     version {
         type: string
         description: "Agent Version"
+    }
+    vm {
+        type: table
+        description: "Virtual Machines"
+    }
+    vm/name {
+        type: string
+        description: "Machine Name"
+    }
+    vm/cores {
+        type: string
+        description: "CPU Cores"
+    }
+    vm/ram {
+        type: string
+        description: "RAM"
+        unit: MB
+    }
+    vm/cpu {
+        type: frac
+        description: "CPU Usage"
+        unit: "%"
+    }
+    bgp {
+        type: table
+        description: "BGP Peers"
+    }
+    bgp/peer {
+        type: string
+        description: "Peer Address"
+    }
+    bgp/as {
+        type: string
+        description: "Remote AS"
+    }
+    bgp/sent {
+        type: integer
+        description: "Msg Sent"
+    }
+    bgp/recv {
+        type: integer
+        description: "Msg Received"
+    }
+    bgp/up {
+        type: string
+        description: "Uptime"
+    }
+    phdns/sz {
+        type: integer
+        description: "DNS block table size"
+    }
+    phdns/qnow {
+        type: integer
+        description: "Queries today"
+    }
+    phdns/bnow {
+        type: integer
+        description: "Queries blocked today"
+    }
+    phdns/pblk {
+        type: frac
+        description: "Blocked"
+        unit: "%"
     }
 }
