@@ -1,0 +1,3 @@
+#!/bin/sh
+printf "phdns:"
+/usr/local/bin/pihole -c -j -e | sed -e 's/domains_being_blocked/sz/;s/dns_queries_today/qnow/;s/ads_blocked_today/bnow/;s/ads_percentage_today/pblk/'

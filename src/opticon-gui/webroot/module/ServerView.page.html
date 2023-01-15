@@ -37,6 +37,12 @@
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
+         <td style="color:#888888;" width="22%">Uptime</td>
+         <td>
+           {{translateUptime(data.uptime)}}
+         </td>
+       </tr>
+       <tr>
           <td style="color:#888888;" width="22%">Kernel</td>
           <td>
             {{data.os.kernel}} {{data.os.version}}
@@ -157,6 +163,41 @@
             <meter max="100" value="{{dsk.pused}}"></meter>
           </td>
           <td>{{dsk.mount}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div v-if="data.phdns && data.phdns.pblk" class="uEditContainer">
+    <u-header icon="header-pihole.png">Pi-Hole DNS</u-header>
+    <div class="uServerData">
+      <table width="100%">
+        <tr>
+          <td rowspan="4" width="70"><center>
+            <img src="icon/pihole.svg" width="50">
+          </td>
+          <td style="color:#888888;" width="35%">Blocked domains</td>
+          <td align="right">
+            {{data.phdns.sz}}
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;">Queries answered today</td>
+          <td align="right">
+            {{data.phdns.qnow}}
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;">Queries blocked today</td>
+          <td align="right">
+            {{data.phdns.bnow}}
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;">Blocked</td>
+          <td align="right">
+            <b>{{parseFloat(data.phdns.pblk).toFixed(2)}} %</b>
+          </td>
         </tr>
       </table>
     </div>

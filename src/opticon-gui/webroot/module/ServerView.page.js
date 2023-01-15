@@ -136,3 +136,35 @@ ServerView.translateUser = function (u) {
   }
   return lu;
 }
+
+ServerView.translateUptime = function (u) {
+    let uptime = parseInt (u);
+    let u_days = Math.floor (uptime / 86400);
+    let u_hours = Math.floor ((uptime - (86400 * u_days)) / 3600);
+    let u_mins = Math.floor (
+        (uptime - (86400 * u_days) - (3600 * u_hours)) / 60);
+    let u_sec = uptime % 60;
+    let res = "Unknown";
+    
+    if (u_days) {
+        res = "" + u_days + " day";
+        if (u_days != 1) res += "s";
+        res += ", ";
+        res += ("" + u_hours).padStart(2, '0');
+        res += ":";
+        res += ("" + u_mins).padStart(2, '0');
+    }
+    else if (u_hours) {
+        res = "" + u_hours + " hour";
+        if (u_hours != 1) res += "s";
+        res += ", " + u_minute + " minute";
+        if (u_minute != 1) res += "s";
+    }
+    else {
+        res = "" + u_minutes + " minute";
+        if (u_minute != 1) res += "s";
+        res += ", " + u_sec + " second";
+        if (u_sec != 1) res += "s";
+    }
+    return res;
+}
