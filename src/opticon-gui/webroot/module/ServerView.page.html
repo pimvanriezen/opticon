@@ -59,6 +59,9 @@
           <td style="color:#888888;" width="22%" valign="top">Distribution</td>
           <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
         </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
         <tr v-if="data.version">
           <td style="color:#888888;" width="22%">Agent Version</td>
           <td>
@@ -143,31 +146,6 @@
     </div>
   </div>
   
-  <div v-if="data.df && data.df.length" class="uEditContainer">
-    <u-header icon="header-disk.png">Disk Usage</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Device</th>
-          <th align="left">FS</th>
-          <th align="right">Size</th>
-          <th align="center">Usage</th>
-          <th align="left">Mount</th>
-        </tr>
-        <tr v-for="dsk in data.df">
-          <td width="20%" style="color:#555555;white-space: nowrap;"
-              v-bind:class="devClass(dsk.device)">{{devName(dsk.device)}}</td>
-          <td width="5%">{{dsk.fs}}</td>
-          <td align="right" width="20%">{{ktoh(dsk.size*1024).size}} <span class="unit">{{ktoh(dsk.size*1024).unit}}</span></td>
-          <td align="center" width="20%">
-            <meter max="100" value="{{dsk.pused}}"></meter>
-          </td>
-          <td>{{dsk.mount}}</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
   <div v-if="data.phdns && data.phdns.pblk" class="uEditContainer">
     <u-header icon="header-pihole.png">Pi-Hole DNS</u-header>
     <div class="uServerData">
@@ -198,6 +176,31 @@
           <td align="right">
             <b>{{parseFloat(data.phdns.pblk).toFixed(2)}} %</b>
           </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div v-if="data.df && data.df.length" class="uEditContainer">
+    <u-header icon="header-disk.png">Disk Usage</u-header>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Device</th>
+          <th align="left">FS</th>
+          <th align="right">Size</th>
+          <th align="center">Usage</th>
+          <th align="left">Mount</th>
+        </tr>
+        <tr v-for="dsk in data.df">
+          <td width="20%" style="color:#555555;white-space: nowrap;"
+              v-bind:class="devClass(dsk.device)">{{devName(dsk.device)}}</td>
+          <td width="5%">{{dsk.fs}}</td>
+          <td align="right" width="20%">{{ktoh(dsk.size*1024).size}} <span class="unit">{{ktoh(dsk.size*1024).unit}}</span></td>
+          <td align="center" width="20%">
+            <meter max="100" value="{{dsk.pused}}"></meter>
+          </td>
+          <td>{{dsk.mount}}</td>
         </tr>
       </table>
     </div>
