@@ -205,6 +205,28 @@
       </table>
     </div>
   </div>
+  
+  <div v-if="data.bgp && data.bgp.length" class="uEditContainer">
+    <u-header icon="header-bgp.png">BGP Peers</u-header>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Peer Address</th>
+          <th align="left">Remote AS</th>
+          <th align="left">Uptime</th>
+          <th align="right">Messages Sent</th>
+          <th align="right">Received</th>
+        </tr>
+        <tr v-for="obj in data.bgp">
+          <td>{{obj.peer}}</td>
+          <td>AS{{obj.as}}</td>
+          <td>{{obj.up}}</td>
+          <td align="right">{{obj.sent}}</td>
+          <td align="right">{{obj.recv}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
 
   <div v-if="data.vm && data.vm.length" class="uEditContainer">
     <u-header icon="header-vm.png">Virtual Machines</u-header>
