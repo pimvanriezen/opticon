@@ -5,7 +5,7 @@ release=$(echo "$versionstr" | cut -f2 -d-)
 
 if [ "$release" = "$version" ]; then
   release="0"
-  verionstr="${versionstr}-0"
+  versionstr="${versionstr}-0"
 fi
 
 mkdir -p pkg/tmp
