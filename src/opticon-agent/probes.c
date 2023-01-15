@@ -125,7 +125,7 @@ var *runprobe_uname (probe *self) {
                     buf[strlen(buf)-1] = 0;
                     char *c = buf+9;
                     while (isspace (*c)) c++;
-                    strncpy (pname, buf, 31);
+                    strncpy (pname, c, 31);
                     pname[31] = 0;
                     sprintf (platform, "Ubiquiti %s", pname);
                     var_set_str_forkey (v_os, "hw", platform);
