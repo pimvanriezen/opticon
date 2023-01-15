@@ -85,7 +85,17 @@ var *runprobe_uname (probe *self) {
     }
     
     if (*vendor && *pname) {
-        sprintf (platform, "%s %s", vendor, pname);
+        if (strcmp (vendor, "To be filled by O.E.M.") == 0) {
+            sprintf (platform, "Prototype board");
+        }
+        else {
+            if (strcmp (vendor, pname) == 0) {
+                sprintf (platform, "%s", vendor);
+            }
+            else {
+                sprintf (platform, "%s %s", vendor, pname);
+            }
+        }
         var_set_str_forkey (v_os, "hw", platform);
         return res;
     }
