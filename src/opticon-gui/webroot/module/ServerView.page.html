@@ -36,12 +36,6 @@
         <tr v-if="meta.name">
           <td colspan="2">&nbsp;</td>
         </tr>
-        <tr>
-         <td style="color:#888888;" width="22%">Uptime</td>
-         <td>
-           {{translateUptime(data.uptime)}}
-         </td>
-       </tr>
        <tr>
           <td style="color:#888888;" width="22%">Kernel</td>
           <td>
@@ -71,7 +65,7 @@
         <tr>
           <td style="color:#888888;" width="22%">Session IP</td>
           <td>{{data.agent.ip}}
-            <span v-if="data.link.ip" style="color:#666666;">
+            <span v-if="data.link.ip && data.link.ip != data.agent.ip" style="color:#666666;">
               (Local {{data.link.ip}})
             </span>
           </td>
@@ -100,11 +94,26 @@
           </td>
         </tr>
         <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
           <td style="color:#888888;" width="22%">LoadAvg</td>
           <td>{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
               {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
               {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
         </tr>
+        <tr>
+          <td style="color:#888888;" width="22%">IO Wait</td>
+          <td>
+            {{parseFloat(data.io.pwait).toFixed(2)}} %
+          </td>
+        </tr>
+        <tr>
+         <td style="color:#888888;" width="22%">Uptime</td>
+         <td>
+           {{translateUptime(data.uptime)}}
+         </td>
+       </tr>
         <tr>
           <td colspan="2">&nbsp;</td>
         </tr>
