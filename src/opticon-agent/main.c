@@ -607,7 +607,7 @@ int app_main (int _argc, const char *_argv[]) {
     
     DSystemFirmwareInfo systemFirmwareInfo;
     if ((e = getSystemFirmwareInfoAlloc(&systemFirmwareInfo))) {
-        log_warn("Failed to load system firmware info: %" PRIx32, e);
+        log_warn("Failed to get system firmware info: %" PRIx32, e);
         return e;
     }
     APP.hostid = bytes2uuid(systemFirmwareInfo.systemInfo.uuid);

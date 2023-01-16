@@ -175,6 +175,8 @@ uint32_t getSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo, void 
 		// @todo biosStructureHeader->type 1 should only exist once, don't know about type 0, but most likely also only once
 		
 		if (biosStructureHeader->type == 0) {
+			// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.3.0.pdf (paragraph 7.1)
+			
 			outSystemFirmwareInfo->biosInfo.vendor = getStringFromBiosStringSet(stringSet, biosTableData[0x4]);
 			outSystemFirmwareInfo->biosInfo.version = getStringFromBiosStringSet(stringSet, biosTableData[0x5]);
 			outSystemFirmwareInfo->biosInfo.releaseDate = getStringFromBiosStringSet(stringSet, biosTableData[0x8]);

@@ -28,6 +28,7 @@ NTSYSAPI NTSTATUS NTAPI RtlGetVersion(IN OUT PRTL_OSVERSIONINFOW lpVersionInform
 #include <libopticon/log.h>
 #include "win/timeHelper.h"
 #include "win/stringHelper.h"
+#include "win/systemFirmwareInfo.h"
 #include "opticon-agent.h"
 #include "probes.h"
 
@@ -65,6 +66,7 @@ static uint32_t getGlobalMemoryInfo(MEMORYSTATUSEX *memoryStatus) {
 var *runprobe_meminfo(probe *self) {
     (void)self;
     uint32_t e;
+    
     var *res = var_alloc();
     
     MEMORYSTATUSEX memoryStatus;
@@ -109,7 +111,6 @@ typedef struct DCpuUsageProbeState {
 
 static DCpuUsageProbeState cpuUsageProbeState;
 static bool isCpuUsageProbeInitialized = false;
-
 
 var *runprobe_cpuusage(probe *self) {
     (void)self;
@@ -359,7 +360,6 @@ typedef struct DNetProbeState {
 static DNetProbeState netProbeState;
 static bool isNetProbeInitialized = false;
 
-
 var *runprobe_net(probe *self) {
     (void)self;
     var *res = var_alloc();
@@ -467,7 +467,6 @@ typedef struct DDiskIoProbeState {
 
 static DDiskIoProbeState diskIoProbeState;
 static bool isDiskIoProbeInitialized = false;
-
 
 var *runprobe_io(probe *self) {
     (void)self;
@@ -622,8 +621,13 @@ var *runprobe_uptime(probe *self) {
 
 // ============================================================================
 
+static char hardwareName[100] = "";
+static bool isHardwareNameSet = false;
+
 var *runprobe_uname(probe *self) {
     (void)self;
+    uint32_t e;
+    
     var *res = var_alloc();
     
     var *osDict = var_get_dict_forkey(res, "os");
@@ -722,6 +726,34 @@ var *runprobe_uname(probe *self) {
     
     log_debug("probe_uname/os/arch: %s", processorArchitecture);
     var_set_str_forkey(osDict, "arch", processorArchitecture);
+    
+    
+    if (!isHardwareNameSet) {
+        DSystemFirmwareInfo systemFirmwareInfo;
+        if ((e = getSystemFirmwareInfoAlloc(&systemFirmwareInfo))) {
+            log_warn("Failed to get system firmware info: %" PRIx32, e);
+        }
+        else {
+            isHardwareNameSet = true;
+            
+            char *hardwareManufacturer = systemFirmwareInfo.systemInfo.manufacturer;
+            char *hardwareProductName = systemFirmwareInfo.systemInfo.productName;
+            
+            if (hardwareManufacturer != NULL && hardwareManufacturer[0] != '\0' && hardwareProductName != NULL && hardwareProductName[0] != '\0') {
+                snprintf(hardwareName, sizeof(hardwareName), "%s %s", hardwareManufacturer, hardwareProductName);
+            }
+            else if (hardwareManufacturer != NULL && hardwareManufacturer[0] != '\0') {
+                snprintf(hardwareName, sizeof(hardwareName), "%s", hardwareManufacturer);
+            }
+            else if (hardwareProductName != NULL && hardwareProductName[0] != '\0') {
+                snprintf(hardwareName, sizeof(hardwareName), "%s", hardwareProductName);
+            }
+            
+            freeSystemFirmwareInfo(&systemFirmwareInfo);
+        }
+    }
+    
+    if (hardwareName[0] != '\0') var_set_str_forkey(osDict, "hw", hardwareName);
     
     return res;
 }
