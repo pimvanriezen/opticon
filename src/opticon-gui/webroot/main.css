@@ -1552,3 +1552,52 @@ meter::-webkit-meter-bar {
   background-color: whiteSmoke;
   box-shadow: 0 5px 5px -5px #333 inset;
 }
+
+.json-key {
+   color: brown;
+}
+.json-value {
+   color: navy;
+}
+.json-string {
+   color: olive;
+}
+
+.paper {
+  position: absolute;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0px 0px 5px 0px #888;
+  min-width: 800px;
+}
+.paper::before {
+  content: '';
+  position: absolute;
+  left: 45px;
+  height: 100%;
+  width: 2px;
+  background: rgba(255,0,0,0.4);
+}
+.lines {
+  margin-top: 40px;
+  height: calc(100% - 40px);
+  width: 100%;
+  background-image: repeating-linear-gradient(white 0px, white 24px, #e0e0f8 25px);
+}
+.holes {
+  position: absolute;
+  left: 10px;
+  height: 25px;
+  width: 25px;
+  background: lightgoldenrodyellow;
+  border-radius: 50%;
+  box-shadow: inset 0px 0px 2px 0px #888;
+}
+.hole-top {
+  top: 10%;
+}
+.hole-middle {
+  top: 50%;
+}
+.hole-bottom {
+  bottom: 10%;
+}

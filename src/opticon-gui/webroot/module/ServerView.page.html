@@ -3,14 +3,15 @@
     <u-button class="green backbutton" icon="toolbar-back.png" cb="back()">
       Back
     </u-button>
-    <u-tabgroup name="tab" tabs="Overview,Graphs,Log"></u-tabgroup>
+    <u-tabgroup name="tab" tabs="Overview,Graphs,Log,Raw"></u-tabgroup>
   </div>
 </form>
 
 <!-- OVERVIEW TAB -->
 
 <span v-if="tab=='Overview'">
-<div class="uEditPane"><div style="text-align:left;">
+<div class="uEditPane" id="ServerOverview"><div style="text-align:left;" class="gridroot">
+  <div class="gridmeasure"></div>
   <div class="uEditContainer">
     <u-header icon="header-info.png">Host Information</u-header>
     <div class="uServerData">
@@ -180,7 +181,7 @@
     </div>
   </div>
   
-  <div v-if="data.phdns && data.phdns.pblk" class="uEditContainer">
+  <div v-if="data.phdns && data.phdns.sz" class="uEditContainer">
     <u-header icon="header-pihole.png">Pi-Hole DNS</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -240,7 +241,7 @@
                 </td>
                 <td style="color:#888888;" width="35%">Configuration</td>
                 <td align="right">
-                  {{data.mysql.conf}}
+                  <span class="status small grey">{{data.mysql.conf}}</span>
                 </td>
               </tr>
               <tr>
@@ -309,6 +310,24 @@
     </div>
   </div>
 
+  <div v-if="data.cntr && data.cntr.length" class="uEditContainer">
+    <u-header icon="header-container.png">Containers</u-header>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Name</th>
+          <th align="left">Image</th>
+          <th align="right">Size</th>
+        </tr>
+        <tr v-for="c in data.cntr">
+          <td widht="20%">{{c.name}}</td>
+          <td style="color: #444444;">{{c.image}}</td>
+          <td align="right">{{c.size}} <span class="unit">MB</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
   <div v-if="data.temp && data.temp.length" class="uEditContainer">
     <u-header icon="header-temp.png">Temperatures</u-header>
     <div class="uServerData table narrow">
@@ -359,6 +378,22 @@
     </div>
   </div>
     
+  <div v-if="data.http && data.http.length" class="uEditContainer">
+    <u-header icon="header-http.png">HTTP Server</u-header>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Site</th>
+          <th align="right">Connections</th>
+        </tr>
+        <tr v-for="s in data.http">
+          <td>{{s.site}}</td>
+          <td align="right">{{s.count}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
   <div class="uEditContainer">
     <u-header icon="header-top.png">Processes</u-header>
     <div class="uServerData table wide">
@@ -452,4 +487,21 @@
     </table>
   </span>
 </div>
+</span>
+
+<!-- RAW TAB -->
+
+<span v-show="tab=='Raw'">
+  <div class="uEditPane" style="background: lightgoldenrodyellow;">
+    <div style="text-align:left; margin-left: 20px; padding-bottom: 40px; padding: 5px;">
+      <div class="paper">
+        <div class="lines">
+          <pre style="margin-left: 60px;" v-static="keep"><code id="serverjsonraw"></code></pre>
+        </div>
+        <div class="holes hole-top"></div>
+        <div class="holes hole-middle"></div>
+        <div class="holes hole-bottom"></div>
+      </div>
+    </div>
+  </div>
 </span>

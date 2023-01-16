@@ -20,6 +20,9 @@ ServerView.activate = function(argv) {
     var self = ServerView;
     self.id = argv[0];
     self.show();
+    self.Vidi.onRender = function() {
+        self.fixLayout();
+    }
     API.Opticon.Host.resolveTenant (self.id, function (tenantid) {
         self.tenantid = tenantid;
         if (self.tenantid) {
@@ -43,6 +46,7 @@ ServerView.refresh = function() {
     var self = ServerView;
     API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
         self.apires = res;
+        $("#serverjsonraw").html (self.jsonPrint (res));
         self.View.data = self.apires;
         API.Opticon.Host.getLog (self.tenantid, self.id, function (res) {
             if (res) {
@@ -167,4 +171,50 @@ ServerView.translateUptime = function (u) {
         if (u_sec != 1) res += "s";
     }
     return res;
+}
+
+ServerView.jsonReplace = function (match, pIndent, pKey, pVal, pEnd) {
+    var key = '<span class=json-key>';
+    var val = '<span class=json-value>';
+    var str = '<span class=json-string>';
+    var r = pIndent || '';
+    if (pKey)
+        r = r + key + pKey.replace(/[": ]/g, '') + '</span>: ';
+    if (pVal)
+        r = r + (pVal[0] == '"' ? str : val) + pVal + '</span>';
+
+    return r + (pEnd || '');
+}
+
+ServerView.jsonPrint = function (obj) {
+    var jsonLine = /^( *)("[\w]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/mg;
+    return JSON.stringify(obj, null, 3)
+               .replace(/\[\]/g, '"---x-EMPTY_ARRAY-x---"')
+               .replace(/&/g, '&amp;').replace(/\\"/g, '&quot;')
+               .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+               .replace(jsonLine, ServerView.jsonReplace)
+               .replace(/"---x-EMPTY_ARRAY-x---"/g, '</span><span>[]');
+}
+
+ServerView.fixLayout = function() {
+    var q = $("#ServerView #ServerOverview .uEditContainer");
+    for (var o of q) o.style.marginTop = 0;
+    for (var i in q) {
+        if (q[i].offsetWidth > 600) continue;
+        if (i) {
+            let qtop = q[i].offsetTop;
+            let maxbottom = 0;
+            for (var ii=0; ii<i; ++ii) {
+                if (q[ii].offsetLeft == q[i].offsetLeft) {
+                    let bottom = q[ii].offsetTop + q[ii].offsetHeight;
+                    if (bottom > maxbottom) maxbottom = bottom;
+                }
+            }
+            
+            if (maxbottom && maxbottom < qtop) {
+                console.log ("Moving "+i+": "+(qtop - maxbottom));
+                q[i].style.marginTop = -(qtop - maxbottom);
+            }
+        }
+    }
 }

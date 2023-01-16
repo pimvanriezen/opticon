@@ -450,6 +450,8 @@ class VidiView
                 }
                 self.renderedOnce = true;
             }
+            
+            if (self.onRender) self.onRender();
         }
         
         if (! self.renderedOnce) dorender();
