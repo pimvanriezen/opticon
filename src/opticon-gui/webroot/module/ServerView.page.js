@@ -7,6 +7,7 @@ ServerView.create = function() {
         data:{
         },
         tab:"Overview",
+        scale:86400,
         log:[]
     });
     self.apires = {};
@@ -61,7 +62,7 @@ ServerView.refresh = function() {
 ServerView.refreshGraph = function(graph,datum,title,unit) {
     var self = ServerView;
     API.Opticon.Host.getGraph (self.tenantid, self.id, graph, datum,
-                               86400, 1000, function (res) {
+                               self.View.scale, 1000, function (res) {
         if (res) {
             console.log ("getgraph:",res);
             if (self.graph[graph] === undefined) {
@@ -75,7 +76,7 @@ ServerView.refreshGraph = function(graph,datum,title,unit) {
                 self.graph[graph][datum].initialize();
             }
 
-            self.graph[graph][datum].set (res.data, res.max, 86400, unit);
+            self.graph[graph][datum].set (res.data, res.max, self.View.scale, unit);
             self.graph[graph][datum].drawGraph();
         }
     });
@@ -194,6 +195,17 @@ ServerView.jsonPrint = function (obj) {
                .replace(/</g, '&lt;').replace(/>/g, '&gt;')
                .replace(jsonLine, ServerView.jsonReplace)
                .replace(/"---x-EMPTY_ARRAY-x---"/g, '</span><span>[]');
+}
+
+ServerView.setScale = function(e) {
+    var self = ServerView;
+    self.View.scale = e;
+    self.refreshGraph ("cpu","usage","Usage","%");
+    self.refreshGraph ("link","rtt","RTT","ms");
+    self.refreshGraph ("net","input","Traffic","Kb/s");
+    self.refreshGraph ("net","output","Traffic","Kb/s");
+    self.refreshGraph ("io","read","i/o","ops/s");
+    self.refreshGraph ("io","write","i/o","ops/s");
 }
 
 ServerView.fixLayout = function() {

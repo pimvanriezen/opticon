@@ -175,6 +175,7 @@ class Graph {
     
     getxaxis() {
         var matrix = [
+            {div:604800,display:"day"},
             {div:86400,display:"day"},
             {div:21600,display:"hm"},
             {div:10800,display:"hm"},
@@ -189,7 +190,7 @@ class Graph {
         let res = [];
         for (let it of matrix) {
             if ((self.graph.timespan / it.div) > 1) {
-                if ((self.graph.timespan / it.div) < 6) {
+                if ((self.graph.timespan / it.div) < 8) {
                     let div = it.div;
                     let display = it.display;
                     

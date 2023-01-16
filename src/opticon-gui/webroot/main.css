@@ -604,7 +604,7 @@ button.red
     background-color: rgb(153,80,76);
 }
 
-button.tabgroup, button.ui-tab
+button.tabgroup, button.ui-tab, button.tabgroup.green
 {
     background-color: #506890;
     border-top: 1px solid black;
@@ -614,10 +614,21 @@ button.tabgroup, button.ui-tab
     color: #c0d0e8;
 }
 
+button.tabgroup.green
+{
+    background-color: #509068;
+}
+
 button.tabgroup:disabled, button.ui-tab:disabled
 {
     background-color: #203050;
     color: #b0c0d8;
+}
+
+button.tabgroup.green:disabled
+{
+    background-color: #205030;
+    color: #b0d8c0;
 }
 
 button.tabgroup:disabled:hover, button.ui-tab:disabled:hover
@@ -626,10 +637,23 @@ button.tabgroup:disabled:hover, button.ui-tab:disabled:hover
     color: #b0c0d8;
 }
 
+button.tabgroup.green:disabled:hover
+{
+    background-color: #203050;
+    color: #b0d8c0;
+}
+
 button.tabgroup:hover:not(:disabled):not(.active),
 button.ui-tab:hover:not(:disabled):not(.active)
 {
     background-color: #6078a8;
+    box-shadow: none;
+    color: white;
+}
+
+button.tabgroup.green:hover:not(:disabled):not(.active)
+{
+    background-color: #60a878;
     box-shadow: none;
     color: white;
 }
@@ -641,8 +665,13 @@ button.ui-tab.active
     color: white;
 }
 
+button.tabgroup.green.active {
+    background-color: #70c09c;
+    color: white;
+}
+
 button.tabgroup.active:hover,
-button.ui-tab.active:hover
+button.ui-tab.active:hover,
 {
     box-shadow: none;
     cursor: default;

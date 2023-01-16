@@ -73,6 +73,7 @@ Markup.getParentAttribute = function (e, attrname, suffix) {
 MarkupDecorators.tabgroup = function (e, mname) {
     var tabstr = e.getAttribute ("tabs");
     var name = e.getAttribute ("name");
+    var extraclass = e.getAttribute ("class");
     var tabs = tabstr.split(',');
     var cb = e.getAttribute ("cb");
     var attrbadges = e.getAttribute ("badges");
@@ -85,6 +86,7 @@ MarkupDecorators.tabgroup = function (e, mname) {
         var tablabel = tabs[ti].split(':')[1];
         if (! tablabel) tablabel=tabid;
         var classsuffix = badges[ti]!==undefined ? " badged" : "";
+        if (extraclass) classsuffix += " " + extraclass;
 
         var ubut = document.createElement ("u-button");
         if (ti==0) {
