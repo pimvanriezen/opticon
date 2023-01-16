@@ -1,0 +1,62 @@
+#!/bin/bash
+
+statusval() {
+    name="$1"
+    opticon-helper mysql -B -e "show status like '$1'" | tail -1 | cut -f2
+}
+
+div() {
+    if [ "$2" = "0" ]; then
+      echo "0.00"
+    else
+      awk "BEGIN {printf \"%.2f\",$1/$2}"
+    fi
+}
+
+slave_running=$(statusval Slave_running)
+slaves_running=$(statusval Slaves_running)
+queries=$(statusval Queries)
+e_accept=$(statusval Connection_errors_accept)
+e_internal=$(statusval Connection_errors_internal)
+e_max=$(statusval Connection_errors_max_connections)
+e_select=$(statusval Connection_errors_select)
+errors=$((e_accept + e_internal + e_max + e_select))
+connections=$(statusval Connections)
+ts=$(date +%s)
+qps="0.00"
+eps="0.00"
+cps="0.00"
+
+if [ -e /var/run/opticon/mysql-probe.queries ]; then
+  read old_queries lastts < /var/run/opticon/mysql-probe.queries
+  read old_errors < /var/run/opticon/mysql-probe.errors
+  read old_connections < /var/run/opticon/mysql-probe.connections
+  
+  dif_ts=$((ts - lastts))
+  
+  dif_q=$((queries - old_queries))
+  dif_e=$((errors - old_errors))
+  dif_c=$((connections - old_connections))
+  qps=$(div $dif_q $dif_ts)
+  eps=$(div $dif_e $dif_ts)
+  cps=$(div $dif_c $dif_ts)
+fi
+
+echo "$queries $ts" > /var/run/opticon/mysql-probe.queries
+echo "$errors" > /var/run/opticon/mysql-probe.errors
+echo "$connections" > /var/run/opticon/mysql-probe.connections
+
+echo "mysql {"
+if [ "$slave_running" = "OFF" ]; then
+  if [ "$slaves_running" = "0" ]; then
+    echo "    conf: STANDALONE"
+  else
+    echo "    conf: MASTER"
+  fi
+else
+  echo "    conf: SLAVE"
+fi
+echo "    qps: $qps"
+echo "    erps: $eps"
+echo "    cps: $cps"
+echo "}"

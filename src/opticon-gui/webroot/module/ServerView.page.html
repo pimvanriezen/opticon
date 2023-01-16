@@ -224,6 +224,50 @@
     </div>
   </div>
 
+  <div v-if="data.mysql && data.mysql.conf" class="uEditContainer">
+    <u-header icon="header-db.png">MySQL</u-header>
+    <div class="uServerData table">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+          <th align="left">Server Statistics</th>
+        </tr>
+        <tr>
+          <td style="margin: 4px;">
+            <table width="100%">
+              <tr>
+                <td rowspan="4" width="70"><center>
+                  <img src="icon/mysql.png" width="60">
+                </td>
+                <td style="color:#888888;" width="35%">Configuration</td>
+                <td align="right">
+                  {{data.mysql.conf}}
+                </td>
+              </tr>
+              <tr>
+                <td style="color:#888888;">Queries per second</td>
+                <td align="right">
+                  {{parseFloat(data.mysql.qps).toFixed(2)}}
+                </td>
+              </tr>
+              <tr>
+                <td style="color:#888888;">Errors per second</td>
+                <td align="right">
+                  {{parseFloat(data.mysql.erps).toFixed(2)}}
+                </td>
+              </tr>
+              <tr>
+                <td style="color:#888888;">Connections per second</td>
+                <td align="right">
+                  {{parseFloat(data.mysql.cps).toFixed(2)}}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  
   <div v-if="data.bgp && data.bgp.length" class="uEditContainer">
     <u-header icon="header-bgp.png">BGP Peers</u-header>
     <div class="uServerData table">
