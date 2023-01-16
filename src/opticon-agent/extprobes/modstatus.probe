@@ -1,0 +1,30 @@
+#!/bin/bash
+getstatus() {
+    curl 'http://127.0.0.1/server-status?notable' 2>/dev/null | \
+    while read line; do
+        if [ "${line:0:9}" = "<b>Server" ]; then
+            read age rest
+            if [ "$age" -lt 10 ]; then
+                read nextline
+                host=$(echo "$nextline" | sed -e 's/^ *<i>//;s/ .*//')
+                site=$(echo "$nextline" | sed -e 's/.*\[//;s/\].*//;s/:[0-9]*//')
+                if [ "$host" = "localhost" ]; then
+                    site=""
+                elif [ "$host" = "127.0.0.1" ]; then
+                    site=""
+                fi
+                if [ ! -z "$site" ]; then
+                    echo "$site"
+                fi
+            fi
+        fi
+    done
+}
+
+echo "http ["
+
+getstatus | sort | uniq -c | sort -r -n | head -16 | while read count site; do
+  printf '    { site:"%s", count:%i }\n' "$site" "$count"
+done
+
+echo "]"
