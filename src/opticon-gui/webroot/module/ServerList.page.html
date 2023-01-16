@@ -34,8 +34,7 @@
           </span>
         </td>
         <td align="right" width="64">
-          <meter low="50%" high="80%" max="100.0" 
-                 value="{{o.pcpu}}">{{parseFloat(o.pcpu).toFixed(2)}} %</meter>
+          <u-meter width="60" var="o.pcpu"></u-meter>
         </td>
         <td align="right" width="50">{{parseFloat(o.loadavg).toFixed(2)}}</td>
         <td align="right" width="86">

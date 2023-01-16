@@ -332,6 +332,21 @@ MarkupDecorators.header = function (e, mname) {
     $(span).insertAfter (e);
 }
 
+MarkupDecorators.meter = function (e, mname) {
+    var usevar = e.getAttribute ("var");
+    var width = e.getAttribute ("width");
+    if (! width) width = 120;
+    
+    nelm = document.createElement ("span");
+    let html = '<table cellspacing="0" class="meter" width="'+width+'"><tr>';
+    html += '<td v-bind:width="' + usevar + "+'%'" + '" class="meterfill"></td>';
+    html += '<td v-bind:width="' + "(100-" + usevar + ")+'%'" + '" class="meterempty"></td>';
+    html += "</tr></table>"
+    nelm.innerHTML = html;
+    
+    $(nelm).insertAfter (e);
+}
+
 // --------------------------------------------------------------------------
 // Decorator for <u-button>.
 // --------------------------------------------------------------------------
