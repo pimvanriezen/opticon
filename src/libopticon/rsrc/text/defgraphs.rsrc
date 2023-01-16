@@ -5,7 +5,7 @@
        title: "CPU Usage"
        unit: "%"
        color: "blue"
-       max: 100.0
+       max: 10.0
    }
    link/rtt {
        graph: link
@@ -21,7 +21,7 @@
        title: "Bandwidth In"
        unit: "Kb/s"
        color: "cyan"
-       max: 500.0
+       max: 100.0
    }
    net/out_kbs {
        graph: net
@@ -29,7 +29,7 @@
        title: "Bandwidth Out"
        unit: "Kb/s"
        color: "blue"
-       max: 500.0
+       max: 100.0
    }
    io/rdops {
        graph: io
