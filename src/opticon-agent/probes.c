@@ -63,7 +63,7 @@ var *runprobe_uname (probe *self) {
     
     f = fopen ("/sys/devices/virtual/dmi/id/product_name","r");
     if (f) {
-        fgets (pname, 31, f);
+        fgets (pname, 32, f);
         pname[31] = 0;
         if (*pname) pname[strlen(pname)-1] = 0;
         fclose (f);
@@ -71,7 +71,7 @@ var *runprobe_uname (probe *self) {
         
     f = fopen ("/sys/devices/virtual/dmi/id/sys_vendor","r");
     if (f) {
-        fgets (vendor, 31, f);
+        fgets (vendor, 32, f);
         vendor[31] = 0;
         if (*vendor) vendor[strlen(vendor)-1] = 0;
         fclose (f);
@@ -103,7 +103,7 @@ var *runprobe_uname (probe *self) {
     struct stat st;
     if (stat ("/sbin/getcfg", &st) == 0) {
         f = popen_safe ("/sbin/getcfg System Model","r");
-        fgets (pname, 31, f);
+        fgets (pname, 32, f);
         pname[31] = 0;
         if (*pname) pname[strlen(pname)-1] = 0;
         pclose_safe (f);
