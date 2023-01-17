@@ -4,7 +4,7 @@ getstatus() {
     while read line; do
         if [ "${line:0:9}" = "<b>Server" ]; then
             read age rest
-            if [ "$age" -lt 10 ]; then
+            if [ "$age" -lt 60 ]; then
                 read nextline
                 host=$(echo "$nextline" | sed -e 's/^ *<i>//;s/ .*//')
                 site=$(echo "$nextline" | sed -e 's/.*\[//;s/\].*//;s/:[0-9]*//')
