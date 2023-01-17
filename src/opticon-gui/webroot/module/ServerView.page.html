@@ -21,6 +21,10 @@
           <td>{{data.hostname}}</td>
         </tr>
         <tr>
+          <td style="color:#888888;" width="22%">UUID</td>
+          <td class="unit">{{id}}</td>
+        </tr>
+        <tr>
           <td style="color:#888888;" width="22%">Status</td>
           <td>
             <span v-bind:class="statusClass(data.status)">{{data.status}}</span>
@@ -37,11 +41,11 @@
         <tr v-if="meta.name">
           <td colspan="2">&nbsp;</td>
         </tr>
-       <tr>
+        <tr>
           <td style="color:#888888;" width="22%">Kernel</td>
           <td>
             <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
-              <img src="icon/linux.png" style="margin-bottom:-2px;">
+              <img v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
             </span>
             <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
               <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
@@ -63,17 +67,17 @@
         <tr>
           <td colspan="2">&nbsp;</td>
         </tr>
-        <tr v-if="data.version">
+        <tr v-if="data.agent.v">
           <td style="color:#888888;" width="22%">Agent Version</td>
           <td>
-            {{data.version}}
+            {{data.agent.v}}
           </td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Session IP</td>
-          <td>{{data.agent.ip}}
-            <span v-if="data.link.ip && data.link.ip != data.agent.ip" style="color:#666666;">
-              (Local {{data.link.ip}})
+          <td>{{data.link.ip}}
+            <span v-if="data.agent.ip && data.agent.ip != data.link.ip" style="color:#666666;">
+              (Local {{data.agent.ip}})
             </span>
           </td>
         </tr>
@@ -92,72 +96,74 @@
   <div class="uEditContainer">
     <u-header icon="header-performance.png">Performance Data</u-header>
     <div class="uServerData">
-      <table width="100%">
+      <table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
           <td style="color:#888888;" width="22%">CPU Usage</td>
-          <td valign="top">
+          <td align="left" width="130" style="padding: 0px;">
             <u-meter width="120" var="data.pcpu"></u-meter>
+          </td>
+          <td align="left">
             {{parseFloat(data.pcpu).toFixed(2)}} %
           </td>
         </tr>
         <tr>
-          <td colspan="2">&nbsp;</td>
+          <td colspan="3">&nbsp;</td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">LoadAvg</td>
-          <td>{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
+          <td colspan="2">{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
               {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
               {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">IO Wait</td>
-          <td>
+          <td colspan="2">
             {{parseFloat(data.io.pwait).toFixed(2)}} %
           </td>
         </tr>
         <tr>
          <td style="color:#888888;" width="22%">Uptime</td>
-         <td>
+         <td colspan="2">
            {{translateUptime(data.uptime)}}
          </td>
        </tr>
         <tr>
-          <td colspan="2">&nbsp;</td>
+          <td colspan="3">&nbsp;</td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Memory</td>
-          <td>
+          <td colspan="2">
             {{ktoh(data.mem.free).size}} <span class="unit">{{ktoh(data.mem.free).unit}}</span>
             free ({{ktoh(data.mem.total).size}} <span class="unit">{{ktoh(data.mem.total).unit}}</span>
             total)
           </td>
         </tr>
         <tr>
-          <td colspan="2">&nbsp;</td>
+          <td colspan="3">&nbsp;</td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Network In</td>
-          <td>
+          <td colspan="2">
             {{ktoh(data.net.in_kbs).size}} <span class="unit">{{ktoh(data.net.in_kbs,true).unit}}</span>
             ({{data.net.in_pps}} <span class="unit">pps</span>)
           </td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Network Out</td>
-          <td>
+          <td colspan="2">
             {{ktoh(data.net.out_kbs).size}} <span class="unit">{{ktoh(data.net.out_kbs,true).unit}}</span>
             ({{data.net.out_pps}} <span class="unit">pps</span>)
           </td>
         </tr>
         <tr>
-          <td colspan="2">&nbsp;</td>
+          <td colspan="3">&nbsp;</td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Disk i/o</td>
-          <td>
+          <td colspan="2">
             {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
           </td>
-        <tr>
+        </tr>
       </table>
     </div>
   </div>
@@ -303,11 +309,13 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
           <th align="left">Name</th>
+          <th align="center">CPU</th>
           <th align="right">Cores</th>
           <th align="right">RAM</th>
         </tr>
         <tr v-for="vm in data.vm">
           <td>{{vm.name}}</td>
+          <td align="center" width="70"><u-meter width="60" var="vm.cpu"></u-meter></td>
           <td width="10%" align="right">{{vm.cores}}</td>
           <td width="20%" align="right">{{ktoh(vm.ram*1024).size}}
             <span class="unit">{{ktoh(vm.ram*1024).unit}}</span></td>

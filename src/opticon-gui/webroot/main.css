@@ -1259,6 +1259,10 @@ form.uEditable,.uServerData
     font-size: 13px;
 }
 
+.uServerData:not(.table) > table > tbody > tr {
+    height: 20px;
+}
+
 .uServerData.table table {
     font-size: 13px;
 }
@@ -1640,6 +1644,7 @@ table.meter {
     background: #f8f8f8;
     margin-bottom: -2px;
     border: 1px solid #aaaaaa;
+    padding: 0px !important;
 }
 
 table.meter tr {
@@ -1652,9 +1657,11 @@ table.meter tr td {
     padding: 0px;
     margin: 0px;
     height: 12px;
+    padding: 0px !important;
 }
 table.meter tr td.meterempty {
     box-shadow: inset 1px 1px 2px 1px rgba(0,0,0,0.15);
+    font-size: 2px;
 }
 
 table.meter tr td.meterfill {

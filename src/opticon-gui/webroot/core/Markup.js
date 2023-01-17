@@ -342,7 +342,9 @@ MarkupDecorators.meter = function (e, mname) {
     nelm = document.createElement ("span");
     let html = '<table cellspacing="0" class="meter" width="'+width+'"><tr>';
     html += '<td v-bind:width="' + usevar + "+'%'" + '" class="meterfill"></td>';
-    html += '<td v-bind:width="' + "(100-" + usevar + ")+'%'" + '" class="meterempty"></td>';
+    html += '<td v-bind:width="' + "(100-" + usevar + ")+'%'" + '" class="meterempty">'+
+            '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfF'+
+                      'cSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg=="></td>';
     html += "</tr></table>"
     nelm.innerHTML = html;
     

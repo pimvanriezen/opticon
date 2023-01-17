@@ -20,6 +20,7 @@ ServerView.create = function() {
 ServerView.activate = function(argv) {
     var self = ServerView;
     self.id = argv[0];
+    self.View.id = self.id;
     self.show();
     self.Vidi.onRender = function() {
         self.fixLayout();
@@ -46,6 +47,18 @@ ServerView.activate = function(argv) {
 ServerView.refresh = function() {
     var self = ServerView;
     API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
+        /* translate pre-0.9.26 layout */
+        if (res.version && (res.agent.v === undefined)) {
+            res.agent.v = res.version;
+            var tmp = res.link.ip;
+            res.link.ip = res.agent.ip;
+            res.agent.ip = tmp;
+            delete res.version;
+            if (res.uptimea) {
+                res.agent.up = res.uptimea;
+                delete res.uptimea;
+            }
+        }
         self.apires = res;
         $("#serverjsonraw").html (self.jsonPrint (res));
         self.View.data = self.apires;
@@ -229,4 +242,9 @@ ServerView.fixLayout = function() {
             }
         }
     }
+}
+
+ServerView.linuxIcon = function(kernel) {
+    if (/UBNT/.test (kernel)) return "icon/ubnt.png"
+    return "icon/linux.png"
 }
