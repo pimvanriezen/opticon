@@ -614,7 +614,8 @@ var *runprobe_uptime(probe *self) {
     
     // Include agent uptime
     time_t tnow = time(NULL);
-    var_set_int_forkey(res, "uptimea", (tnow - APP.starttime));
+    var *res_agent = var_get_dict_forkey (res, "agent");
+    var_set_int_forkey(res_agent, "up", (tnow - APP.starttime));
     
     return res;
 }
@@ -1594,7 +1595,7 @@ var *runprobe_who(probe *self) {
 var *runprobe_localip(probe *self) {
     (void)self;
     var *res = var_alloc();
-    var *linkDict = var_get_dict_forkey(res, "link");
+    var *agentDict = var_get_dict_forkey(res, "agent");
     
     uint32_t e;
     
@@ -1628,7 +1629,7 @@ var *runprobe_localip(probe *self) {
                 }
                 
                 log_debug("probe_localip/ip: %s", ipString);
-                var_set_str_forkey(linkDict, "ip", ipString);
+                var_set_str_forkey(agentDict, "ip", ipString);
                 
                 break;
             }
@@ -1641,7 +1642,7 @@ var *runprobe_localip(probe *self) {
                 }
                 
                 log_debug("probe_localip/ip: %s", ipString);
-                var_set_str_forkey(linkDict, "ip", ipString);
+                var_set_str_forkey(agentDict, "ip", ipString);
                 
                 // @note Continue after an ipv6 ip address is found to see if there is also an ipv4 address (which we prefer and will overwrite the one we set here)
             }

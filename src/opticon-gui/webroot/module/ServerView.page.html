@@ -40,6 +40,12 @@
        <tr>
           <td style="color:#888888;" width="22%">Kernel</td>
           <td>
+            <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
+              <img src="icon/linux.png" style="margin-bottom:-2px;">
+            </span>
+            <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
+              <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
+            </span>
             {{data.os.kernel}} {{data.os.version}}
             <span class="unit">({{data.os.arch}})</span>
           </td>

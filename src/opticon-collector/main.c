@@ -327,7 +327,7 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
         host *h = S->host;
         char addrbuf[64];
         ip2str (&S->remote, addrbuf);
-        meterid_t mid_agentip = makeid ("agent/ip", MTYPE_STR, 0);
+        meterid_t mid_agentip = makeid ("link/ip", MTYPE_STR, 0);
         meter *m_agentip = host_get_meter (h, mid_agentip);
         meter_setcount (m_agentip, 0);
         meter_set_str (m_agentip, 0, addrbuf);

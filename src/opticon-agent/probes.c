@@ -194,7 +194,7 @@ var *runprobe_localip (probe *self) {
     struct timeval tv;
     
     var *res = var_alloc();
-    var *res_link = var_get_dict_forkey (res, "link");
+    var *res_agent = var_get_dict_forkey (res, "agent");
 #if defined(OS_LINUX)
     const char *cmd = "dev=$(ip route show | grep ^default | head -1 | "
                       "sed -e 's/.*dev //' | cut -f1 -d' '); "
@@ -231,7 +231,7 @@ var *runprobe_localip (probe *self) {
                 ++c;
             }
             if (*c) *c = 0;
-            var_set_str_forkey (res_link, "ip", m_inet);
+            var_set_str_forkey (res_agent, "ip", m_inet);
             break;
         }
     }

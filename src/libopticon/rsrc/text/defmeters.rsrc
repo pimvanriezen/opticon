@@ -1,7 +1,16 @@
 {
     agent/ip {
         type: string
-        description: "Remote IP Address"
+        description: "Local IP Address"
+    }
+    agent/v {
+        type: string
+        description: "Agent Version"
+    }
+    agent/up {
+        type: integer
+        description: "Agent Uptime"
+        unit: s
     }
     link/rtt {
         type: frac
@@ -21,7 +30,7 @@
     }
     link/ip {
         type: string
-        description: "Primary IP Address"
+        description: "Remote IP Address"
     }
     os/kernel {
         type: string
@@ -63,11 +72,6 @@
     uptime {
         type: integer
         description: "Uptime"
-        unit: s
-    }
-    uptimea {
-        type: integer
-        description: "Agent Uptime"
         unit: s
     }
     top {
@@ -269,10 +273,6 @@
         type: string
         description: "State"
     }
-    version {
-        type: string
-        description: "Agent Version"
-    }
     vm {
         type: table
         description: "Virtual Machines"
@@ -335,5 +335,22 @@
         type: frac
         description: "Blocked"
         unit: "%"
+    }
+    mysql/conf {
+        type: string
+        description: "Configuration"
+    }
+    mysql/qps {
+        type: frac
+        description: "Queries per second"
+    }
+    mysql/erps {
+        type: frac
+        description: "Errors per second"
+        warning { cmp: gt, val: 0.0, weight: 1.0 }
+    }
+    mysql/cps {
+        type: frac
+        description: "Connections per second"
     }
 }

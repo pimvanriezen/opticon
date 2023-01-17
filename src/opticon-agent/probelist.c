@@ -35,7 +35,8 @@ probe *probe_alloc (void) {
 
 var *runprobe_version (probe *self) {
     var *res = var_alloc();
-    var_set_str_forkey (res, "version", VERSION);
+    var *res_agent = var_get_dict_forkey (res, "agent");
+    var_set_str_forkey (res_agent, "v", VERSION);
     return res;
 }
 
