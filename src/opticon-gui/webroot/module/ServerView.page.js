@@ -350,7 +350,7 @@ ServerView.makeLayout = function(q) {
         }
     }
 
-    pslist.style.top = plisty + 20;
+    pslist.style.top = plisty + yoffs;
     pslist.style.position = "absolute";
 
     for (let c of outcolumns) {
