@@ -12,7 +12,7 @@
 <span v-if="tab=='Overview'">
 <div class="uEditPane" id="ServerOverview"><div style="text-align:left;" class="gridroot">
   <div class="gridmeasure"></div>
-  <div class="uEditContainer">
+  <div class="uEditContainer magicLayout">
     <u-header icon="header-info.png">Host Information</u-header>
     <div class="uServerData">
       <table width="100%">
@@ -23,6 +23,9 @@
         <tr>
           <td style="color:#888888;" width="22%">UUID</td>
           <td class="unit">{{id}}</td>
+        </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
           <td style="color:#888888;" width="22%">Status</td>
@@ -39,32 +42,6 @@
           <td>{{meta.name}}</td>
         </tr>
         <tr v-if="meta.name">
-          <td colspan="2">&nbsp;</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">Kernel</td>
-          <td>
-            <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
-              <img v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
-            </span>
-            <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
-              <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
-            </span>
-            {{data.os.kernel}} {{data.os.version}}
-            <span class="unit">({{data.os.arch}})</span>
-          </td>
-        </tr>
-        <tr v-if="data.os.hw">
-          <td style="color:#888888;" width="22%">Platform</td>
-          <td>
-            {{data.os.hw}}
-          </td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%" valign="top">Distribution</td>
-          <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
-        </tr>
-        <tr>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr v-if="data.agent.v">
@@ -93,7 +70,7 @@
     </div>
   </div>
   
-  <div class="uEditContainer">
+  <div class="uEditContainer magicLayout">
     <u-header icon="header-performance.png">Performance Data</u-header>
     <div class="uServerData">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -168,7 +145,38 @@
     </div>
   </div>
   
-  <div v-if="data.df && data.df.length" class="uEditContainer">
+  <div class="uEditContainer magicLayout">
+    <u-header icon="header-hwenv.png">System Details</u-header>
+    <div class="uServerData">
+      <table width="100%">
+        <tr>
+          <td style="color:#888888;" width="22%">Kernel</td>
+          <td>
+            <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
+              <img v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
+            </span>
+            <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
+              <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
+            </span>
+            {{data.os.kernel}} {{data.os.version}}
+            <span class="unit">({{data.os.arch}})</span>
+          </td>
+        </tr>
+        <tr v-if="data.os.hw">
+          <td style="color:#888888;" width="22%">Platform</td>
+          <td>
+            {{data.os.hw}}
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%" valign="top">Distribution</td>
+          <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div v-if="data.df && data.df.length" class="uEditContainer magicLayout">
     <u-header icon="header-disk.png">Disk Usage</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -193,7 +201,7 @@
     </div>
   </div>
   
-  <div v-if="data.phdns && data.phdns.sz" class="uEditContainer">
+  <div v-if="data.phdns && data.phdns.sz" class="uEditContainer magicLayout">
     <u-header icon="header-pihole.png">Pi-Hole DNS</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -237,7 +245,7 @@
     </div>
   </div>
 
-  <div v-if="data.mysql && data.mysql.conf" class="uEditContainer">
+  <div v-if="data.mysql && data.mysql.conf" class="uEditContainer magicLayout">
     <u-header icon="header-db.png">MySQL</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -281,7 +289,7 @@
     </div>
   </div>
   
-  <div v-if="data.bgp && data.bgp.length" class="uEditContainer">
+  <div v-if="data.bgp && data.bgp.length" class="uEditContainer magicLayout">
     <u-header icon="header-bgp.png">BGP Peers</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -303,7 +311,7 @@
     </div>
   </div>
 
-  <div v-if="data.vm && data.vm.length" class="uEditContainer">
+  <div v-if="data.vm && data.vm.length" class="uEditContainer magicLayout">
     <u-header icon="header-vm.png">Virtual Machines</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -324,7 +332,7 @@
     </div>
   </div>
 
-  <div v-if="data.cntr && data.cntr.length" class="uEditContainer">
+  <div v-if="data.cntr && data.cntr.length" class="uEditContainer magicLayout">
     <u-header icon="header-container.png">Containers</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -342,39 +350,41 @@
     </div>
   </div>
 
-  <div v-if="data.temp && data.temp.length" class="uEditContainer">
-    <u-header icon="header-temp.png">Temperatures</u-header>
-    <div class="uServerData table narrow">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Name</th>
-          <th align="right">Value</th>
-        </tr>
-        <tr v-for="dat in data.temp">
-          <td>{{dat.id}}</td>
-          <td align="right">{{dat.v}} <span class="unit">º{{dat.u}}</span></td>
-        </tr>
-      </table>
+  <div v-if="data.temp || data.fan" style="width: 552px;" class="magicLayout">
+    <div v-if="data.temp && data.temp.length" class="uEditContainer">
+      <u-header icon="header-temp.png">Temperatures</u-header>
+      <div class="uServerData table narrow">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Name</th>
+            <th align="right">Value</th>
+          </tr>
+          <tr v-for="dat in data.temp">
+            <td>{{dat.id}}</td>
+            <td align="right">{{dat.v}} <span class="unit">º{{dat.u}}</span></td>
+          </tr>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <div v-if="data.temp && data.temp.length" class="uEditContainer">
-    <u-header icon="header-fans.png">Fans</u-header>
-    <div class="uServerData table narrow">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Name</th>
-          <th align="right">Value</th>
-        </tr>
-        <tr v-for="dat in data.fan">
-          <td>{{dat.id}}</td>
-          <td align="right">{{dat.v}} <span class="unit">{{dat.u}}</span></td>
-        </tr>
-      </table>
+    <div v-if="data.fan && data.fan.length" class="uEditContainer">
+      <u-header icon="header-fans.png">Fans</u-header>
+      <div class="uServerData table narrow">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Name</th>
+            <th align="right">Value</th>
+          </tr>
+          <tr v-for="dat in data.fan">
+            <td>{{dat.id}}</td>
+            <td align="right">{{dat.v}} <span class="unit">{{dat.u}}</span></td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
   
-  <div v-if="data.who && data.who.length" class="uEditContainer">
+  <div v-if="data.who && data.who.length" class="uEditContainer magicLayout">
     <u-header icon="header-who.png">User Sessions</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -392,7 +402,7 @@
     </div>
   </div>
     
-  <div v-if="data.http && data.http.length" class="uEditContainer">
+  <div v-if="data.http && data.http.length" class="uEditContainer magicLayout">
     <u-header icon="header-http.png">HTTP Server</u-header>
     <div class="uServerData table">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -408,7 +418,7 @@
     </div>
   </div>
 
-  <div class="uEditContainer">
+  <div class="uEditContainer magicLayout">
     <u-header icon="header-top.png">Processes</u-header>
     <div class="uServerData table wide">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -443,42 +453,42 @@
     <br>
     <br>
     <div style="text-align:left;">
-      <div class="uEditContainer" v-static="keep">
+      <div class="uEditContainer magicLayout" v-static="keep">
         <u-header icon="header-performance.png">CPU</u-header>
         <div class="uServerData table" v-static="keep">
           <canvas id="graph-cpu-usage" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer" v-static="keep">
+      <div class="uEditContainer magicLayout" v-static="keep">
         <u-header icon="header-rtt.png">RTT</u-header>
         <div class="uServerData table">
           <canvas id="graph-link-rtt" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer" v-static="keep">
+      <div class="uEditContainer magicLayout" v-static="keep">
         <u-header icon="header-netio.png">Network in</u-header>
         <div class="uServerData table">
           <canvas id="graph-net-input" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer" v-static="keep">
+      <div class="uEditContainer magicLayout" v-static="keep">
         <u-header icon="header-netio.png">Network out</u-header>
         <div class="uServerData table">
           <canvas id="graph-net-output" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer" v-static="keep">
+      <div class="uEditContainer magicLayout" v-static="keep">
         <u-header icon="header-disk.png">Disk i/o (read)</u-header>
         <div class="uServerData table">
           <canvas id="graph-io-read" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer" v-static="keep">
+      <div class="uEditContainer magicLayout" v-static="keep">
         <u-header icon="header-disk.png">Disk i/o (write)</u-header>
         <div class="uServerData table">
           <canvas id="graph-io-write" width="530" height="200"

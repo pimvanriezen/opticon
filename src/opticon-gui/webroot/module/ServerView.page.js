@@ -221,27 +221,152 @@ ServerView.setScale = function(e) {
     self.refreshGraph ("io","write","i/o","ops/s");
 }
 
-ServerView.fixLayout = function() {
-    var q = $("#ServerView #ServerOverview .uEditContainer");
-    for (var o of q) o.style.marginTop = 0;
-    for (var i in q) {
-        if (q[i].offsetWidth > 600) continue;
-        if (i) {
-            let qtop = q[i].offsetTop;
-            let maxbottom = 0;
-            for (var ii=0; ii<i; ++ii) {
-                if (q[ii].offsetLeft == q[i].offsetLeft) {
-                    let bottom = q[ii].offsetTop + q[ii].offsetHeight;
-                    if (bottom > maxbottom) maxbottom = bottom;
-                }
+ServerView.makeLayout = function(q) {
+    var objtable= {};
+    var columnpositions = {};
+    var widths= [];
+    var outcolumns = [];
+    var idx = 0;
+    
+    for (obj of q) {
+        if (! obj.offsetWidth) continue;
+        let w = obj.offsetWidth;
+        if (objtable[w] === undefined) {
+            objtable[w] = [];
+            columnpositions[w] = [];
+            widths.push (w);
+        }
+        objtable[w].push ({
+            idx: idx++,
+            height: obj.offsetHeight,
+            left: obj.offsetLeft,
+            obj: obj
+        });
+        
+        if (! columnpositions[w].includes (obj.offsetLeft)) {
+            columnpositions[w].push (obj.offsetLeft);
+            outcolumns.push ([]);
+        }
+    }
+    
+    let cpos = 0;
+    let yoffs = 20;
+    
+    let columnh = [0,0,0,0,0,0];
+    let numc = 0;
+    let numw = widths.length;
+    if (numw != 2) {
+        console.log ("Unknown layout scheme", widths.length, widths);
+        return;
+    }
+    
+    var width = widths[0];
+    var owidth = widths[1];
+    var oheight = objtable[owidth][0].height;
+    let wcolumnh = JSON.parse (JSON.stringify (columnh));
+    
+    objtable[width].sort (function (a,b) {
+        console.log ("sort ("+a.idx+","+b.idx+")",a,b);
+        if (a.idx <3) return 0;
+        if (b.idx <3) return 0;
+        console.log ("not cut short");
+        if (a.height < b.height) return 1;
+        return -1;
+    });
+    
+    console.log ("sorted", objtable[width]);
+    
+    wcolumnh[0] = oheight;
+    wcolumnh[1] = oheight;
+
+    numc = columnpositions[width].length;
+
+    for (var item of objtable[width]) {
+        console.log (columnh);
+        let lowestcolumn = 0;
+        let lowestval = -1;
+        for (let i=0; i<numc; ++i) {
+            if (columnh[i] == 0) {
+                lowestval = 0;
+                lowestcolumn = i;
+                break;
             }
+            if ((lowestval<0) || (wcolumnh[i]<lowestval)) {
+                lowestval = wcolumnh[i];
+                lowestcolumn = i;
+            }
+        }
+        
+        lowestval = columnh[lowestcolumn];
+
+        outcolumns[lowestcolumn].push ({
+            top: lowestval+yoffs,
+            left: columnpositions[width][lowestcolumn],
+            obj: item.obj
+        });
+
+        columnh[lowestcolumn] += item.height;
+        wcolumnh[lowestcolumn] += item.height;
+    }
+    
+    console.log ("owidth: "+owidth, objtable);
+
+    let plisty = columnh[0];
+    if (columnh[1] > plisty) plisty = columnh[1];
+    let pslist = objtable[owidth][0].obj;
+    
+    if (numc > 2) {
+        columnh[0] = plisty + pslist.offsetHeight;
+        columnh[1] = plisty + pslist.offsetHeight;
+    }
+    
+    let maxh = 0;
+    for (let col=0; col<numc; ++col) {
+        if (columnh[col] > maxh) maxh = columnh[col];
+    }
+    
+    for (let col=0; col<numc; ++col) {
+        if (columnh[col] < maxh) {
+            if (outcolumns[col].length<2) continue;
             
-            if (maxbottom && maxbottom < qtop) {
-                console.log ("Moving "+i+": "+(qtop - maxbottom));
-                q[i].style.marginTop = -(qtop - maxbottom);
+            let diff = maxh - columnh[col];
+            let delta = diff;
+            let cdelta = diff / (outcolumns[col].length-1);
+            
+            for (let i = outcolumns[col].length-1; i>0; --i) {
+                let o = outcolumns[col][i];
+                o.top += delta;
+                delta -= cdelta;
             }
         }
     }
+    
+    if (numc <= 2) {
+        plisty = maxh;
+    }
+    else {
+        if (plisty + pslist.offsetHeight < maxh) {
+            plisty = (maxh - pslist.offsetHeight);
+        }
+    }
+
+    pslist.style.top = plisty + 20;
+    pslist.style.position = "absolute";
+
+    for (let c of outcolumns) {
+        for (let item of c) {
+            item.obj.style.top = item.top;
+            item.obj.style.left = item.left;
+            item.obj.style.position = "absolute";
+        }
+    }
+}
+
+ServerView.fixLayout = function() {
+    var positions = {};
+    var counts = {};
+    var q = $("#ServerView #ServerOverview .magicLayout");
+    ServerView.makeLayout (q);
 }
 
 ServerView.linuxIcon = function(kernel) {
