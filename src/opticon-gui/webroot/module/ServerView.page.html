@@ -41,12 +41,6 @@
         <tr>
           <td colspan="2">&nbsp;</td>
         </tr>
-        <tr v-if="data.agent.v">
-          <td style="color:#888888;" width="22%">Agent Version</td>
-          <td>
-            {{data.agent.v}}
-          </td>
-        </tr>
         <tr>
           <td style="color:#888888;" width="22%">Session IP</td>
           <td>{{data.link.ip}}
@@ -67,37 +61,6 @@
     </div>
   </div>
   
-  <div class="uEditContainer magicLayout">
-    <u-header icon="header-hwenv.png">System Details</u-header>
-    <div class="uServerData">
-      <table width="100%">
-        <tr>
-          <td style="color:#888888;" width="22%">Kernel</td>
-          <td>
-            <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
-              <img v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
-            </span>
-            <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
-              <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
-            </span>
-            {{data.os.kernel}} {{data.os.version}}
-            <span class="unit">({{data.os.arch}})</span>
-          </td>
-        </tr>
-        <tr v-if="data.os.hw">
-          <td style="color:#888888;" width="22%">Platform</td>
-          <td>
-            {{data.os.hw}}
-          </td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%" valign="top">Distribution</td>
-          <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
   <div class="uEditContainer magicLayout">
     <u-header icon="header-performance.png">Performance Data</u-header>
     <div class="uServerData">
@@ -173,6 +136,43 @@
     </div>
   </div>
   
+  <div class="uEditContainer magicLayout">
+    <u-header icon="header-hwenv.png">System Details</u-header>
+    <div class="uServerData">
+      <table width="100%">
+        <tr>
+          <td style="color:#888888;" width="22%">Kernel</td>
+          <td>
+            <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
+              <img v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
+            </span>
+            <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
+              <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
+            </span>
+            {{data.os.kernel}} {{data.os.version}}
+            <span class="unit">({{data.os.arch}})</span>
+          </td>
+        </tr>
+        <tr v-if="data.os.hw">
+          <td style="color:#888888;" width="22%">Platform</td>
+          <td>
+            {{data.os.hw}}
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#888888;" width="22%" valign="top">Distribution</td>
+          <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
+        </tr>
+        <tr v-if="data.agent.v">
+          <td style="color:#888888;" width="22%">Agent Version</td>
+          <td>
+            {{data.agent.v}}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
   <div v-if="data.df && data.df.length" class="uEditContainer magicLayout">
     <u-header icon="header-disk.png">Disk Usage</u-header>
     <div class="uServerData table">

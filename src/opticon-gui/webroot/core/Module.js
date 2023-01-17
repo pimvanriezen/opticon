@@ -328,30 +328,36 @@ Module.Page.prototype.show = function() {
     $(".uContent input").blur();
     $(".uContent:visible").hide();
     $("#"+this.id+" li.selected").removeClass("selected");
-    if (Module.Page.lastroot && this.root != Module.Page.lastroot) {
-        // Don't do animations when switching between roots.
+    
+    if (App && (! App.animateNavigation)) {
         $(this.View.$el).show();
-    }
-    else if (this.navigationlevel > Module.Page.lastlevel) {
-        // if we're going deeper, slide in.
-        let el = this.View.$el;
-        let q = $(el).find(".uSearch,.uSelectList,.uSearchResults,"+
-                           ".uEditPane:not(.letterbox)");
-        let w = $(el).outerWidth();
-        q.css("marginRight",-w).css("paddingLeft",w);
-        $(el).show();
-        q.animate ({
-            paddingLeft:0,
-            marginRight:0
-        },$.speed(180));
-    }
-    else if (this.navigationlevel < Module.Page.lastlevel) {
-        // if we're going shallower, fade in
-        $(this.View.$el).show(); // fadeIn(100);
     }
     else {
-        // otherwise, forget about animation and just show.
-        $(this.View.$el).show();
+        if (Module.Page.lastroot && this.root != Module.Page.lastroot) {
+            // Don't do animations when switching between roots.
+            $(this.View.$el).show();
+        }
+        else if (this.navigationlevel > Module.Page.lastlevel) {
+            // if we're going deeper, slide in.
+            let el = this.View.$el;
+            let q = $(el).find(".uSearch,.uSelectList,.uSearchResults,"+
+                               ".uEditPane:not(.letterbox)");
+            let w = $(el).outerWidth();
+            q.css("marginRight",-w).css("paddingLeft",w);
+            $(el).show();
+            q.animate ({
+                paddingLeft:0,
+                marginRight:0
+            },$.speed(180));
+        }
+        else if (this.navigationlevel < Module.Page.lastlevel) {
+            // if we're going shallower, fade in
+            $(this.View.$el).show(); // fadeIn(100);
+        }
+        else {
+            // otherwise, forget about animation and just show.
+            $(this.View.$el).show();
+        }
     }
     Module.Page.lastlevel = this.navigationlevel;
     Module.Page.lastroot = this.root;

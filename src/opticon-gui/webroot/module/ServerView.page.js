@@ -77,7 +77,6 @@ ServerView.refreshGraph = function(graph,datum,title,unit) {
     API.Opticon.Host.getGraph (self.tenantid, self.id, graph, datum,
                                self.View.scale, 1000, function (res) {
         if (res) {
-            console.log ("getgraph:",res);
             if (self.graph[graph] === undefined) {
                 self.graph[graph] = {};
             }
@@ -264,13 +263,18 @@ ServerView.makeLayout = function(q) {
     var owidth = widths[1];
     var oheight = objtable[owidth][0].height;
     let wcolumnh = JSON.parse (JSON.stringify (columnh));
+    var thirdwassorted = false;
     
     objtable[width].sort (function (a,b) {
-        console.log ("sort ("+a.idx+","+b.idx+")",a,b);
-        if (a.idx <3) return 0;
-        if (b.idx <3) return 0;
-        console.log ("not cut short");
-        if (a.height < b.height) return 1;
+        if (a.idx <2) return 0;
+        if (b.idx <2) return 0;
+        if (a.height < b.height) {
+            if (a.idx == 2 || b.idx == 2) {
+                if (thirdwassorted) return 0;
+                thirdwassorted = true;
+            }
+            return 1;
+        }
         return -1;
     });
     
@@ -282,7 +286,6 @@ ServerView.makeLayout = function(q) {
     numc = columnpositions[width].length;
 
     for (var item of objtable[width]) {
-        console.log (columnh);
         let lowestcolumn = 0;
         let lowestval = -1;
         for (let i=0; i<numc; ++i) {
@@ -309,8 +312,6 @@ ServerView.makeLayout = function(q) {
         wcolumnh[lowestcolumn] += item.height;
     }
     
-    console.log ("owidth: "+owidth, objtable);
-
     let plisty = columnh[0];
     if (columnh[1] > plisty) plisty = columnh[1];
     let pslist = objtable[owidth][0].obj;
