@@ -260,7 +260,7 @@ void watchthread_handle_host (host *host) {
     
     pthread_rwlock_wrlock (&host->lock);
     
-    meterid_t mid_ip = makeid ("agent/ip",MTYPE_STR,0);
+    meterid_t mid_ip = makeid ("link/ip",MTYPE_STR,0);
     meter *m_ip = host_find_meter (host, mid_ip);
     if (m_ip) {
         fstring ipstr = meter_get_str (m_ip, 0);
