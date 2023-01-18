@@ -2,36 +2,39 @@
 
 CURCONF=/etc/opticon/opticon-agent.conf
 
-whip() {
+dlog() {
     dialog "$@" 3>&1 1>&2 2>&3
 }
 
+join_by() {
+  local d=${1-} f=${2-}
+  if shift 2; then
+    printf %s "$f" "${@/#/$d}"
+  fi
+}
+
+bequote() {
+  while [ ! -z "$1" ]; do
+    echo '"'"$1"'"'
+    shift
+  done
+}
+
+to_array() {
+  join_by , $(bequote "$@")
+}  
+
 get_diskchoice() {
-  sz=$(cat /proc/diskstats | grep -v "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" | wc -l)
+  sz=$(df | grep ^/ | wc -l)
   printf " $sz "
-  cat /proc/diskstats | sed -e 's/^\s*[0-9][0-9]*\s*[0-9][0-9]*\s//' | \
-      while read dev count rest; do
-        if [ "$count" = "0" ]; then continue; fi
-        on="OFF"
-        txt="                "
-        if [ "${dev:0:2}" = "md" ]; then
+  df | grep ^/ | sed -e 's/ .*% / /' | \
+      while read dev mount; do
+        on="ON"
+        if [ "$mount" = "/boot/efi" ]; then
           on="OFF"
-          txt="Software RAID"
-        elif [ "${dev:1:1}" = "d" ]; then
-          isnumbered=$(echo "$dev" | sed -e 's/.*[0-9]$/yes/')
-          if [ "$isnumbered" = "yes" ]; then
-            on="OFF"
-            txt="Partition"
-          else
-            txt="Physical disk"
-            on="ON"
-          fi
         fi
-        if [ "${dev:0:2}" = "dm" ]; then
-          txt="Device Mapper / Logical Volume"
-        fi
-    
-        printf '"'"$dev"'" "'"$txt"'" '"$on "
+        fs=$(cat /proc/mounts | grep "^$dev " | cut -f3 -d' ')
+        printf '"'"$dev"'" "'"$mount ($fs)"'" '"$on "
       done
 }
 
@@ -41,11 +44,11 @@ display_diskchoice() {
   local text="$1"
   shift
   choice=$(get_diskchoice)
-  eval whip --title \"$title\" --checklist \"$text\" 0 0 "$choice"
+  eval dlog --title \"$title\" --checklist \"$text\" 0 0 "$choice"
 }
 
 menu_diskchoice() {
-  t="Select disk interfaces to use for i/o monitoring."
+  t="Select disk mounts to monitor for free space."
   display_diskchoice "Disk monitor" "$t"
 }
 
@@ -87,7 +90,7 @@ display_ifchoice() {
   
   gatewayif=$(ip route get 8.8.8.8 | head -n1 | awk '{print $5}')
   choice=$(get_ifchoice $gatewayif)
-  eval whip --title \"$title\" --checklist \"$text\" 0 0 "$choice"
+  eval dlog --title \"$title\" --checklist \"$text\" 0 0 "$choice"
 }
 
 menu_ifchoice() {
@@ -117,7 +120,7 @@ display_tenantid() {
   tidvalid=0
   
   while [ $tidvalid = 0 ]; do
-    tid=$(whip --title "$title" --inputbox "$text" 0 0 "$tid")
+    tid=$(dlog --title "$title" --inputbox "$text" 8 60 "$tid")
     if [ $? = 1 ]; then
       exit 1
     fi
@@ -142,7 +145,7 @@ display_string() {
     default=""
   fi
   
-  whip --title "$title" --inputbox "$text" 0 0 "$default"
+  dlog --title "$title" --inputbox "$text" 8 60 "$default"
 }
 
 menu_tenantid() {
@@ -183,10 +186,33 @@ get_optionals() {
         ipmitool)
             txt="Gather fan and temperature data"
             ;;
+        pihole)
+            txt="Track PiHole DNS statistics"
+            ;;
+        docker)
+            txt="Track Docker containers"
+            ;;
     esac
     
     printf '"'"$system"'" "'"$txt"'" ON '
   done
+}
+
+ipmi_options() {
+  dlog --infobox "Querying IPMI for available sensors..." 3 50
+  ipmitool -I open sdr | grep '|.*[0-9].*|' | grep -v '| 0x' | while read ln; do
+    var=$(echo "$ln" | cut -f1 -d'|' | sed -e 's/ *$//')
+    val=$(echo "$ln" | cut -f2 -d'|' | sed -e 's/^ *//;s/ *$//')
+    printf '"'"$var"'" "'"$var ($val)"'" OFF '
+  done
+}
+
+export ipmi_choice=""
+
+ipmi_pick() {
+  [ -z "$ipmi_choice" ] && ipmi_choice=$(ipmi_options)
+  eval dlog --title Picker --visit-items --buildlist \
+       \"Pick $1 sensors\" 0 0 0 "$ipmi_choice"
 }
 
 display_optionchoice() {
@@ -195,7 +221,7 @@ display_optionchoice() {
   local text="$1"
   shift
   choice=$(get_optionals "$@")
-  eval whip --title \"$title\" --checklist \"$text\" 0 0 "$choice"
+  eval dlog --title \"$title\" --checklist \"$text\" 0 0 "$choice"
 }
 
 menu_options() {
@@ -213,7 +239,14 @@ startinfo() {
     t="$t Authentication data from $CURCONF has been loaded."
   fi
   
-  whip --title "Opticon Setup" --msgbox "$t" 8 78
+  dlog --title "Opticon Setup" --msgbox "$t" 8 70
+}
+
+echolist() {
+    while [ ! -z "$1" ]; do
+      echo "$1"
+      shift
+    done
 }
 
 tmpl_address="opticon.example.net"
@@ -232,7 +265,7 @@ tenantid=$(menu_tenantid "$tmpl_tenant")
 key=$(menu_key "$tmpl_key")
 [ -z "$tenantid" ] && exit 1
 netif=$(menu_ifchoice)
-disks=$(menu_diskchoice)
+dfdisks=$(menu_diskchoice)
 
 optionals=""
 has_libvirt="no"
@@ -262,15 +295,130 @@ if [ ! -z "$a" ]; then
   optionals="${optionals} bgp-zebra"
 fi
 
+a=$(which pihole)
+if [ ! -z "$a" ]; then
+  optionals="${optionals} pihole"
+fi
+
+a=$(which docker)
+if [ ! -z "$a" ]; then
+  optionals="${optionals} docker"
+fi
+
 a=$(which ipmitool)
 if [ ! -z "$a" ]; then
   optionals="${optionals} ipmitool"
 fi
 
-menu_options $optionals
+use_options=$(menu_options $optionals)
 
-echo "tenant: $tenantid"
-echo "host: $chost"
-echo "netif: $netif"
-echo "disks: $disks"
-echo "libvirt: $enable_libvirt"
+for opt in $use_options; do
+  case "$opt" in
+    ipmitool)
+        fanmatches=$(ipmi_pick Fan)
+        fanunit=$(dlog --menu "Unit used for fans" 0 0 2 rpm RPM % "Duty Cycle Percentage")
+        tempmatches=$(ipmi_pick Temperature)
+        tempunit=$(dlog --menu "System's temperature unit" 0 0 2 C Celsius F Fahrenheit)
+        ;;
+  esac
+done
+
+cat > out.conf << _EOF_
+# -----------------------------------------------------------------------------
+# CONFIGURATION GENERATED BY OPTICON-CONFIG
+# -----------------------------------------------------------------------------
+collector {
+    address: "$chost"
+    port: 1047
+    key: "$key"
+    tenant: "$tenantid"
+}
+
+probes {
+    net {
+        options {
+            match: [ $(to_array $netif) ]
+        }
+    }
+    df {
+        options {
+            match: [ $(to_array $dfdisks) ]
+        }
+    }
+_EOF_
+
+for opt in $optionals; do
+  case "$opt" in
+    "libvirt")
+        printf "    libvirt {\n"
+        printf "        type: exec\n"
+        printf "        call: /var/lib/opticon/probes/libvirt.probe\n"
+        printf "        frequency: high\n"
+        printf "    }\n"
+        ;;
+    "modstatus")
+        printf "    httpd {\n"
+        printf "        type: exec\n"
+        printf "        call: /var/lib/opticon/probes/modstatus.probe\n"
+        printf "        frequency: high\n"
+        printf "    }\n"
+        ;;
+    "mysql")
+        printf "    mysql {\n"
+        printf "        type: exec\n"
+        printf "        call: /var/lib/opticon/probes/mysql.probe\n"
+        printf "        frequency: high\n"
+        printf "    }\n"
+        ;;
+    "bgp-zebra")
+        printf "    bgp {\n"
+        printf "        type: exec\n"
+        printf "        call: /var/lib/opticon/probes/bgp-zebra.probe\n"
+        printf "        frequency: low\n"
+        printf "    }\n"
+        ;;
+    "pihole")
+        printf "    pihole {\n"
+        printf "        type: exec\n"
+        printf "        call: /var/lib/opticon/probes/pihole.probe\n"
+        printf "        frequency: low\n"
+        printf "    }\n"
+        ;;
+    "docker")
+        printf "    docker {\n"
+        printf "        type: exec\n"
+        printf "        call: /var/lib/opticon/probes/docker.probe\n"
+        printf "        frequency: low\n"
+        printf "    }\n"
+        ;;
+    "ipmitool")
+        printf "    ipmi {\n"
+        printf "        type: built-in\n"
+        printf "        call: probe_ipmi\n"
+        printf "        frequency: low\n"
+        printf "        options {\n"
+        printf "            ipmi {\n"
+        printf "                interface: open\n"
+        printf "            }\n"
+        printf "            values {\n"
+        printf "                fan [\n"
+        eval echolist $fanmatches | while read match; do
+          printf "                    { match: \"$match\", id: \"$match\", u: \"%s\" }\n" "$fanunit"
+        done
+        printf "                ]\n"
+        printf "                temp [\n"
+        eval echolist $tempmatches | while read match; do
+          printf "                    { match: \"$match\", id: \"$match\", u: \"%s\" }\n" "$tempunit"
+        done
+        printf "                ]\n"
+        printf "            }\n"
+        printf "        }\n"
+        printf "    }\n"
+        ;;
+  esac
+done >> out.conf
+
+echo "}" >> out.conf
+
+dlog --textbox out.conf 20 72
+printf "\033c"
