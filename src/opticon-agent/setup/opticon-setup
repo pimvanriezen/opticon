@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CURCONF=/etc/opticon/opticon-agent.conf
+
 whip() {
     dialog "$@" 3>&1 1>&2 2>&3
 }
@@ -158,14 +160,61 @@ menu_key() {
   display_string "Tenant Key" "$t" "$1"
 }
 
+get_optionals() {
+  local cnt=$(echo "$*" | wc -w)
+  printf "$cnt "
+  while [ ! -z "$1" ]; do
+    local system="$1"
+    shift
+    txt="Enable $system"
+    case "$system" in
+        libvirt)
+            txt="Monitor virtual machines"
+            ;;
+        modstatus)
+            txt="Monitor apache mod_status for connections"
+            ;;
+        mysql)
+            txt="Monitor MySQL/MariaDB performance"
+            ;;
+        bgp-zebra)
+            txt="List BGP peer connection status"
+            ;;
+        ipmitool)
+            txt="Gather fan and temperature data"
+            ;;
+    esac
+    
+    printf '"'"$system"'" "'"$txt"'" ON '
+  done
+}
+
+display_optionchoice() {
+  local title="$1"
+  shift
+  local text="$1"
+  shift
+  choice=$(get_optionals "$@")
+  eval whip --title \"$title\" --checklist \"$text\" 0 0 "$choice"
+}
+
+menu_options() {
+  t="Scanning of available software yielded a number of optional modules"
+  t="$t that can be configured for this system. Disable any modules you "
+  t="$t don't want to use."
+  display_optionchoice "Modules" "$t" "$@"
+}
+
 startinfo() {
   local t="This script will guide you through configuring opticon-agent and"
   t="$t its optional modules."
   
-  whiptail --title "Opticon Setup" --msgbox "$t" 8 78
+  if [ -e "$CURCONF" ]; then
+    t="$t Authentication data from $CURCONF has been loaded."
+  fi
+  
+  whip --title "Opticon Setup" --msgbox "$t" 8 78
 }
-
-CURCONF=/etc/opticon/opticon-agent.conf
 
 tmpl_address="opticon.example.net"
 tmpl_key=""
@@ -185,14 +234,40 @@ key=$(menu_key "$tmpl_key")
 netif=$(menu_ifchoice)
 disks=$(menu_diskchoice)
 
+optionals=""
+has_libvirt="no"
 enable_libvirt="no"
 a=$(systemctl is-active libvirtd)
 if [ "$a" = "active" ]; then
-  if dialog --title "Virtual Machines" --yesno \
-     "This machine is running libvirtd. Do you want to report back status of running VMs?" 8 50; then
-     enable_libvirt="yes"
-  fi
+  has_libvirt="yes"
+  optionals="${optionals} libvirt"
 fi
+
+a=$(systemctl is-active httpd)
+if [ ! "$a" = "active" ]; then
+  a=$(systemctl is-active apache)
+fi
+
+if [ "$a" = "active" ]; then
+  optionals="${optionals} modstatus"
+fi
+
+a=$(which mysql)
+if [ ! -z "$a" ]; then
+  optionals="${optionals} mysql"
+fi
+
+a=$(which vtysh)
+if [ ! -z "$a" ]; then
+  optionals="${optionals} bgp-zebra"
+fi
+
+a=$(which ipmitool)
+if [ ! -z "$a" ]; then
+  optionals="${optionals} ipmitool"
+fi
+
+menu_options $optionals
 
 echo "tenant: $tenantid"
 echo "host: $chost"
