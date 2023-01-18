@@ -1,17 +1,79 @@
 #!/bin/bash
 
+whip() {
+    dialog "$@" 3>&1 1>&2 2>&3
+}
+
+get_diskchoice() {
+  sz=$(cat /proc/diskstats | grep -v "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" | wc -l)
+  printf " $sz "
+  cat /proc/diskstats | sed -e 's/^\s*[0-9][0-9]*\s*[0-9][0-9]*\s//' | \
+      while read dev count rest; do
+        if [ "$count" = "0" ]; then continue; fi
+        on="OFF"
+        txt="                "
+        if [ "${dev:0:2}" = "md" ]; then
+          on="OFF"
+          txt="Software RAID"
+        elif [ "${dev:1:1}" = "d" ]; then
+          isnumbered=$(echo "$dev" | sed -e 's/.*[0-9]$/yes/')
+          if [ "$isnumbered" = "yes" ]; then
+            on="OFF"
+            txt="Partition"
+          else
+            txt="Physical disk"
+            on="ON"
+          fi
+        fi
+        if [ "${dev:0:2}" = "dm" ]; then
+          txt="Device Mapper / Logical Volume"
+        fi
+    
+        printf '"'"$dev"'" "'"$txt"'" '"$on "
+      done
+}
+
+display_diskchoice() {
+  local title="$1"
+  shift
+  local text="$1"
+  shift
+  choice=$(get_diskchoice)
+  eval whip --title \"$title\" --checklist \"$text\" 0 0 "$choice"
+}
+
+menu_diskchoice() {
+  t="Select disk interfaces to use for i/o monitoring."
+  display_diskchoice "Disk monitor" "$t"
+}
+
 get_ifchoice() {
  sz=$(ip link show up | grep "^[0-9]" | cut -f2 -d: | grep -v lo | grep -v vnet | wc -l)
  printf "$sz "
  ip link show up | grep "^[0-9]" | cut -f2 -d: | grep -v lo | grep -v vnet \
                  | while read if; do
-    xtra="          "
+    xtra=""
+    if [ "${if:0:4}" = "bond" ]; then
+      xtra="LAG"
+    elif [ "${if:0:2}" = "br" ]; then
+      xtra="Bridge"
+    elif [ "${if:0:5}" = "virbr" ]; then
+      xtra="Bridge (KVM)"
+    elif [ "${if:0:3}" = "tun"]; then
+      xtra="Tunnel"
+    elif [ "${if:0:4}" = "vtun"]; then
+      xtra="Tunnel"
+    elif [ "${if:0:1}" = "v" ]; then
+      xtra="Virtual"
+    else
+      xtra="Interface"
+    fi
     on="OFF"
     if [ "$if" = "$1" ]; then
-        xtra="Default gateway.    "
+        xtra="$xtra (Default gateway)"
         on="ON"
     fi
-    printf '"'"$if"'" "'"  $xtra"'" '"$on "
+    printf '"'"$if"'" "'"$xtra"'" '"$on "
   done
 }
 
@@ -23,7 +85,7 @@ display_ifchoice() {
   
   gatewayif=$(ip route get 8.8.8.8 | head -n1 | awk '{print $5}')
   choice=$(get_ifchoice $gatewayif)
-  eval whiptail --title \"$title\" --checklist \"$text\" 20 50 "$choice"
+  eval whip --title \"$title\" --checklist \"$text\" 0 0 "$choice"
 }
 
 menu_ifchoice() {
@@ -45,21 +107,95 @@ display_tenantid() {
   shift
   local text="$1"
   shift
+  if [ ! -z "$1" ]; then
+    tid="$1"
+  else
+    tid=""
+  fi
   tidvalid=0
-  tid=""
   
   while [ $tidvalid = 0 ]; do
-    tid=$(whiptail --title "$title" --inputbox "$text" 8 50 --default-item "$tid" 3>&1 1>&2 2>&3)
+    tid=$(whip --title "$title" --inputbox "$text" 0 0 "$tid")
+    if [ $? = 1 ]; then
+      exit 1
+    fi
     if [[ $tid =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]; then
       tidvalid=1
     fi
+    text=$(echo "$text" | sed -e 's/your/a valid/')
   done
-  echo "$tid" | tr A-F a-f
+  if [[ $tid =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]; then
+    echo "$tid" | tr A-F a-f
+  fi
+}
+
+display_string() {
+  local title="$1"
+  shift
+  local text="$1"
+  shift
+  if [ ! -z "$1" ]; then
+    default="$1"
+  else
+    default=""
+  fi
+  
+  whip --title "$title" --inputbox "$text" 0 0 "$default"
 }
 
 menu_tenantid() {
   t="Enter your tenant UUID"
-  display_tenantid "Tenant" "$t"
+  display_tenantid "Tenant" "$t" "$1"
 }
 
-menu_tenantid
+menu_collector() {
+  t="Enter collector address"
+  display_string "Collector" "$t" "$1"
+}
+
+menu_key() {
+  t="Enter your base64 key"
+  display_string "Tenant Key" "$t" "$1"
+}
+
+startinfo() {
+  local t="This script will guide you through configuring opticon-agent and"
+  t="$t its optional modules."
+  
+  whiptail --title "Opticon Setup" --msgbox "$t" 8 78
+}
+
+CURCONF=/etc/opticon/opticon-agent.conf
+
+tmpl_address="opticon.example.net"
+tmpl_key=""
+tmpl_tenant=""
+
+if [ -e $CURCONF ]; then
+  tmpl_address=$(grep "^ *address:" < $CURCONF | head -1 | sed -e 's/^.*address: *//;s/^"//;s/" *$//')
+  tmpl_key=$(grep "^ *key:" < $CURCONF | head -1 | sed -e 's/^.*key: *//;s/^"//;s/" *$//')
+  tmpl_tenant=$(grep "^ *tenant:" < $CURCONF | head -1 | sed -e 's/^.*tenant: *//;s/^"//;s/" *$//')
+fi
+
+startinfo
+chost=$(menu_collector "$tmpl_address")
+tenantid=$(menu_tenantid "$tmpl_tenant")
+key=$(menu_key "$tmpl_key")
+[ -z "$tenantid" ] && exit 1
+netif=$(menu_ifchoice)
+disks=$(menu_diskchoice)
+
+enable_libvirt="no"
+a=$(systemctl is-active libvirtd)
+if [ "$a" = "active" ]; then
+  if dialog --title "Virtual Machines" --yesno \
+     "This machine is running libvirtd. Do you want to report back status of running VMs?" 8 50; then
+     enable_libvirt="yes"
+  fi
+fi
+
+echo "tenant: $tenantid"
+echo "host: $chost"
+echo "netif: $netif"
+echo "disks: $disks"
+echo "libvirt: $enable_libvirt"
