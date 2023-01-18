@@ -1300,6 +1300,7 @@ form.uEditable.uSingleColumn
     display: inline-block;
     vertical-align: top;
     width: auto;
+    text-align: left;
 }
 
 .uEditContainer h2 {

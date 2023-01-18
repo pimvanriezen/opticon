@@ -220,12 +220,14 @@ ServerView.setScale = function(e) {
     self.refreshGraph ("io","write","i/o","ops/s");
 }
 
-ServerView.makeLayout = function(q) {
+ServerView.makeLayout = function(q, portWidth) {
     var objtable= {};
     var columnpositions = {};
     var widths= [];
     var outcolumns = [];
     var idx = 0;
+    var leftmost = 1000;
+    var rightmost = 0;
     
     for (obj of q) {
         if (! obj.offsetWidth) continue;
@@ -242,6 +244,11 @@ ServerView.makeLayout = function(q) {
             obj: obj
         });
         
+        if (obj.offsetLeft < leftmost) leftmost = obj.offsetLeft;
+        if (obj.offsetLeft+obj.offsetWidth > rightmost) {
+            rightmost = obj.offsetLeft+obj.offsetWidth;
+        }
+        
         if (! columnpositions[w].includes (obj.offsetLeft)) {
             columnpositions[w].push (obj.offsetLeft);
             outcolumns.push ([]);
@@ -250,6 +257,7 @@ ServerView.makeLayout = function(q) {
     
     let cpos = 0;
     let yoffs = 20;
+    let xoffs = (((portWidth-rightmost)/2)-leftmost) - 10/*margin/2*/;
     
     let columnh = [0,0,0,0,0,0];
     let numc = 0;
@@ -305,6 +313,7 @@ ServerView.makeLayout = function(q) {
         outcolumns[lowestcolumn].push ({
             top: lowestval+yoffs,
             left: columnpositions[width][lowestcolumn],
+            idx: item.idx,
             obj: item.obj
         });
 
@@ -326,6 +335,32 @@ ServerView.makeLayout = function(q) {
         if (columnh[col] > maxh) maxh = columnh[col];
     }
     
+    for (let c of outcolumns) {
+        for (let j=0; j<c.length-1;++j) {
+            for (let i=0; i<c.length-1;++i) {
+                if (c[i].idx > c[i+1].idx) {
+            
+                    let tmp = {
+                        top:c[i].top+c[i+1].obj.offsetHeight,
+                        left:c[i].left,
+                        idx:c[i].idx,
+                        obj:c[i].obj
+                    }
+                
+                    let tmp2 = {
+                        top:c[i].top,
+                        left:c[i+1].left,
+                        idx:c[i+1].idx,
+                        obj:c[i+1].obj
+                    }
+                
+                    c[i] = tmp2;
+                    c[i+1] = tmp;
+                }
+            }
+        }
+    }        
+
     for (let col=0; col<numc; ++col) {
         if (columnh[col] < maxh) {
             if (outcolumns[col].length<2) continue;
@@ -352,12 +387,13 @@ ServerView.makeLayout = function(q) {
     }
 
     pslist.style.top = plisty + yoffs;
+    pslist.style.left = leftmost + xoffs;
     pslist.style.position = "absolute";
 
     for (let c of outcolumns) {
         for (let item of c) {
             item.obj.style.top = item.top;
-            item.obj.style.left = item.left;
+            item.obj.style.left = item.left + xoffs;
             item.obj.style.position = "absolute";
         }
     }
@@ -367,7 +403,7 @@ ServerView.fixLayout = function() {
     var positions = {};
     var counts = {};
     var q = $("#ServerView #ServerOverview .magicLayout");
-    ServerView.makeLayout (q);
+    ServerView.makeLayout (q, $("#ServerView").width());
 }
 
 ServerView.linuxIcon = function(kernel) {

@@ -10,432 +10,434 @@
 <!-- OVERVIEW TAB -->
 
 <span v-if="tab=='Overview'">
-<div class="uEditPane" id="ServerOverview"><div style="text-align:left;" class="gridroot">
-  <div class="gridmeasure"></div>
-  <div class="uEditContainer magicLayout">
-    <u-header icon="header-info.png">Host Information</u-header>
-    <div class="uServerData">
-      <table width="100%">
-        <tr>
-          <td style="color:#888888;" width="22%">Hostname</td>
-          <td>{{data.hostname}}</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">UUID</td>
-          <td class="unit">{{id}}</td>
-        </tr>
-        <tr v-if="meta.name">
-          <td style="color:#888888;" width="22%">Tenant</td>
-          <td>{{meta.name}}</td>
-        </tr>
-        <tr>
-          <td colspan="2">&nbsp;</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">Status</td>
-          <td>
-            <span v-bind:class="statusClass(data.status)">{{data.status}}</span>
-            <span v-if="data.problems">{{data.problems.join(',')}}</span>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">&nbsp;</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">Session IP</td>
-          <td>{{data.link.ip}}
-            <span v-if="data.agent.ip && data.agent.ip != data.link.ip" style="color:#666666;">
-              (Local {{data.agent.ip}})
-            </span>
-          </td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">RTT</td>
-          <td>{{data.link.rtt}} <span class="unit">ms</span>
-            <span v-if="data.link.loss>0">
-              <b>({{data.link.loss}}% packet loss)</b>
-            </span>
-          </td>
-        </tr>
-      </table>
+<div class="uEditPane" id="ServerOverview" style="text-align:center; width: 100%;">
+  <div style="text-align:left; width: 1150px;">
+    <div class="gridmeasure"></div>
+    <div class="uEditContainer magicLayout">
+      <u-header icon="header-info.png">Host Information</u-header>
+      <div class="uServerData">
+        <table width="100%">
+          <tr>
+            <td style="color:#888888;" width="22%">Hostname</td>
+            <td>{{data.hostname}}</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">UUID</td>
+            <td class="unit">{{id}}</td>
+          </tr>
+          <tr v-if="meta.name">
+            <td style="color:#888888;" width="22%">Tenant</td>
+            <td>{{meta.name}}</td>
+          </tr>
+          <tr>
+            <td colspan="2">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">Status</td>
+            <td>
+              <span v-bind:class="statusClass(data.status)">{{data.status}}</span>
+              <span v-if="data.problems">{{data.problems.join(',')}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">Session IP</td>
+            <td>{{data.link.ip}}
+              <span v-if="data.agent.ip && data.agent.ip != data.link.ip" style="color:#666666;">
+                (Local {{data.agent.ip}})
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">RTT</td>
+            <td>{{data.link.rtt}} <span class="unit">ms</span>
+              <span v-if="data.link.loss>0">
+                <b>({{data.link.loss}}% packet loss)</b>
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
-  </div>
   
-  <div class="uEditContainer magicLayout">
-    <u-header icon="header-performance.png">Performance Data</u-header>
-    <div class="uServerData">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <td style="color:#888888;" width="22%">CPU Usage</td>
-          <td align="left" width="130" style="padding: 0px;">
-            <u-meter width="120" var="data.pcpu"></u-meter>
-          </td>
-          <td align="left">
-            {{parseFloat(data.pcpu).toFixed(2)}} %
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3">&nbsp;</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">LoadAvg</td>
-          <td colspan="2">{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
-              {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
-              {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">IO Wait</td>
-          <td colspan="2">
-            {{parseFloat(data.io.pwait).toFixed(2)}} %
-          </td>
-        </tr>
-        <tr>
-         <td style="color:#888888;" width="22%">Uptime</td>
-         <td colspan="2">
-           {{translateUptime(data.uptime)}}
-         </td>
-       </tr>
-        <tr>
-          <td colspan="3">&nbsp;</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">Memory</td>
-          <td colspan="2">
-            {{ktoh(data.mem.free).size}} <span class="unit">{{ktoh(data.mem.free).unit}}</span>
-            free ({{ktoh(data.mem.total).size}} <span class="unit">{{ktoh(data.mem.total).unit}}</span>
-            total)
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3">&nbsp;</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">Network In</td>
-          <td colspan="2">
-            {{ktoh(data.net.in_kbs).size}} <span class="unit">{{ktoh(data.net.in_kbs,true).unit}}</span>
-            ({{data.net.in_pps}} <span class="unit">pps</span>)
-          </td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">Network Out</td>
-          <td colspan="2">
-            {{ktoh(data.net.out_kbs).size}} <span class="unit">{{ktoh(data.net.out_kbs,true).unit}}</span>
-            ({{data.net.out_pps}} <span class="unit">pps</span>)
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3">&nbsp;</td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%">Disk i/o</td>
-          <td colspan="2">
-            {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-  
-  <div class="uEditContainer magicLayout">
-    <u-header icon="header-hwenv.png">System Details</u-header>
-    <div class="uServerData">
-      <table width="100%">
-        <tr>
-          <td style="color:#888888;" width="22%">Kernel</td>
-          <td>
-            <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
-              <img v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
-            </span>
-            <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
-              <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
-            </span>
-            {{data.os.kernel}} {{data.os.version}}
-            <span class="unit">({{data.os.arch}})</span>
-          </td>
-        </tr>
-        <tr v-if="data.os.hw">
-          <td style="color:#888888;" width="22%">Platform</td>
-          <td>
-            {{data.os.hw}}
-          </td>
-        </tr>
-        <tr>
-          <td style="color:#888888;" width="22%" valign="top">Distribution</td>
-          <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
-        </tr>
-        <tr v-if="data.agent.v">
-          <td style="color:#888888;" width="22%">Agent Version</td>
-          <td>
-            {{data.agent.v}}
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div v-if="data.df && data.df.length" class="uEditContainer magicLayout">
-    <u-header icon="header-disk.png">Disk Usage</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Device</th>
-          <th align="left">FS</th>
-          <th align="right">Size</th>
-          <th align="center">Usage</th>
-          <th align="left">Mount</th>
-        </tr>
-        <tr v-for="dsk in data.df">
-          <td width="20%" style="color:#555555;white-space: nowrap;"
-              v-bind:class="devClass(dsk.device)">{{devName(dsk.device)}}</td>
-          <td width="5%">{{dsk.fs}}</td>
-          <td align="right" width="20%">{{ktoh(dsk.size*1024).size}} <span class="unit">{{ktoh(dsk.size*1024).unit}}</span></td>
-          <td align="center" width="20%">
-            <u-meter width="60" var="dsk.pused"></u-meter>
-          </td>
-          <td>{{dsk.mount}}</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-  
-  <div v-if="data.phdns && data.phdns.sz" class="uEditContainer magicLayout">
-    <u-header icon="header-pihole.png">Pi-Hole DNS</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Server Statistics</th>
-        </tr>
-        <tr>
-          <td style="margin: 4px;">
-            <table width="100%">
-              <tr>
-                <td rowspan="4" width="70"><center>
-                  <img src="icon/pihole.svg" width="50">
-                </td>
-                <td style="color:#888888;" width="35%">Blocked domains</td>
-                <td align="right">
-                  {{data.phdns.sz}}
-                </td>
-              </tr>
-              <tr>
-                <td style="color:#888888;">Queries answered today</td>
-                <td align="right">
-                  {{data.phdns.qnow}}
-                </td>
-              </tr>
-              <tr>
-                <td style="color:#888888;">Queries blocked today</td>
-                <td align="right">
-                  {{data.phdns.bnow}}
-                </td>
-              </tr>
-              <tr>
-                <td style="color:#888888;">Blocked</td>
-                <td align="right">
-                  <b>{{parseFloat(data.phdns.pblk).toFixed(2)}} %</b>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div v-if="data.mysql && data.mysql.conf" class="uEditContainer magicLayout">
-    <u-header icon="header-db.png">MySQL</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Server Statistics</th>
-        </tr>
-        <tr>
-          <td style="margin: 4px;">
-            <table width="100%">
-              <tr>
-                <td rowspan="4" width="70"><center>
-                  <img src="icon/mysql.png" width="60">
-                </td>
-                <td style="color:#888888;" width="35%">Configuration</td>
-                <td align="right">
-                  <span class="status small grey">{{data.mysql.conf}}</span>
-                </td>
-              </tr>
-              <tr>
-                <td style="color:#888888;">Queries per second</td>
-                <td align="right">
-                  {{parseFloat(data.mysql.qps).toFixed(2)}}
-                </td>
-              </tr>
-              <tr>
-                <td style="color:#888888;">Errors per second</td>
-                <td align="right">
-                  {{parseFloat(data.mysql.erps).toFixed(2)}}
-                </td>
-              </tr>
-              <tr>
-                <td style="color:#888888;">Connections per second</td>
-                <td align="right">
-                  {{parseFloat(data.mysql.cps).toFixed(2)}}
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-  
-  <div v-if="data.bgp && data.bgp.length" class="uEditContainer magicLayout">
-    <u-header icon="header-bgp.png">BGP Peers</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Peer Address</th>
-          <th align="left">Remote AS</th>
-          <th align="left">Uptime</th>
-          <th align="right">Messages Sent</th>
-          <th align="right">Received</th>
-        </tr>
-        <tr v-for="obj in data.bgp">
-          <td>{{obj.peer}}</td>
-          <td>AS{{obj.as}}</td>
-          <td>{{obj.up}}</td>
-          <td align="right">{{obj.sent}}</td>
-          <td align="right">{{obj.recv}}</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div v-if="data.vm && data.vm.length" class="uEditContainer magicLayout">
-    <u-header icon="header-vm.png">Virtual Machines</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Name</th>
-          <th align="center">CPU</th>
-          <th align="right">Cores</th>
-          <th align="right">RAM</th>
-        </tr>
-        <tr v-for="vm in data.vm">
-          <td>{{vm.name}}</td>
-          <td align="center" width="70"><u-meter width="60" var="vm.cpu"></u-meter></td>
-          <td width="10%" align="right">{{vm.cores}}</td>
-          <td width="20%" align="right">{{ktoh(vm.ram*1024).size}}
-            <span class="unit">{{ktoh(vm.ram*1024).unit}}</span></td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div v-if="data.cntr && data.cntr.length" class="uEditContainer magicLayout">
-    <u-header icon="header-container.png">Containers</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Name</th>
-          <th align="left">Image</th>
-          <th align="right">Size</th>
-        </tr>
-        <tr v-for="c in data.cntr">
-          <td widht="20%">{{c.name}}</td>
-          <td style="color: #444444;">{{c.image}}</td>
-          <td align="right">{{c.size}} <span class="unit">MB</span></td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div v-if="data.temp || data.fan" style="width: 552px;" class="magicLayout">
-    <div v-if="data.temp && data.temp.length" class="uEditContainer">
-      <u-header icon="header-temp.png">Temperatures</u-header>
-      <div class="uServerData table narrow">
+    <div class="uEditContainer magicLayout">
+      <u-header icon="header-performance.png">Performance Data</u-header>
+      <div class="uServerData">
         <table width="100%" border="0" cellspacing="0" cellpadding="2">
           <tr>
-            <th align="left">Name</th>
-            <th align="right">Value</th>
+            <td style="color:#888888;" width="22%">CPU Usage</td>
+            <td align="left" width="130" style="padding: 0px;">
+              <u-meter width="120" var="data.pcpu"></u-meter>
+            </td>
+            <td align="left">
+              {{parseFloat(data.pcpu).toFixed(2)}} %
+            </td>
           </tr>
-          <tr v-for="dat in data.temp">
-            <td>{{dat.id}}</td>
-            <td align="right">{{dat.v}} <span class="unit">º{{dat.u}}</span></td>
+          <tr>
+            <td colspan="3">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">LoadAvg</td>
+            <td colspan="2">{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
+                {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
+                {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">IO Wait</td>
+            <td colspan="2">
+              {{parseFloat(data.io.pwait).toFixed(2)}} %
+            </td>
+          </tr>
+          <tr>
+           <td style="color:#888888;" width="22%">Uptime</td>
+           <td colspan="2">
+             {{translateUptime(data.uptime)}}
+           </td>
+         </tr>
+          <tr>
+            <td colspan="3">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">Memory</td>
+            <td colspan="2">
+              {{ktoh(data.mem.free).size}} <span class="unit">{{ktoh(data.mem.free).unit}}</span>
+              free ({{ktoh(data.mem.total).size}} <span class="unit">{{ktoh(data.mem.total).unit}}</span>
+              total)
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">Network In</td>
+            <td colspan="2">
+              {{ktoh(data.net.in_kbs).size}} <span class="unit">{{ktoh(data.net.in_kbs,true).unit}}</span>
+              ({{data.net.in_pps}} <span class="unit">pps</span>)
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">Network Out</td>
+            <td colspan="2">
+              {{ktoh(data.net.out_kbs).size}} <span class="unit">{{ktoh(data.net.out_kbs,true).unit}}</span>
+              ({{data.net.out_pps}} <span class="unit">pps</span>)
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">Disk i/o</td>
+            <td colspan="2">
+              {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  
+    <div class="uEditContainer magicLayout">
+      <u-header icon="header-hwenv.png">System Details</u-header>
+      <div class="uServerData">
+        <table width="100%">
+          <tr>
+            <td style="color:#888888;" width="22%">Kernel</td>
+            <td>
+              <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
+                <img v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
+              </span>
+              <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
+                <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
+              </span>
+              {{data.os.kernel}} {{data.os.version}}
+              <span class="unit">({{data.os.arch}})</span>
+            </td>
+          </tr>
+          <tr v-if="data.os.hw">
+            <td style="color:#888888;" width="22%">Platform</td>
+            <td>
+              {{data.os.hw}}
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%" valign="top">Distribution</td>
+            <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
+          </tr>
+          <tr v-if="data.agent.v">
+            <td style="color:#888888;" width="22%">Agent Version</td>
+            <td>
+              {{data.agent.v}}
+            </td>
           </tr>
         </table>
       </div>
     </div>
 
-    <div v-if="data.fan && data.fan.length" class="uEditContainer">
-      <u-header icon="header-fans.png">Fans</u-header>
-      <div class="uServerData table narrow">
+    <div v-if="data.df && data.df.length" class="uEditContainer magicLayout">
+      <u-header icon="header-disk.png">Disk Usage</u-header>
+      <div class="uServerData table">
         <table width="100%" border="0" cellspacing="0" cellpadding="2">
           <tr>
-            <th align="left">Name</th>
-            <th align="right">Value</th>
+            <th align="left">Device</th>
+            <th align="left">FS</th>
+            <th align="right">Size</th>
+            <th align="center">Usage</th>
+            <th align="left">Mount</th>
           </tr>
-          <tr v-for="dat in data.fan">
-            <td>{{dat.id}}</td>
-            <td align="right">{{dat.v}} <span class="unit">{{dat.u}}</span></td>
+          <tr v-for="dsk in data.df">
+            <td width="20%" style="color:#555555;white-space: nowrap;"
+                v-bind:class="devClass(dsk.device)">{{devName(dsk.device)}}</td>
+            <td width="5%">{{dsk.fs}}</td>
+            <td align="right" width="20%">{{ktoh(dsk.size*1024).size}} <span class="unit">{{ktoh(dsk.size*1024).unit}}</span></td>
+            <td align="center" width="20%">
+              <u-meter width="60" var="dsk.pused"></u-meter>
+            </td>
+            <td>{{dsk.mount}}</td>
           </tr>
         </table>
       </div>
     </div>
-  </div>
   
-  <div v-if="data.who && data.who.length" class="uEditContainer magicLayout">
-    <u-header icon="header-who.png">User Sessions</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">User</th>
-          <th align="right">TTY</th>
-          <th align="left">Remote</th>
-        </tr>
-        <tr v-for="ses in data.who">
-          <td>{{ses.user}}</td>
-          <td width="20%" align="right">{{ses.tty}}</td>
-          <td>{{ses.remote}}</td>
-        </tr>
-      </table>
+    <div v-if="data.phdns && data.phdns.sz" class="uEditContainer magicLayout">
+      <u-header icon="header-pihole.png">Pi-Hole DNS</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Server Statistics</th>
+          </tr>
+          <tr>
+            <td style="margin: 4px;">
+              <table width="100%">
+                <tr>
+                  <td rowspan="4" width="70"><center>
+                    <img src="icon/pihole.svg" width="50">
+                  </td>
+                  <td style="color:#888888;" width="35%">Blocked domains</td>
+                  <td align="right">
+                    {{data.phdns.sz}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#888888;">Queries answered today</td>
+                  <td align="right">
+                    {{data.phdns.qnow}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#888888;">Queries blocked today</td>
+                  <td align="right">
+                    {{data.phdns.bnow}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#888888;">Blocked</td>
+                  <td align="right">
+                    <b>{{parseFloat(data.phdns.pblk).toFixed(2)}} %</b>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
-  </div>
+
+    <div v-if="data.mysql && data.mysql.conf" class="uEditContainer magicLayout">
+      <u-header icon="header-db.png">MySQL</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Server Statistics</th>
+          </tr>
+          <tr>
+            <td style="margin: 4px;">
+              <table width="100%">
+                <tr>
+                  <td rowspan="4" width="70"><center>
+                    <img src="icon/mysql.png" width="60">
+                  </td>
+                  <td style="color:#888888;" width="35%">Configuration</td>
+                  <td align="right">
+                    <span class="status small grey">{{data.mysql.conf}}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#888888;">Queries per second</td>
+                  <td align="right">
+                    {{parseFloat(data.mysql.qps).toFixed(2)}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#888888;">Errors per second</td>
+                  <td align="right">
+                    {{parseFloat(data.mysql.erps).toFixed(2)}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#888888;">Connections per second</td>
+                  <td align="right">
+                    {{parseFloat(data.mysql.cps).toFixed(2)}}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  
+    <div v-if="data.bgp && data.bgp.length" class="uEditContainer magicLayout">
+      <u-header icon="header-bgp.png">BGP Peers</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Peer Address</th>
+            <th align="left">Remote AS</th>
+            <th align="left">Uptime</th>
+            <th align="right">Messages Sent</th>
+            <th align="right">Received</th>
+          </tr>
+          <tr v-for="obj in data.bgp">
+            <td>{{obj.peer}}</td>
+            <td>AS{{obj.as}}</td>
+            <td>{{obj.up}}</td>
+            <td align="right">{{obj.sent}}</td>
+            <td align="right">{{obj.recv}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div v-if="data.vm && data.vm.length" class="uEditContainer magicLayout">
+      <u-header icon="header-vm.png">Virtual Machines</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Name</th>
+            <th align="center">CPU</th>
+            <th align="right">Cores</th>
+            <th align="right">RAM</th>
+          </tr>
+          <tr v-for="vm in data.vm">
+            <td>{{vm.name}}</td>
+            <td align="center" width="70"><u-meter width="60" var="vm.cpu"></u-meter></td>
+            <td width="10%" align="right">{{vm.cores}}</td>
+            <td width="20%" align="right">{{ktoh(vm.ram*1024).size}}
+              <span class="unit">{{ktoh(vm.ram*1024).unit}}</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div v-if="data.cntr && data.cntr.length" class="uEditContainer magicLayout">
+      <u-header icon="header-container.png">Containers</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Name</th>
+            <th align="left">Image</th>
+            <th align="right">Size</th>
+          </tr>
+          <tr v-for="c in data.cntr">
+            <td widht="20%">{{c.name}}</td>
+            <td style="color: #444444;">{{c.image}}</td>
+            <td align="right">{{c.size}} <span class="unit">MB</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div v-if="data.temp || data.fan" style="width: 552px;" class="magicLayout">
+      <div v-if="data.temp && data.temp.length" class="uEditContainer">
+        <u-header icon="header-temp.png">Temperatures</u-header>
+        <div class="uServerData table narrow">
+          <table width="100%" border="0" cellspacing="0" cellpadding="2">
+            <tr>
+              <th align="left">Name</th>
+              <th align="right">Value</th>
+            </tr>
+            <tr v-for="dat in data.temp">
+              <td>{{dat.id}}</td>
+              <td align="right">{{dat.v}} <span class="unit">º{{dat.u}}</span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div v-if="data.fan && data.fan.length" class="uEditContainer">
+        <u-header icon="header-fans.png">Fans</u-header>
+        <div class="uServerData table narrow">
+          <table width="100%" border="0" cellspacing="0" cellpadding="2">
+            <tr>
+              <th align="left">Name</th>
+              <th align="right">Value</th>
+            </tr>
+            <tr v-for="dat in data.fan">
+              <td>{{dat.id}}</td>
+              <td align="right">{{dat.v}} <span class="unit">{{dat.u}}</span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  
+    <div v-if="data.who && data.who.length" class="uEditContainer magicLayout">
+      <u-header icon="header-who.png">User Sessions</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">User</th>
+            <th align="right">TTY</th>
+            <th align="left">Remote</th>
+          </tr>
+          <tr v-for="ses in data.who">
+            <td>{{ses.user}}</td>
+            <td width="20%" align="right">{{ses.tty}}</td>
+            <td>{{ses.remote}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
     
-  <div v-if="data.http && data.http.length" class="uEditContainer magicLayout">
-    <u-header icon="header-http.png">HTTP Server</u-header>
-    <div class="uServerData table">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">Site</th>
-          <th align="right">Connections</th>
-        </tr>
-        <tr v-for="s in data.http">
-          <td>{{s.site}}</td>
-          <td align="right">{{s.count}}</td>
-        </tr>
-      </table>
+    <div v-if="data.http && data.http.length" class="uEditContainer magicLayout">
+      <u-header icon="header-http.png">HTTP Server</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Site</th>
+            <th align="right">Connections</th>
+          </tr>
+          <tr v-for="s in data.http">
+            <td>{{s.site}}</td>
+            <td align="right">{{s.count}}</td>
+          </tr>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <div class="uEditContainer magicLayout">
-    <u-header icon="header-top.png">Processes</u-header>
-    <div class="uServerData table wide">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
-        <tr>
-          <th align="left">PID</td>
-          <th align="left">User</td>
-          <th align="right">CPU %</td>
-          <th align="right">Mem %</td>
-          <th></th>
-          <th align="left">Name</td>
-        </tr>
-        <tr v-for="proc in data.top">
-          <td width="5%">{{proc.pid}}</td>
-          <td width="15%">{{translateUser(proc.user)}}</td>
-          <td width="8%" align="right">{{parseFloat(proc.pcpu).toFixed(2)}}</td>
-          <td width="8%" align="right">{{parseFloat(proc.pmem).toFixed(2)}}</td>
-          <td width="2%">&nbsp;</td>
-          <td>{{proc.name}}</td>
-        </tr>
-      </table>
+    <div class="uEditContainer magicLayout">
+      <u-header icon="header-top.png">Processes</u-header>
+      <div class="uServerData table wide">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">PID</td>
+            <th align="left">User</td>
+            <th align="right">CPU %</td>
+            <th align="right">Mem %</td>
+            <th></th>
+            <th align="left">Name</td>
+          </tr>
+          <tr v-for="proc in data.top">
+            <td width="5%">{{proc.pid}}</td>
+            <td width="15%">{{translateUser(proc.user)}}</td>
+            <td width="8%" align="right">{{parseFloat(proc.pcpu).toFixed(2)}}</td>
+            <td width="8%" align="right">{{parseFloat(proc.pmem).toFixed(2)}}</td>
+            <td width="2%">&nbsp;</td>
+            <td>{{proc.name}}</td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
   
@@ -449,43 +451,43 @@
     <u-tabgroup cb="setScale" name="scale" tabs="604800:Week,86400:24h,43200:12h,10800:3h" class="green"></u-tabgroup>
     <br>
     <br>
-    <div style="text-align:left;">
-      <div class="uEditContainer magicLayout" v-static="keep">
+    <div>
+      <div class="uEditContainer" v-static="keep">
         <u-header icon="header-performance.png">CPU</u-header>
         <div class="uServerData table" v-static="keep">
           <canvas id="graph-cpu-usage" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer magicLayout" v-static="keep">
+      <div class="uEditContainer" v-static="keep">
         <u-header icon="header-rtt.png">RTT</u-header>
         <div class="uServerData table">
           <canvas id="graph-link-rtt" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer magicLayout" v-static="keep">
+      <div class="uEditContainer" v-static="keep">
         <u-header icon="header-netio.png">Network in</u-header>
         <div class="uServerData table">
           <canvas id="graph-net-input" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer magicLayout" v-static="keep">
+      <div class="uEditContainer" v-static="keep">
         <u-header icon="header-netio.png">Network out</u-header>
         <div class="uServerData table">
           <canvas id="graph-net-output" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer magicLayout" v-static="keep">
+      <div class="uEditContainer" v-static="keep">
         <u-header icon="header-disk.png">Disk i/o (read)</u-header>
         <div class="uServerData table">
           <canvas id="graph-io-read" width="530" height="200"
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
-      <div class="uEditContainer magicLayout" v-static="keep">
+      <div class="uEditContainer" v-static="keep">
         <u-header icon="header-disk.png">Disk i/o (write)</u-header>
         <div class="uServerData table">
           <canvas id="graph-io-write" width="530" height="200"
