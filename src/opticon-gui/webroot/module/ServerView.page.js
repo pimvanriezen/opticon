@@ -47,6 +47,11 @@ ServerView.activate = function(argv) {
 ServerView.refresh = function() {
     var self = ServerView;
     API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
+        if (! res) {
+            setTimeout (function() { self.refresh(); }, 1000);
+            return;
+        }
+
         /* translate pre-0.9.26 layout */
         if (res.version && (res.agent === undefined || res.agent.v === undefined)) {
             if (res.agent === undefined) res.agent = {};
@@ -408,7 +413,14 @@ ServerView.fixLayout = function() {
 }
 
 ServerView.linuxIcon = function(kernel) {
-    if (/UBNT/.test (kernel)) return "icon/ubnt.png"
-    if (/qnap/.test (kernel)) return "icon/qnap.png"
-    return "icon/linux.png"
+    let distro = ServerView.View.data.os.distro;
+    if (/UBNT/.test (kernel)) return "icon/ubnt.png";
+    if (/qnap/.test (kernel)) return "icon/qnap.png";
+    if (/el[0-9]/.test (kernel) && /^Alma/.test (distro)) {
+        return "icon/alma.svg";
+    }
+    if (/generic/.test (kernel) && /^Ubuntu/.test (distro)) {
+        return "icon/ubuntu.png";
+    }
+    return "icon/linux.png";
 }
