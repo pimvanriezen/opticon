@@ -673,16 +673,15 @@ int cmd_get_record (int argc, const char *argv[]) {
     print_value ("Hostname", VT_YLW "%s" VT_RST, Vstr("hostname"));
     print_value ("Address", VT_BLD "%s" VT_RST " (rtt: " VT_BLD "%.2f"
                             VT_RST " ms, " VT_BLD "%.0f" VT_RST " %% loss)",
-                            VDstr("agent","ip"),
+                            VDstr("link","ip"),
                             VDfrac("link","rtt"),
                             VDfrac("link","loss"));
                             
-    print_value ("Version", VT_YLW "%s" VT_RST, Vstr("version"));
+    print_value ("Version", VT_YLW "%s" VT_RST, VDstr("agent","v"));
     print_value ("Status", "%s", decorate_status(Vstr("status")));
     print_array ("Problems", Arr("problems"));
     
     Vdone("hostname");
-    Vdone("agent");
     Vdone("link");
     Vdone("status");
     Vdone("problems");
@@ -713,11 +712,13 @@ int cmd_get_record (int argc, const char *argv[]) {
 
         char uptimeastr[128];
         uptimeastr[0] = 0;
-        uint64_t uptimea = Vint("uptimea"); Vdone("uptimea");
+        uint64_t uptimea = VDint("agent","up");
         uint64_t ua_days = uptimea / 86400ULL;
         uint64_t ua_hours = (uptimea - (86400 * ua_days)) / 3600ULL;
         uint64_t ua_mins = (uptimea - (86400 * ua_days) - (3600 * ua_hours)) / 60ULL;
         uint64_t ua_sec = uptimea % 60;
+        
+        Vdone("agent");
         
         if (uptimea) {
             if (ua_days) {
