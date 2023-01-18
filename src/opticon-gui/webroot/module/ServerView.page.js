@@ -48,7 +48,8 @@ ServerView.refresh = function() {
     var self = ServerView;
     API.Opticon.Host.getCurrent (self.tenantid, self.id, function (res) {
         /* translate pre-0.9.26 layout */
-        if (res.version && (res.agent.v === undefined)) {
+        if (res.version && (res.agent === undefined || res.agent.v === undefined)) {
+            if (res.agent === undefined) res.agent = {};
             res.agent.v = res.version;
             var tmp = res.link.ip;
             res.link.ip = res.agent.ip;
