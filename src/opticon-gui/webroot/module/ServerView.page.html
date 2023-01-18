@@ -145,7 +145,7 @@
             <td style="color:#888888;" width="22%">Kernel</td>
             <td>
               <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
-                <img v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
+                <img height="16" v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
               </span>
               <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
                 <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">

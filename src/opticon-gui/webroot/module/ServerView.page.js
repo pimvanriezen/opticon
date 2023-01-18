@@ -408,5 +408,6 @@ ServerView.fixLayout = function() {
 
 ServerView.linuxIcon = function(kernel) {
     if (/UBNT/.test (kernel)) return "icon/ubnt.png"
+    if (/qnap/.test (kernel)) return "icon/qnap.png"
     return "icon/linux.png"
 }
