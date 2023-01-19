@@ -110,6 +110,8 @@ ServerView.statusClass = function (st) {
     if (st == "OK") return "status small green";
     if (st == "WARN") return "status small orange";
     if (st == "ALERT") return "status small red";
+    if (st == "UP") return "status small green";
+    if (st == "DOWN") return "status small red";
     return "status small grey";
 }
 

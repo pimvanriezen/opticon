@@ -1,0 +1,54 @@
+#!/bin/bash
+
+pman="unknown"
+
+if [ -e /etc/debian_version ]; then
+  pman="apt"
+else
+  pman="dnf"
+fi
+
+cnt=0
+reboot=0
+
+if [ "$pman" = "dnf" ]; then
+  printf "pkgl [\n"
+  while read id v rest; do
+    if [ "$id" = "Security:" ]; then
+      reboot=1
+    else
+      cnt=$((cnt + 1))
+      if [ $cnt -lt 10 ]; then
+        printf "    { id:\"%s\", v:\"%s\" }\n" "$id" "$v"
+      fi
+    fi
+  done <<< $(dnf -q check-update | grep -v "^$")
+  printf "]\n"
+  printf "pkgm {\n"
+  printf "    inq: %i\n" "$cnt"
+  printf "    reboot: %i\n" "$reboot"
+  printf "}\n"
+elif [ "$pman" = "apt" ]; then
+  printf "pkgl [\n"
+  while read iid v rest; do
+    cnt=$((cnt + 1))
+    id=$(echo "$iid" | cut -f1 -d/)
+    if [ $cnt -lt 10 ]; then
+      printf "    { id:\"%s\", v:\"%s\" }\n" "$id" "$v"
+    fi
+  done <<< $(apt list --upgradable 2>/dev/null | grep /)
+  printf "]\n"
+ 
+  nr=$(which needrestart)
+  if [ ! -z "$nr" ]; then
+    kcur=$(needrestart -b | grep ^NEEDRESTART-KCUR | sed -e 's/.*: //')
+    kexp=$(needrestart -b | grep ^NEEDRESTART-KCUR | sed -e 's/.*: //')
+    if [ "$kcur" != "$kexp" ]; then
+      reboot=1
+    fi
+  fi
+  printf "pkgm {\n"
+  printf "    inq: %i\n" "$cnt"
+  printf "    reboot: %i\n" "$reboot"
+  printf "}\n"
+fi

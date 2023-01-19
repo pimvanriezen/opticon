@@ -174,6 +174,39 @@
       </div>
     </div>
 
+    <div v-if="data.pkgm && (data.pkgm.reboot||data.pkgm.inq)"
+         class="uEditContainer magicLayout">
+      <u-header icon="header-pkg.png">System Updates</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Package</th>
+            <th align="right">Version</th>
+          </tr>
+          <tr v-for="pkg in data.pkgl">
+            <td align="left">{{pkg.id}}</td>
+            <td align="right" style="color:#555555">{{pkg.v}}</td>
+          </tr>
+          <tr v-if="data.pkgm.reboot || (data.pkgm.inq != data.pkgl.length)">
+            <td colspan="2">&nbsp;</td>
+          </tr>
+          
+          <tr v-if="data.pkgm.inq != data.pkgl.length">
+            <td colspan="2" align="left">
+              <i>And {{data.pkgm.inq - data.pkgl.length}} more packages</i>
+            </td>
+          </tr>
+
+          <tr v-if="data.pkgm.reboot">
+            <td colspan="2" align="center">
+              <img src="icon/dialog-alert.png" style="margin-bottom: -2px;" height="16">
+              <b>System needs to be rebooted</b>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
     <div v-if="data.df && data.df.length" class="uEditContainer magicLayout">
       <u-header icon="header-disk.png">Disk Usage</u-header>
       <div class="uServerData table">
@@ -343,6 +376,28 @@
             <td widht="20%">{{c.name}}</td>
             <td style="color: #444444;">{{c.image}}</td>
             <td align="right">{{c.size}} <span class="unit">MB</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div v-if="data.lb && data.lb.length" class="uEditContainer magicLayout">
+      <u-header icon="header-lb.png">Network Load-balancer</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Interface</th>
+            <th align="left">Description</th>
+            <th align="center">Status</th>
+            <th align="left">Target</th>
+          </tr>
+          <tr v-for="o in data.lb">
+            <td width="10%">{{o.if}}</td>
+            <td>{{o.desc}}</td>
+            <td align="center">
+              <span v-bind:class="statusClass(o.st)">{{o.st}}</span>
+            </td>
+            <td>{{o.gw}}</td>
           </tr>
         </table>
       </div>
