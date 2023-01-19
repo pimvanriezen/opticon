@@ -355,6 +355,7 @@ int conf_collector (const char *id, var *v, updatetype tp) {
 int conf_probe (const char *id, var *v, updatetype tp) {
     if (tp != UPDATE_ADD) exit (0);
     const char *vtp = var_get_str_forkey (v, "type");
+    const char *vchk = var_get_str_forkey (v, "check");
     const char *call = var_get_str_forkey (v, "call");
     var *opt = var_get_dict_forkey (v, "options");
     int interval = var_get_int_forkey (v, "interval");
@@ -374,6 +375,13 @@ int conf_probe (const char *id, var *v, updatetype tp) {
             return 0;
         }
     }
+    
+    if (vchk) {
+        if (system (vchk)) {
+            log_info ("Probe <%s> failed check, disabling", call);
+        }
+    }
+    
     probetype t = PROBE_BUILTIN;
     
     if (vtp && call && interval) {
