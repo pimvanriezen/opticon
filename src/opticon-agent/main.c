@@ -379,6 +379,7 @@ int conf_probe (const char *id, var *v, updatetype tp) {
     if (vchk) {
         if (system (vchk)) {
             log_info ("Probe <%s> failed check, disabling", call);
+            return 0;
         }
     }
     
