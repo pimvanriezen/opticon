@@ -38,6 +38,7 @@ install -m 0640 src/opticon-agent/opticon-agent.conf.example $RPM_BUILD_ROOT/etc
 install -m 0644 src/opticon-agent/opticon-defaultprobes.conf $RPM_BUILD_ROOT/etc/opticon
 install -m 0644 src/opticon-agent/helpers.conf $RPM_BUILD_ROOT/etc/opticon
 install -m 0755 src/opticon-agent/extprobes/*.probe $RPM_BUILD_ROOT/var/lib/opticon/probes
+install -m 0755 src/opticon-agent/extprobes/*.check $RPM_BUILD_ROOT/var/lib/opticon/probes
 
 %post
 id opticon >/dev/null 2>&1 || {

@@ -25,7 +25,7 @@ while read dev; do
             printf ", fail:%i" "$val"
             ;;
     esac
-  done <<< $(mdadm --detail /dev/$dev)
+  done <<< $(opticon-helper mdadm --detail /dev/$dev)
   printf " }\n"
 done <<< $(raiddevices)
 printf "]\n"
