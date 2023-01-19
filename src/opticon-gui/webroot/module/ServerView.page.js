@@ -182,12 +182,12 @@ ServerView.translateUptime = function (u) {
     else if (u_hours) {
         res = "" + u_hours + " hour";
         if (u_hours != 1) res += "s";
-        res += ", " + u_minute + " minute";
-        if (u_minute != 1) res += "s";
+        res += ", " + u_mins + " minute";
+        if (u_mins != 1) res += "s";
     }
     else {
-        res = "" + u_minutes + " minute";
-        if (u_minute != 1) res += "s";
+        res = "" + u_mins + " minute";
+        if (u_mins != 1) res += "s";
         res += ", " + u_sec + " second";
         if (u_sec != 1) res += "s";
     }

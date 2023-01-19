@@ -925,6 +925,7 @@ void sample_tprocs (procrun *run) {
     struct stat      st;
     char             buf[256];
     char            *c;
+    char            *cc;
     wordlist        *words;
     struct timeval   tv;
     int              pausetimer;
@@ -1029,8 +1030,17 @@ void sample_tprocs (procrun *run) {
                                 buf[pos] = ' ';
                             }
                         }
+                        
+                        /* strip paths */
+                        c = buf;
+                        cc = c;
+                        while (*c && (*c != ' ')) {
+                            if (*c == '/') cc = c+1;
+                            c++;
+                        }
+                        
                         procrun_setproc (run, pid, utime, stime,
-                                         tuid, tgid, buf, pmem);
+                                         tuid, tgid, cc, pmem);
                     }
                 }
             }
