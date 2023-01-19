@@ -17,9 +17,11 @@ if [ "$pman" = "dnf" ]; then
     if [ "$id" = "Security:" ]; then
       reboot=1
     else
-      cnt=$((cnt + 1))
-      if [ $cnt -lt 10 ]; then
-        printf "    { id:\"%s\", v:\"%s\" }\n" "$id" "$v"
+      if [ ! -z "$id" ]; then
+        cnt=$((cnt + 1))
+        if [ $cnt -lt 10 ]; then
+          printf "    { id:\"%s\", v:\"%s\" }\n" "$id" "$v"
+        fi
       fi
     fi
   done <<< $(dnf -q check-update | grep -v "^$")

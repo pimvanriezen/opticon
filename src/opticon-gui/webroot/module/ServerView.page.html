@@ -174,7 +174,7 @@
       </div>
     </div>
 
-    <div v-if="data.pkgm && (data.pkgm.reboot||data.pkgm.inq)"
+    <div v-if="data.pkgm && (data.pkgm.reboot!=0 ||data.pkgm.inq !=0)"
          class="uEditContainer magicLayout">
       <u-header icon="header-pkg.png">System Updates</u-header>
       <div class="uServerData table">

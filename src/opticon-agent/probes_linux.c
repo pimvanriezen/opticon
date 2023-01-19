@@ -1024,6 +1024,11 @@ void sample_tprocs (procrun *run) {
                         }
                     }
                     else {
+                        for (int pos=0; pos<255; ++pos) {
+                            if (buf[pos] == 0 && buf[pos+1] != 0) {
+                                buf[pos] = ' ';
+                            }
+                        }
                         procrun_setproc (run, pid, utime, stime,
                                          tuid, tgid, buf, pmem);
                     }
