@@ -232,6 +232,28 @@
       </div>
     </div>
   
+    <div v-if="data.raid && data.raid.length" class="uEditContainer magicLayout">
+      <u-header icon="header-raid.png">RAID Storage</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Device</th>
+            <th align="left">RAID Level</th>
+            <th align="left">State</th>
+            <th align="right">Drives</th>
+            <th align="right">Failed</th>
+          </tr>
+          <tr v-for="v in data.raid">
+            <td>{{v.dev}}</td>
+            <td>{{v.level}}</td>
+            <td>{{v.state}}</td>
+            <td align="right">{{v.count}}</td>
+            <td align="right">{{v.fail}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
     <div v-if="data.phdns && data.phdns.sz" class="uEditContainer magicLayout">
       <u-header icon="header-pihole.png">Pi-Hole DNS</u-header>
       <div class="uServerData table">
