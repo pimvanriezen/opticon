@@ -1,0 +1,31 @@
+#!/bin/bash
+
+raiddevices() {
+ cat /proc/mdstat | grep -v "^Personalities" | \
+    grep -v "^unused" | grep "^[a-z]" | cut -f1 -d' '
+}
+
+printf "raid [\n"
+while read dev; do
+  printf "    { dev:\"%s\"" "$dev"
+  while read line; do
+    var=$(echo "$line" | sed -e 's/ :.*//')
+    val=$(echo "$line" | sed -e 's/.* : //')
+    case "$var" in
+        "Raid Level")
+            printf ", level:\"%s\"" "$val"
+            ;;
+        "State")
+            printf ", state:\"%s\"" "$val"
+            ;;
+        "Active Devices")
+            printf ", count:%i" "$val"
+            ;;
+        "Failed Devices")
+            printf ", fail:%i" "$val"
+            ;;
+    esac
+  done <<< $(mdadm --detail /dev/$dev)
+  printf " }\n"
+done <<< $(raiddevices)
+printf "]\n"
