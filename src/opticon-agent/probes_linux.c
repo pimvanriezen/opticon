@@ -998,7 +998,7 @@ void sample_tprocs (procrun *run) {
                 sprintf (buf, "/proc/%d/cmdline", pid);
                 if ((F = fopen (buf, "r"))) {
                     memset (buf, 0, 255);
-                    fread (buf, 0, 255, F);
+                    fread (buf, 1, 255, F);
                     fclose (F);
                                         
                     if (*buf == 0) {
