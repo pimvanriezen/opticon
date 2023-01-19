@@ -1029,6 +1029,7 @@ void sample_tprocs (procrun *run) {
                             if (buf[pos] == 0 && buf[pos+1] != 0) {
                                 buf[pos] = ' ';
                             }
+                            else if (! buf[pos]) break;
                         }
                         
                         /* strip paths */

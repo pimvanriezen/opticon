@@ -50,7 +50,7 @@ void jsoncodec_dump_val (metertype_t type, meter *m, int pos, ioport *into) {
             break;
             
         default:
-            buf[0] = '\0';
+            strcpy (buf, "null");
             break;
     }
     ioport_write (into, buf, strlen (buf));
