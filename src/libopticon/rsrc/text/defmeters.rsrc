@@ -353,4 +353,24 @@
         type: frac
         description: "Connections per second"
     }
+    lb {
+        type: table
+        description: "Network Load-balancer"
+    }
+    lb/if {
+        type: string
+        description: "Interface"
+    }
+    lb/desc {
+        type: string
+        description: "Description"
+    }
+    lb/st {
+        type: string
+        description: "Status"
+    }
+    lb/gw {
+        type: string
+        description: "Check target"
+    }
 }

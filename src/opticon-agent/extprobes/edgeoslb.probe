@@ -1,0 +1,36 @@
+#!/bin/bash
+
+parseimpl() {
+  printf "lb ["
+    read line
+    while read line; do
+      if [ "${line:0:5}" = "Group" ]; then
+        printf "\n"
+        return
+      else
+        if [ -z "$line" ]; then
+          read temp
+        elif [ "${line:0:7}" = "status:" ]; then
+          st="${line:8}"
+          if [ "$st" = "OK" ]; then
+            printf ", st:\"UP\""
+          else
+            printf ", st:\"DOWN\""
+          fi
+        elif [ "${line:0:13}" = "ping gateway:" ]; then
+          gw=$(echo "${line:14}" | cut -f1 -d' ')
+          printf ", gw:\"%s\" }" "$gw"
+        else
+          words=$(echo "$line" | wc -w)
+          if [ "$words" = "1" ]; then
+            printf "\n    { if:\"%s\"" "$line"
+            desc=$(cat /sys/class/net/${line}/ifalias)
+            printf ", desc:\"%s\"" "$desc"
+          fi
+        fi
+      fi
+    done
+    printf "\n]\n"
+}
+
+opticon-helper /usr/sbin/ubnt-hal wlbGetWdStatus | parseimpl
