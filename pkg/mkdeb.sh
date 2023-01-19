@@ -41,6 +41,7 @@ Package: opticon-agent
 Version: $VERSION
 Section: base
 Priority: optional
+Depends: dialog
 Architecture: amd64
 Maintainer: NewVM <info@newvm.com>
 Description: Opticon Agent Software
@@ -54,6 +55,7 @@ cp pkg/opticon-agent.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 cp bin/opticon-agent $BUILDROOT/usr/sbin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-agent
 cp bin/opticon-helper $BUILDROOT/usr/bin/opticon-helper
+cp bin/opticon-setup $BUILDROOT/usr/bin/opticon-setup
 cp -p init/opticon-agent.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/etc/opticon/
 cp src/opticon-agent/opticon-defaultprobes.conf $BUILDROOT/etc/opticon/
