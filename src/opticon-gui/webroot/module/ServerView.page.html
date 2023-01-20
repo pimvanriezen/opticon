@@ -84,7 +84,7 @@
                 {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
                 {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
           </tr>
-          <tr>
+          <tr v-if="data.io.pwait !== undefined">
             <td style="color:#888888;" width="22%">IO Wait</td>
             <td colspan="2">
               {{parseFloat(data.io.pwait).toFixed(2)}} %
@@ -142,14 +142,20 @@
       <div class="uServerData">
         <table width="100%">
           <tr>
-            <td style="color:#888888;" width="22%">Kernel</td>
-            <td>
+            <td style="color:#888888;" width="22%" valign="top">Distribution</td>
+            <td valign="top" style="white-space: nowrap;">
               <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
                 <img height="16" v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
               </span>
               <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
                 <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
               </span>
+              {{(""+data.os.distro).replace(/[.][0-9][0-9][0-9][0-9]+/g,'')}}
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">Kernel</td>
+            <td>
               {{data.os.kernel}} {{data.os.version}}
               <span class="unit">({{data.os.arch}})</span>
             </td>
@@ -159,10 +165,6 @@
             <td>
               {{data.os.hw}}
             </td>
-          </tr>
-          <tr>
-            <td style="color:#888888;" width="22%" valign="top">Distribution</td>
-            <td valign="top" style="white-space: nowrap;">{{data.os.distro}}</td>
           </tr>
           <tr v-if="data.agent.v">
             <td style="color:#888888;" width="22%">Agent Version</td>
