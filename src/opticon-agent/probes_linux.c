@@ -1035,6 +1035,7 @@ void sample_tprocs (procrun *run) {
                         /* strip paths */
                         c = buf;
                         cc = c;
+                        
                         while (*c && (*c != ' ')) {
                             if (*c == '/') cc = c+1;
                             c++;
@@ -1232,9 +1233,51 @@ var *runprobe_top (probe *self) {
     return NULL;
 }
 
+/* Probe cpu models */
+var *runprobe_cpu (probe *self) {
+    FILE *f = fopen ("/proc/cpuinfo","r");
+    if (!f) return NULL;
+    
+    var *res = var_alloc();
+    var *res_cpu = var_get_array_forkey (res, "cpu");
+    var *tally = var_alloc();
+    char buf[1024];
+    
+    while (! feof (f)) {
+        *buf = 0;
+        fgets (buf, 1023, f);
+        if (strncmp (buf, "model name", 10) == 0) {
+            char *c = strchr (buf, ':');
+            if (c) {
+                c++;
+                while (isspace (*c)) c++;
+                var *k = var_find_key (tally, c);
+                if (! k) {
+                    var_set_int_forkey (tally, c, 1);
+                }
+                else {
+                    var_set_int (k, var_get_int (k) + 1);
+                }
+            }
+        }
+    }
+    fclose (f);
+    
+    var *crsr = var_first (tally);
+    while (crsr) {
+        var *obj = var_add_dict (res_cpu);
+        var_set_str_forkey (obj, "model", crsr->key);
+        var_set_int_forkey (obj, "count", var_get_int (crsr));
+        crsr = crsr->next;
+    }
+    
+    return res;
+}
+
 /* ======================================================================= */
 builtinfunc BUILTINS[] = {
     GLOBAL_BUILTINS,
+    {"probe_cpu", runprobe_cpu},
     {"probe_top", runprobe_top},
     {"probe_uptime", runprobe_uptime},
     {"probe_io", runprobe_io},
@@ -1248,4 +1291,3 @@ builtinfunc BUILTINS[] = {
     {"probe_version", runprobe_version},
     {NULL, NULL}
 };
-
