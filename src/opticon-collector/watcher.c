@@ -30,20 +30,13 @@ void host_to_overview (host *h, var *ovdict) {
     var *res = var_get_dict_forkey (ovdict, uuidstr);
     meter *m = h->first;
     while (m) {
-        if (m->count >= SZ_EMPTY_VAL) {
+        /* We only want singular values */
+        if (m->count > 0) {
             m = m->next;
             continue;
         }
+
         id2str (m->id, mid);
-        
-        if ((strncmp (mid, "top/", 4) == 0) ||
-            (strncmp (mid, "df/", 3) == 0) ||
-            (strncmp (mid, "proc/", 5) == 0) ||
-            (strncmp (mid, "os/", 3) == 0) ||
-            (strncmp (mid, "who/", 4) == 0)) {
-            m = m->next;
-            continue;
-        }
         
         switch (m->id & MMASK_TYPE) {
             case MTYPE_INT:
