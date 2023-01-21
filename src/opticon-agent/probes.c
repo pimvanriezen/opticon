@@ -47,6 +47,9 @@ var *runprobe_uname (probe *self) {
                 if (strstr (buf, "Model Identifier")) {
                     char *c = strchr (buf, ':');
                     if (c) {
+                        c++;
+                        while (isspace (*c)) c++;
+                        
                         c[strlen(c)-1] = 0;
                         strncpy (pname, c, 31);
                         pname[31] = 0;
