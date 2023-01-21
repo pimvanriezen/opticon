@@ -58,7 +58,6 @@ cp bin/opticon-helper $BUILDROOT/usr/bin/opticon-helper
 cp bin/opticon-setup $BUILDROOT/usr/bin/opticon-setup
 cp -p init/opticon-agent.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-agent/opticon-agent.conf.example $BUILDROOT/etc/opticon/
-cp src/opticon-agent/opticon-defaultprobes.conf $BUILDROOT/etc/opticon/
 cp src/opticon-agent/helpers.conf $BUILDROOT/etc/opticon/
 cp src/opticon-agent/extprobes/*.probe $BUILDROOT/var/lib/opticon/probes/
 cp src/opticon-agent/extprobes/*.check $BUILDROOT/var/lib/opticon/probes/
