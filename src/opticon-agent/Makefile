@@ -25,7 +25,7 @@ endif
 
 CFLAGS+=-DOS_$(OSDEF) -DOSNAME=$(OSNAME) -DOSREL=$(OSREL) -DOSRELMAJOR=$(OSRELMAJOR)
 
-OBJS_OPTICONAGENT = main.o probelist.o probes.o resender.o \
+OBJS_OPTICONAGENT = rsrc.o main.o probelist.o probes.o resender.o \
                     collectorlist.o tproc.o wordlist.o version.o
 LIBS = ../../lib/libopticon.a ../../lib/libopticondb.a 
 				  
@@ -39,8 +39,14 @@ all: ../../bin/opticon-agent ../../bin/opticon-helper
 ../../bin/opticon-helper: helper.o
 	@$(CC) $(LDFLAGS) -o ../../bin/opticon-helper helper.o
 
+rsrc.c: rsrc.h
+
+rsrc.h: rsrc/*/*.rsrc
+	@echo "[RSRC ] building resource file"
+	@../../tools/mkrsrc librsrc
+
 clean:
-	rm -f *.o version.c ../../bin/opticon-agent
+	rm -f *.o version.c ../../bin/opticon-agent rsrc.c rsrc.h
 	
 version.c:
 	@./mkversion.sh

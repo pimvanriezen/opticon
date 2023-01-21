@@ -18,6 +18,7 @@
 #include <arpa/inet.h>
 #include <syslog.h>
 #include <errno.h>
+#include "rsrc.h"
 
 #if defined (OS_WINDOWS)
     // Need to include winsock2.h before windows.h
@@ -641,7 +642,8 @@ int app_main (int _argc, const char *_argv[]) {
     /** Override default probes where needed */
     var *default_probes = var_alloc();
     var *conf_probes = var_get_dict_forkey (APP.conf, "probes");
-    if (var_load_json (default_probes, APP.defaultspath)) {
+    
+    if (var_parse_json (default_probes, rstext(defprobes))) {
         var *crsr = var_first (default_probes);
         while (crsr) {
             var *existing = var_find_key (conf_probes, crsr->id);
@@ -664,7 +666,7 @@ int app_main (int _argc, const char *_argv[]) {
                         }
                         else if (cc->type == VAR_DICT) {
                             ee = var_get_dict_forkey (existing, cc->id);
-                            var_copy (ee, cc);
+                            var_merge (ee, cc);
                         }
                     }
                     cc = cc->next;

@@ -7,6 +7,8 @@ src/opticon-cli/rsrc.c
 src/opticon-cli/rsrc.h
 src/libopticon/rsrc.c
 src/libopticon/rsrc.h
+src/opticon-agent/rsrc.c
+src/opticon-agent/rsrc.h
 src/opticon-agent/version.c
 test/bin/test_*
 test/out/*.*
