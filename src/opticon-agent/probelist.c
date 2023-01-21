@@ -182,6 +182,7 @@ void probelist_start (probelist *self) {
     probe *p = self->first;
     while (p) {
         thread_init (&p->thr, probe_run, NULL);
+        thread_setname (&p->thr, p->id);
         p = p->next;
     }
 }
