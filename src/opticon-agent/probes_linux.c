@@ -1266,7 +1266,7 @@ var *runprobe_cpu (probe *self) {
     var *crsr = var_first (tally);
     while (crsr) {
         var *obj = var_add_dict (res_cpu);
-        var_set_str_forkey (obj, "model", crsr->key);
+        var_set_str_forkey (obj, "model", crsr->id);
         var_set_int_forkey (obj, "count", var_get_int (crsr));
         crsr = crsr->next;
     }
