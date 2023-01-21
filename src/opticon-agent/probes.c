@@ -39,6 +39,25 @@ var *runprobe_uname (probe *self) {
     if (strcmp (uts.sysname, "Darwin") == 0) {
         char buf[256];
 
+        f = popen_safe ("defaults read "
+                        "~/Library/Preferences/com.apple.SystemProfiler.plist "
+                        "'CPU Names' | cut -sd '\"' -f 4 | uniq");
+        if (f) {
+            while (! feof (f)) {
+                fgets (buf, 255, f);
+                if (*buf) {
+                    buf[strlen(buf)-1] = 0;
+                    strncpy (pname, buf, 31);
+                    pname[31] = 0;
+                    sprintf (platform, "Apple %s", pname);
+                    var_set_str_forkey (v_os, "hw", platform);
+                    pclose_safe (f);
+                    return res;
+                }
+            }
+            pclose_safe (f);
+        }
+
         f = popen_safe ("system_profiler SPHardwareDataType","r");
         if (f) {
             while (! feof (f)) {
@@ -49,13 +68,13 @@ var *runprobe_uname (probe *self) {
                     if (c) {
                         c++;
                         while (isspace (*c)) c++;
-                        
+                    
                         c[strlen(c)-1] = 0;
                         strncpy (pname, c, 31);
                         pname[31] = 0;
                         sprintf (platform, "Apple %s", pname);
                         var_set_str_forkey (v_os, "hw", platform);
-                        pclose (f);
+                        pclose_safe (f);
                         return res;
                     }
                 }
