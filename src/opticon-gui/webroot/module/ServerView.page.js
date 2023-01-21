@@ -24,6 +24,11 @@ ServerView.activate = function(argv) {
     self.show();
     self.Vidi.onRender = function() {
         self.fixLayout();
+        if (self.View.data.status == "STALE" || self.View.data.status == "DEAD") {
+            let q = $("#ServerView .MagicLayout");
+            delete q[0];
+            q.css ("opacity","0.6");
+        }
     }
     API.Opticon.Host.resolveTenant (self.id, function (tenantid) {
         self.tenantid = tenantid;
@@ -106,13 +111,15 @@ ServerView.back = function() {
     App.go ("/Server");
 }
 
-ServerView.statusClass = function (st) {
-    if (st == "OK") return "status small green";
-    if (st == "WARN") return "status small orange";
-    if (st == "ALERT") return "status small red";
-    if (st == "UP") return "status small green";
-    if (st == "DOWN") return "status small red";
-    return "status small grey";
+ServerView.statusClass = function (st, large) {
+    pfx="status small "
+    if (large) pfx="status ";
+    if (st == "OK") return pfx+"green";
+    if (st == "WARN") return pfx+"orange";
+    if (st == "ALERT") return pfx+"red";
+    if (st == "UP") return pfx+"green";
+    if (st == "DOWN") return pfx+"red";
+    return pfx+"grey";
 }
 
 ServerView.ktoh = function (kb,isbps) {
@@ -195,7 +202,11 @@ ServerView.translateUptime = function (u) {
 }
 
 ServerView.translateCPUModel = function (m) {
-    return m.replace (/\(R\)/g, "&reg;");
+    return m.replace (/&/g, "&amp;")
+            .replace (/</g, "&lt;")
+            .replace (/>/g, "&gt;")
+            .replace (/\(R\)/g, "&reg;")
+            .replace (/\(TM\)/g, "&trade;");
 }
 
 ServerView.jsonReplace = function (match, pIndent, pKey, pVal, pEnd) {
@@ -373,6 +384,7 @@ ServerView.makeLayout = function(q, portWidth) {
         }
     }        
 
+    // Vertically fill-justify the columns, if possible.
     for (let col=0; col<numc; ++col) {
         if (columnh[col] < maxh) {
             if (outcolumns[col].length<2) continue;
@@ -380,6 +392,8 @@ ServerView.makeLayout = function(q, portWidth) {
             let diff = maxh - columnh[col];
             let delta = diff;
             let cdelta = diff / (outcolumns[col].length-1);
+            console.log ("cdelta: "+cdelta);
+            if (cdelta > 64) continue; // if it's too much, just don't.
             
             for (let i = outcolumns[col].length-1; i>0; --i) {
                 let o = outcolumns[col][i];
