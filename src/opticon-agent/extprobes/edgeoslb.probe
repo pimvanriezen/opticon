@@ -8,9 +8,7 @@ parseimpl() {
         printf "\n"
         return
       else
-        if [ -z "$line" ]; then
-          read temp
-        elif [ "${line:0:7}" = "status:" ]; then
+        if [ "${line:0:7}" = "status:" ]; then
           st="${line:8}"
           if [ "$st" = "OK" ]; then
             printf ", st:\"UP\""
