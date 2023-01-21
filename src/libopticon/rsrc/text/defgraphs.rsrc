@@ -1,50 +1,66 @@
 {
-   pcpu {
-       graph: cpu
-       datum: usage
-       title: "CPU Usage"
-       unit: "%"
-       color: "blue"
-       max: 10.0
-   }
-   link/rtt {
-       graph: link
-       datum: rtt
-       title: "RTT"
-       unit: "ms"
-       color: "blue"
-       max: 1.0
-   }
-   net/in_kbs {
-       graph: net
-       datum: input
-       title: "Bandwidth In"
-       unit: "Kb/s"
-       color: "cyan"
-       max: 100.0
-   }
-   net/out_kbs {
-       graph: net
-       datum: output
-       title: "Bandwidth Out"
-       unit: "Kb/s"
-       color: "blue"
-       max: 100.0
-   }
-   io/rdops {
-       graph: io
-       datum: read
-       title: "Read Operations"
-       unit: "iops"
-       color: "green"
-       max: 100.0
-   }
-   io/wrops {
-       graph: io
-       datum: write
-       title: "Write Operations"
-       unit: "iops"
-       color: "red"
-       max: 100.0
-   }
+    pcpu {
+        graph: cpu
+        datum: usage
+        title: "CPU Usage"
+        unit: "%"
+        color: "blue"
+        max: 10.0
+    }
+    io/pwait {
+        graph: cpu
+        datum: iowait
+        title: "IO Wait"
+        unit: "%"
+        color: "blue"
+        max: 10.0
+    }
+    mem/free {
+        graph: memory
+        datum: free
+        title: "Free Memory"
+        unit: "KB"
+        color: "blue"
+        max: "65536"
+    }
+    link/rtt {
+        graph: link
+        datum: rtt
+        title: "RTT"
+        unit: "ms"
+        color: "blue"
+        max: 1.0
+    }
+    net/in_kbs {
+        graph: net
+        datum: input
+        title: "Bandwidth In"
+        unit: "Kb/s"
+        color: "cyan"
+        max: 100.0
+    }
+    net/out_kbs {
+        graph: net
+        datum: output
+        title: "Bandwidth Out"
+        unit: "Kb/s"
+        color: "blue"
+        max: 100.0
+    }
+    io/rdops {
+        graph: io
+        datum: read
+        title: "Read Operations"
+        unit: "iops"
+        color: "green"
+        max: 100.0
+    }
+    io/wrops {
+        graph: io
+        datum: write
+        title: "Write Operations"
+        unit: "iops"
+        color: "red"
+        max: 100.0
+    }
 }
