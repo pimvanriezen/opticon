@@ -194,6 +194,10 @@ ServerView.translateUptime = function (u) {
     return res;
 }
 
+ServerView.translateCPUModel = function (m) {
+    return m.replace (/\(R\)/g, "&reg;");
+}
+
 ServerView.jsonReplace = function (match, pIndent, pKey, pVal, pEnd) {
     var key = '<span class=json-key>';
     var val = '<span class=json-value>';
