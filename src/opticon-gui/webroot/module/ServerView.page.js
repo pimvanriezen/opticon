@@ -111,6 +111,13 @@ ServerView.back = function() {
     App.go ("/Server");
 }
 
+ServerView.deleteHost = function() {
+    var self = ServerView;
+    API.Opticon.Host.remove (self.tenantid, self.id, function() {
+        self.back();
+    });
+}
+
 ServerView.statusClass = function (st, large) {
     pfx="status small "
     if (large) pfx="status ";

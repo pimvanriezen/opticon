@@ -4,6 +4,9 @@
       Back
     </u-button>
     <u-tabgroup name="tab" tabs="Overview,Graphs,Log,Raw"></u-tabgroup>
+    <span v-if="data.status=='STALE'">
+      <u-button class="red" cb="deleteHost()">Delete Host</u-button>
+    </span>
   </div>
 </form>
 
