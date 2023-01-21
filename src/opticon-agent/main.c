@@ -355,6 +355,20 @@ int conf_collector (const char *id, var *v, updatetype tp) {
 /** Parse /meter into probes */
 int conf_probe (const char *id, var *v, updatetype tp) {
     if (tp != UPDATE_ADD) exit (0);
+    const char *platform = var_get_str_forkey (v, "platform");
+    if (platform) {
+#if defined(OS_WINDOWS)
+        if (strcmp (platform, "windows") != 0) return 0;
+#endif
+#if defined(OS_LINUX)
+        if ((strcmp (platform, "unix") != 0) &&
+            (strcmp (platform, "linux") != 0)) return 0;
+#endif
+#if defined(OS_DARWIN)
+        if ((strcmp (platform, "unix") != 0) &&
+            (strcmp (platform, "darwin") != 0)) return 0;
+#endif
+    }
     const char *vtp = var_get_str_forkey (v, "type");
     const char *vchk = var_get_str_forkey (v, "check");
     const char *call = var_get_str_forkey (v, "call");

@@ -9,6 +9,7 @@ version {
     frequency: low
 }
 cpu {
+    platform: unix
     type: built-in
     call: probe_cpu
     frequency: low
@@ -66,7 +67,14 @@ meminfo {
     call: probe_meminfo
     frequency: high
 }
+proc {
+    platform: windows
+    type: built-in
+    call: probe_proc
+    frequency: high
+}
 distro {
+    platform: unix
     type: built-in
     call: probe_distro
     frequency: low
@@ -77,12 +85,14 @@ who {
     frequency: low
 }
 updates {
+    platform: linux
     type: exec
     check: /var/lib/opticon/probes/updates.check
     call: /var/lib/opticon/probes/updates.probe
     frequency: low
 }
 raid {
+    platform: linux
     type: exec
     check: /var/lib/opticon/probes/raid.check
     call: /var/lib/opticon/probes/raid.probe
