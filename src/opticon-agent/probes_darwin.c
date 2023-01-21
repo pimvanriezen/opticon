@@ -458,9 +458,25 @@ var *runprobe_uptime (probe *self) {
     return res;
 }
 
+var *runprobe_cpu (probe *self) {
+    var *res = var_alloc();
+    uint32_t ncores;
+    size_t ncoresc = sizeof (ncores);
+    char buf[256];
+    size_t buflen = 255;
+    sysctlbyname ("machdep.cpu.brand_string", &buf, &buflen, NULL, 0);
+    sysctlbyname ("machdep.cpu.core_count", &ncores, &ncoresc, NULL, 0);
+    var *res_cpu = var_get_array_forkey (res, "cpu");
+    var *res_data = var_add_dict (res_cpu);
+    var_set_str_forkey (res_data, "model", buf);
+    var_set_int_forkey (res_data, "count", ncores);
+    return res;
+}
+
 /** List of built-in probe functions */
 builtinfunc BUILTINS[] = {
     GLOBAL_BUILTINS,
+    {"probe_cpu", runprobe_cpu},
     {"probe_top", runprobe_top},
     {"probe_df", runprobe_df},
     {"probe_uptime", runprobe_uptime},
