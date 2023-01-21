@@ -1251,6 +1251,10 @@ var *runprobe_cpu (probe *self) {
             if (c) {
                 c++;
                 while (isspace (*c)) c++;
+                
+                char *nl = strchr (buf, '\n');
+                if (nl) *nl=0;
+                
                 var *k = var_find_key (tally, c);
                 if (! k) {
                     var_set_int_forkey (tally, c, 1);
