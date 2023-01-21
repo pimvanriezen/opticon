@@ -439,13 +439,14 @@ int cmd_tenant_set_meta (req_context *ctx, req_arg *a,
         db_free (DB);
         return err_not_found (ctx, a, env, status);
     }
-    var *v_meta = var_get_dict_forkey (ctx->bodyjson, "metadata");
-    var *meta = db_get_metadata (DB);
-    var *v_dbusermeta = var_get_dict_forkey (meta, "meta");
-    var_copy (v_dbusermeta, v_meta);
-    db_set_metadata (DB, meta);
-    var_copy (var_get_dict_forkey (env, "metadata"), v_meta);
-    var_free (meta);
+    
+    var *db_meta = db_get_metadata (DB);
+    var *in_meta = var_get_dict_forkey (ctx->bodyjson, "metadata");
+    var_merge (db_meta, in_meta);
+    db_set_metadata (DB, db_meta);
+
+    var_copy (var_get_dict_forkey (env, "metadata"), db_meta);
+    var_free (db_meta);
     db_free (DB);
     *status = 200;
     return 1;
