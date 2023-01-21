@@ -41,7 +41,7 @@ var *runprobe_uname (probe *self) {
 
         f = popen_safe ("defaults read "
                         "~/Library/Preferences/com.apple.SystemProfiler.plist "
-                        "'CPU Names' | cut -sd '\"' -f 4 | uniq");
+                        "'CPU Names' | cut -sd '\"' -f 4 | uniq","r");
         if (f) {
             while (! feof (f)) {
                 fgets (buf, 255, f);
