@@ -12,6 +12,8 @@ html, body
     margin: 0;
     height: 100%;
     overflow: hidden;
+    background-image: url(img/bg.jpg);
+    background-size: cover;
     background-color: #777777;
 }
 
@@ -25,8 +27,8 @@ html, body
     font-family: "Verdana", sans-serif;
     height: 100%;
     overflow: hidden;
-    background-color: #444444;
-    background: linear-gradient(177deg, rgba(31,31,31,1) 0%, rgba(55,55,55,1) 100%);
+    /*background-color: #444444;*/
+    /*background: linear-gradient(177deg, rgba(31,31,31,1) 0%, rgba(55,55,55,1) 100%);*/
 }
 
 .uSidebar
@@ -206,7 +208,7 @@ html, body
 .uDialog#LoginScreen
 {
     width: 350px;
-    margin-left: -215px;
+    margin-left: -195px;
     padding-left:10px;
     padding-right:10px;
 }
