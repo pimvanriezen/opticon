@@ -8,6 +8,25 @@
 
 <u-listkeyboard></u-listkeyboard>
 
+<div class="uServerHeader">
+  <table cellspacing="0" border="0" class="tbserverlist" width="100%">
+    <tr height="22">
+      <td width="*">
+        <b>Hostname</b>
+      </td>
+      <td width="20">&nbsp;</td>
+      <td width="20">&nbsp;</td>
+      <td width="80"><b>Status</b></td>
+      <td width="240"><b>IP Address</b></td>
+      <td width="64" align="center"><b>CPU</b></td>
+      <td width="50" align="right"><b>Load</td>
+      <td width="86" align="right"><b>Disk I/O</td>
+      <td width="88" align="right"><b>Net I/O</td>
+      <td width="80" align="right"><b>RTT</td>
+    </tr>
+  </table>
+</div>
+
 <div class="uSelectList uServerList" v-on:click="deSelect">
   <div v-show="empty" class="uNoResults">
     <center>No servers in the {{server_status}} state.<br>
@@ -24,13 +43,29 @@
         <td width="*">
           <b>{{o.hostname}}</b>
         </td>
+        <td width="20">
+          <span v-if="o['os/kernel']=='Linux'">
+            <img height="16" src="icon/linux.png" style="margin-bottom:-2px;">
+          </span>
+          <span v-if="o['os/kernel']=='Windows'">
+            <img height="16" src="icon/windows.png" style="margin-bottom:-2px;">
+          </span>
+          <span v-if="o['os/kernel']=='Darwin'">
+            <img height="16" src="icon/apple.png" style="margin-bottom:-2px;">
+          </span>
+        </td>
+        <td width="20">
+          <span v-if="o['pkgm/inq']>0">
+            <div class="badge inline nonzero">{{o["pkgm/inq"]}}</div>
+          </span>
+        </td>
         <td width="80">
           <span v-bind:class="statusClass(o)">{{o.status}}</span>
         </td>
         <td width="240">
-          {{o["agent/ip"]}}
-          <span v-if="o['link/ip'] &&(o['link/ip']!=o['agent/ip'])">
-            -> {{o["link/ip"]}}
+          {{o["link/ip"]}}
+          <span v-if="o['agent/ip'] &&(o['link/ip']!=o['agent/ip'])">
+            -> {{o["agent/ip"]}}
           </span>
         </td>
         <td align="right" width="64">
@@ -41,13 +76,7 @@
           {{translateUnit(o["io/rdops"]+o["io/wrops"], "", "iops")}}
         </td>
         <td align="right" width="88">
-          {{translateUnit(o["net/in_kbs"], "K", "b/s")}}
-        </td>
-        <td align="right" width="88">
-          {{translateUnit(o["net/out_kbs"], "K", "b/s")}}
-        </td>
-        <td align="right" width="80">
-          {{translateUnit(o["net/in_pps"]+o["net/out_pps"],"","pps")}}
+          {{translateUnit(o["net/in_kbs"]+o["io/wrops"], "K", "b/s")}}
         </td>
         <td align="right" width="80">
           {{parseFloat(o["link/rtt"]).toFixed(2)}} ms

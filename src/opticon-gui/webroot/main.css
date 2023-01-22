@@ -766,7 +766,7 @@ button.tabgroup.middle,
     left: 0;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: auto;
     background: linear-gradient(#aaa, #ddd);
     box-shadow: inset 32px 32px 10px -27px #888888;
 }
@@ -885,6 +885,24 @@ table.tbserverlist tr td {
     color: #888888;
 }
 
+.uSelectList.uServerList {
+    top: 80px;
+}
+
+.uServerHeader {
+    position: absolute;
+    top: 57px;
+    left: 0;
+    right: 0;
+    height: 22px;
+}
+
+.uServerHeader tr {
+    background: linear-gradient(to bottom, #eeeeee 0%,#cccccc 100%);
+    border-bottom: 1px solid #222222;
+    color: #555555 !important;
+}
+
 .uServerList table tr {
     cursor: pointer;
 }
@@ -977,7 +995,7 @@ div.wrapper > div.table {
     border-radius: 24px;
 }
 
-button .badge
+button .badge,
 {
     height: 10px;
     margin-top: -18px;
@@ -990,6 +1008,24 @@ button .badge
     padding-bottom: 4px;
     padding-left: 3px;
     padding-right: 3px;
+}
+
+.badge.inline
+{
+    position: relative;
+    height: 10px;
+    min-width: 9px;
+    font-size: 9px;
+    padding-top: 2px;
+    padding-bottom: 4px;
+    padding-left: 3px;
+    padding-right: 3px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 button.tabgroup.badged, button.ui-tab.badged

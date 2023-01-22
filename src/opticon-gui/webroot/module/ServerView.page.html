@@ -598,6 +598,17 @@
 <!-- LOG TAB -->
 
 <span v-if="tab=='Log'">
+
+<div class="uServerHeader">
+  <table cellspacing="0" border="0" class="tbserverlist" width="100%">
+    <tr height="22">
+      <td width="200"><b>When</b></td>
+      <td width="80"><b>System</b></td>
+      <td width="*"><b>Message</b></td>
+    </tr>
+  </table>
+</div>
+
 <div class="uSelectList uServerList" v-on:click="deSelect">
   <div v-show="empty" class="uNoResults">
     <center>No log entries.</center>
