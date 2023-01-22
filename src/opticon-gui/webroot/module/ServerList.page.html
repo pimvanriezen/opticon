@@ -14,14 +14,13 @@
       <td width="*">
         <b>Hostname</b>
       </td>
-      <td width="20">&nbsp;</td>
-      <td width="20">&nbsp;</td>
+      <td width="20" align="right"><img src="icon/header-pkg.png" height="16"></td>
       <td width="80"><b>Status</b></td>
       <td width="240"><b>IP Address</b></td>
       <td width="64" align="center"><b>CPU</b></td>
-      <td width="50" align="right"><b>Load</td>
-      <td width="86" align="right"><b>Disk I/O</td>
-      <td width="88" align="right"><b>Net I/O</td>
+      <td width="64" align="right"><b>Load</td>
+      <td width="112" align="right"><b>Disk I/O</td>
+      <td width="112" align="right"><b>Net I/O</td>
       <td width="80" align="right"><b>RTT</td>
     </tr>
   </table>
@@ -41,18 +40,8 @@
       <tr height="32" v-for="o,idx,count in overview"
           v-on:click="rowClick(idx)">
         <td width="*">
+          <img src="{{osIcon(o)}}" height="16" style="margin-bottom:-4px;">
           <b>{{o.hostname}}</b>
-        </td>
-        <td width="20">
-          <span v-if="o['os/kernel']=='Linux'">
-            <img height="16" src="icon/linux.png" style="margin-bottom:-2px;">
-          </span>
-          <span v-if="o['os/kernel']=='Windows'">
-            <img height="16" src="icon/windows.png" style="margin-bottom:-2px;">
-          </span>
-          <span v-if="o['os/kernel']=='Darwin'">
-            <img height="16" src="icon/apple.png" style="margin-bottom:-2px;">
-          </span>
         </td>
         <td width="20">
           <span v-if="o['pkgm/inq']>0">
@@ -64,22 +53,22 @@
         </td>
         <td width="240">
           {{o["link/ip"]}}
-          <span v-if="o['agent/ip'] &&(o['link/ip']!=o['agent/ip'])">
+          <span class="unit" v-if="o['agent/ip'] &&(o['link/ip']!=o['agent/ip'])">
             -> {{o["agent/ip"]}}
           </span>
         </td>
         <td align="right" width="64">
           <u-meter width="60" var="o.pcpu"></u-meter>
         </td>
-        <td align="right" width="50">{{parseFloat(o.loadavg).toFixed(2)}}</td>
-        <td align="right" width="86">
-          {{translateUnit(o["io/rdops"]+o["io/wrops"], "", "iops")}}
+        <td align="right" width="64">{{parseFloat(o.loadavg).toFixed(2)}}</td>
+        <td align="right" width="112"
+            v-html="translateUnit(o['io/rdops']+o['io/wrops'],'','iops')">
         </td>
-        <td align="right" width="88">
-          {{translateUnit(o["net/in_kbs"]+o["io/wrops"], "K", "b/s")}}
+        <td align="right" width="112"
+            v-html="translateUnit(o['net/in_kbs']+o['net/out_kbs'],'K','b/s')">
         </td>
         <td align="right" width="80">
-          {{parseFloat(o["link/rtt"]).toFixed(2)}} ms
+          {{parseFloat(o["link/rtt"]).toFixed(2)}} <span class="unit">ms</span>
         </td>
       </tr>
     </table>

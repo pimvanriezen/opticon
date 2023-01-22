@@ -36,10 +36,10 @@ html, body
     top: 0;
     left: 0;
     bottom: 0;
-    width: 202px;
+    width: 200px;
     font-family: "Verdana", sans-serif;
     background-color: #506890;
-    border-right: 1px solid black;
+    border-right: 1px solid #608090;
     color: white;
     margin-left: 0;
     padding: 0;
@@ -858,11 +858,15 @@ table.tbserverlist {
     box-shadow: 0 5px 8px 0 #777777;
 }
 
+table.tbserverlist .unit {
+    color: #aaaaaa;
+}
+
 table.tbserverlist tr {
     font-family: "Verdana", sans-serif;
     border-top: 1px solid #fcfcfc;
     border-bottom: 1px solid #d0d0d0;
-    color: #888888;
+    color: #666666;
     background-color: #E8E8E8;
     font-size: 13px;
     min-height: 18px;

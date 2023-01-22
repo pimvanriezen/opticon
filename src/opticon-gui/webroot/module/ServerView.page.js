@@ -444,7 +444,7 @@ ServerView.linuxIcon = function(kernel) {
     if (/UBNT/.test (kernel)) return "icon/ubnt.png";
     if (/qnap/.test (kernel)) return "icon/qnap.png";
     if (/el[0-9]/.test (kernel) && /^Alma/.test (distro)) {
-        return "icon/alma.svg";
+        return "icon/alma.png";
     }
     if (/generic/.test (kernel) && /^Ubuntu/.test (distro)) {
         return "icon/ubuntu.png";
