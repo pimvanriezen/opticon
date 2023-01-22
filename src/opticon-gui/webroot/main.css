@@ -820,7 +820,7 @@ button.tabgroup.middle,
     margin: 0;
     padding: 0;
     overflow: auto;
-    background: linear-gradient(#aaa, #ddd);
+    background: linear-gradient(#aaaaa4, #ddddd8);
     box-shadow: inset 32px 32px 10px -27px #888888;
 }
 
@@ -858,8 +858,9 @@ button.tabgroup.middle,
     overflow-x: hidden;
     text-align: center;
     -webkit-overflow-scrolling: touch;
-    background: linear-gradient(#ccc, #eee);
-    box-shadow: inset 8px 8px 10px -27px #777777;
+    background: linear-gradient(#d0d0ce, #eeeee8);
+    box-shadow: inset 32px 32px 10px -27px #888888;
+    /*box-shadow: inset 8px 8px 10px -27px #777777;*/
 }
 
 .textlabel
