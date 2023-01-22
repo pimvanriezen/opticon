@@ -58,6 +58,46 @@ html, body
          url('font/Orbitron-Regular.ttf') format('truetype');
 }
 
+.logobox {
+    position: relative;
+    width: 330px;
+    font-family: "Orbitron", Fallback, sans-serif;
+    font-size: 52px;
+    color: white;
+    vertical-align: middle;
+    background-color: #506890;
+    border-radius: 3px;
+    height: 120px;
+    box-shadow: 0 1px 13px 0 rgba(0,0,0,0.5);
+    padding-left: 20px;
+    padding-top: 15px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.logobox .logotext {
+    margin-left: 15px;
+    display: inline-block;
+    height: 100px;
+    vertical-align: middle;
+}
+
+.logobox .subtitle {
+    display: box;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20px;
+    background: black;
+    font-family: "Helvetica Neue", sans-serif;
+    font-size: 12px;
+    text-align: center;
+    padding-top: 3px;
+    color: #eeeeee;
+    border-radius: 3px;
+}
+
 .uLogo {
     padding-bottom: 20px;
     padding-top: 20px;
@@ -370,6 +410,7 @@ button, form.uSearch input:not([type=checkbox]):not([type=radio]):not([type=text
     -webkit-appearance: none;
     height: 32px;
     font-size: 16px;
+    box-shadow: inset 1px 1px 1px #ffffff38;
 }
 
 button.mini
