@@ -52,10 +52,22 @@ html, body
     overflow: hidden;
 }
 
+@font-face {
+    font-family: 'Orbitron';
+    src: url('font/Orbitron-Regular.woff2') format('woff2'),
+         url('font/Orbitron-Regular.ttf') format('truetype');
+}
+
 .uLogo {
     padding-bottom: 20px;
     padding-top: 20px;
     text-align: center;
+    font-family: "Orbitron", Fallback, sans-serif;
+    font-size: 24px;
+}
+
+.uLogo img {
+    opacity: 0.7;
 }
 
 .uMenuItem:first-child {
