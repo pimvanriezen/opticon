@@ -60,18 +60,19 @@ html, body
 
 .logobox {
     position: relative;
-    width: 330px;
+    width: 352px;
     font-family: "Orbitron", Fallback, sans-serif;
     font-size: 52px;
     color: white;
     vertical-align: middle;
     background-color: #506890;
-    border-radius: 3px;
     height: 120px;
     box-shadow: 0 1px 13px 0 rgba(0,0,0,0.5);
     padding-left: 20px;
     padding-top: 15px;
-    margin-top: 10px;
+    border: 0px;
+    margin-left: -11px;
+    margin-top: -20px;
     margin-bottom: 30px;
 }
 
@@ -95,7 +96,6 @@ html, body
     text-align: center;
     padding-top: 3px;
     color: #eeeeee;
-    border-radius: 3px;
 }
 
 .uLogo {
@@ -201,6 +201,14 @@ html, body
     font-size: 14px;
     box-shadow: rgba(0,0,0,0.2) 0 5px 10px 0,
                 rgba(0,0,0,0.188) 0 4px 8px 0;
+}
+
+.uDialog#LoginScreen
+{
+    width: 350px;
+    margin-left: -215px;
+    padding-left:10px;
+    padding-right:10px;
 }
 
 .uWizard
@@ -875,6 +883,10 @@ button.tabgroup.middle,
     width: 120px;
 }
 
+.osicon {
+    opacity: 0.8;
+}
+
 .uSearchResults > ul, .uSelectList > ul {
     display: block;
     margin: 0;
@@ -1342,7 +1354,7 @@ form.uEditable,.uServerData
 }
 
 .uServerData.table tr th {
-    background: linear-gradient(to bottom, #506080 0%,#303848 100%);;
+    background: linear-gradient(to bottom, #607090 0%,#303858 100%);;
     color: #eeeeee;
     font-weight: bold;
     padding-left: 5px;

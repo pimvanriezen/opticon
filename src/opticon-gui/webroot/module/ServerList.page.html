@@ -40,7 +40,7 @@
       <tr height="32" v-for="o in overview"
           v-on:click="rowClick(o.id)">
         <td width="*">
-          <img src="{{osIcon(o)}}" height="16" v-bind:style="osMargin(o)">
+          <img class="osicon" src="{{osIcon(o)}}" height="16" v-bind:style="osMargin(o)">
           <b>{{o.hostname}}</b>
         </td>
         <td width="20">
