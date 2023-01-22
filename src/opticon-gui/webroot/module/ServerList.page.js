@@ -44,22 +44,44 @@ ServerList.activate = function (argv) {
 // --------------------------------------------------------------------------
 ServerList.refresh = function () {
     let self = ServerList;
-    let nwlist = {};
+    let nwlist = [];
     let count = 0;
     
     API.Opticon.Host.getOverview (function (err, res) {
         if (! err) {
             for (var i in res.overview) {
                 let srv = res.overview[i];
+                if (srv.hostname === undefined) continue;
                 if (srv.status == "OK") {
                     if (self.View.server_status != "ALL") continue;
                 }
                 else if (srv.status == "WARN") {
                     if (self.View.server_status == "ALERT") continue;
                 }
-                nwlist[i] = srv;
+                srv.id = i;
+                nwlist.push (srv);
                 count++;
             }
+            
+            let stval = {
+                "OK":0,
+                "WARN":1,
+                "ALERT":2,
+                "CRIT":3,
+                "DEAD":4,
+                "STALE":4
+            }
+            
+            nwlist = nwlist.sort (function (left, right) {
+                if (stval[left.status] < stval[right.status]) return 1;
+                if (stval[left.status] > stval[right.status]) return -1;
+                if (left.pcpu < right.pcpu) return 1;
+                if (left.pcpu > right.pcpu) return -1;
+                if (left.loadavg < right.loadavg) return 1;
+                if (left.loadavg > right.loadavg) return -1;
+                return 0;
+            });
+            
             self.View.empty = (count == 0);
             self.View.overview = nwlist;
         }
@@ -151,6 +173,12 @@ ServerList.translateUnit = function (val, base, unit) {
     
     if (base == "") return parseInt(val) + " " + unit;
     return parseFloat(val).toFixed(2) + " " + unit;
+}
+
+ServerList.osMargin = function(obj) {
+    let self = ServerList;
+    if (self.osIcon(obj) == "icon/apple.png") return "margin-bottom:-2px;";
+    return "margin-bottom:-4px;";
 }
 
 ServerList.osIcon = function(obj) {

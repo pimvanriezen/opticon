@@ -37,10 +37,10 @@
   </div>
   <span v-if="!empty">
     <table cellspacing="0" border="0" class="tbserverlist" width="100%">
-      <tr height="32" v-for="o,idx,count in overview"
-          v-on:click="rowClick(idx)">
+      <tr height="32" v-for="o in overview"
+          v-on:click="rowClick(o.id)">
         <td width="*">
-          <img src="{{osIcon(o)}}" height="16" style="margin-bottom:-4px;">
+          <img src="{{osIcon(o)}}" height="16" v-bind:style="osMargin(o)">
           <b>{{o.hostname}}</b>
         </td>
         <td width="20">
