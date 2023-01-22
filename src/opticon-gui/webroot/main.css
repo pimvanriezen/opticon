@@ -410,7 +410,7 @@ button, form.uSearch input:not([type=checkbox]):not([type=radio]):not([type=text
     -webkit-appearance: none;
     height: 32px;
     font-size: 16px;
-    box-shadow: inset 1px 1px 1px #ffffff28;
+    box-shadow: inset 1px 1px 1px #ffffff18;
 }
 
 button.mini
