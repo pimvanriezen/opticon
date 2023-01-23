@@ -23,14 +23,14 @@ ServerView.activate = function(argv) {
     self.View.id = self.id;
     self.show();
     self.Vidi.onRender = function() {
+        $(".GaugeMeter").html("");
+        $(".GaugeMeter").gaugeMeter();
         self.fixLayout();
         if (self.View.data.status == "STALE" || self.View.data.status == "DEAD") {
             let q = $("#ServerView .MagicLayout");
             delete q[0];
             q.css ("opacity","0.6");
         }
-        $(".GaugeMeter").html("");
-        $(".GaugeMeter").gaugeMeter();
     }
     API.Opticon.Host.resolveTenant (self.id, function (tenantid) {
         self.tenantid = tenantid;

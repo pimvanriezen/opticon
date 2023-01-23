@@ -17,7 +17,7 @@
   <div class="leftcolumn uServerData">
         <table width="100%">
           <tr>
-            <td style="color:#888888;" width="32%">
+            <td style="color:#888888;" width="30%">
               <img height="48" src="img/server.png">
             </td>
             <td><b>{{data.hostname}}<b></td>
@@ -26,7 +26,7 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">Status</td>
+            <td style="color:#888888;" width="30%">Status</td>
             <td>
               <span v-bind:class="statusClass(data.status,true)">{{data.status}}</span>
               <span v-if="data.problems">{{data.problems.join(',')}}</span>
@@ -36,19 +36,19 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr v-if="meta.name">
-            <td style="color:#888888;" width="32%">Tenant</td>
+            <td style="color:#888888;" width="30%">Tenant</td>
             <td>{{meta.name}}</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">Session IP</td>
+            <td style="color:#888888;" width="30%">Session IP</td>
             <td>{{data.link.ip}}
               <span v-if="data.agent.ip && data.agent.ip != data.link.ip" style="color:#666666;">
-                (Local {{data.agent.ip}})
+                -> {{data.agent.ip}}
               </span>
             </td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">RTT</td>
+            <td style="color:#888888;" width="30%">RTT</td>
             <td>{{data.link.rtt}} <span class="unit">ms</span>
               <span v-if="data.link.loss>0">
                 <b>({{data.link.loss}}% packet loss)</b>
@@ -62,7 +62,7 @@
 
         <table width="100%" border="0" cellspacing="0" cellpadding="2">
           <tr>
-            <td style="color:#888888;" width="32%">Memory</td>
+            <td style="color:#888888;" width="30%">Memory</td>
             <td colspan="2" style="padding-left: 40px;">
               <div class="GaugeMeter" id="PreviewGaugeMeter_2"
                    v-bind:data-used="data.mem.free/(1024*1024)"
@@ -91,7 +91,7 @@
             <td colspan="3">&nbsp;</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">CPU Usage</td>
+            <td style="color:#888888;" width="30%">CPU Usage</td>
             <td align="left" width="190" style="padding: 0px;">
               <u-meter class="big" width="180" var="data.pcpu"></u-meter>
             </td>
@@ -103,25 +103,25 @@
             <td colspan="3">&nbsp;</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">Load Average</td>
+            <td style="color:#888888;" width="30%">Load Average</td>
             <td colspan="2">{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
                 {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
                 {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
           </tr>
           <tr v-if="data.io.pwait !== undefined">
-            <td style="color:#888888;" width="32%">IO Wait</td>
+            <td style="color:#888888;" width="30%">IO Wait</td>
             <td colspan="2">
               {{parseFloat(data.io.pwait).toFixed(2)}} %
             </td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">Disk i/o</td>
+            <td style="color:#888888;" width="30%">Disk i/o</td>
             <td colspan="2">
               {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
             </td>
           </tr>
           <tr>
-           <td style="color:#888888;" width="32%">Uptime</td>
+           <td style="color:#888888;" width="30%">Uptime</td>
            <td colspan="2">
              {{translateUptime(data.uptime)}}
            </td>
@@ -130,7 +130,7 @@
             <td colspan="3">&nbsp;</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">Network</td>
+            <td style="color:#888888;" width="30%">Network</td>
             <td colspan="2">
               <div class="GaugeMeter" id="PreviewGaugeMeter_3"
                    v-bind:data-used="data.net.in_kbs/1024"
@@ -179,16 +179,10 @@
       <div class="uServerData">
         <table width="100%">
           <tr>
-            <td style="color:#888888;" width="22%">Hostname</td>
-            <td>{{data.hostname}}</td>
-          </tr>
-          <tr>
-            <td style="color:#888888;" width="22%">UUID</td>
-            <td class="unit">{{id}}</td>
-          </tr>
-          <tr v-if="meta.name">
-            <td style="color:#888888;" width="22%">Tenant</td>
-            <td>{{meta.name}}</td>
+            <td style="color:#888888;" width="30%">
+              <img height="48" src="img/server.png">
+            </td>
+            <td><b>{{data.hostname}}<b></td>
           </tr>
           <tr>
             <td colspan="2">&nbsp;</td>
@@ -199,6 +193,17 @@
               <span v-bind:class="statusClass(data.status,true)">{{data.status}}</span>
               <span v-if="data.problems">{{data.problems.join(',')}}</span>
             </td>
+          </tr>
+          <tr>
+            <td colspan="2">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="22%">UUID</td>
+            <td class="unit">{{id}}</td>
+          </tr>
+          <tr v-if="meta.name">
+            <td style="color:#888888;" width="22%">Tenant</td>
+            <td>{{meta.name}}</td>
           </tr>
           <tr>
             <td colspan="2">&nbsp;</td>
@@ -228,9 +233,38 @@
       <div class="uServerData">
         <table width="100%" border="0" cellspacing="0" cellpadding="2">
           <tr>
-            <td style="color:#888888;" width="22%">CPU Usage</td>
-            <td align="left" width="130" style="padding: 0px;">
-              <u-meter width="120" var="data.pcpu"></u-meter>
+            <td style="color:#888888;" width="35%">Memory</td>
+            <td colspan="2" style="padding-left: 40px;">
+              <div class="GaugeMeter" id="PreviewGaugeMeter_2"
+                   v-bind:data-used="data.mem.free/(1024*1024)"
+                   v-bind:data-total="data.mem.total/(1024*1024)"
+                   data-append="GB"
+                   data-size="100" data-theme="White"
+                   data-back="RGBa(0,0,0,.1)" 
+                   data-width="15"
+                   data-label="Free"
+                   data-showvalue="true"
+                   data-animationstep="0"
+                   data-color="rgb(81,165,227)"
+                   data-style="Arch"></div>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td colspan="2" style="padding-left: 40px;">
+              <div style="width:100px; text-align: center">
+              {{ktoh(data.mem.total).size}} <span class="unit">{{ktoh(data.mem.total).unit}}</span>
+              total
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="35%">CPU Usage</td>
+            <td align="left" width="180" style="padding: 0px;">
+              <u-meter width="180" class="big" var="data.pcpu"></u-meter>
             </td>
             <td align="left">
               {{parseFloat(data.pcpu).toFixed(2)}} %
@@ -240,19 +274,30 @@
             <td colspan="3">&nbsp;</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="22%">LoadAvg</td>
-            <td colspan="2">{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
-                {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
-                {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
+            <td style="color:#888888;" width="35%">Load Average</td>
+            <td colspan="2">
+                {{parseFloat(data.loadavg[0]).toFixed(2)}} 
+                <span class="unit">(1m)</span> /
+                {{parseFloat(data.loadavg[1]).toFixed(2)}}
+                <span class="unit">(5m)</span> /
+                {{parseFloat(data.loadavg[2]).toFixed(2)}}
+                <span class="unit">(15m)</span>
+            </td>
           </tr>
           <tr v-if="data.io.pwait !== undefined">
-            <td style="color:#888888;" width="22%">IO Wait</td>
+            <td style="color:#888888;" width="35%">IO Wait</td>
             <td colspan="2">
               {{parseFloat(data.io.pwait).toFixed(2)}} %
             </td>
           </tr>
           <tr>
-           <td style="color:#888888;" width="22%">Uptime</td>
+            <td style="color:#888888;" width="35%">Disk i/o</td>
+            <td colspan="2">
+              {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
+            </td>
+          </tr>
+          <tr>
+           <td style="color:#888888;" width="35%">Uptime</td>
            <td colspan="2">
              {{translateUptime(data.uptime)}}
            </td>
@@ -261,37 +306,43 @@
             <td colspan="3">&nbsp;</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="22%">Memory</td>
+            <td style="color:#888888;" width="35%">Network</td>
             <td colspan="2">
-              {{ktoh(data.mem.free).size}} <span class="unit">{{ktoh(data.mem.free).unit}}</span>
-              free ({{ktoh(data.mem.total).size}} <span class="unit">{{ktoh(data.mem.total).unit}}</span>
-              total)
+              <div class="GaugeMeter" id="PreviewGaugeMeter_3"
+                   v-bind:data-used="data.net.in_kbs/1024"
+                   data-total="1024"
+                   data-append="Mb"
+                   data-size="90" data-theme="White"
+                   data-back="RGBa(0,0,0,.1)" 
+                   data-width="10"
+                   data-label="In"
+                   data-showvalue="true"
+                   data-animationstep="0"
+                   data-color="rgb(81,165,227)"
+                   data-style="Arch"></div>
+              <div class="GaugeMeter" id="PreviewGaugeMeter_4"
+                   v-bind:data-used="data.net.out_kbs/1024"
+                   data-total="1024"
+                   data-append="Mb"
+                   data-size="90" data-theme="White"
+                   data-back="RGBa(0,0,0,.1)" 
+                   data-width="10"
+                   data-label="Out"
+                   data-showvalue="true"
+                   data-animationstep="0"
+                   data-color="rgb(81,165,227)"
+                   data-style="Arch"></div>
             </td>
           </tr>
           <tr>
-            <td colspan="3">&nbsp;</td>
-          </tr>
-          <tr>
-            <td style="color:#888888;" width="22%">Network In</td>
+            <td>&nbsp;</td>
             <td colspan="2">
-              {{ktoh(data.net.in_kbs).size}} <span class="unit">{{ktoh(data.net.in_kbs,true).unit}}</span>
-              ({{data.net.in_pps}} <span class="unit">pps</span>)
-            </td>
-          </tr>
-          <tr>
-            <td style="color:#888888;" width="22%">Network Out</td>
-            <td colspan="2">
-              {{ktoh(data.net.out_kbs).size}} <span class="unit">{{ktoh(data.net.out_kbs,true).unit}}</span>
-              ({{data.net.out_pps}} <span class="unit">pps</span>)
-            </td>
-          </tr>
-          <tr>
-            <td colspan="3">&nbsp;</td>
-          </tr>
-          <tr>
-            <td style="color:#888888;" width="22%">Disk i/o</td>
-            <td colspan="2">
-              {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
+              <div style="display: inline-block; width:90px; text-align: center">
+                {{data.net.in_pps}} <span class="unit">pps</span>
+              </div>
+              <div style="display: inline-block; width:90px; text-align: center">
+                {{data.net.out_pps}} <span class="unit">pps</span>
+              </div>
             </td>
           </tr>
         </table>
@@ -303,19 +354,23 @@
       <div class="uServerData">
         <table width="100%">
           <tr>
-            <td style="color:#888888;" width="22%" valign="top">Distribution</td>
-            <td valign="top" style="white-space: nowrap;">
+            <td style="color:#888888;" width="22%">&nbsp;
               <span v-if="data.os.kernel.substr(0,5) == 'Linux'">
-                <img height="16" v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
+                <img height="48" v-bind:src="linuxIcon(data.os.version)" style="margin-bottom:-2px;">
               </span>
               <span v-if="data.os.kernel.substr(0,7) == 'Windows'">
-                <img src="icon/windows.png" style="margin-bottom:-2px; opacity:0.8;">
+                <img src="icon/windows.png" height="48" style="margin-bottom:-2px; opacity:0.8;">
               </span>
               <span v-if="data.os.kernel.substr(0,6) == 'Darwin'">
-                <img src="icon/apple.png" height="16" style="margin-bottom:-2px; opacity:0.8;">
+                <img src="icon/apple.png" height="48" style="margin-bottom:-2px; opacity:0.8;">
               </span>
-              {{(""+data.os.distro).replace(/[.][0-9][0-9][0-9][0-9]+/g,'')}}
             </td>
+            <td style="white-space: nowrap;">
+              <b>{{(""+data.os.distro).replace(/[.][0-9][0-9][0-9][0-9]+/g,'')}}</b>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
             <td style="color:#888888;" width="22%">Kernel</td>
@@ -341,6 +396,9 @@
                 </tr>
               </table>
             </td>
+          </tr>
+          <tr v-if="data.agent.v">
+            <td colspan="2">&nbsp;</td>
           </tr>
           <tr v-if="data.agent.v">
             <td style="color:#888888;" width="22%">Agent Version</td>

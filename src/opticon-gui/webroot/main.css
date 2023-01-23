@@ -890,13 +890,13 @@ button.tabgroup.middle,
         top: 10px;
         bottom: 0;
         left: 0;
-        width: 370px;
-        padding-left: 30px !important;
-        padding-top: 30px !important;
+        width: 350px;
+        padding-left: 20px !important;
+        padding-top: 20px !important;
         overflow: hidden;
     }
     .contentarea {
-        margin-left: 440px;
+        margin-left: 420px;
     }
     .nonwide {
         display: none !important;
@@ -1385,11 +1385,11 @@ form.uEditable,.uServerData
 
 .uServerData
 {
-    padding-left: 10px;
+    padding-left: 20px;
     padding-right: 20px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    width: 500px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    width: 490px;
 }
 
 .uServerData b
@@ -1778,7 +1778,7 @@ meter::-webkit-meter-bar {
    color: navy;
 }
 .json-string {
-   color: olive;
+   color: #208020;
 }
 
 .paper {
