@@ -1254,7 +1254,7 @@ double *localdb_get_graph (db *d, uuid hostid, const char *id,
     while (pos < numsamples) {
         double ra = 0.0;
         double rc = 0.0;
-        while (localdb_offset_next(crsr) != ((uint32_t)offs_next)%(30*86400)) {
+        while (localdb_offset_next(crsr) != ((uint32_t)offs_next)%(GRAPHDATASZ)) {
             ra += graph->data[crsr];
             rc += 1.0;
             crsr = localdb_offset_next(crsr);
