@@ -22,13 +22,6 @@
             </td>
             <td><b>{{data.hostname}}<b></td>
           </tr>
-          <tr v-if="meta.name">
-            <td colspan="2">&nbsp;</td>
-          </tr>
-          <tr v-if="meta.name">
-            <td style="color:#888888;" width="32%">Tenant</td>
-            <td>{{meta.name}}</td>
-          </tr>
           <tr>
             <td colspan="2">&nbsp;</td>
           </tr>
@@ -41,6 +34,10 @@
           </tr>
           <tr>
             <td colspan="2">&nbsp;</td>
+          </tr>
+          <tr v-if="meta.name">
+            <td style="color:#888888;" width="32%">Tenant</td>
+            <td>{{meta.name}}</td>
           </tr>
           <tr>
             <td style="color:#888888;" width="32%">Session IP</td>
@@ -106,7 +103,7 @@
             <td colspan="3">&nbsp;</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">LoadAvg</td>
+            <td style="color:#888888;" width="32%">Load Average</td>
             <td colspan="2">{{parseFloat(data.loadavg[0]).toFixed(2)}} / 
                 {{parseFloat(data.loadavg[1]).toFixed(2)}} / 
                 {{parseFloat(data.loadavg[2]).toFixed(2)}}</td>
@@ -115,6 +112,12 @@
             <td style="color:#888888;" width="32%">IO Wait</td>
             <td colspan="2">
               {{parseFloat(data.io.pwait).toFixed(2)}} %
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#888888;" width="32%">Disk i/o</td>
+            <td colspan="2">
+              {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
             </td>
           </tr>
           <tr>
@@ -127,26 +130,43 @@
             <td colspan="3">&nbsp;</td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">Network In</td>
+            <td style="color:#888888;" width="32%">Network</td>
             <td colspan="2">
-              {{ktoh(data.net.in_kbs).size}} <span class="unit">{{ktoh(data.net.in_kbs,true).unit}}</span>
-              ({{data.net.in_pps}} <span class="unit">pps</span>)
+              <div class="GaugeMeter" id="PreviewGaugeMeter_3"
+                   v-bind:data-used="data.net.in_kbs/1024"
+                   data-total="1024"
+                   data-append="Mb"
+                   data-size="90" data-theme="White"
+                   data-back="RGBa(0,0,0,.1)" 
+                   data-width="10"
+                   data-label="In"
+                   data-showvalue="true"
+                   data-animationstep="0"
+                   data-color="rgb(81,165,227)"
+                   data-style="Arch"></div>
+              <div class="GaugeMeter" id="PreviewGaugeMeter_4"
+                   v-bind:data-used="data.net.out_kbs/1024"
+                   data-total="1024"
+                   data-append="Mb"
+                   data-size="90" data-theme="White"
+                   data-back="RGBa(0,0,0,.1)" 
+                   data-width="10"
+                   data-label="Out"
+                   data-showvalue="true"
+                   data-animationstep="0"
+                   data-color="rgb(81,165,227)"
+                   data-style="Arch"></div>
             </td>
           </tr>
           <tr>
-            <td style="color:#888888;" width="32%">Network Out</td>
+            <td>&nbsp;</td>
             <td colspan="2">
-              {{ktoh(data.net.out_kbs).size}} <span class="unit">{{ktoh(data.net.out_kbs,true).unit}}</span>
-              ({{data.net.out_pps}} <span class="unit">pps</span>)
-            </td>
-          </tr>
-          <tr>
-            <td colspan="3">&nbsp;</td>
-          </tr>
-          <tr>
-            <td style="color:#888888;" width="32%">Disk i/o</td>
-            <td colspan="2">
-              {{data.io.rdops}} / {{data.io.wrops}} <span class="unit">iops</span>
+              <div style="display: inline-block; width:90px; text-align: center">
+                {{data.net.in_pps}} <span class="unit">pps</span>
+              </div>
+              <div style="display: inline-block; width:90px; text-align: center">
+                {{data.net.out_pps}} <span class="unit">pps</span>
+              </div>
             </td>
           </tr>
         </table>
