@@ -32,8 +32,11 @@ void host_to_overview (host *h, var *ovdict) {
     while (m) {
         /* We only want singular values */
         if (m->count > 0) {
-            m = m->next;
-            continue;
+            id2str (m->id, mid);
+            if (strcmp (mid, "loadavg") != 0) {
+                m = m->next;
+                continue;
+            }
         }
 
         id2str (m->id, mid);
