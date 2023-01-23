@@ -591,6 +591,20 @@
                   style="border:1px solid grey"></canvas>
         </div>
       </div>
+      <div class="uEditContainer" v-static="keep">
+        <u-header icon="header-rtt.png">IO Wait</u-header>
+        <div class="uServerData table">
+          <canvas id="graph-cpu-iowait" width="530" height="200"
+                  style="border:1px solid grey"></canvas>
+        </div>
+      </div>
+      <div class="uEditContainer" v-static="keep">
+        <u-header icon="header-rtt.png">Free RAM</u-header>
+        <div class="uServerData table">
+          <canvas id="graph-memory-free" width="530" height="200"
+                  style="border:1px solid grey"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 </span>

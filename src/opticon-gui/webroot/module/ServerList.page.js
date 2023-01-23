@@ -182,39 +182,17 @@ ServerList.osMargin = function(obj) {
 }
 
 ServerList.osIcon = function(obj) {
-    let hack = {
-        "VM01216":"icon/windows.png",
-        "opticon":"icon/ubuntu.png",
-        "smokeping":"icon/ubuntu.png",
-        "jumphost.newvm.com":"icon/ubuntu.png",
-        "opticon-ubuntu":"icon/ubuntu.png",
-        "ns2.office.midilab.nl":"icon/alma.png",
-        "gitlab.office.midilab.nl":"icon/alma.png",
-        "http-01.midilab.nl":"icon/alma.png",
-        "rt-lkk2-core01":"icon/ubnt.png",
-        "rt-ams3-core01":"icon/alma.png",
-        "ns1.office.midilab.nl":"icon/alma.png",
-        "ns2.office.midilab.nl":"icon/alma.png",
-        "mx.midilab.nl":"icon/ubuntu.png",
-        "jumphost.midilab.nl":"icon/alma.png",
-        "vm.midilab.nl":"icon/alma.png",
-        "uisp.office.midilab.nl":"icon/ubuntu.png",
-        "dump.midilab.nl":"icon/alma.png",
-        "deepmind.office.midilab.nl":"icon/apple.png"
-    }
-    
-    let t = hack[obj.hostname];
-    if (t) return t;   
-
     let kernel = obj["os/kernel"];
+    let kvers = obj["os/version"];
     let distro = obj["os/distro"];
     
     if (kernel == "Windows") return "icon/windows.png";
-    if (/UBNT/.test (kernel)) return "icon/ubnt.png";
-    if (/el[0-9]/.test (kernel) && /^Alma/.test (distro)) {
+    if (kernel == "Darwin") return "icon/apple.png";
+    if (/UBNT/.test (kvers)) return "icon/ubnt.png";
+    if (/el[0-9]/.test (kvers) && /^Alma/.test (distro)) {
         return "icon/alma.png";
     }
-    if (/generic/.test (kernel) && /^Ubuntu/.test (distro)) {
+    if (/generic/.test (kvers) && /^Ubuntu/.test (distro)) {
         return "icon/ubuntu.png";
     }
     return "icon/linux.png";

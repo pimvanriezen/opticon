@@ -40,6 +40,8 @@ ServerView.activate = function(argv) {
             Module.setBackground (self.refresh);
             self.refresh();
             self.refreshGraph ("cpu","usage","Usage","%");
+            self.refreshGraph ("cpu","iowait","IOWait","%");
+            self.refreshGraph ("memory","free","Free RAM","KB");
             self.refreshGraph ("link","rtt","RTT","ms");
             self.refreshGraph ("net","input","Traffic","Kb/s");
             self.refreshGraph ("net","output","Traffic","Kb/s");
