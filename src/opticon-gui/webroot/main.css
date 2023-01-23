@@ -1403,6 +1403,13 @@ form.uEditable,.uServerData
     width: 530px;
 }
 
+.uServerData.graph
+{
+    margin-left: 10px;
+    padding: 0px;
+    width: 530px;
+}
+
 .uServerData.table.wide
 {
     width: 1086px;

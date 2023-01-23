@@ -17,7 +17,8 @@
       <td width="20" align="right"><img src="icon/header-pkg.png" height="16"></td>
       <td width="100"><b>Status</b></td>
       <td class="ipaddr"><b>IP Address</b></td>
-      <td width="64" align="center"><b>CPU</b></td>
+      <td class="nonwide" width="64" align="center"><b>CPU</b></td>
+      <td class="onlywide" width="128" align="center"><b>CPU</b></td>
       <td class="nonarrow" width="64" align="right"><b>Load</td>
       <td class="nonarrow" width="112" align="right"><b>Disk I/O</td>
       <td width="112" align="right"><b>Net I/O</td>
@@ -59,8 +60,11 @@
             -> {{o["agent/ip"]}}
           </span>
         </td>
-        <td align="right" width="64">
+        <td class="nonwide" align="right" width="64">
           <u-meter width="60" var="o.pcpu"></u-meter>
+        </td>
+        <td class="onlywide" align="right" width="128">
+          <u-meter width="120" var="o.pcpu"></u-meter>
         </td>
         <td class="nonarrow" align="right" width="64">{{parseFloat(o.loadavg).toFixed(2)}}</td>
         <td class="nonarrow" align="right" width="112"
