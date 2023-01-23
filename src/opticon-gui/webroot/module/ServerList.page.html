@@ -15,12 +15,13 @@
         <b>Hostname</b>
       </td>
       <td width="20" align="right"><img src="icon/header-pkg.png" height="16"></td>
-      <td width="80"><b>Status</b></td>
-      <td width="240"><b>IP Address</b></td>
+      <td width="100"><b>Status</b></td>
+      <td class="ipaddr"><b>IP Address</b></td>
       <td width="64" align="center"><b>CPU</b></td>
-      <td width="64" align="right"><b>Load</td>
-      <td width="112" align="right"><b>Disk I/O</td>
+      <td class="nonarrow" width="64" align="right"><b>Load</td>
+      <td class="nonarrow" width="112" align="right"><b>Disk I/O</td>
       <td width="112" align="right"><b>Net I/O</td>
+      <td width="100" align="right" class="onlywide"><b>Free RAM</b></td>
       <td width="80" align="right"><b>RTT</td>
     </tr>
   </table>
@@ -49,10 +50,10 @@
             <div class="badge inline nonzero">{{o["pkgm/inq"]}}</div>
           </span>
         </td>
-        <td width="80">
+        <td width="100">
           <span v-bind:class="statusClass(o)">{{o.status}}</span>
         </td>
-        <td width="240">
+        <td class="ipaddr">
           {{o["link/ip"]}}
           <span class="unit" v-if="o['agent/ip'] &&(o['link/ip']!=o['agent/ip'])">
             -> {{o["agent/ip"]}}
@@ -61,12 +62,16 @@
         <td align="right" width="64">
           <u-meter width="60" var="o.pcpu"></u-meter>
         </td>
-        <td align="right" width="64">{{parseFloat(o.loadavg).toFixed(2)}}</td>
-        <td align="right" width="112"
+        <td class="nonarrow" align="right" width="64">{{parseFloat(o.loadavg).toFixed(2)}}</td>
+        <td class="nonarrow" align="right" width="112"
             v-html="translateUnit(o['io/rdops']+o['io/wrops'],'','iops')">
         </td>
         <td align="right" width="112"
             v-html="translateUnit(o['net/in_kbs']+o['net/out_kbs'],'K','b/s')">
+        </td>
+        <td width="100" align="right" class="onlywide">
+          {{(parseFloat(o["mem/free"])/(1024*1024)).toFixed(2)}}
+          <span class="unit">GB</span>
         </td>
         <td align="right" width="80">
           {{parseFloat(o["link/rtt"]).toFixed(2)}} <span class="unit">ms</span>

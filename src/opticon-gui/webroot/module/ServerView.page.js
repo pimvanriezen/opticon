@@ -29,6 +29,8 @@ ServerView.activate = function(argv) {
             delete q[0];
             q.css ("opacity","0.6");
         }
+        $(".GaugeMeter").html("");
+        $(".GaugeMeter").gaugeMeter();
     }
     API.Opticon.Host.resolveTenant (self.id, function (tenantid) {
         self.tenantid = tenantid;
@@ -49,6 +51,7 @@ ServerView.activate = function(argv) {
             self.refreshGraph ("io","write","i/o","ops/s");
         }
     });
+    window.addEventListener ("resize", ServerView.onResize);
 }
 
 ServerView.refresh = function() {
@@ -252,6 +255,16 @@ ServerView.setScale = function(e) {
     self.refreshGraph ("io","write","i/o","ops/s");
 }
 
+ServerView.onHide = function() {
+    window.removeEventListener ("resize", ServerView.onResize);
+}
+
+ServerView.onResize = function() {
+    console.log ("resize");
+    var self = ServerView;
+    self.Vidi.render();
+}
+
 ServerView.makeLayout = function(q, portWidth) {
     var objtable= {};
     var columnpositions = {};
@@ -304,12 +317,15 @@ ServerView.makeLayout = function(q, portWidth) {
     var oheight = objtable[owidth][0].height;
     let wcolumnh = JSON.parse (JSON.stringify (columnh));
     var thirdwassorted = false;
+    var leftvisible = $("#ServerView .leftcolumn").is(":visible");
     
     objtable[width].sort (function (a,b) {
-        if (a.idx <2) return 0;
-        if (b.idx <2) return 0;
+        if (! leftvisible) {
+            if (a.idx <2) return 0;
+            if (b.idx <2) return 0;
+        }
         if (a.height < b.height) {
-            if (a.idx == 2 || b.idx == 2) {
+            if (! leftvisible && (a.idx == 2 || b.idx == 2)) {
                 if (thirdwassorted) return 0;
                 thirdwassorted = true;
             }
@@ -437,12 +453,13 @@ ServerView.makeLayout = function(q, portWidth) {
 ServerView.fixLayout = function() {
     var positions = {};
     var counts = {};
-    var q = $("#ServerView #ServerOverview .magicLayout");
-    ServerView.makeLayout (q, $("#ServerView").width());
+    var q = $("#ServerView #ServerOverview .magicLayout:visible");
+    ServerView.makeLayout (q, $("#ServerView .contentarea").width()-20);
 }
 
 ServerView.linuxIcon = function(kernel) {
     let distro = ServerView.View.data.os.distro;
+    if (/Cumulus/.test (distro)) return "icon/nvidia.png";
     if (/UBNT/.test (kernel)) return "icon/ubnt.png";
     if (/qnap/.test (kernel)) return "icon/qnap.png";
     if (/el[0-9]/.test (kernel) && /^Alma/.test (distro)) {

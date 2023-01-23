@@ -373,6 +373,7 @@ Module.Page.prototype.hide = function() {
         }
     }
     this.listeners = [];
+    if (this.onHide) this.onHide();
     $(this.View.$el).hide();
 }
 

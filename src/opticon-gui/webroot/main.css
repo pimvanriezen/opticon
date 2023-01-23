@@ -874,6 +874,71 @@ button.tabgroup.middle,
     /*box-shadow: inset 8px 8px 10px -27px #777777;*/
 }
 
+.uEditPane .leftcolumn
+{
+    display: none;
+}
+
+.uEditPane .contentarea {
+    text-align: left;
+}
+
+@media (min-width: 1800px) {
+    .uEditPane .leftcolumn {
+        display: block;
+        position: absolute;
+        top: 10px;
+        bottom: 0;
+        left: 0;
+        width: 400px;
+    }
+    .contentarea {
+        margin-left: 440px;
+    }
+    .nonwide {
+        display: none !important;
+    }
+    td.onlywide {
+        display: block !important;
+    }
+}
+
+td.ipaddr {
+    width: 240px;
+}
+
+@media (max-width: 1350px) {
+    td.nonarrow {
+        display: none;
+    }
+}
+
+@media (max-width: 1250px) {
+    td.ipaddr {
+        width: 140px;
+    }
+    td.ipaddr .unit {
+        display: none;
+    }
+}
+
+td.onlywide {
+    display: none;
+}
+
+.leftcolumn table tr td {
+    padding-bottom: 6px !important;
+}
+
+.contentarea {
+    position: absolute;
+    overflow: auto;
+    top: 0;
+    bottom: 0;
+    left: 0px;
+    right: 0;
+}
+
 .textlabel
 {
     display: inline-block;
@@ -1748,6 +1813,11 @@ meter::-webkit-meter-bar {
 table.meter, table.meter tbody {
     height: 12px;
 }
+
+table.meter.big, table.meter.big tr, table.meter.big tr td table.meter.big tbody {
+    height: 16px;
+}
+
 table.meter {
     border: none;
     display: inline-block;
@@ -1777,4 +1847,44 @@ table.meter tr td.meterempty {
 table.meter tr td.meterfill {
     background: linear-gradient(to bottom, rgba(179,220,237,1) 0%, rgba(41,125,227,1) 77%, rgba(188,224,238,1) 100%) !important;
     font-size: 2px;
+}
+
+.GaugeMeter {
+    position: Relative;
+    text-align: Center;
+    overflow: Hidden;
+    cursor: Default;
+    display: inline-block;
+}
+
+.GaugeMeter SPAN, .GaugeMeter B {
+    width: 54%;
+    position: Absolute;
+    text-align: Center;
+    display: Inline-Block;
+    color: RGBa(0, 0, 0, .8);
+    font-weight: 100;
+    font-family: "Open Sans", Arial;
+    overflow: Hidden;
+    white-space: NoWrap;
+    text-overflow: Ellipsis;
+    margin: 0 23%;
+}
+
+.GaugeMeter[data-style="Semi"] B {
+    width: 80%;
+    margin: 0 10%;
+}
+
+.GaugeMeter S, .GaugeMeter U {
+    text-decoration: None;
+    font-size: .60em;
+    font-weight: 200;
+    opacity: .6;
+}
+
+.GaugeMeter B {
+    color: #000;
+    font-weight: 200;
+    opacity: .8;
 }

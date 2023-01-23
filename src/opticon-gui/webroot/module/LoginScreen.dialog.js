@@ -31,6 +31,11 @@ LoginScreen.open = function() {
     $(".uContent").hide();
     $("#LoginScreen-username").focus();
     
+    if (conf.autologin.username) {
+        self.View.username = conf.autologin.username;
+        self.View.password = conf.autologin.password;
+    }
+    
     // Chrome autofill isn't immediately available, so wait for a bit.
     setTimeout (function(){
             // Autofill does not make the password available until

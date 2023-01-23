@@ -337,10 +337,12 @@ MarkupDecorators.header = function (e, mname) {
 MarkupDecorators.meter = function (e, mname) {
     var usevar = e.getAttribute ("var");
     var width = e.getAttribute ("width");
+    var xclass = e.getAttribute ("class");
+    var addclass = xclass ? " "+xclass : "";
     if (! width) width = 120;
     
     nelm = document.createElement ("span");
-    let html = '<table cellspacing="0" class="meter" width="'+width+'"><tr>';
+    let html = '<table cellspacing="0" class="meter'+addclass+'" width="'+width+'"><tr>';
     html += '<td v-bind:width="parseInt(' + usevar + ')*0.01*'+width+
             '" class="meterfill">&nbsp;</td>';
     html += '<td v-bind:width="' + "(100-parseInt(" + usevar + ')) * 0.01*'+

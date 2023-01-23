@@ -188,6 +188,9 @@ ServerList.osIcon = function(obj) {
     
     if (kernel == "Windows") return "icon/windows.png";
     if (kernel == "Darwin") return "icon/apple.png";
+
+    if (/Cumulus/.test (distro)) return "icon/nvidia.png";
+
     if (/UBNT/.test (kvers)) return "icon/ubnt.png";
     if (/el[0-9]/.test (kvers) && /^Alma/.test (distro)) {
         return "icon/alma.png";
