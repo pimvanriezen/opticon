@@ -890,7 +890,10 @@ button.tabgroup.middle,
         top: 10px;
         bottom: 0;
         left: 0;
-        width: 400px;
+        width: 370px;
+        padding-left: 30px !important;
+        padding-top: 30px !important;
+        overflow: hidden;
     }
     .contentarea {
         margin-left: 440px;
