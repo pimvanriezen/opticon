@@ -12,11 +12,11 @@
   * \param into The ioport to use */
 /*/ ======================================================================= /*/
 void jsoncodec_dump_val (metertype_t type, meter *m, int pos, ioport *into) {
-    if ((m->count < pos) || (m->count > SZ_EMPTY_VAL)) {
+    if (m->count > SZ_EMPTY_VAL) {
         ioport_write (into, "null", 4);
         return;
     }
-    if (m->count == SZ_EMPTY_VAL) {
+    if ((m->count < pos) || (m->count == SZ_EMPTY_VAL)) {
         if (pos>0) return;
         switch (type) {
             case MTYPE_INT:
