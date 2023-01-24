@@ -1246,8 +1246,8 @@ var *runprobe_cpu (probe *self) {
     while (! feof (f)) {
         *buf = 0;
         fgets (buf, 1023, f);
-        if (strncmp (buf, "model name", 10) == 0 ||
-            strncmp (buf, "cpu model", 9) == 0)) {
+        if ((strncmp (buf, "model name", 10) == 0) ||
+            (strncmp (buf, "cpu model", 9) == 0)) {
             char *c = strchr (buf, ':');
             if (c) {
                 c++;
