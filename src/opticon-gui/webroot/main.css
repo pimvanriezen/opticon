@@ -883,7 +883,7 @@ button.tabgroup.middle,
     text-align: left;
 }
 
-@media (min-width: 1800px) {
+@media (min-width: 1755px) {
     .uEditPane .leftcolumn {
         display: block;
         position: absolute;
@@ -901,9 +901,27 @@ button.tabgroup.middle,
     .nonwide {
         display: none !important;
     }
-    td.onlywide {
+    .onlywide {
         display: block !important;
     }
+}
+
+@media (min-width: 1880px) {
+    .graphgrid {
+        width: 1650px !important;
+    }
+}
+
+@media (max-width: 1350px) {
+    .graphgrid {
+        width: 550px !important;
+    }
+}
+
+.graphgrid {
+    margin-left: 20px;
+    width: 1120px;
+    text-align: left;
 }
 
 td.ipaddr {
@@ -911,7 +929,7 @@ td.ipaddr {
 }
 
 @media (max-width: 1350px) {
-    td.nonarrow {
+    .nonarrow {
         display: none;
     }
 }
@@ -925,7 +943,7 @@ td.ipaddr {
     }
 }
 
-td.onlywide {
+.onlywide {
     display: none;
 }
 

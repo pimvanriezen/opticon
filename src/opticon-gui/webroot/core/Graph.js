@@ -92,11 +92,40 @@ class Graph {
 
             ctx.fillStyle = gr.fg;
             ctx.fillRect(x, GRAPH_MARGIN_B, 1, y);
+
             if (i < (bwidth-1)) {
                 ctx.fillStyle = gr.bg;
                 ctx.fillRect (x+1, GRAPH_MARGIN_B, 1, y);
             }
         }
+
+
+        ctx.save();
+        ctx.beginPath();
+
+        for (let i=0; i < bwidth; ++i) {
+            let index = (1000/bwidth) * i;
+            let x = GRAPH_MARGIN_L + i;
+            let y = (bheight-1) * (self.graph.data.at(index) / max);
+            if (y<0) y=0;
+            if (y>bheight) y = bheight;
+
+            if (! i) ctx.moveTo(x, y + GRAPH_MARGIN_B);
+            else ctx.lineTo(x, y + GRAPH_MARGIN_B);
+        }
+                    
+        //ctx.strokeStyle = "#ffffff80";
+        //ctx.lineWidth = 8;
+        //ctx.stroke();
+        // 50c0c060
+        ctx.strokeStyle = "#000008e0";
+        ctx.lineWidth = 2;
+        ctx.shadowColor = "#ffffff60";
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.stroke();
+        ctx.restore();
 
         ctx.beginPath();
         ctx.lineWidth = "2";

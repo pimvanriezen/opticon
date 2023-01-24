@@ -736,8 +736,8 @@
           <tr>
             <th align="left">PID</td>
             <th align="left">User</td>
-            <th align="right">CPU %</td>
-            <th align="right">Mem %</td>
+            <th align="right">CPU%</td>
+            <th align="right" class="nonarrow">Mem%</td>
             <th></th>
             <th align="left">Name</td>
           </tr>
@@ -745,7 +745,7 @@
             <td width="5%">{{proc.pid}}</td>
             <td width="15%">{{translateUser(proc.user)}}</td>
             <td width="8%" align="right">{{parseFloat(proc.pcpu).toFixed(2)}}</td>
-            <td width="8%" align="right">{{parseFloat(proc.pmem).toFixed(2)}}</td>
+            <td width="8%" align="right" class="nonarrow">{{parseFloat(proc.pmem).toFixed(2)}}</td>
             <td width="2%">&nbsp;</td>
             <td>{{proc.name}}</td>
           </tr>
@@ -764,7 +764,8 @@
     <u-tabgroup cb="setScale" name="scale" tabs="604800:Week,86400:24h,43200:12h,10800:3h" class="green"></u-tabgroup>
     <br>
     <br>
-    <div>
+    <center>
+    <div class="graphgrid">
       <div class="uEditContainer" v-static="keep">
         <u-header icon="header-performance.png">CPU</u-header>
         <div class="uServerData graph" v-static="keep">

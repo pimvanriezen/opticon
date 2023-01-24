@@ -305,6 +305,19 @@ ServerView.makeLayout = function(q, portWidth) {
     let cpos = 0;
     let yoffs = 20;
     let xoffs = (((portWidth-rightmost)/2)-leftmost) - 10/*margin/2*/;
+    console.log ("widths: " + JSON.stringify(widths));
+    if (widths.length == 2) {
+        let widest = widths[1];
+        if (widest > (portWidth-20)) {
+            let outwidth = widths[0];
+            for (let o of objtable[widest]) {
+                o.obj.style.width = "" + outwidth + "px";
+                o.obj.style.overflow = "hidden";
+                $(o.obj).find("table").prop ("width", outwidth);
+            }
+            xoffs = ((portWidth - widths[0])/2) - 10;
+        }
+    }
     
     let columnh = [0,0,0,0,0,0];
     let numc = 0;
@@ -342,6 +355,7 @@ ServerView.makeLayout = function(q, portWidth) {
     wcolumnh[1] = oheight;
 
     numc = columnpositions[width].length;
+    if (widths[1] > (portWidth-20)) numc = 1;
 
     for (var item of objtable[width]) {
         let lowestcolumn = 0;
