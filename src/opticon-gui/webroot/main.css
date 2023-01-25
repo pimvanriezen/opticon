@@ -902,9 +902,15 @@ button.tabgroup.middle,
         display: none !important;
     }
     .onlywide {
-        display: block !important;
     }
 }
+
+@media (max-width: 1755px) {
+    .onlywide {
+        display: none;
+    }
+}
+
 
 @media (min-width: 1880px) {
     .graphgrid {
@@ -932,6 +938,14 @@ td.ipaddr {
     .nonarrow {
         display: none;
     }
+    .onlynarrow {
+    }
+}
+
+@media (min-width: 1350px) {
+    .onlynarrow {
+        display:  none;
+    }
 }
 
 @media (max-width: 1250px) {
@@ -941,10 +955,6 @@ td.ipaddr {
     td.ipaddr .unit {
         display: none;
     }
-}
-
-.onlywide {
-    display: none;
 }
 
 .leftcolumn table tr td {
