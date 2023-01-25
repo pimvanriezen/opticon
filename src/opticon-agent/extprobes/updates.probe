@@ -23,7 +23,7 @@ if [ "$pman" = "dnf" ]; then
         printf "    { id:\"%s\", v:\"%s\" }\n" "$id" "$v"
       fi
     fi
-  done <<< $(opticon-helper dnf -q check-update | grep -v "^$")
+  done < <(opticon-helper dnf -q check-update | grep -v "^$")
   printf "]\n"
   printf "pkgm {\n"
   printf "    inq: %i\n" "$cnt"
@@ -39,7 +39,7 @@ elif [ "$pman" = "apt" ]; then
         printf "    { id:\"%s\", v:\"%s\" }\n" "$id" "$v"
       fi
     fi
-  done <<< $(apt list --upgradable 2>/dev/null | grep /)
+  done < <(apt list --upgradable 2>/dev/null | grep /)
   printf "]\n"
  
   nr=$(which needrestart)
