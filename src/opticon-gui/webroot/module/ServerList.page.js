@@ -200,3 +200,9 @@ ServerList.osIcon = function(obj) {
     }
     return "icon/linux.png";
 }
+
+ServerList.pkgDotClass = function(q) {
+    if (q == 0) return "";
+    if (q < 10) return "dot yellow";
+    return "dot red";
+}

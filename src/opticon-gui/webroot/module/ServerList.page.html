@@ -14,7 +14,7 @@
       <td width="*">
         <b>Hostname</b>
       </td>
-      <td width="20" align="right"><img src="icon/header-pkg.png" height="16"></td>
+      <td width="20" align="center"><img src="icon/header-pkg.png" height="16"></td>
       <td width="100"><b>Status</b></td>
       <td class="ipaddr"><b>IP Address</b></td>
       <td class="nonwide" width="64" align="center"><b>CPU</b></td>
@@ -46,9 +46,9 @@
                style="margin-bottom:-4px;">
           <b>{{o.hostname}}</b>
         </td>
-        <td width="20">
+        <td width="20" align="center">
           <span v-if="o['pkgm/inq']>0">
-            <div class="badge inline nonzero">{{o["pkgm/inq"]}}</div>
+            <span v-bind:class="pkgDotClass(o['pkgm/inq'])"></span>
           </span>
         </td>
         <td width="100">

@@ -1916,3 +1916,22 @@ table.meter tr td.meterfill {
     font-weight: 200;
     opacity: .8;
 }
+
+.dot {
+    height: 8px;
+    width: 8px;
+    background-color: #e0c020;
+    border: 1px solid #80701050;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 5px 0 #e0c020e0;
+}
+
+.dot.yellow {
+}
+
+.dot.red {
+    background-color: #e04040;
+    border: 1px solid #80101050;
+    box-shadow: 0 0 5px 0 #e04040a0;
+}
