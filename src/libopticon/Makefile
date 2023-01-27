@@ -8,6 +8,9 @@ LUALIBS?=$(shell pkg-config --libs $(LUA))
 LUAINC?=$(shell pkg-config --cflags $(LUA))
 
 OSNAME?=$(shell uname -s | tr A-Z a-z)
+ifeq ($(findstring mingw64,$(OSNAME)),mingw64)
+	OSNAME=windows
+endif
 OSREL?=$(shell uname -r)
 OSRELMAJOR?=$(shell uname -r | cut -f1 -d.)
 
@@ -17,6 +20,11 @@ endif
 
 ifeq (linux,$(OSNAME))
   CFLAGS+=-std=c99 -D_GNU_SOURCE
+endif
+
+ifeq (windows,$(OSNAME))
+  CFLAGS+=-isystem ../../lib/winlibc/additional/include
+  CFLAGS+=-DOS_WINDOWS -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0601
 endif
 
 CFLAGS+=-DOSNAME=$(OSNAME) -DOSREL=$(OSREL) -DOSRELMAJOR=$(OSRELMAJOR)
