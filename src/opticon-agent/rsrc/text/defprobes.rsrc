@@ -98,3 +98,10 @@ raid {
     call: /var/lib/opticon/probes/raid.probe
     frequency: low
 }
+mssql {
+    platform: windows
+    type: exec
+    check: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/mssql.probe.ps1\" check"
+    call: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/mssql.probe.ps1\""
+    frequency: high
+}

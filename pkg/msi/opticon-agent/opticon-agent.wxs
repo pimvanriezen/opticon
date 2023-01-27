@@ -50,12 +50,15 @@
 						<!-- 'Manually' store the generated product id (ProductCode) in the registry, so it can be used to check if the agent is installed as an msi or not -->
 						<RegistryValue Root="HKLM" Key="Software\Opticon-Agent" Name="msiProductCode" Type="string" Value="[ProductCode]" />
 					</Component>
-					<Component Id="opticonAgent.defaultProbesFileComponent" Guid="0f9a7cf2-7b09-452b-b17e-dba8d01bc96d" Win64="yes">
-						<File Id="opticonAgent.defaultProbesFile" KeyPath="yes" Source="../../../src/opticon-agent/opticon-defaultprobes.win.conf" Name="opticon-defaultprobes.conf" />
-					</Component>
 					<Component Id="opticonAgent.exampleConfigFileComponent" Guid="1cff4680-48c3-41c7-afe0-bc7da0a60670" Win64="yes">
 						<File Id="opticonAgent.exampleConfigFile" KeyPath="yes" Source="../../../src/opticon-agent/opticon-agent.conf.example" />
 					</Component>
+					
+					<Directory Id="opticonAgent.extprobesDirectory" Name="extprobes">
+						<Component Id="opticonAgent.mssqlProbeFileComponent" Guid="305e3e3a-878b-4cd5-b53f-95b14b86f2f4" Win64="yes">
+							<File Id="opticonAgent.mssqlProbeFile" KeyPath="yes" Source="../../../src/opticon-agent/extprobes/win/mssql.probe.ps1" Name="mssql.probe.ps1" />
+						</Component>
+					</Directory>
 				</Directory>
 			</Directory>
 		</Directory>
@@ -63,8 +66,8 @@
 		<Feature Id="opticonAgent.defaultFeature" Level="1">
 			<!-- Using a Component per File as recommended by the docs (or the internet) -->
 			<ComponentRef Id="opticonAgent.exeFileComponent" />
-			<ComponentRef Id="opticonAgent.defaultProbesFileComponent" />
 			<ComponentRef Id="opticonAgent.exampleConfigFileComponent" />
+			<ComponentRef Id="opticonAgent.mssqlProbeFileComponent" />
 		</Feature>
 		
 		

@@ -1,5 +1,9 @@
 #!/bin/sh
-VERSION=$(git describe --tags  2>/dev/null | cut -f1 -d' ' | cut -f1-2 -d-)
+GITTAG=$(git describe --tags)
+if [ ! $? = 0 ]; then
+  exit 1
+fi
+VERSION=$(echo "$GITTAG" | cut -f1 -d' ' | cut -f1-2 -d-)
 if [ -z "$VERSION" ]; then
   # we're in rpmbuild, hopefully
   VERSION=$(pwd | sed -e 's@/opticon-agent$@/@;s/.*opticon-agent-//;s/.*opticon-//;s@/.*@@;s/-0$//')

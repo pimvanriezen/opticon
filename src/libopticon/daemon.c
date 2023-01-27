@@ -1,3 +1,6 @@
+#if !defined (OS_WINDOWS)
+
+
 #include <libopticon/defaults.h>
 #include <libopticon/daemon.h>
 #include <libopticon/log.h>
@@ -178,3 +181,6 @@ bool daemonize (const char *pidfilepath, int argc,
     }
     return false;
 }
+
+
+#endif /* OS_WINDOWS */
