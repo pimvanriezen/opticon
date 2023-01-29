@@ -53,12 +53,12 @@ var *runprobe_exec (probe *self) {
     
     if (! proc) return NULL;
     while (!feof (proc)) {
+// @todo Windows does not have timeouts for synchronous file operations (select() is for sockets), need to use overlapped io instead)
+#if !defined (OS_WINDOWS)
         tv.tv_sec = 30;
         tv.tv_usec = 0;
         FD_ZERO (&fds);
         FD_SET (procfd, &fds);
-// @todo Windows does not have timeouts for synchronous file operations (select() is for sockets), need to use overlapped io instead)
-#if !defined (OS_WINDOWS)
         if (select (procfd+1, &fds, NULL, NULL, &tv) > 0) {
 #endif
             size_t res = fread (buffer, 1, 16383, proc);
