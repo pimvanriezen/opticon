@@ -43,9 +43,10 @@ var *runprobe_version (probe *self) {
 /** Implementation of the exec probe type. Reads JSON from the
   * stdout of the called program. */
 var *runprobe_exec (probe *self) {
-    char buffer[4096];
+    char buffer[16384];
     buffer[0] = 0;
-    FILE *proc = popen_safe (self->call, "r");
+    
+    FILE *proc = popen_safe_env (self->call, "r", self->options);
     int procfd = fileno (proc);
     fd_set fds;
     struct timeval tv;
@@ -60,8 +61,8 @@ var *runprobe_exec (probe *self) {
 #if !defined (OS_WINDOWS)
         if (select (procfd+1, &fds, NULL, NULL, &tv) > 0) {
 #endif
-            size_t res = fread (buffer, 1, 4096, proc);
-            if (res && res < 4096) {
+            size_t res = fread (buffer, 1, 16383, proc);
+            if (res && res < 16384) {
                 buffer[res] = 0;
                 break;
             }
