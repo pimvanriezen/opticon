@@ -20,7 +20,7 @@ if ($args[0] -eq 'check') {
 
 # The counter postfixes and the mapping to the result name
 $counterMap = @{
-	bsp = 'SQL Statistics\Batch Requests/sec'
+	bps = 'SQL Statistics\Batch Requests/sec'
 	erps = 'SQL Errors(_Total)\Errors/sec'
 	uc = 'General Statistics\User Connections'
 }
