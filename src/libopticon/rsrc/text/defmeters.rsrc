@@ -373,4 +373,17 @@
         type: string
         description: "Check target"
     }
+    mssql/uc {
+        type: integer
+        description: "User connections"
+    }
+    mssql/bps {
+        type: integer
+        description: "Batch requests/s"
+    }
+    mssql/erps {
+        type: integer
+        description: "Errors/s"
+        warning { cmp: gt, val: 0, weight: 1.0 }
+    }
 }
