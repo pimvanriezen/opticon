@@ -7,8 +7,10 @@
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <sys/wait.h>
 #include <sys/errno.h>
+#if !defined (OS_WINDOWS)
+#include <sys/wait.h>
+#endif
 
 extern char **environ;
 
@@ -94,6 +96,9 @@ void free_env (char **e) {
   * variables to be merged in from a var object. */
 /*/ ======================================================================= /*/
 FILE *popen_safe_env (const char *command, const char *mode, var *opt) {
+#if defined(OS_WINDOWS)
+    return popen_safe (command, mode);
+#else
     FILE *fp = NULL;
     pthread_mutex_lock (&popen_mutex);
     
@@ -171,19 +176,28 @@ FILE *popen_safe_env (const char *command, const char *mode, var *opt) {
     
     pthread_mutex_unlock (&popen_mutex);
     return fp;
+#endif
 }
 
 /*/ ======================================================================= /*/
 /** Regular popen, but threadsafe. */
 /*/ ======================================================================= /*/
 FILE *popen_safe (const char *command, const char *mode) {
+#if !defined (OS_WINDOWS)
     return popen_safe_env (command, mode, NULL);
+#else
+    pthread_mutex_lock (&popen_mutex);
+    FILE *res = popen (command, mode);
+    pthread_mutex_unlock (&popen_mutex);
+    return res;
+#endif
 }
 
 /*/ ======================================================================= /*/
 /** Accompanying pclose equivalent. */
 /*/ ======================================================================= /*/
 int pclose_safe (FILE *fd) {
+#if !defined (OS_WINDOWS)
     int status;
     pid_t pid;
     pthread_mutex_lock (&popen_mutex);
@@ -222,4 +236,12 @@ int pclose_safe (FILE *fd) {
     status = fclose (fd);
     pthread_mutex_unlock (&popen_mutex);
     return status;
+#else
+    int res = -1;
+    pthread_mutex_lock (&popen_mutex);
+    res = pclose (fd);
+    pthread_mutex_unlock (&popen_mutex);
+    return res;
+#endif
 }
+
