@@ -190,7 +190,7 @@ ServerList.osIcon = function(obj) {
     if (kernel == "Darwin") return "icon/apple.png";
 
     if (/Cumulus/.test (distro)) return "icon/nvidia.png";
-
+    if (/^CentOS/.test (distro)) return "icon/centos.png";
     if (/UBNT/.test (kvers)) return "icon/ubnt.png";
     if (/el[0-9]/.test (kvers) && /^Alma/.test (distro)) {
         return "icon/alma.png";
@@ -198,6 +198,7 @@ ServerList.osIcon = function(obj) {
     if (/generic/.test (kvers) && /^Ubuntu/.test (distro)) {
         return "icon/ubuntu.png";
     }
+    if (/^Debian/.test (distro)) return "icon/debian.png";
     return "icon/linux.png";
 }
 

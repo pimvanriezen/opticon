@@ -476,6 +476,7 @@ ServerView.fixLayout = function() {
 ServerView.linuxIcon = function(kernel) {
     let distro = ServerView.View.data.os.distro;
     if (/Cumulus/.test (distro)) return "icon/nvidia.png";
+    if (/^CentOS/.test (distro)) return "icon/centos.png";
     if (/UBNT/.test (kernel)) return "icon/ubnt.png";
     if (/qnap/.test (kernel)) return "icon/qnap.png";
     if (/el[0-9]/.test (kernel) && /^Alma/.test (distro)) {
@@ -484,5 +485,6 @@ ServerView.linuxIcon = function(kernel) {
     if (/generic/.test (kernel) && /^Ubuntu/.test (distro)) {
         return "icon/ubuntu.png";
     }
+    if (/^Debian/.test (distro)) return "icon/debian.png";
     return "icon/linux.png";
 }
