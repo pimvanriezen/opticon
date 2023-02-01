@@ -578,6 +578,44 @@
       </div>
     </div>
   
+    <div v-if="data.mssql && data.mssql.uc !== undefined" class="uEditContainer magicLayout">
+      <u-header icon="header-db.png">SQL Server</u-header>
+      <div class="uServerData table">
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr>
+            <th align="left">Server Statistics</th>
+          </tr>
+          <tr>
+            <td style="margin: 4px;">
+              <table width="100%">
+                <tr>
+                  <td rowspan="3" width="70"><center>
+                    <img src="icon/mssql.svg" width="60">
+                  </td>
+                  <td style="color:#888888;">User Connections</td>
+                  <td align="right">
+                    {{data.mssql.uc}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#888888;">Requests per second</td>
+                  <td align="right">
+                    {{data.mssql.bps}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#888888;">Errors per second</td>
+                  <td align="right">
+                    {{data.mssql.erps}}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
     <div v-if="data.bgp && data.bgp.length" class="uEditContainer magicLayout">
       <u-header icon="header-bgp.png">BGP Peers</u-header>
       <div class="uServerData table">
