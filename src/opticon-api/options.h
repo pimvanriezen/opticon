@@ -12,6 +12,7 @@ typedef struct apioptions_s {
     const char  *keystone_url;
     char        *unithost_url;
     char        *unithost_account_url;
+    char        *external_querytool;
     int          foreground;
     int          port;
     int          autoexit;
