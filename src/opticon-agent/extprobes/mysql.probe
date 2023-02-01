@@ -2,10 +2,15 @@
 
 statusval() {
     name="$1"
-    if [ -z "$OPT_USERNAME" ]; then
-      opticon-helper mysql -B -e "show status like '$1'" | tail -1 | cut -f2
+    if [ -z "$OPT_CONF" ]; then
+      if [ -z "$OPT_USERNAME" ]; then
+        opticon-helper mysql -B -e "show status like '$1'" | tail -1 | cut -f2
+      else
+        opticon-helper mysql -u $OPT_USERNAME --password=$OPT_PASSWORD -B \
+          -e "show status like '$1'" | tail -1 | cut -f2
+      fi
     else
-      opticon-helper mysql -u $OPT_USERNAME --password=$OPT_PASSWORD -B \
+      opticon-helper mysql --defaults-extra-file=$OPT_CONF -B \
         -e "show status like '$1'" | tail -1 | cut -f2
     fi
 }
