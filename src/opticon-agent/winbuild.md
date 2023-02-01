@@ -3,6 +3,10 @@
 Compiling on Windows is done using the MinGW-w64 compiler/toolchain.
 This is a windows version of the GCC compiler that (by default) uses the MSVCRT.DLL libc crt (runtime) that we assume to be included in all windows versions (so no external/exotic DLLs need to be distributed).
 
+## UPDATE
+Compiling via cmd.exe is (temporarily?) not possible due to the need to codegen the `defprobes.rsrc` into c code, which is done via the `mkrsrc` bash script
+
+
 ## Compiling via WinLibs (portable)
 - Download "GCC 12.2.0 + LLVM/Clang/LLD/LLDB 14.0.6 + MinGW-w64 10.0.0 (MSVCRT) - release 2" Win64 zip archive & extract it: https://winlibs.com
 - Add the MinGW bin folder to your environment PATH variable: `C:\winlibs\mingw64\bin`
@@ -17,7 +21,19 @@ This is a windows version of the GCC compiler that (by default) uses the MSVCRT.
 - Add the MinGW bin folder to your environment PATH variable: `C:\msys64\mingw64\bin`
 - Open cmd.exe and run `build-gcc production` to build and `run.bat` to run (or `brun.bat` to build and run a dev version)
 
-NB: It seems we do not need to run the build tools from inside the "MSYS2 MinGW x64" console provided by msys2, it also works from a regular cmd.exe
+NB: It seems we do not need to run the build tools from inside the "MSYS2 MINGW64" console provided by msys2, it also works from a regular cmd.exe
+UPDATE: The above statement is no longer true (see the UPDATE heading)
+Compiling via MSYS2 MINGW64 console:
+- Open `MSYS2 MINGW64` from the start menu (which is a shortcut for: `C:\msys64\mingw64.exe`)
+- Install the packages vim and git: `pacman -S vim git` (vim for the xxd executable, git for getting the version tag from the repository)
+- For now also install the packages ming curl and ming microhttpd: `pacman -S mingw-w64-x86_64-curl mingw-w64-x86_64-libmicrohttpd` (because the other programs in this repo need them and the makefile is a bit all or nothing)
+- Close msys and reopen it
+- Navigate to the opticon folder (e.g. `cd /c/projects/opticon`)
+- Run `./configure`
+- Navigation to libopticon `cd src/libopticon`
+- Run `make`
+- Navigation to opticon-agent `cd src/opticon-agent`
+- Run `make`
 
 ## Building with CMake (optional)
 - Download & install/extract cmake (portable zip available): https://cmake.org

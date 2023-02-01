@@ -1,3 +1,6 @@
+#if !defined (OS_WINDOWS)
+
+
 #include <sys/utsname.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -275,3 +278,5 @@ var *runprobe_localip (probe *self) {
   #error Undefined Operating System
 #endif
 
+
+#endif /* OS_WINDOWS */
