@@ -14,6 +14,7 @@
 #include <versionhelpers.h> // For IsWindows7OrGreater
 #include <winternl.h> // For NtQuerySystemInformation
 #include <ntstatus.h> // For STATUS_SUCCESS
+#include <intrin.h> // For __cpuid
 
 // ----------------------------------------------------------------------------
 // @note The RtlGetVersion function is declared in ntddk.h which is part of the DDK (Driver Development Kit) which apparently cannot work together with the 'user-mode' windows.h
@@ -546,6 +547,7 @@ var *runprobe_io(probe *self) {
     
     PDH_FMT_COUNTERVALUE pdhValue;
     uint64_t value;
+    uint64_t transfersPerSecond = 0;
     
     // io/rdops
     if ((status = PdhGetFormattedCounterValue(diskIoProbeState.readsCounter, PDH_FMT_LARGE, NULL, &pdhValue)) != ERROR_SUCCESS) {
@@ -555,6 +557,7 @@ var *runprobe_io(probe *self) {
     value = pdhValue.largeValue;
     log_debug("probe_io/rdops: %" PRIu64, value);
     var_set_int_forkey(ioDict, "rdops", value);
+    transfersPerSecond += value;
     
     // io/wrops
     if ((status = PdhGetFormattedCounterValue(diskIoProbeState.writesCounter, PDH_FMT_LARGE, NULL, &pdhValue)) != ERROR_SUCCESS) {
@@ -564,6 +567,7 @@ var *runprobe_io(probe *self) {
     value = pdhValue.largeValue;
     log_debug("probe_io/wrops: %" PRIu64, value);
     var_set_int_forkey(ioDict, "wrops", value);
+    transfersPerSecond += value;
     
     // io/pwait
     if (totalTicksSincePrevious > 0) {
@@ -571,12 +575,19 @@ var *runprobe_io(probe *self) {
             log_error("Failed to format disk io counter: %" PRIx32, status);
             return res;
         }
-        // Number of seconds it takes to get a response from a disk
-        double waitSeconds = pdhValue.doubleValue;
+        // Average number of seconds it takes to get a response from a disk
+        double averageWaitSecondsPerTransfer = pdhValue.doubleValue;
         
         uint64_t totalSeconds = totalTicksSincePrevious / WIN_TICKS_PER_SECOND;
+        
         // @note Multiply by 100 first to prevent dipping below 0 (so you could also use the result as an int)
-        double waitPercent = waitSeconds * 100.0 / totalSeconds;
+        //double waitPercent = averageWaitSecondsPerTransfer * 100.0 / totalSeconds;
+        
+        //uint64_t ioTransfers = transfersPerSecond * totalSeconds;
+        //double waitSeconds = ioTransfers * averageWaitSecondsPerTransfer;
+        //double waitPercent = waitSeconds / totalSeconds;
+        
+        double waitPercent = transfersPerSecond * averageWaitSecondsPerTransfer;
         log_debug("probe_io/pwait: %f", waitPercent);
         var_set_double_forkey(ioDict, "pwait", waitPercent);
     }
@@ -748,6 +759,17 @@ var *runprobe_uname(probe *self) {
             }
             else if (hardwareProductName != NULL && hardwareProductName[0] != '\0') {
                 snprintf(hardwareName, sizeof(hardwareName), "%s", hardwareProductName);
+            }
+            
+            var *cpusArray = var_get_array_forkey(res, "cpu");
+            for (uint8_t i = 0; i < 16; ++i) {
+                if (!systemFirmwareInfo.processorInfos[i].hasData) continue;
+                
+                var *cpuDict = var_add_dict(cpusArray);
+                log_debug("probe_uname/cpu/model: %s", systemFirmwareInfo.processorInfos[i].version);
+                if (systemFirmwareInfo.processorInfos[i].version == NULL) var_set_str_forkey(cpuDict, "model", "");
+                else var_set_str_forkey(cpuDict, "model", systemFirmwareInfo.processorInfos[i].version);
+                var_set_int_forkey(cpuDict, "count", systemFirmwareInfo.processorInfos[i].coreEnabled);
             }
             
             freeSystemFirmwareInfo(&systemFirmwareInfo);
@@ -1658,7 +1680,49 @@ var *runprobe_localip(probe *self) {
 
 // ============================================================================
 
+// @note __cpuid returns the info for the processor the function is executed on, so not really useful in case of multiple processors
+//var *runprobe_cpu(probe *self) {
+//    (void)self;
+//    var *res = var_alloc();
+//    var *cpusArray = var_get_array_forkey(res, "cpu");;
+//    
+//    // https://learn.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?view=msvc-170
+//    
+//    // cpuInfo is used both as an int as well as 16 chars
+//    int cpuInfo[4] = {-1};
+//    
+//    // 0x80000000 gets the highest extended ID
+//    __cpuid(cpuInfo, 0x80000000);
+//    
+//    unsigned int highestExtendedId = cpuInfo[0];
+//    // Cap at 0x80000004 (we don't need to read higher than that)
+//    if (highestExtendedId > 0x80000004) highestExtendedId = 0x80000004;
+//    
+//    // Hold 3 x 16 bytes plus a null terminator
+//    char cpuBrand[49];
+//    memset(cpuBrand, 0, sizeof(cpuBrand));
+//    for (int i = 0x80000002; i <= highestExtendedId; ++i) {
+//        __cpuid(cpuInfo, i);
+//        
+//        //printf("\nX:%s\n", cpuInfo);
+//        if (i == 0x80000002) memcpy(cpuBrand, cpuInfo, sizeof(cpuInfo));
+//        else if  (i == 0x80000003) memcpy(cpuBrand + 16, cpuInfo, sizeof(cpuInfo));
+//        else if  (i == 0x80000004) memcpy(cpuBrand + 32, cpuInfo, sizeof(cpuInfo));
+//    }
+//    
+//    //printf("\n\nCPU:%s", cpuBrand);
+//    
+//    //var *cpuDict = var_add_dict(cpusArray);
+//    //var_set_str_forkey(cpuDict, "model", ?);
+//    //var_set_int_forkey(cpuDict, "count", ?);
+//    
+//    return res;
+//}
+
+// ============================================================================
+
 builtinfunc BUILTINS[] = {
+    //{"probe_cpu", runprobe_cpu}, // @note Cpu's 
     {"probe_version", runprobe_version},
     {"probe_hostname", runprobe_hostname},
     {"probe_meminfo", runprobe_meminfo},

@@ -10,7 +10,7 @@
 
 // @tmp
 //#include <inttypes.h>
-//#include <stdio.h>
+#include <stdio.h>
 
 // https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemfirmwaretable
 typedef struct DRawSmBiosData {
@@ -33,12 +33,12 @@ typedef struct DSmBiosStructureHeader {
 } DSmBiosStructureHeader;
 
 
-static void getUuidFromBiosTableData(uint8_t *outByteArray16, const BYTE *biosTableData, int16_t version) {
+static void getUuidFromBiosTableData(uint8_t *outByteArray16, const BYTE *biosTableData, int16_t biosVersion) {
 	// Although RFC4122 recommends network byte order for all fields, the PC industry (including the ACPI, UEFI, and Microsoft specifications)
 	// has consistently used little-endian byte encoding for the first three fields: time_low, time_mid, time_hi_and_version.
 	// Supposedly this was only done/described as of version 2.6 of the SMBIOS specification? (though the text seems to indicate the industry did this all along).
 	// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.3.0.pdf (paragraph 7.2.1)
-	if (version >= 0x0206) {
+	if (biosVersion >= 0x0206) {
 		outByteArray16[0] = biosTableData[3];
 		outByteArray16[1] = biosTableData[2];
 		outByteArray16[2] = biosTableData[1];
@@ -131,6 +131,10 @@ void initSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo) {
 	}
 	outSystemFirmwareInfo->systemInfo.skuNumber = "";
 	outSystemFirmwareInfo->systemInfo.family = "";
+	
+	for (uint8_t i = 0; i < 16; ++i) {
+		outSystemFirmwareInfo->processorInfos[i].hasData = false;
+	}
 }
 
 /**
@@ -159,7 +163,9 @@ uint32_t getSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo, void 
 	}
 	
 	DRawSmBiosData *biosData = (DRawSmBiosData *)rawBuffer;
+	int16_t biosVersion = biosData->SMBIOSMajorVersion * 0x100 + biosData->SMBIOSMinorVersion;
 	
+	uint8_t processorIndex = 0;
 	BYTE *biosTableData = biosData->SMBIOSTableData;
 	while (biosTableData < biosData->SMBIOSTableData + biosData->Length) {
 		DSmBiosStructureHeader *biosStructureHeader = (DSmBiosStructureHeader *)biosTableData;
@@ -194,10 +200,25 @@ uint32_t getSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo, void 
 			outSystemFirmwareInfo->systemInfo.serialNumber = getStringFromBiosStringSet(stringSet, biosTableData[0x7]);
 			
 			// UUID is at offset 0x08
-			getUuidFromBiosTableData(outSystemFirmwareInfo->systemInfo.uuid, biosTableData + 0x8, biosData->SMBIOSMajorVersion * 0x100 + biosData->SMBIOSMinorVersion);
+			getUuidFromBiosTableData(outSystemFirmwareInfo->systemInfo.uuid, biosTableData + 0x8, biosVersion);
 			
 			outSystemFirmwareInfo->systemInfo.skuNumber = getStringFromBiosStringSet(stringSet, biosTableData[0x19]);
 			outSystemFirmwareInfo->systemInfo.family = getStringFromBiosStringSet(stringSet, biosTableData[0x1a]);
+		}
+		else if (biosStructureHeader->type == 4) {
+			if (processorIndex < 16) {
+				outSystemFirmwareInfo->processorInfos[processorIndex].hasData = true;
+				outSystemFirmwareInfo->processorInfos[processorIndex].version = getStringFromBiosStringSet(stringSet, biosTableData[0x10]);
+				
+				// @todo
+				//if (biosVersion >= 0x0300) {
+				//biosTableData[0x2c] + biosTableData[0x2d];
+				//biosTableData[0x2e] + biosTableData[0x2f];
+				
+				outSystemFirmwareInfo->processorInfos[processorIndex].coreEnabled = biosTableData[0x23];
+				outSystemFirmwareInfo->processorInfos[processorIndex].threadCount = biosTableData[0x24];
+			}
+			++processorIndex;
 		}
 		
 		// Skip over formatted area
