@@ -54,3 +54,9 @@ uint32_t hash_token (const char *str) {
     return hash;
 }
 
+uint32_t hash_uuid (uuid u) {
+    uint64_t acc = u.msb ^ u.lsb;
+    uint32_t upper = (uint32_t) ((acc & 0xffffffff00000000) >> 32);
+    uint32_t lower = (uint32_t) (acc & 0xffffffff);
+    return upper ^ lower;
+}
