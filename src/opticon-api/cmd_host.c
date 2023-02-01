@@ -11,6 +11,7 @@
 #include "req_context.h"
 #include "cmd.h"
 #include "options.h"
+#include "externaldata.h"
 
 static codec *JSONCODEC = NULL;
 
@@ -23,10 +24,23 @@ int cmd_host_overview (req_context *ctx, req_arg *a,
         db_free (DB);
         return err_not_found (ctx, a, env, status);
     }
-    var *summ = db_get_overview (DB);
-    if (! summ) summ = var_alloc();
-    var_copy (env, summ);
-    var_free (summ);
+    var *res = db_get_overview (DB);
+    if (! res) res = var_alloc();
+    else {
+        var *ov = var_find_key (res, "overview");
+        var *crsr = NULL;
+        if (ov) crsr = var_first (ov);
+        while (crsr) {
+            uuid hostid = mkuuid (crsr->id);
+            var *extra = extdata_get (ctx->tenantid, hostid);
+            if (extra) {
+                var_link_as (extra, crsr, "external");
+            }
+            crsr = crsr->next;
+        }
+    }
+    var_copy (env, res);
+    var_free (res);
     db_free (DB);
     *status = 200;
     return 1;

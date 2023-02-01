@@ -2,6 +2,7 @@
 #define _PARSE_H 1
 
 #include <libopticon/var.h>
+#include <stdio.h>
 
 /* ============================= FUNCTIONS ============================= */
 

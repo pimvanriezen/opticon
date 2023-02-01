@@ -1,5 +1,8 @@
 #include "externaldata.h"
 #include <libopticondb/db.h>
+#include <libopticon/popen.h>
+#include <libopticon/hash.h>
+#include <libopticon/var_parse.h>
 #include <time.h>
 #include <pthread.h>
 #include "options.h"
@@ -17,7 +20,7 @@ typedef struct extdata_s {
 typedef struct extdatalist_s {
     extdata         *first;
     extdata         *last;
-    pthread_rwlock   lock;
+    pthread_rwlock_t lock;
 } extdatalist;
 
 static extdatalist dlist;
@@ -44,7 +47,7 @@ extdata *extdata_find (uuid tenantid, uuid hostid) {
 
 /** Create and link a new cache entry */
 extdata *extdata_new (uuid tenantid, uuid hostid) {
-    var *res = malloc (sizeof (extdata));
+    extdata *res = malloc (sizeof (extdata));
     res->next = NULL;
     res->prev = dlist.last;
     if (dlist.last) {
