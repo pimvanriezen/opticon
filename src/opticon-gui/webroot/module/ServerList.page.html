@@ -47,8 +47,8 @@
           <b>{{o.hostname}}</b>
         </td>
         <td width="20" align="center">
-          <span v-if="o['pkgm/inq']>0">
-            <span v-bind:class="pkgDotClass(o['pkgm/inq'])"></span>
+          <span v-if="(o['pkgm/inq']>0)||(o['pkgm/reboot'])">
+            <span v-bind:class="pkgDotClass(o['pkgm/inq'],o['pkgm/reboot'])"></span>
           </span>
         </td>
         <td width="100">
