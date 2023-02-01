@@ -448,6 +448,31 @@ int var_load_json (var *into, const char *path) {
     return res;
 }
 
+/** Load json data from an open file.
+  * \param into The variable space to load the configuration into.
+  * \param F the already open file handle
+  * \return 1 on success, 0 on failure.
+  */
+int var_read_json (var *into, FILE *F) {
+    size_t bufsz = 4096;
+    size_t wpos = 0;
+    int sz;
+    char *buf = malloc (bufsz);
+    while (! feof (F)) {
+        sz = fread (buf + wpos, 1, 1024, F);
+        if (sz<1) break;
+        wpos += sz;
+        if (wpos+1024 > bufsz) {
+            bufsz += 4096;
+            buf = realloc (buf, bufsz);
+        }
+    }
+    buf[wpos] = 0;
+    int res = var_parse_json (into, buf);
+    free (buf);
+    return res;
+}
+
 /** Parse a configuration text into a variable space.
   * \param into The root of the variable space.
   * \param buf The configuration text.
