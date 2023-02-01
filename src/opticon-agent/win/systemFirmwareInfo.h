@@ -39,10 +39,18 @@ typedef struct DSystemInfo {
 	char *family;
 } DSystemInfo;
 
+typedef struct DProcessorInfo {
+	bool hasData;
+	char *version; // This is actually the model name e.g. "Intel(R) Core(TM) i5-5300U CPU @ 2.30GHz"
+	uint16_t coreEnabled;
+	uint16_t threadCount;
+} DProcessorInfo;
+
 typedef struct DSystemFirmwareInfo {
 	void *rawBuffer;
 	DBiosInfo biosInfo;
 	DSystemInfo systemInfo;
+	DProcessorInfo processorInfos[16];
 } DSystemFirmwareInfo;
 
 
