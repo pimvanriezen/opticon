@@ -19,7 +19,7 @@ void procrun_init (procrun *p) {
     p->total_ticks = 0;
     p->pcpu = 0;
     p->ncpu = 1;
-    p->array = (tproc *) malloc (16 * sizeof (tproc));
+    p->array = malloc (16 * sizeof (tproc));
     bzero (p->array, 16 * sizeof (tproc));
     p->ti_start = time (NULL);
     p->ti_now = time (NULL);

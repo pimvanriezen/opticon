@@ -17,7 +17,7 @@ bool matchlist (const char *val, var *defarr) {
 
 /** Allocate and initialize a probe object in memory */
 probe *probe_alloc (void) {
-    probe *res = (probe *) malloc (sizeof (probe));
+    probe *res = malloc (sizeof (probe));
     conditional_init (&res->pulse);
     pthread_mutex_init (&res->vlock, NULL);
     res->type = PROBE_NONE;

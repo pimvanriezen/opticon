@@ -60,7 +60,7 @@ int wordsepcount (const char *string, char sep) {
 wordlist *wordlist_create (void) {
     wordlist *res;
     
-    res = (wordlist *) malloc (sizeof (wordlist));
+    res = malloc (sizeof (wordlist));
     res->argc = 0;
     res->argv = NULL;
     return res;
@@ -73,7 +73,7 @@ void wordlist_add (wordlist *arg, const char *elm) {
     }
     else {
         arg->argc = 1;
-        arg->argv = (char **) malloc (sizeof (char *));
+        arg->argv = malloc (sizeof (char *));
         arg->argv[0] = strdup (elm);
     }
 }
@@ -89,15 +89,15 @@ wordlist *wordlist_make (const char *string) {
     crsr = (char *) string;
     while ((*crsr == ' ')||(*crsr == '\t')) ++crsr;
     
-    result = (wordlist *) malloc (sizeof (wordlist));
+    result = malloc (sizeof (wordlist));
     count = wordcount (crsr);
     result->argc = count;
-    result->argv = (char **) malloc (count * sizeof (char *));
+    result->argv = malloc (count * sizeof (char *));
     
     pos = 0;
     
     while ((rightbound = findspace (crsr))) {
-        word = (char *) malloc ((rightbound-crsr+3) * sizeof (char));
+        word = malloc ((rightbound-crsr+3) * sizeof (char));
         memcpy (word, crsr, rightbound-crsr);
         word[rightbound-crsr] = 0;
         result->argv[pos++] = word;
@@ -122,13 +122,13 @@ wordlist *wordlist_split (const char *string, char sep) {
     
     crsr = (char *) string;
 
-    result = (wordlist *) malloc (sizeof (wordlist));
+    result = malloc (sizeof (wordlist));
     count = wordsepcount (crsr, sep);
     result->argc = count;
     result->argv = (char **) calloc (count, sizeof (char *));
 
     while ((rightbound = strchr (crsr, sep))) {
-        word = (char *) malloc ((rightbound-crsr+3) * sizeof (char));
+        word = malloc ((rightbound-crsr+3) * sizeof (char));
         memcpy (word, crsr, rightbound-crsr);
         word[rightbound-crsr] = 0;
         result->argv[pos++] = word;

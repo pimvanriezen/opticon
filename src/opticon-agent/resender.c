@@ -32,7 +32,7 @@ void authresender_run (thread *t) {
 
 /** Initialize and start the authresender thread */
 authresender *authresender_create (outtransport *t) {
-    authresender *self = (authresender *) malloc (sizeof (authresender));
+    authresender *self = malloc (sizeof (authresender));
     self->cond = conditional_create();
     self->trans = t;
     memset (&self->buf, 0, sizeof (pktbuf));

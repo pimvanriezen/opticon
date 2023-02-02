@@ -6,7 +6,7 @@
 #include "opticon-agent.h"
 
 collector *collector_new (collectorlist *parent) {
-    collector *self = (collector *) malloc (sizeof (collector));
+    collector *self = malloc (sizeof (collector));
     self->next = self->prev = NULL;
     self->port = 0;
     self->addr = NULL;
