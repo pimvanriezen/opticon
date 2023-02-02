@@ -61,6 +61,7 @@ extdata *extdata_new (uuid tenantid, uuid hostid) {
     res->tenantid = tenantid;
     res->hostid = hostid;
     res->data = NULL;
+    return res;
 }
 
 /** Load ext data either from cache or through its command. */
