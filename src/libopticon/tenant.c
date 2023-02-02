@@ -18,7 +18,7 @@ void tenant_init (void) {
 /** Allocate a tenant object */
 /*/ ======================================================================= /*/
 tenant *tenant_alloc (void) {
-    tenant *res = (tenant *) malloc (sizeof(tenant));
+    tenant *res = malloc (sizeof(tenant));
     res->first = res->last = NULL;
     res->prev = res->next = NULL;
     memset (&res->key, 0, sizeof (aeskey));

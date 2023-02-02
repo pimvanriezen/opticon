@@ -62,7 +62,7 @@ thread *thread_create (run_f run, cancel_f cancel) {
         TKEY = malloc (sizeof (pthread_key_t));
         pthread_key_create (TKEY, NULL);
     }
-    thread *self = (thread *) malloc (sizeof (thread));
+    thread *self = malloc (sizeof (thread));
     thread_init (self, run, cancel);
     return self;
 }
@@ -71,7 +71,7 @@ thread *thread_create (run_f run, cancel_f cancel) {
 /** Allocate and initialize a conditional object */
 /*/ ======================================================================= /*/
 conditional *conditional_create (void) {
-    conditional *c = (conditional *) malloc (sizeof (conditional));
+    conditional *c = malloc (sizeof (conditional));
     conditional_init (c);
     return c;
 }

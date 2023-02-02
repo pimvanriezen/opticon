@@ -8,7 +8,7 @@ pathnode OPTICONF_ROOT;
 /** Allocate a pathnode */
 /*/ ======================================================================= /*/
 pathnode *pathnode_alloc (void) {
-    pathnode *self = (pathnode *) malloc (sizeof (pathnode));
+    pathnode *self = malloc (sizeof (pathnode));
     if (! self) return NULL;
     
     self->prev = self->next = self->parent = 
@@ -24,7 +24,7 @@ pathnode *pathnode_alloc (void) {
 /*/ ======================================================================= /*/
 void pathnode_add_reaction (pathnode *self, reaction_f f) {
     if (self->rcount == 0) {
-        self->reactions = (reaction_f *) malloc (sizeof (reaction_f));
+        self->reactions = malloc (sizeof (reaction_f));
         self->reactions[0] = f;
         self->rcount = 1;
     }

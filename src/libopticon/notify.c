@@ -6,7 +6,7 @@
 /** Allocate and initialize a notification object */
 /*/ ======================================================================= /*/
 notification *notification_create (void) {
-    notification *res = (notification *) malloc (sizeof (notification));
+    notification *res = malloc (sizeof (notification));
     res->next = res->prev = NULL;
     res->status[0] = 0;
     res->isproblem = false;

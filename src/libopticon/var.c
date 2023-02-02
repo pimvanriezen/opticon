@@ -8,7 +8,7 @@
 /** Allocate a var object */
 /*/ ======================================================================= /*/
 var *var_alloc (void) {
-    var *self = (var *) malloc (sizeof (var));
+    var *self = malloc (sizeof (var));
     if (! self) return NULL;
     
     self->next = self->prev = self->parent = self->root = NULL;
@@ -1338,7 +1338,7 @@ int var_indexof (var *self, const char *str) {
 
 /** Escape quoted string content with backslash */
 char *var_escape_str (const char *str) {
-    char *res = (char *) malloc (2*strlen(str)+1);
+    char *res = malloc (2*strlen(str)+1);
     const char *icrsr = str;
     char *ocrsr = res;
     while (*icrsr) {

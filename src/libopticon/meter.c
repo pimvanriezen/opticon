@@ -7,7 +7,7 @@
 /** Allocate and initialize a meter structure. */
 /*/ ======================================================================= /*/
 meter *meter_alloc (void) {
-    meter *res = (meter *) malloc (sizeof (meter));
+    meter *res = malloc (sizeof (meter));
     res->next = NULL;
     res->prev = NULL;
     res->count = SZ_EMPTY_VAL;

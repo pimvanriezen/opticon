@@ -84,7 +84,7 @@ void log_open_syslog (const char *name, int maxprio) {
     (void)name;
     (void)maxprio;
 #else
-    LOG = (loghandle *) malloc (sizeof (loghandle));
+    LOG = malloc (sizeof (loghandle));
     LOG->write = syslog_write;
     LOG->maxprio = maxprio;
     LOG->data = NULL;
@@ -97,7 +97,7 @@ void log_open_syslog (const char *name, int maxprio) {
   * \param filename Full path to the file to write/append to. */
 /*/ ======================================================================= /*/
 void log_open_file (const char *filename, int maxprio) {
-    LOG = (loghandle *) malloc (sizeof (loghandle));
+    LOG = malloc (sizeof (loghandle));
     LOG->data = malloc (sizeof (logfile_data));
     logfile_data *d = (logfile_data *) LOG->data;
     

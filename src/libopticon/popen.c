@@ -55,14 +55,14 @@ var *env_to_var (void) {
 /** Convert a var dictionary into an environment pointer. */
 /*/ ======================================================================= /*/
 char **var_to_env (var *v) {
-    char **res = (char **) malloc ((1+var_get_count (v))*sizeof(char *));
+    char **res = malloc ((1+var_get_count (v))*sizeof(char *));
     int respos = 0;
     var *c = var_first (v);
     while (c) {
         const char *str = var_get_str (c);
         if (str) {
             int len = 4 + strlen (c->id) + strlen (str) + 2;
-            char *tmp = (char *) malloc (len * sizeof (char));
+            char *tmp = malloc (len * sizeof (char));
             strcpy (tmp, "OPT_");
             char *cc = c->id;
             char *oc = tmp+4;

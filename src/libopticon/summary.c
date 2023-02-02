@@ -11,7 +11,7 @@
 /** Allocate a summarydata structure */
 /*/ ======================================================================= /*/
 summarydata *summarydata_create (void) {
-    summarydata *self = (summarydata *) malloc (sizeof (summarydata));
+    summarydata *self = malloc (sizeof (summarydata));
     self->meter = 0;
     self->name.str[0] = 0;
     self->type = SUMMARY_NONE;
@@ -125,7 +125,7 @@ void summarydata_add (summarydata *self, meterdata *d, metertype_t tp) {
     switch (self->meter & MMASK_TYPE) {
         case MTYPE_INT:
             if (! self->d.u64) {
-                self->d.u64 = (uint64_t *) malloc (sizeof (uint64_t));
+                self->d.u64 = malloc (sizeof (uint64_t));
                 *(self->d.u64) = 0;
             }
             switch (tp & MMASK_TYPE) {
@@ -149,7 +149,7 @@ void summarydata_add (summarydata *self, meterdata *d, metertype_t tp) {
         
         case MTYPE_FRAC:
             if (! self->d.frac) {
-                self->d.frac = (double *) malloc (sizeof (double));
+                self->d.frac = malloc (sizeof (double));
                 *(self->d.frac) = 0.00;
             }
             switch (tp & MMASK_TYPE) {
@@ -175,7 +175,7 @@ void summarydata_add (summarydata *self, meterdata *d, metertype_t tp) {
             if (! self->d.str) {
                 /* We really shouldn't be here, but this will make
                  * the whole thing fail softly. */
-                self->d.str = (fstring *) malloc (sizeof (fstring));
+                self->d.str = malloc (sizeof (fstring));
                 self->d.str->str[0] = 0;
             }
             if ((tp & MMASK_TYPE) != MTYPE_STR) break;
@@ -233,7 +233,7 @@ void summaryinfo_add_summary_any (summaryinfo *self, const char *name,
     else {
         self->count = 1;
         sz = sizeof (summarydata *);
-        self->array = (summarydata **) malloc (sz);
+        self->array = malloc (sz);
     }
 
     self->array[self->count-1] = newdt;
@@ -279,7 +279,7 @@ void summaryinfo_add_summary_count (summaryinfo *self, const char *name,
     strncpy (newdt->name.str, name, 127);
     newdt->name.str[127] = 0;
     newdt->type = SUMMARY_COUNT;
-    newdt->d.str = (fstring *) malloc (sizeof (fstring));
+    newdt->d.str = malloc (sizeof (fstring));
     strncpy (newdt->d.str->str, match, 127);
     newdt->d.str->str[127] = 0;
     
@@ -291,7 +291,7 @@ void summaryinfo_add_summary_count (summaryinfo *self, const char *name,
     else {
         self->count = 1;
         sz = sizeof (summarydata);
-        self->array = (summarydata **) malloc (sz);
+        self->array = malloc (sz);
     }
 
     self->array[self->count-1] = newdt;

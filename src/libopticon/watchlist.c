@@ -40,7 +40,7 @@ void watchlist_add (watchlist *self, meterwatch *m) {
 /*/ ======================================================================= /*/
 void watchlist_add_uint (watchlist *self, meterid_t id, watchtype tp,
                          uint64_t val, double bad, watchtrigger trig) {
-    meterwatch *w = (meterwatch *) malloc (sizeof (meterwatch));
+    meterwatch *w = malloc (sizeof (meterwatch));
     w-> next = w->prev = NULL;
     w->id = id;
     w->tp = tp;
@@ -61,7 +61,7 @@ void watchlist_add_uint (watchlist *self, meterid_t id, watchtype tp,
 /*/ ======================================================================= /*/
 void watchlist_add_frac (watchlist *self, meterid_t id, watchtype tp,
                          double val, double bad, watchtrigger trig) {
-    meterwatch *w = (meterwatch *) malloc (sizeof (meterwatch));
+    meterwatch *w = malloc (sizeof (meterwatch));
     w-> next = w->prev = NULL;
     w->id = id;
     w->tp = tp;
@@ -83,7 +83,7 @@ void watchlist_add_frac (watchlist *self, meterid_t id, watchtype tp,
 void watchlist_add_str (watchlist *self, meterid_t id, watchtype tp,
                         const char *val, double bad, watchtrigger trig) {
                         
-    meterwatch *w = (meterwatch *) malloc (sizeof (meterwatch));
+    meterwatch *w = malloc (sizeof (meterwatch));
     w-> next = w->prev = NULL;
     w->id = id;
     w->tp = tp;
@@ -114,7 +114,7 @@ void watchlist_clear (watchlist *self) {
 /** Allocate and initialize a graphlist */
 /*/ ======================================================================= /*/
 graphlist *graphlist_create (void) {
-    graphlist *self = (graphlist *) malloc (sizeof (graphlist));
+    graphlist *self = malloc (sizeof (graphlist));
     self->first = self->last = NULL;
     pthread_mutex_init (&self->mutex, NULL);
     return self;
@@ -156,7 +156,7 @@ void graphlist_clear (graphlist *self) {
 void graphlist_add (graphlist *self, meterid_t id, const char *graph,
                     const char *datum, const char *title, const char *unit,
                     const char *color, double max) {
-    graphtarget *res = (graphtarget *) malloc (sizeof (graphtarget));
+    graphtarget *res = malloc (sizeof (graphtarget));
     res->next = res->prev = NULL;
     res->id = id;
     res->graph_id = graph ? strdup (graph) : NULL;

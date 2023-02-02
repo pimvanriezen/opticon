@@ -135,7 +135,7 @@ bool pktcodec_decode_host (ioport *io, host *h) {
 /** Instantiate a packet codec */
 /*/ ======================================================================= /*/
 codec *codec_create_pkt (void) {
-    codec *res = (codec *) malloc (sizeof (codec));
+    codec *res = malloc (sizeof (codec));
     if (! res) return res;
     res->encode_host = pktcodec_encode_host;
     res->decode_host = pktcodec_decode_host;

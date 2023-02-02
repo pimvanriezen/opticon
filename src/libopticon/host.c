@@ -9,7 +9,7 @@
   *         freeing allocated memory. */
 /*/ ======================================================================= /*/
 host *host_alloc (void) {
-    host *res = (host *) malloc (sizeof (host));
+    host *res = malloc (sizeof (host));
     res->prev = NULL;
     res->next = NULL;
     res->first = NULL;
@@ -291,7 +291,7 @@ meter *host_set_meter_uint (host *h, meterid_t id,
         m->d.any = NULL;
     }
     
-    m->d.u64 = (uint64_t *) malloc (count * sizeof (uint64_t));
+    m->d.u64 = malloc (count * sizeof (uint64_t));
     memcpy (m->d.u64, data, count * sizeof (uint64_t));
     return m;
 }
@@ -310,7 +310,7 @@ meter *host_set_meter_str (host *h, meterid_t id,
         free (m->d.any);
         m->d.any = NULL;
     }
-    m->d.str = (fstring *) malloc (count * sizeof (fstring));
+    m->d.str = malloc (count * sizeof (fstring));
     memcpy (m->d.str, str, count * sizeof (fstring));
     return m;   
 }

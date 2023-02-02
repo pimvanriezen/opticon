@@ -311,7 +311,7 @@ void str2ip (const char *addrbuf, struct sockaddr_storage *remote) {
 /*/ ======================================================================= /*/
 static char *tm2str (struct tm *tm, int zulu) {
     /* 1234-67-90T23:56:89Z */
-    char *res = (char*) malloc (24);
+    char *res = malloc ((size_t) 24);
     sprintf (res, "%i-%02i-%02iT%02i:%02i:%02i%s",
              tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
              tm->tm_hour, tm->tm_min, tm->tm_sec,

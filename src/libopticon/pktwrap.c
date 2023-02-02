@@ -195,7 +195,7 @@ ioport *ioport_unwrap_meterdata (uint32_t networkid, ioport *in,
   *         to create a session, or NULL if something failed. */
 /*/ ======================================================================= /*/
 authinfo *ioport_unwrap_authdata (ioport *in, resolve_tenantkey_f resolve) {
-    authinfo *res = (authinfo *) malloc (sizeof (authinfo));
+    authinfo *res = malloc (sizeof (authinfo));
     ioport *decrypted = ioport_create_buffer (NULL, 2048);
     char packettype[5];
     int success = 0;

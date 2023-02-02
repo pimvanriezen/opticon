@@ -91,10 +91,10 @@ void filereader_reset_read (ioport *io) {
   * \return The freshly created ioport */
 /*/ ======================================================================= /*/
 ioport *ioport_create_filewriter (FILE *F) {
-    ioport *res = (ioport *) malloc (sizeof (ioport));
+    ioport *res = malloc (sizeof (ioport));
     if (! res) return NULL;
     writerstorage *stor;
-    stor = (writerstorage *) malloc (sizeof (writerstorage));
+    stor = malloc (sizeof (writerstorage));
     stor->pri = F;
     stor->sec = NULL;
     res->storage = stor;
@@ -114,10 +114,10 @@ ioport *ioport_create_filewriter (FILE *F) {
 /** Create a filewriter instance with two writing files. */
 /*/ ======================================================================= /*/
 ioport *ioport_create_dualfilewriter (FILE *Fpri, FILE *Fsec) {
-    ioport *res = (ioport *) malloc (sizeof (ioport));
+    ioport *res = malloc (sizeof (ioport));
     if (! res) return NULL;
     writerstorage *stor;
-    stor = (writerstorage *) malloc (sizeof (writerstorage));
+    stor = malloc (sizeof (writerstorage));
     stor->pri = Fpri;
     stor->sec = Fsec;
     res->storage = stor;
@@ -139,7 +139,7 @@ ioport *ioport_create_dualfilewriter (FILE *Fpri, FILE *Fsec) {
   * \return The freshly created ioport */
 /*/ ======================================================================= /*/
 ioport *ioport_create_filereader (FILE *F) {
-    ioport *res = (ioport *) malloc (sizeof (ioport));
+    ioport *res = malloc (sizeof (ioport));
     res->storage = F;
     res->write = filereader_write;
     res->close = filereader_close;

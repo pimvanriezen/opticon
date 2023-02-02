@@ -429,7 +429,7 @@ int var_load_json (var *into, const char *path) {
     size_t sz;
     int res = 0;
     if (stat (path, &st) == 0) {
-        char *txt = (char *) malloc (st.st_size+2);
+        char *txt = malloc (st.st_size+2);
         FILE *F = fopen (path, "rb");
         if (F) {
             sz = fread (txt, 1, st.st_size, F);

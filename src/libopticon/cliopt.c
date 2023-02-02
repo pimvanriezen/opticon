@@ -15,7 +15,7 @@
 const char **cliopt_dispatch (cliopt *opt, const char **argv, int *argc) {
     int inargc = *argc;
     *argc = 0;
-    const char **res = (const char **) malloc (inargc * sizeof (void*));
+    const char **res = malloc (inargc * sizeof (char*));
     const char *cur;
     const char *val;
     const char *arg;

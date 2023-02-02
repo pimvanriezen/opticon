@@ -102,7 +102,7 @@ void sessiondb_restore (var *list) {
 /** Allocate and initialize session object. */
 /*/ ======================================================================= /*/
 session *session_alloc (void) {
-    session *res = (session *) malloc (sizeof (session));
+    session *res = malloc (sizeof (session));
     res->next = res->prev = NULL;
     res->addr = res->sessid = res->lastserial = 0;
     bzero (res->key.data, 8);

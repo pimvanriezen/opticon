@@ -72,8 +72,7 @@ void udp_outtransport_close (outtransport *t) {
 /** Create a UDP outtransport */
 /*/ ======================================================================= /*/
 outtransport *outtransport_create_udp (void) {
-    udp_outtransport *self = 
-        (udp_outtransport *) malloc (sizeof (udp_outtransport));
+    udp_outtransport *self = malloc (sizeof (udp_outtransport));
     self->peeraddr = NULL;
     self->sock = -1;
     self->super.setremote = udp_outtransport_setremote;
@@ -142,8 +141,7 @@ void udp_intransport_close (intransport *t) {
 /** Create a UDP intransport */
 /*/ ======================================================================= /*/
 intransport *intransport_create_udp (void) {
-    udp_intransport *self =
-        (udp_intransport *) malloc (sizeof (udp_intransport));
+    udp_intransport *self = malloc (sizeof (udp_intransport));
     self->listenaddr = NULL;
     self->sock = -1;
     self->super.setlistenport = udp_intransport_setlistenport;

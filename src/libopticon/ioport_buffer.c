@@ -81,7 +81,7 @@ void buffer_reset_read (ioport *io) {
   * \return The freshly created ioport */
 /*/ ======================================================================= /*/
 ioport *ioport_create_buffer (void *buf, size_t sz) {
-    ioport *res = (ioport *) malloc (sizeof (ioport));
+    ioport *res = malloc (sizeof (ioport));
     res->write = buffer_write;
     res->close = buffer_close;
     res->read = buffer_read;
@@ -101,7 +101,7 @@ ioport *ioport_create_buffer (void *buf, size_t sz) {
         S->owned = false;
     }
     else {
-        S->buf = (char *) malloc (sz);
+        S->buf = malloc (sz);
         S->owned = true;
     }
     return res;
