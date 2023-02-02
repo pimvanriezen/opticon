@@ -145,7 +145,13 @@ int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
         db_free (DB);
-        return 0;
+        *status = 404;
+        var *err = var_alloc();
+        var_set_str_forkey (err, "error", "Tenant not found");
+        var_write (err, outio);
+        var_free (err);
+        *status = 404;
+        return 1;
     }
     if (!JSONCODEC) JSONCODEC= codec_create_json();
     host *h = host_alloc();
