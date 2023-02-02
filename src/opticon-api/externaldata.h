@@ -5,6 +5,6 @@
 #include <libopticon/var.h>
 
 void extdata_init (void);
-var *extdata_get (uuid tenantid, uuid hostid);
+var *extdata_get (uuid tenantid, uuid hostid, var *env);
 
 #endif

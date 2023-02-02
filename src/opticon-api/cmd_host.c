@@ -26,18 +26,23 @@ int cmd_host_overview (req_context *ctx, req_arg *a,
     }
     var *res = db_get_overview (DB);
     if (! res) res = var_alloc();
-    else {
+    else if (OPTIONS.external_querytool) {
         var *ov = var_find_key (res, "overview");
         var *crsr = NULL;
         if (ov) crsr = var_first (ov);
+        var *outenv = var_alloc();
+        if (ctx->external_token) {
+            var_set_str_forkey (outenv, "token", ctx->external_token);
+        }
         while (crsr) {
             uuid hostid = mkuuid (crsr->id);
-            var *extra = extdata_get (ctx->tenantid, hostid);
+            var *extra = extdata_get (ctx->tenantid, hostid, outenv);
             if (extra) {
                 var_link_as (extra, crsr, "external");
             }
             crsr = crsr->next;
         }
+        var_free (outenv);
     }
     var_copy (env, res);
     var_free (res);

@@ -64,7 +64,7 @@ extdata *extdata_new (uuid tenantid, uuid hostid) {
 }
 
 /** Load ext data either from cache or through its command. */
-var *extdata_get (uuid tenantid, uuid hostid) {
+var *extdata_get (uuid tenantid, uuid hostid, var *env) {
     const char *tool = OPTIONS.external_querytool;
     if (! tool) return NULL;
     
@@ -92,7 +92,7 @@ var *extdata_get (uuid tenantid, uuid hostid) {
 
     sprintf (cmd, "%s %s %s", tool, tenantstr, hoststr);
     var *vout = var_alloc();
-    FILE *f = popen_safe (cmd, "r");
+    FILE *f = popen_safe_env (cmd, "r", env);
     if (f) {
         var_read_json (vout, f);
         pclose_safe (f);
