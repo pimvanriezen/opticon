@@ -9,7 +9,6 @@ version {
     frequency: low
 }
 cpu {
-    platform: unix
     type: built-in
     call: probe_cpu
     frequency: low
