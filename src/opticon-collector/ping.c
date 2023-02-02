@@ -471,7 +471,7 @@ pingtarget *pingtarget_open (struct sockaddr_storage *remote, bool create) {
 /** Allocates and initializes a pingtarget */
 /*/ ======================================================================= /*/
 pingtarget *pingtarget_create (struct sockaddr_storage *remote) {
-    pingtarget *self = (pingtarget *) malloc (sizeof (pingtarget));
+    pingtarget *self = malloc (sizeof (pingtarget));
     self->next = self->prev = NULL;
     self->parent = NULL;
     self->id = pingtarget_makeid (remote);

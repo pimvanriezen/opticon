@@ -615,7 +615,7 @@ void conf_reloader_run (thread *t) {
 /** Create the configuration reloader thread */
 /*/ ======================================================================= /*/
 conf_reloader *conf_reloader_create (void) {
-    conf_reloader *self = (conf_reloader *) malloc (sizeof (conf_reloader));
+    conf_reloader *self = malloc (sizeof (conf_reloader));
     self->cond = conditional_create();
     thread_init (&self->super, conf_reloader_run, NULL);
     return self;
