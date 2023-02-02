@@ -26,13 +26,13 @@ void tcache_node_clear (tcache_node *self, int dofree) {
 }
 
 tcache_node *tcache_node_copy (tcache_node *src) {
-    tcache_node *dst = (tcache_node *) malloc (sizeof (tcache_node));
+    tcache_node *dst = malloc (sizeof (tcache_node));
     if (! dst) return dst;
     
     memcpy (dst, src, sizeof (tcache_node));
     if (dst->tenantcount) {
         size_t sz = dst->tenantcount * sizeof(uuid);
-        dst->tenantlist = (uuid *) malloc (sz);
+        dst->tenantlist = malloc (sz);
         memcpy (dst->tenantlist, src->tenantlist, sz);
     }
     return dst;
@@ -231,7 +231,7 @@ void tokencache_store_valid (const char *token, uuid *tenantlist,
     
     if (into->tenantlist) free (into->tenantlist);
     into->tenantcount = tenantcount;
-    into->tenantlist = (uuid *) malloc (tenantcount * sizeof (uuid));
+    into->tenantlist = malloc (tenantcount * sizeof (uuid));
     memcpy (into->tenantlist, tenantlist, tenantcount * sizeof (uuid));
     into->ctime = into->lastref = tnow;
     

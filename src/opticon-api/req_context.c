@@ -13,7 +13,7 @@
 /** Allocate a request argument list */
 /*/ ======================================================================= /*/
 req_arg *req_arg_alloc (void) {
-    req_arg *self = (req_arg *) malloc (sizeof (req_arg));
+    req_arg *self = malloc (sizeof (req_arg));
     self->argc = 0;
     self->argv = NULL;
     return self;
@@ -29,7 +29,7 @@ void req_arg_add_nocopy (req_arg *self, const char *a) {
         self->argv = (char **)
             realloc (self->argv, sizeof (char *) * (self->argc+1));
     }
-    else self->argv = (char **) malloc (sizeof (char *));
+    else self->argv = malloc (sizeof (char *));
     self->argv[self->argc] = (char *) a;
     self->argc++;
 }
@@ -95,7 +95,7 @@ void req_matchlist_init (req_matchlist *self) {
 /*/ ======================================================================= /*/
 void req_matchlist_add (req_matchlist *self, const char *s,
                         req_method mmask, path_f f) {
-    req_match *m = (req_match *) malloc (sizeof (req_match));
+    req_match *m = malloc (sizeof (req_match));
     m->next = m->prev = NULL;
     m->matchstr = s;
     m->method_mask = mmask;
@@ -122,7 +122,7 @@ void req_matchlist_add (req_matchlist *self, const char *s,
 /*/ ======================================================================= /*/
 void req_matchlist_add_text (req_matchlist *self, const char *s,
                              req_method mmask, path_text_f f) {
-    req_match *m = (req_match *) malloc (sizeof (req_match));
+    req_match *m = malloc (sizeof (req_match));
     m->next = m->prev = NULL;
     m->matchstr = s;
     m->method_mask = mmask;
@@ -230,7 +230,7 @@ int req_match_check (req_match *self, const char *url, req_arg *arg) {
             /* Copy the url-part to the argument list */
             size_t elmsize = curl-curl_start;
             if (! elmsize) return 0;
-            char *elm = (char *) malloc (elmsize+1);
+            char *elm = malloc (elmsize+1);
             memcpy (elm, curl_start, elmsize);
             elm[elmsize] = 0;
             req_arg_add_nocopy (arg, elm); /*req_arg will free() elm*/
@@ -351,7 +351,7 @@ void req_matchlist_dispatch (req_matchlist *self, const char *url,
 /** Allocate a request context object */
 /*/ ======================================================================= /*/
 req_context *req_context_alloc (void) {
-    req_context *self = (req_context *) malloc (sizeof (req_context));
+    req_context *self = malloc (sizeof (req_context));
     if (self) {
         self->headers = var_alloc();
         self->bodyjson = var_alloc();
@@ -455,7 +455,7 @@ static size_t mkallocsz (size_t target) {
 void req_context_append_body (req_context *self, const char *dt, size_t sz) {
     if (! self->body) {
         self->bodyalloc = mkallocsz (sz);
-        self->body = (char *) malloc (self->bodyalloc);
+        self->body = malloc (self->bodyalloc);
         self->bodysz = 0;
     }
     if ((self->bodysz + sz + 1) > self->bodyalloc) {

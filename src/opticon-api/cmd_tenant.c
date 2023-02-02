@@ -674,7 +674,7 @@ static char *timfmt (time_t w, int json) {
     struct tm tm;
     if (json) gmtime_r (&w, &tm);
     else localtime_r (&w, &tm);
-    char *res = (char *) malloc (24);
+    char *res = malloc ((size_t) 24);
     strftime (res, 23, json ? "%FT%H:%M:%S" : "%F %H:%M", &tm);
     return res;
 }
