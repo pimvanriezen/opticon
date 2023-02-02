@@ -19,6 +19,7 @@
 #include "cmd.h"
 #include "options.h"
 #include "tokencache.h"
+#include "authsession.h"
 
 req_matchlist REQ_MATCHES;
 
@@ -290,13 +291,17 @@ int handle_external_token (req_context *ctx) {
     if (! ctx->external_token) return 0;
     if (! ctx->external_token[0]) return 0;
     if (! ctx->external_token[1]) return 0;
-    if (OPTIONS.keystone_url && OPTIONS.keystone_url[0]) {
-        return handle_external_token_openstack (ctx);
+
+    switch (OPTIONS.auth) {
+        case AUTH_OPENSTACK:
+            return handle_external_token_openstack (ctx);
+        
+        case AUTH_UNITHOST:
+            return handle_external_token_unithost (ctx);
+            
+        default:
+            return 0;
     }
-    else if (OPTIONS.unithost_url && OPTIONS.unithost_url[0]) {
-        return handle_external_token_unithost (ctx);
-    }
-    else return 0;
 }
 
 int flt_add_cors (req_context *ctx, req_arg *a, var *out, int *status) {
@@ -318,6 +323,14 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
     char uuidstr[40];
     
     if (uuidvalid (ctx->opticon_token)) {
+        authsession *s = authsession_find (ctx->opticon_token);
+        if (s) {
+            ctx->userlevel = s->userlevel;
+            ctx->auth_tenants = malloc (sizeof (uuid));
+            ctx->auth_tenants[0] = s->tenant;
+            ctx->auth_tenantcount = 1;
+            return 0;
+        }
         if (strcmp (OPTIONS.adminhost, ctx->remote) != 0) {
             log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (IP)", ctx->remote); 
             ctx->userlevel = AUTH_GUEST;
@@ -425,6 +438,7 @@ void setup_matches (void) {
     _P_ ("/token",                    REQ_GET,    cmd_token);
     _P_ ("/session",                  REQ_GET,    flt_check_admin);
     _P_ ("/session",                  REQ_GET,    cmd_list_sessions);
+    _P_ ("/login",                    REQ_POST,   cmd_login);
     _P_ ("/any*",                     REQ_ANY,    flt_check_admin);
     _P_ ("/any/host/overview",        REQ_GET,    cmd_host_any_overview);
     _T_ ("/any/host/%U",              REQ_GET,    cmd_host_any_get);
@@ -563,6 +577,18 @@ int conf_admin_token (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+int conf_auth_method (const char *id, var *v, updatetype tp) {
+    const char *mth = var_get_str (v);
+    if (strcmp (mth, "internal") == 0) OPTIONS.auth = AUTH_INTERNAL;
+    else if (strcmp (mth, "openstack") == 0) OPTIONS.auth = AUTH_OPENSTACK;
+    else if (strcmp (mth, "unithost") == 0) OPTIONS.auth = AUTH_UNITHOST;
+    else {
+        log_error ("Invalid auth_method");
+        exit (1);
+    }
+    return 1;
+}
+
 /** Handle auth/admin_host config */
 int conf_admin_host (const char *id, var *v, updatetype tp) {
     OPTIONS.adminhost = var_get_str (v);
@@ -572,6 +598,7 @@ int conf_admin_host (const char *id, var *v, updatetype tp) {
 /** Handle auth/keystone_url config */
 int conf_keystone_url (const char *id, var *v, updatetype tp) {
     OPTIONS.keystone_url = var_get_str (v);
+    if (OPTIONS.auth == AUTH_UNSET) OPTIONS.auth = AUTH_OPENSTACK;
     return 1;
 }
 
@@ -583,6 +610,7 @@ int conf_unithost_url (const char *id, var *v, updatetype tp) {
         if (*e == '/') *e = 0;
     }
     OPTIONS.unithost_url = url;
+    if (OPTIONS.auth == AUTH_UNSET) OPTIONS.auth = AUTH_UNITHOST;
     return 1;
 }
 
@@ -606,6 +634,12 @@ int conf_port (const char *id, var *v, updatetype tp) {
 /** Handle database/path config */
 int conf_dbpath (const char *id, var *v, updatetype tp) {
     OPTIONS.dbpath = var_get_str (v);
+    return 1;
+}
+
+/** Handle plugin/querytool config */
+int conf_querytool (const char *id, var *v, updatetype tp) {
+    OPTIONS.external_querytool = var_get_str (v);
     return 1;
 }
 
@@ -635,18 +669,22 @@ int main (int _argc, const char *_argv[]) {
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);
     if (! argv) return 1;
     
+    OPTIONS.auth = AUTH_UNSET;
     OPTIONS.keystone_url = NULL;
     OPTIONS.unithost_url = NULL;
     OPTIONS.unithost_account_url = NULL;
+    OPTIONS.external_querytool = NULL;
 
     opticonf_add_reaction ("network/port", conf_port);
     opticonf_add_reaction ("auth/admin_token", conf_admin_token);
     opticonf_add_reaction ("auth/admin_host", conf_admin_host);
+    opticonf_add_reaction ("auth/auth_method", conf_auth_method);
     opticonf_add_reaction ("auth/keystone_url", conf_keystone_url);
     opticonf_add_reaction ("auth/unithost_url", conf_unithost_url);
     opticonf_add_reaction ("auth/unithost_account_url",
                            conf_unithost_account_url);
     opticonf_add_reaction ("database/path", conf_dbpath);
+    opticonf_add_reaction ("plugin/querytool", conf_querytool);
     
     OPTIONS.conf = var_alloc();
     if (! var_load_json (OPTIONS.conf, OPTIONS.confpath)) {
@@ -671,6 +709,7 @@ int main (int _argc, const char *_argv[]) {
     opticonf_handle_config (OPTIONS.conf);
     tokencache_init();
     setup_matches();
+    authsession_init();
 
     if (! daemonize (OPTIONS.pidfile, argc, argv, daemon_main,
                      OPTIONS.foreground)) {

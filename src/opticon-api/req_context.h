@@ -5,6 +5,7 @@
 #include <microhttpd.h>
 #include <arpa/inet.h>
 #include <libopticon/timer.h>
+#include <libopticon/ioport.h>
 #include <time.h>
 
 typedef uint8_t req_method;

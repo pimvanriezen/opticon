@@ -23,7 +23,7 @@ endif
 CFLAGS+=-DOSNAME=$(OSNAME) -DOSREL=$(OSREL) -DOSRELMAJOR=$(OSRELMAJOR)
 
 OBJS_OPTICONAPI = cmd_err.o cmd_host.o cmd_tenant.o externaldata.o \
-				  main.o req_context.o tokencache.o
+				  main.o req_context.o tokencache.o authsession.o cmd_user.o
 				  
 all: ../../bin/opticon-api
 

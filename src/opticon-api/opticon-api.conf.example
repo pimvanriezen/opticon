@@ -5,7 +5,7 @@ auth {
     admin_token: "00000000-0000-0000-0000-000000000000"
     admin_host: "127.0.0.1"
     auth_method: unithost
-    unithost_url: "https://backoffice.newvm.com/api/account/v1/token"
+    unithost_url: "https://api.newvm.com/api/account/v1/token"
 }
 database {
     path: "/var/opticon/db"
