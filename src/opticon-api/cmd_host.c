@@ -143,10 +143,12 @@ int cmd_host_any_get_tenant (req_context *ctx, req_arg *a,
 /** GET /$TENANT/host/$HOST */
 int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
+    var *err;
+    
     if (! db_open (DB, ctx->tenantid, NULL)) {
         db_free (DB);
         *status = 404;
-        var *err = var_alloc();
+        err = var_alloc();
         var_set_str_forkey (err, "error", "Tenant not found");
         var_write (err, outio);
         var_free (err);
@@ -168,7 +170,7 @@ int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     host_delete (h);
     db_free (DB);
     
-    var *err = var_alloc();
+    err = var_alloc();
     var_set_str_forkey (err, "error", "No current record found for host");
     var_write (err, outio);
     var_free (err);
