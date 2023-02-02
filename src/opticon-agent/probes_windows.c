@@ -67,7 +67,6 @@ static uint32_t getGlobalMemoryInfo(MEMORYSTATUSEX *memoryStatus) {
 var *runprobe_meminfo(probe *self) {
     (void)self;
     uint32_t e;
-    
     var *res = var_alloc();
     
     MEMORYSTATUSEX memoryStatus;
@@ -77,17 +76,63 @@ var *runprobe_meminfo(probe *self) {
     }
     
     uint64_t totalMemory = memoryStatus.ullTotalPhys / 1024;
-    uint64_t swapMemory = memoryStatus.ullAvailPageFile / 1024;
     uint64_t freeMemory = memoryStatus.ullAvailPhys / 1024;
     
     log_debug("probe_meminfo/total: %" PRIu64, totalMemory);
-    log_debug("probe_meminfo/swap: %" PRIu64, swapMemory);
     log_debug("probe_meminfo/free: %" PRIu64, freeMemory);
     
     var *memDict = var_get_dict_forkey(res, "mem");
     var_set_int_forkey(memDict, "total", totalMemory);
-    var_set_int_forkey(memDict, "swap", swapMemory);
     var_set_int_forkey(memDict, "free", freeMemory);
+    
+    
+    void *pageFileInfoList = NULL;
+    uint32_t pageFileInfoListBufferSize = 0;
+    
+    // Buffer size needed on an arbitrary desktop PC: 32 (This seems low, but the FileName.Buffer property is not inside our buffer, but a pointer to OS memory or something)
+    // Loop because in between the query for the required buffer size, new page files may have have been activated (which means we need a larger buffer)
+    // Also the code to call it manually twice is more confusing than the loop
+    while (true) {
+        ULONG pageFileInfoListBufferSizeRequired;
+        NTSTATUS status = NtQuerySystemInformation(SystemPagefileInformation, pageFileInfoList, pageFileInfoListBufferSize, &pageFileInfoListBufferSizeRequired);
+        if (status == STATUS_INFO_LENGTH_MISMATCH) {
+            if (pageFileInfoList != NULL) free(pageFileInfoList);
+            pageFileInfoListBufferSize = pageFileInfoListBufferSizeRequired;
+            pageFileInfoList = malloc(pageFileInfoListBufferSize);
+        }
+        else if (status != STATUS_SUCCESS) {
+            log_error("Failed to get page file information: %" PRIx32, status);
+            if (pageFileInfoList != NULL) free(pageFileInfoList);
+            return res;
+        }
+        else {
+            break;
+        }
+    }
+    
+    uint64_t totalSwap = 0;
+    SYSTEM_PAGEFILE_INFORMATION *pageFileInfo = (SYSTEM_PAGEFILE_INFORMATION *)pageFileInfoList;
+    // @note We have no reliable way to determine if the returned list is actually empty, so we check for CurrentSize being 0
+    if (pageFileInfo->CurrentSize != 0) {
+        SYSTEM_INFO systemInfo;
+        GetNativeSystemInfo(&systemInfo);
+        
+        while (true) {
+            //printf("pagefile: %ls\n", pageFileInfo->FileName.Buffer);
+            
+            // @note Sizes are in pages (which are 4096 bytes on x86)
+            // Convert Bytes to MB
+            totalSwap += pageFileInfo->TotalUsed * systemInfo.dwPageSize / 1024 / 1024;
+            
+            if (pageFileInfo->NextEntryOffset == 0) break;
+            pageFileInfo = (SYSTEM_PAGEFILE_INFORMATION *)((uint8_t *)pageFileInfo + pageFileInfo->NextEntryOffset);
+        }
+    }
+    
+    free(pageFileInfoList);
+    
+    log_debug("probe_meminfo/swap: %" PRIu64, totalSwap);
+    var_set_int_forkey(memDict, "swap", totalSwap);
     
     return res;
 }
@@ -639,7 +684,6 @@ static bool isHardwareNameSet = false;
 var *runprobe_uname(probe *self) {
     (void)self;
     uint32_t e;
-    
     var *res = var_alloc();
     
     var *osDict = var_get_dict_forkey(res, "os");
@@ -677,7 +721,7 @@ var *runprobe_uname(probe *self) {
     
     
     char servicePack[sizeof(osVersionInfo.szCSDVersion)];
-    // Pass -1 for cchWideChar to tell it it's a null terminated string
+    // Pass -1 for cchWideChar to tell it the input is a null terminated string
     WideCharToMultiByte(CP_UTF8, 0, osVersionInfo.szCSDVersion, -1, servicePack, sizeof(servicePack), NULL, NULL);
     
     
@@ -743,7 +787,7 @@ var *runprobe_uname(probe *self) {
     if (!isHardwareNameSet) {
         DSystemFirmwareInfo systemFirmwareInfo;
         if ((e = getSystemFirmwareInfoAlloc(&systemFirmwareInfo))) {
-            log_warn("Failed to get system firmware info: %" PRIx32, e);
+            log_error("Failed to get system firmware info: %" PRIx32, e);
         }
         else {
             isHardwareNameSet = true;
@@ -759,17 +803,6 @@ var *runprobe_uname(probe *self) {
             }
             else if (hardwareProductName != NULL && hardwareProductName[0] != '\0') {
                 snprintf(hardwareName, sizeof(hardwareName), "%s", hardwareProductName);
-            }
-            
-            var *cpusArray = var_get_array_forkey(res, "cpu");
-            for (uint8_t i = 0; i < 16; ++i) {
-                if (!systemFirmwareInfo.processorInfos[i].hasData) continue;
-                
-                var *cpuDict = var_add_dict(cpusArray);
-                log_debug("probe_uname/cpu/model: %s", systemFirmwareInfo.processorInfos[i].version);
-                if (systemFirmwareInfo.processorInfos[i].version == NULL) var_set_str_forkey(cpuDict, "model", "");
-                else var_set_str_forkey(cpuDict, "model", systemFirmwareInfo.processorInfos[i].version);
-                var_set_int_forkey(cpuDict, "count", systemFirmwareInfo.processorInfos[i].coreEnabled);
             }
             
             freeSystemFirmwareInfo(&systemFirmwareInfo);
@@ -1384,7 +1417,6 @@ static void CALLBACK onTopTimerCallback(void *customData, BOOLEAN hasTimedOut) {
 var *runprobe_top(probe *self) {
     (void)self;
     uint32_t e;
-    
     var *res = var_alloc();
     
     if (!isTopProbeInitialized) {
@@ -1470,23 +1502,23 @@ var *runprobe_proc(probe *self) {
     
     var *procDict = var_get_dict_forkey(res, "proc");
     
-    void *processList = NULL;
-    uint32_t processListBufferSize = 0;
+    void *processInfoList = NULL;
+    uint32_t processInfoListBufferSize = 0;
     
     // Buffer size needed on an arbitrary desktop PC: 263832
     // Loop because in between the query for the required buffer size, new processes may have started (which means we need a larger buffer)
     while (true) {
-        ULONG processListBufferSizeRequired;
-        NTSTATUS status = NtQuerySystemInformation(SystemProcessInformation, processList, processListBufferSize, &processListBufferSizeRequired);
+        ULONG processInfoListBufferSizeRequired;
+        NTSTATUS status = NtQuerySystemInformation(SystemProcessInformation, processInfoList, processInfoListBufferSize, &processInfoListBufferSizeRequired);
         if (status == STATUS_INFO_LENGTH_MISMATCH) {
-            if (processList != NULL) free(processList);
+            if (processInfoList != NULL) free(processInfoList);
             // Include some headroom in the buffer to allocate for new processes that may have started
-            processListBufferSize = processListBufferSizeRequired + 4096;
-            processList = malloc(processListBufferSize);
+            processInfoListBufferSize = processInfoListBufferSizeRequired + 4096;
+            processInfoList = malloc(processInfoListBufferSize);
         }
         else if (status != STATUS_SUCCESS) {
             log_error("Failed to get process information: %" PRIx32, status);
-            if (processList != NULL) free(processList);
+            if (processInfoList != NULL) free(processInfoList);
             return res;
         }
         else {
@@ -1496,25 +1528,26 @@ var *runprobe_proc(probe *self) {
     
     uint64_t runningThreadCount = 0;
     uint64_t totalThreadCount = 0;
-    for (
-        SYSTEM_PROCESS_INFORMATION *process = (SYSTEM_PROCESS_INFORMATION *)processList;
-        process->NextEntryOffset != 0;
-        process = (SYSTEM_PROCESS_INFORMATION *)((uint8_t *)process + process->NextEntryOffset)
-    ) {
-        totalThreadCount += process->NumberOfThreads;
+    SYSTEM_PROCESS_INFORMATION *processInfo = (SYSTEM_PROCESS_INFORMATION *)processInfoList;
+    // @note We have no reliable way to determine if the returned list is actually empty, but if our process runs this code, it cannot be empty anway
+    while (true) {
+        totalThreadCount += processInfo->NumberOfThreads;
         
         // The first SYSTEM_THREAD_INFORMATION structure sits after the SYSTEM_PROCESS_INFORMATION structure
-        SYSTEM_THREAD_INFORMATION *thread = (SYSTEM_THREAD_INFORMATION *)((uint8_t *)process + sizeof(SYSTEM_PROCESS_INFORMATION));
-        for (DWORD i = 0; i < process->NumberOfThreads; ++i) {
+        SYSTEM_THREAD_INFORMATION *thread = (SYSTEM_THREAD_INFORMATION *)((uint8_t *)processInfo + sizeof(SYSTEM_PROCESS_INFORMATION));
+        for (DWORD i = 0; i < processInfo->NumberOfThreads; ++i) {
             //thread->ThreadState == Waiting && thread->WaitReason == Suspended
             if (thread->ThreadState == StateRunning) ++runningThreadCount;
             
             // Move pointer to the next thread
             ++thread;
         }
+        
+        if (processInfo->NextEntryOffset == 0) break;
+        processInfo = (SYSTEM_PROCESS_INFORMATION *)((uint8_t *)processInfo + processInfo->NextEntryOffset);
     }
     
-    free(processList);
+    free(processInfoList);
     
     log_debug("probe_proc/run: %u", runningThreadCount);
     log_debug("probe_proc/total: %u", totalThreadCount);
@@ -1616,10 +1649,8 @@ var *runprobe_who(probe *self) {
 
 var *runprobe_localip(probe *self) {
     (void)self;
-    var *res = var_alloc();
-    var *agentDict = var_get_dict_forkey(res, "agent");
-    
     uint32_t e;
+    var *res = var_alloc();
     
     // Buffer size needed on an arbitrary desktop PC: 16383
     DWORD adapterListSizeRequired;
@@ -1637,6 +1668,7 @@ var *runprobe_localip(probe *self) {
         return res;
     }
     
+    var *agentDict = var_get_dict_forkey(res, "agent");
     for (IP_ADAPTER_ADDRESSES *adapter = adapterList; adapter != NULL; adapter = adapter->Next) {
         if (adapter->FirstUnicastAddress == NULL) continue;
         if (adapter->FirstGatewayAddress == NULL) continue;
@@ -1680,49 +1712,65 @@ var *runprobe_localip(probe *self) {
 
 // ============================================================================
 
-// @note __cpuid returns the info for the processor the function is executed on, so not really useful in case of multiple processors
-//var *runprobe_cpu(probe *self) {
-//    (void)self;
-//    var *res = var_alloc();
-//    var *cpusArray = var_get_array_forkey(res, "cpu");;
-//    
-//    // https://learn.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?view=msvc-170
-//    
-//    // cpuInfo is used both as an int as well as 16 chars
-//    int cpuInfo[4] = {-1};
-//    
-//    // 0x80000000 gets the highest extended ID
-//    __cpuid(cpuInfo, 0x80000000);
-//    
-//    unsigned int highestExtendedId = cpuInfo[0];
-//    // Cap at 0x80000004 (we don't need to read higher than that)
-//    if (highestExtendedId > 0x80000004) highestExtendedId = 0x80000004;
-//    
-//    // Hold 3 x 16 bytes plus a null terminator
-//    char cpuBrand[49];
-//    memset(cpuBrand, 0, sizeof(cpuBrand));
-//    for (int i = 0x80000002; i <= highestExtendedId; ++i) {
-//        __cpuid(cpuInfo, i);
-//        
-//        //printf("\nX:%s\n", cpuInfo);
-//        if (i == 0x80000002) memcpy(cpuBrand, cpuInfo, sizeof(cpuInfo));
-//        else if  (i == 0x80000003) memcpy(cpuBrand + 16, cpuInfo, sizeof(cpuInfo));
-//        else if  (i == 0x80000004) memcpy(cpuBrand + 32, cpuInfo, sizeof(cpuInfo));
-//    }
-//    
-//    //printf("\n\nCPU:%s", cpuBrand);
-//    
-//    //var *cpuDict = var_add_dict(cpusArray);
-//    //var_set_str_forkey(cpuDict, "model", ?);
-//    //var_set_int_forkey(cpuDict, "count", ?);
-//    
-//    return res;
-//}
+var *runprobe_cpu(probe *self) {
+    (void)self;
+    uint32_t e;
+    var *res = var_alloc();
+    
+    // @note __cpuid returns the info for the processor the function is executed on, so not really useful in case of multiple processors
+    //
+    //// https://learn.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?view=msvc-170
+    //
+    //// cpuInfo is used both as an int as well as 16 chars
+    //int cpuInfo[4] = {-1};
+    //
+    //// 0x80000000 gets the highest extended ID
+    //__cpuid(cpuInfo, 0x80000000);
+    //
+    //unsigned int highestExtendedId = cpuInfo[0];
+    //// Cap at 0x80000004 (we don't need to read higher than that)
+    //if (highestExtendedId > 0x80000004) highestExtendedId = 0x80000004;
+    //
+    //// Hold 3 x 16 bytes plus a null terminator
+    //char cpuModel[49];
+    //memset(cpuModel, 0, sizeof(cpuModel));
+    //for (int i = 0x80000002; i <= highestExtendedId; ++i) {
+    //    __cpuid(cpuInfo, i);
+    //    if (i == 0x80000002) memcpy(cpuModel, cpuInfo, sizeof(cpuInfo));
+    //    else if  (i == 0x80000003) memcpy(cpuModel + 16, cpuInfo, sizeof(cpuInfo));
+    //    else if  (i == 0x80000004) memcpy(cpuModel + 32, cpuInfo, sizeof(cpuInfo));
+    //}
+    
+    
+    DSystemFirmwareInfo systemFirmwareInfo;
+    if ((e = getSystemFirmwareInfoAlloc(&systemFirmwareInfo))) {
+        log_error("Failed to get system firmware info: %" PRIx32, e);
+        return res;
+    }
+    
+    var *cpusArray = var_get_array_forkey(res, "cpu");
+    for (uint8_t i = 0; i < 16; ++i) {
+        if (!systemFirmwareInfo.processorInfos[i].hasData) continue;
+        
+        var *cpuDict = var_add_dict(cpusArray);
+        
+        log_debug("probe_cpu/cpu/model: %s", systemFirmwareInfo.processorInfos[i].version);
+        if (systemFirmwareInfo.processorInfos[i].version == NULL) var_set_str_forkey(cpuDict, "model", "");
+        else var_set_str_forkey(cpuDict, "model", systemFirmwareInfo.processorInfos[i].version);
+        
+        log_debug("probe_cpu/cpu/count: %u", systemFirmwareInfo.processorInfos[i].coreEnabled);
+        var_set_int_forkey(cpuDict, "count", systemFirmwareInfo.processorInfos[i].coreEnabled);
+    }
+    
+    freeSystemFirmwareInfo(&systemFirmwareInfo);
+    
+    return res;
+}
 
 // ============================================================================
 
 builtinfunc BUILTINS[] = {
-    //{"probe_cpu", runprobe_cpu}, // @note Cpu's 
+    {"probe_cpu", runprobe_cpu},
     {"probe_version", runprobe_version},
     {"probe_hostname", runprobe_hostname},
     {"probe_meminfo", runprobe_meminfo},
