@@ -83,12 +83,19 @@ int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
         return err_server_error (ctx, a, env, status);
     }
     
+    
     char pwfile[1024];
     sprintf (pwfile, "%s/user.db", OPTIONS.dbpath);
     
     const char *user = a->argv[0];
     uuid tenantid = var_get_uuid_forkey (ctx->bodyjson, "tenant");
     const char *level = var_get_str_forkey (ctx->bodyjson, "level");
+
+    if (ctx->userlevel != AUTH_ADMIN) {
+        var_set_str_forkey (env, "error", "Admin required");
+        *status = 403;
+        return 1;
+    }
     
     var *pwdb = var_alloc();
     if (var_load_json (pwdb, pwfile)) {
