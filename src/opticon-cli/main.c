@@ -452,7 +452,7 @@ int internal_login (void) {
     var_set_str_forkey (req, "username", username);
     var_set_str_forkey (req, "password", password);
     
-    var *apires = api_call ("GET", req, "/login");
+    var *apires = api_call ("POST", req, "/login");
     if ((! apires)||(! var_find_key(apires,"token"))) {
         printf ("%% Login failed\n");
         if (apires) var_free (apires);
