@@ -1,5 +1,5 @@
-Opticon Server Metering for OpenStack
-=====================================
+Opticon
+=======
 
 Opticon is a lightweight multi-tenant monitoring system, a way of
 keeping tabs on what your servers are doing for purposes of monitoring,
@@ -45,7 +45,7 @@ network {
     address: *
 }
 database {
-    path: "/var/db/opticon"
+    path: "/var/opticon/db"
 }
 ```
 
@@ -87,7 +87,7 @@ auth {
     auth_method: internal
 }
 database {
-    path: "/var/db/opticon"
+    path: "/var/opticon/db"
 }
 ```
 
