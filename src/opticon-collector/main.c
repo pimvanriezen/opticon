@@ -325,12 +325,26 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
     
     if (S) {
         host *h = S->host;
+        pthread_rwlock_wrlock (&h->lock);
+        
+        if (h->mcount == 0) {
+            db *DB = localdb_create (APP.dbpath);
+            if (db_open (DB, S->tenantid, NULL)) {
+                if (db_host_exists (DB, S->hostid)) {
+                    db_get_current (DB, h);
+                }
+                db_close (DB);
+            }
+            db_free (DB);
+        }
+        
         char addrbuf[64];
         ip2str (&S->remote, addrbuf);
         meterid_t mid_agentip = makeid ("link/ip", MTYPE_STR, 0);
         meter *m_agentip = host_get_meter (h, mid_agentip);
         meter_setcount (m_agentip, 0);
         meter_set_str (m_agentip, 0, addrbuf);
+        pthread_rwlock_unlock (&h->lock);
     }
     
     /* Now's a good time to cut the dead wood */
@@ -790,6 +804,7 @@ int conf_db_path (const char *id, var *v, updatetype tp) {
     APP.writedb = localdb_create (var_get_str (v));
     APP.overviewdb = localdb_create (var_get_str (v));
     APP.reaperdb = localdb_create (var_get_str (v));
+    APP.dbpath = var_get_str (v);
     return 1;
 }
 
