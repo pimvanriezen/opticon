@@ -511,6 +511,18 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     }
     
     host_begin_update (H, tnow);
+
+    if (H->mcount == 0) {
+        db *DB = localdb_create (APP.dbpath);
+        if (db_open (DB, S->tenantid, NULL)) {
+            if (db_host_exists (DB, H->uuid)) {
+                db_get_current (DB, H);
+            }
+            db_close (DB);
+        }
+        db_free (DB);
+    }
+
     if (codec_decode_host (APP.codec, unwrap, H)) {
         log_debug ("Update handled for session <%08x-%08x>",
                     S->sessid, S->addr);
