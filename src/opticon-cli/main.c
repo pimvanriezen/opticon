@@ -43,6 +43,8 @@ STRINGOPT(key)
 STRINGOPT(path)
 STRINGOPT(host)
 STRINGOPT(hostname)
+STRINGOPT(username)
+STRINGOPT(password)
 FLAGOPT(json)
 FLAGOPT(watch)
 FLAGOPT(flip)
@@ -426,6 +428,8 @@ int unithost_login (void) {
 
 /** Command line flags */
 cliopt CLIOPT[] = {
+    {"--username","-l",OPT_VALUE,"",set_username},
+    {"--password","-p",OPT_VALUE,"",set_password},
     {"--tenant","-t",OPT_VALUE,"",set_tenant},
     {"--key","-k",OPT_VALUE,"",set_key},
     {"--host","-H",OPT_VALUE,"",set_host},
@@ -459,6 +463,7 @@ cliopt CLIOPT[] = {
 
 /** Sub-commands */
 clicmd CLICMD[] = {
+    {"set-user",cmd_set_user},
     {"tenant-list",cmd_tenant_list},
     {"tenant-create",cmd_tenant_create},
     {"tenant-delete",cmd_tenant_delete},

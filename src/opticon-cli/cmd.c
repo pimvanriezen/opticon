@@ -627,6 +627,27 @@ int cmd_remove_host (int argc, const char *argv[]) {
     return 0;
 }
 
+int cmd_set_user (int argc, const char *argv[]) {
+    if ((OPTIONS.tenant[0] == 0) ||
+        (strcmp (OPTIONS.tenant, "any") == 0)) {
+        fprintf (stderr, "%% No tenantid provided\n");
+        return 1;
+    }
+    
+    if ((OPTIONS.username[0] == 0)||(OPTIONS.password[0] == 0)) {
+        fprintf (stderr, "%% No username/password provided\n");
+        return 1;
+    }
+    
+    var *req = var_alloc();
+    var_set_str_forkey (req, "password", OPTIONS.password);
+    var_set_str_forkey (req, "tenant", OPTIONS.tenant);
+    var *apires = api_call ("POST", req, "/user/%s", OPTIONS.username);
+    var_free (req);
+    var_free (apires);
+    return 0;
+}
+
 /** The get-record command */
 int cmd_get_record (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {

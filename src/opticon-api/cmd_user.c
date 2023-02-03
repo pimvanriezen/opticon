@@ -90,6 +90,7 @@ int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
     const char *user = a->argv[0];
     uuid tenantid = var_get_uuid_forkey (ctx->bodyjson, "tenant");
     const char *level = var_get_str_forkey (ctx->bodyjson, "level");
+    const char *plainpw = var_get_str_forkey (ctx->bodyjson, "password");
 
     if (ctx->userlevel != AUTH_ADMIN) {
         var_set_str_forkey (env, "error", "Admin required");
@@ -97,10 +98,18 @@ int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
         return 1;
     }
     
+    char salt[16];
+    salt[0] = rand() & 255;
+    salt[1] = rand() & 255;
+    salt[2] = 0;
+    
+    char *passwd = pwcrypt (plainpw, salt);
+    
     var *pwdb = var_alloc();
     if (var_load_json (pwdb, pwfile)) {
         var *outpw = var_get_dict_forkey (pwdb, user);
         var_set_uuid_forkey (outpw, "tenant", tenantid);
+        var_set_str_forkey (outpw, "passwd", passwd);
         if (level) var_set_str_forkey (outpw, "level", level);
         char tmpfn[1024];
         sprintf (tmpfn, "%s.new", pwfile);
@@ -113,12 +122,14 @@ int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
         fclose (fout);
         rename (tmpfn, pwfile);
         var_free (pwdb);
+        free (passwd);
         
         var_set_str_forkey (env, "result", "ok");
         *status = 200;
         return 1;
     }
     
+    free (passwd);
     var_free (pwdb);
     var_set_str_forkey (env, "error", "Could not load user.db");
     *status = 500;
