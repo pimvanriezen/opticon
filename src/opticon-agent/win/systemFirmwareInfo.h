@@ -42,8 +42,10 @@ typedef struct DSystemInfo {
 typedef struct DProcessorInfo {
 	bool hasData;
 	char *version; // This is actually the model name e.g. "Intel(R) Core(TM) i5-5300U CPU @ 2.30GHz"
-	uint16_t coreEnabled;
-	uint16_t threadCount;
+	bool isSocketPopulated;
+	uint16_t coreCount; // v2.5+ (not available in windows 2008)
+	uint16_t coreEnabled; // v2.5+
+	uint16_t threadCount; // v2.5+
 } DProcessorInfo;
 
 typedef struct DSystemFirmwareInfo {
