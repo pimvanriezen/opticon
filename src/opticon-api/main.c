@@ -334,7 +334,7 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
         if (strcmp (OPTIONS.adminhost, ctx->remote) != 0) {
             log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (IP)", ctx->remote); 
             ctx->userlevel = AUTH_GUEST;
-            return err_unauthorized (ctx, a, out, status);
+            return 0;
         }
         else if (uuidcmp (ctx->opticon_token, OPTIONS.admintoken)) {
             ctx->userlevel = AUTH_ADMIN;
@@ -343,7 +343,7 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
             uuid2str (ctx->opticon_token, uuidstr);
             log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (Token %c%c...)",
                       ctx->remote, uuidstr[0], uuidstr[1]);
-            ctx->userlevel = AUTH_USER;
+            ctx->userlevel = AUTH_GUEST;
         }
     }
     else if (ctx->external_token) {

@@ -466,6 +466,7 @@ int internal_login (void) {
     
     var_free (apires);
     var_free (req);
+    return 1;
 }
 
 /** Command line flags */
@@ -583,6 +584,7 @@ int conf_auth (const char *id, var *vv, updatetype tp) {
     else if (strcmp (v, "unithost") == 0) {
         OPTIONS.auth = AUTH_UNITHOST;
     }
+    return 1;
 }
 
 /** Set up the default --tenant argument from configuration.
@@ -687,7 +689,7 @@ int main (int _argc, const char *_argv[]) {
     }
     
     if (OPTIONS.keystone_url[0] == 0 && OPTIONS.unithost_url[0] == 0 &&
-        OPTIONS.opticon_token[0] == 0) {
+        OPTIONS.opticon_token[0] == 0 && OPTIONS.auth != AUTH_INTERNAL) {
 
         fprintf (stderr, "%% No authentication endpoint or opticon "
                          "token found\n");
