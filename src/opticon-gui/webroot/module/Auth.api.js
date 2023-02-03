@@ -48,7 +48,16 @@ API.Auth.login = function (username, password, cb) {
             self.credentials.token = data.token;
             if (conf.auth_method == "internal") {
                 API.headers["X-Opticon-Token"] = data.token;
-                cb (true);
+                API.get ("opticon","/token",function (err, data) {
+                    self.credentials.access = "user";
+                    if (data.token.userlevel == "AUTH_ADMIN") {
+                        self.credentials.access = "admin";
+                    };
+                    self.credentials.username = username;
+                    self.credentials.roles = ["USER"];
+                    self.credentials.tenant = data.token.tenants[0];
+                    cb (true);
+                })
                 return;
             }
 

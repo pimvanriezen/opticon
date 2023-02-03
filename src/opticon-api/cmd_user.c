@@ -74,7 +74,51 @@ int cmd_login (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
-int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
+int cmd_user_delete (req_context *ctx, req_arg *a, var *env, int *status) {
+    if (OPTIONS.auth != AUTH_INTERNAL) {
+        var_set_str_forkey (env, "error", "External authentication configured");
+        *status = 400;
+        return 1;
+    }
+    
+    if (ctx->userlevel != AUTH_ADMIN) {
+        var_set_str_forkey (env, "error", "Admin required");
+        *status = 403;
+        return 1;
+    }
+    
+    if (a->argc < 1) {
+        return err_server_error (ctx, a, env, status);
+    }
+
+    char pwfile[1024];
+    sprintf (pwfile, "%s/user.db", OPTIONS.dbpath);
+
+    const char *user = a->argv[0];
+    
+    var *pwdb = var_alloc();
+    if (var_load_json (pwdb, pwfile)) {
+        var_delete_key (pwdb, user);
+        char tmpfn[1024];
+        sprintf (tmpfn, "%s.new", pwfile);
+        FILE *fout = fopen (tmpfn, "w");
+        if (! fout) {
+            var_free (pwdb);
+            return err_server_error (ctx, a, env, status);
+        }
+        var_dump (pwdb, fout);
+        fclose (fout);
+        rename (tmpfn, pwfile);
+        var_free (pwdb);
+        var_set_str_forkey (env, "status", "deleted");
+        *status = 200;
+        return 1;
+    }
+    var_free (pwdb);
+    return err_server_error (ctx, a, env, status);
+}
+
+int cmd_user_set (req_context *ctx, req_arg *a, var *env, int *status) {
     if (OPTIONS.auth != AUTH_INTERNAL) {
         var_set_str_forkey (env, "error", "External authentication configured");
         *status = 400;
@@ -85,7 +129,6 @@ int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
         return err_server_error (ctx, a, env, status);
     }
     
-    
     char pwfile[1024];
     sprintf (pwfile, "%s/user.db", OPTIONS.dbpath);
     
@@ -93,6 +136,14 @@ int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
     uuid tenantid = var_get_uuid_forkey (ctx->bodyjson, "tenant");
     const char *level = var_get_str_forkey (ctx->bodyjson, "level");
     const char *plainpw = var_get_str_forkey (ctx->bodyjson, "password");
+
+    if (ctx->method == REQ_PUT) {
+        if ((! uuidvalid (tenantid)) || (! plainpw)) {
+            var_set_str_forkey (env, "error", "Missing required field");
+            *status = 400;
+            return 1;
+        }
+    }
 
     if (ctx->userlevel != AUTH_ADMIN) {
         var_set_str_forkey (env, "error", "Admin required");
@@ -110,13 +161,27 @@ int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
     salt[5] = '$';
     salt[6] = 0;
     
-    char *passwd = pwcrypt (plainpw, salt);
+    char *passwd = plainpw ? pwcrypt (plainpw, salt) : NULL;
     
     var *pwdb = var_alloc();
     if (var_load_json (pwdb, pwfile)) {
-        var *outpw = var_get_dict_forkey (pwdb, user);
-        var_set_uuid_forkey (outpw, "tenant", tenantid);
-        var_set_str_forkey (outpw, "passwd", passwd);
+        var *outpw = var_find_key (pwdb, user);
+        if (! outpw) {
+            if (ctx->method == REQ_POST) {
+                var_set_str_forkey (env, "error", "User not found");
+                *status = 404;
+                var_free (pwdb);
+                return 1;
+            }
+            outpw = var_get_dict_forkey (pwdb, user);
+        }
+        
+        if (uuidvalid (tenantid)) {
+            var_set_uuid_forkey (outpw, "tenant", tenantid);
+        }
+        if (passwd) {
+            var_set_str_forkey (outpw, "passwd", passwd);
+        }
         if (level) var_set_str_forkey (outpw, "level", level);
         char tmpfn[1024];
         sprintf (tmpfn, "%s.new", pwfile);

@@ -21,6 +21,10 @@
          <y>tenant-set-quota     </> <g>--tenant</> <uuid> <quota megabytes>
          <y>tenant-get-quota     </> <g>--tenant</> <uuid>
          <y>tenant-get-summary   </> <g>--tenant</> <uuid>
+         <y>user-create          </> <g>--tenant</> <uuid> <g>--username</> <name> [<g>--admin</>]
+         <y>user-set-tenant      </> <g>--tenant</> <uuid> <g>--username</> <name>
+         <y>user-change-password </> <g>--username</> <name>
+         <y>user-delete          </> <g>--username</> <name>
          <y>meter-list           </> <g>--tenant</> <uuid>
          <y>meter-create         </> <g>--tenant</> <uuid> <g>--meter</> <meterid> <g>--type</> <TYPE>
          <y>                     </> <g>--description</> <description> [<g>--unit</> <unitstr>]

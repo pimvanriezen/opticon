@@ -24,6 +24,7 @@
 #include "api.h"
 #include "prettyprint.h"
 #include "term.h"
+#include "readpass.h"
 
 /** The tenant-list command */
 int cmd_tenant_list (int argc, const char *argv[]) {
@@ -627,22 +628,91 @@ int cmd_remove_host (int argc, const char *argv[]) {
     return 0;
 }
 
-int cmd_set_user (int argc, const char *argv[]) {
+int cmd_user_create (int argc, const char *argv[]) {
+    char password[64];
+    password[0] = 0;
+    
     if ((OPTIONS.tenant[0] == 0) ||
         (strcmp (OPTIONS.tenant, "any") == 0)) {
         fprintf (stderr, "%% No tenantid provided\n");
         return 1;
     }
     
-    if ((OPTIONS.username[0] == 0)||(OPTIONS.password[0] == 0)) {
-        fprintf (stderr, "%% No username/password provided\n");
+    if (OPTIONS.username[0] == 0) {
+        fprintf (stderr, "%% No username provided\n");
+        return 1;
+    }
+    
+    if (OPTIONS.password[0] == 0) {
+        printf ("Password: ");
+        readpass (password, 64);
+    }
+    else {
+        strncpy (password, OPTIONS.password, 63);
+    }
+    
+    var *req = var_alloc();
+    var_set_str_forkey (req, "password", password);
+    var_set_str_forkey (req, "tenant", OPTIONS.tenant);
+    var *apires = api_call ("PUT", req, "/user/%s", OPTIONS.username);
+    var_free (req);
+    var_free (apires);
+    return 0;
+}
+
+int cmd_user_set_tenant (int argc, const char *argv[]) {
+    if ((OPTIONS.tenant[0] == 0) ||
+        (strcmp (OPTIONS.tenant, "any") == 0)) {
+        fprintf (stderr, "%% No tenantid provided\n");
+        return 1;
+    }
+    
+    if (OPTIONS.username[0] == 0) {
+        fprintf (stderr, "%% No username provided\n");
         return 1;
     }
     
     var *req = var_alloc();
-    var_set_str_forkey (req, "password", OPTIONS.password);
     var_set_str_forkey (req, "tenant", OPTIONS.tenant);
     var *apires = api_call ("POST", req, "/user/%s", OPTIONS.username);
+    var_free (req);
+    var_free (apires);
+    return 0;
+}
+
+int cmd_user_set_password (int argc, const char *argv[]) {
+    char password[64];
+    password[0] = 0;
+    
+    if (OPTIONS.username[0] == 0) {
+        fprintf (stderr, "%% No username provided\n");
+        return 1;
+    }
+    
+    if (OPTIONS.password[0] == 0) {
+        printf ("Password: ");
+        readpass (password, 64);
+    }
+    else {
+        strncpy (password, OPTIONS.password, 63);
+    }
+    
+    var *req = var_alloc();
+    var_set_str_forkey (req, "password", password);
+    var *apires = api_call ("POST", req, "/user/%s", OPTIONS.username);
+    var_free (req);
+    var_free (apires);
+    return 0;
+}
+
+int cmd_user_delete (int argc, const char *argv[]) {
+    if (OPTIONS.username[0] == 0) {
+        fprintf (stderr, "%% No username provided\n");
+        return 1;
+    }
+
+    var *req = var_alloc();
+    var *apires = api_call ("DELETE", req, "/user/%s", OPTIONS.username);
     var_free (req);
     var_free (apires);
     return 0;

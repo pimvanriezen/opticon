@@ -49,6 +49,7 @@ FLAGOPT(json)
 FLAGOPT(watch)
 FLAGOPT(flip)
 FLAGOPT(showgraphs)
+FLAGOPT(admin)
 STRINGOPT(name)
 STRINGOPT(meter)
 STRINGOPT(description)
@@ -513,6 +514,7 @@ cliopt CLIOPT[] = {
     {"--unithost-identity-url","-i",OPT_VALUE,"",set_unithost_identity_url},
     {"--external-token","-K",OPT_VALUE,"",set_external_token},
     {"--opticon-token","-O",OPT_VALUE,"",set_opticon_token},
+    {"--admin","-a",OPT_FLAG,NULL,set_admin},
     {"--config-file","-c",OPT_VALUE,
             "/etc/opticon/opticon-cli.conf",set_config_file},
     {"--help","-h",OPT_FLAG,NULL,show_usage},
@@ -521,7 +523,10 @@ cliopt CLIOPT[] = {
 
 /** Sub-commands */
 clicmd CLICMD[] = {
-    {"set-user",cmd_set_user},
+    {"user-create",cmd_user_create},
+    {"user-set-tenant",cmd_user_set_tenant},
+    {"user-set-password",cmd_user_set_password},
+    {"user-delete",cmd_user_delete},
     {"tenant-list",cmd_tenant_list},
     {"tenant-create",cmd_tenant_create},
     {"tenant-delete",cmd_tenant_delete},

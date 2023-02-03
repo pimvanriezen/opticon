@@ -147,7 +147,6 @@ API.call = function(service,path,method,indata,cb,silent,retry) {
             cb (status, {"error":status});
         }
         if (status=="success") {
-            console.log ("[API] success", xhr);
             cb (null, (dtype=="text")?xhr.responseText:xhr.responseJSON);
         }
         else {
