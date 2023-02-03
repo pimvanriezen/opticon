@@ -241,8 +241,14 @@ int load_cached_token (void) {
                 }
             }
             else {
-                if (OPTIONS.external_token) free (OPTIONS.external_token);
-                OPTIONS.external_token = strdup (token);
+                if (OPTIONS.auth == AUTH_INTERNAL) {
+                    if (OPTIONS.opticon_token) free (OPTIONS.opticon_token);
+                    OPTIONS.opticon_token = strdup (token);
+                }
+                else {
+                    if (OPTIONS.external_token) free (OPTIONS.external_token);
+                    OPTIONS.external_token = strdup (token);
+                }
                 res = 1;
             }
         }

@@ -218,6 +218,10 @@ int cmd_token (req_context *ctx, req_arg *a, var *env, int *status) {
             var_set_str_forkey (env_token, "userlevel", "AUTH_PROV");
             break;
     }
+    var *arr = var_get_array_forkey (env_token, "tenants");
+    for (int i=0; i<ctx->auth_tenantcount; ++i) {
+        var_add_uuid (arr, ctx->auth_tenants[i]);
+    }
     *status = 200;
     return 1;
 }
