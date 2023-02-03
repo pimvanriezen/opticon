@@ -27,8 +27,10 @@ var *check_password (const char *u, const char *p) {
             if (! strcmp (cr, pwhash)) {
                 var *res = var_clone (user);
                 var_free (pwdb);
+                free (cr);
                 return res;
             }
+            free (cr);
         }
     }
     var_free (pwdb);
