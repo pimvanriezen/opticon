@@ -14,7 +14,13 @@ API.Auth.create = function() {
 
 API.Auth.login = function (username, password, cb) {
     var self = API.Auth;
-    API.post ("identity","/",{username,password}, function (err, data) {
+    let svc = "opticon";
+    let path = "/login";
+    if (conf.auth_method === undefined || conf.auth_method = "unithost") {
+        svc = "identity";
+        path = "/";
+    }
+    API.post (svc,path,{username,password}, function (err, data) {
         if (err) {
             cb (false);
             return;
@@ -22,6 +28,12 @@ API.Auth.login = function (username, password, cb) {
         
         if (data.token) {
             self.credentials.token = data.token;
+            if (conf.auth_method == "internal") {
+                API.headers["X-Opticon-Token"] = data.token;
+                cb (true);
+                return;
+            }
+
             API.headers["X-Auth-Token"] = data.token;
             
             API.get ("account","/token",function (err, data) {
