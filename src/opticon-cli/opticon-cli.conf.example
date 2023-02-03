@@ -1,3 +1,4 @@
+auth_method: internal
 endpoints {
 	opticon: "http://localhost:1888/"
 }

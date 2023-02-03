@@ -6,6 +6,13 @@
 
 /* =============================== TYPES =============================== */
 
+typedef enum {
+    AUTH_UNSET,
+    AUTH_INTERNAL,
+    AUTH_OPENSTACK,
+    AUTH_UNITHOST
+} authtype;
+
 /** Configuration and flags obtained from the configuration file and
   * command line.
   */
@@ -40,6 +47,7 @@ typedef struct optinfo {
     char        *opticon_token;
     char        *config_file;
     var         *conf;
+    authtype     auth;
 } optinfo;
 
 /* ============================== GLOBALS ============================== */

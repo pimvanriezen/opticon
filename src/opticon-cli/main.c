@@ -22,7 +22,7 @@
 
 optinfo OPTIONS;
 
-/* Convenience macro's for setting up a shitload of command line flag
+/* Convenience macros for setting up a shitload of command line flag
    handlers */
 #define CONCAT(a,b) a##b
 
@@ -196,6 +196,7 @@ int load_cached_token (void) {
     char *home = getenv ("HOME");
     if (! home) return 0;
     if (OPTIONS.external_token[0]) return 1;
+    if (OPTIONS.opticon_token[0]) return 1;
     struct stat st;
     time_t tnow = time (NULL);
 
@@ -214,19 +215,29 @@ int load_cached_token (void) {
             stat (path, &st);
             /* re-validate after an hour */
             if (tnow - st.st_mtime > 3600) {
-                if (OPTIONS.external_token) free (OPTIONS.external_token);
-                OPTIONS.external_token = strdup (token);
+                if (OPTIONS.auth == AUTH_INTERNAL) {
+                    if (OPTIONS.opticon_token) free (OPTIONS.opticon_token);
+                    OPTIONS.opticon_token = strdup (token);
+                }
+                else {
+                    if (OPTIONS.external_token) free (OPTIONS.external_token);
+                    OPTIONS.external_token = strdup (token);
+                }
                 var *vres = api_get_raw ("/token", 0);
                 if (vres) {
                     res = 1;
                     var_free (vres);
                     
                     /* refresh the file */
-                    write_cached_token (OPTIONS.external_token);
+                    write_cached_token (token);
                 }
                 else {
-                    if (OPTIONS.external_token) free (OPTIONS.external_token);
-                    OPTIONS.external_token = strdup ("");
+                    if (OPTIONS.auth == AUTH_INTERNAL) {
+                        OPTIONS.opticon_token[0] = 0;
+                    }
+                    else {
+                        OPTIONS.external_token[0] = 0;
+                    }
                 }
             }
             else {
@@ -426,6 +437,37 @@ int unithost_login (void) {
     return 1;
 }
 
+/** Log-in for internal authentication */
+int internal_login (void) {
+    char username[256];
+    print_hdr ("Login required", rsrc(icns.lock));
+    printf ("  Username.......: ");
+    fflush (stdout);
+    fgets (username, 255, stdin);
+    for (char *c = username; *c; c++) if (*c == '\n') *c = 0;
+    const char *password = getpass ("  Password.......: ");
+    printf ("\n");
+    
+    var *req = var_alloc();
+    var_set_str_forkey (req, "username", username);
+    var_set_str_forkey (req, "password", password);
+    
+    var *apires = api_call ("GET", req, "/login");
+    if ((! apires)||(! var_find_key(apires,"token"))) {
+        printf ("%% Login failed\n");
+        if (apires) var_free (apires);
+        var_free (req);
+        return 0;
+    }
+    
+    const char *token = var_get_str_forkey (apires, "token");
+    OPTIONS.opticon_token = strdup (token);
+    write_cached_token (token);
+    
+    var_free (apires);
+    var_free (req);
+}
+
 /** Command line flags */
 cliopt CLIOPT[] = {
     {"--username","-l",OPT_VALUE,"",set_username},
@@ -501,6 +543,7 @@ int conf_endpoint_api (const char *id, var *v, updatetype tp) {
 /** Set up the keystone endpoint from configuration */
 int conf_endpoint_keystone (const char *id, var *v, updatetype tp) {
     OPTIONS.keystone_url = strdup (var_get_str(v));
+    OPTIONS.auth = AUTH_OPENSTACK;
     return 1;
 }
 
@@ -515,6 +558,8 @@ int conf_endpoint_unithost (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/** Set up the unithost-identity part of the endpoint for actual
+    login */
 int conf_endpoint_unithost_identity (const char *id, var *v, updatetype tp) {
     char *url = strdup (var_get_str(v));
     if (url[0]) {
@@ -522,7 +567,22 @@ int conf_endpoint_unithost_identity (const char *id, var *v, updatetype tp) {
         if (*e == '/') *e = 0;
     }
     OPTIONS.unithost_identity_url = url;
+    OPTIONS.auth = AUTH_UNITHOST;
     return 1;
+}
+
+/** Explicitly set up an authentication type */
+int conf_auth (const char *id, var *vv, updatetype tp) {
+    const char *v = var_get_str (vv);
+    if (strcmp (v, "internal") == 0) {
+        OPTIONS.auth = AUTH_INTERNAL;
+    }
+    else if (strcmp (v, "openstack") == 0) {
+        OPTIONS.auth = AUTH_OPENSTACK;
+    }
+    else if (strcmp (v, "unithost") == 0) {
+        OPTIONS.auth = AUTH_UNITHOST;
+    }
 }
 
 /** Set up the default --tenant argument from configuration.
@@ -536,6 +596,7 @@ int conf_default_tenant (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/** Sets a default opticon token (used for admin on localhost) */
 int conf_admin_token (const char *id, var *v, updatetype tp) {
     if (OPTIONS.opticon_token[0] == 0) {
         free (OPTIONS.opticon_token);
@@ -562,12 +623,14 @@ int main (int _argc, const char *_argv[]) {
         return 1;
     }
     
+    OPTIONS.auth = AUTH_UNSET;
 
     opticonf_add_reaction ("endpoints/keystone", conf_endpoint_keystone);
     opticonf_add_reaction ("endpoints/unithost", conf_endpoint_unithost);
     opticonf_add_reaction ("endpoints/unithost_identity",
                            conf_endpoint_unithost_identity);
     opticonf_add_reaction ("endpoints/opticon", conf_endpoint_api);
+    opticonf_add_reaction ("auth_method", conf_auth);
     opticonf_add_reaction ("defaults/tenant", conf_default_tenant);
     opticonf_add_reaction ("defaults/admin_token", conf_admin_token);
 
