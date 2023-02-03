@@ -332,6 +332,8 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
             if (db_open (DB, S->tenantid, NULL)) {
                 if (db_host_exists (DB, S->hostid)) {
                     db_get_current (DB, h);
+                    log_info ("Repopulating host <%s>: %i", s_hostid,
+                              h->mcount);
                 }
                 db_close (DB);
             }
