@@ -1,20 +1,19 @@
 Opticon Server Metering for OpenStack
 =====================================
 
-Opticon is the CloudVPS successor to its N2 monitoring service: A way of keeping
-tabs on what your servers are doing for purposes of monitoring, performance
-analysis and incident forensics. Opticon is designed to be used in conjunction
-with the OpenStack Compute service, but can be operated independently.
+Opticon is a lightweight multi-tenant monitoring system, a way of
+keeping tabs on what your servers are doing for purposes of monitoring,
+performance analysis and incident forensics. 
 
-Like its predecessor, the Opticon server agent uses *push notification* to send
+The Opticon server agent uses *push messages* to send
 updates to the central collector, allowing important performance data to keep
 flowing even under adversial conditions, where traditional pollers tend to fail.
 
 Components
 ----------
 
-An installation of opticon will leave you with the following binaries and
-path elements:
+An installation of all opticon components will leave you with the following
+binaries and path elements:
 
 | Component                      | Function                                           |
 | ------------------------------ | -------------------------------------------------- |
@@ -23,8 +22,8 @@ path elements:
 | /usr/sbin/opticon-api          | The API server.                                    |
 | /usr/bin/opticon               | The command line client to the API server.         |
 | /etc/opticon                   | Directory for configuration.                       |
-| /usr/libexec/opticon           | Directory for plugins.                             |
-| /var/db/opticon                | Directory for the database.                        |
+| /var/lib/opticon               | Directory for plugins.                             |
+| /var/opticon/db                | Directory for the database.                        |
 
 Configuring opticon-collector
 -----------------------------
@@ -85,7 +84,7 @@ network {
 auth {
     admin_token: a666ed1e-24dc-4533-acab-1efb2bb55081
     admin_host: 127.0.0.1
-    keystone_url: "https://identity.stack.cloudvps.com/v2.0"
+    auth_method: internal
 }
 database {
     path: "/var/db/opticon"
@@ -95,14 +94,6 @@ database {
 Generate a random UUID for the `admin_token` setting. Requests with this token
 coming from the IP address specified by `admin_host` will be granted
 administrative privileges.
-
-The `keystone_url` should point to an OpenStack Keystone server. Authorization
-tokens sent to the Opticon API using the OpenStack `X-Auth-Token` header will be
-verified against this service, and any OpenStack tenants the token is said to
-have access to will be open to the local session.
-
-Note that, in order to keep latency at a minimum, opticon-api will cache valid
-and invalid tokens, and their associated tenant lists, for up to an hour.
 
 The API server will also reference `/etc/opticon/opticon-meter.conf`, so it can
 inform users of the actual defaults active.
@@ -197,6 +188,17 @@ that should teach them. Users authenticated through Keystone are allowed to
 clean up their own tenants, but not those of others, for reasons that should be
 obvious.
 
+### Creating a user account for the API/GUI
+
+When opticon-api is not set up to integrate with an external authentication
+provider, you can use the `user-create` sub-command, e.g.:
+```Apex
+$ opticon --tenant 0296d893-8187-4f44-a31b-bf3b4c19fc10 user-create --username john@acme.com
+```
+
+The command will ask for a password. Use the `--admin` flag to create a user
+with admin privileges.
+
 Configuring opticon-agent
 -------------------------
 
@@ -207,39 +209,12 @@ a rather straightforward configuration:
 
 ```
 collector {
-    config: manual
     address: 192.168.1.1
     port: 1047
     key: "nwKT5sfGa+OlYHwa7rZZ7WQaMsAIEWKQii0iuSUPfG0="
     tenant: "001b71534f4b4f1cb281cc06b134f98f"
-    host: "0d19d114-55c8-4077-9cab-348579c70612"
 }
 probes {
-    top {
-        type: built-in
-        call: probe_top
-        interval: 60
-    }
-    hostname {
-        type: built-in
-        call: probe_hostname
-        interval: 300
-    }
-    uname {
-        type: built-in
-        call: probe_uname
-        interval: 300
-    }
-    df {
-        type: built-in
-        call: probe_df
-        interval: 300
-    }
-    uptime {
-        type: built-in
-        call: probe_uptime
-        interval: 60
-    }
 }
 ```
 
@@ -251,37 +226,21 @@ It will try to read the following metadata fields: `opticon_collector_address`,
 `opticon_collector_port`, `opticon_tenant_key`, `opticon_tenant_id`, and
 `opticon_host_id`.
 
-If you are using manual configuration, be sure to use a unique, random, UUID for
-the `host` field. You can use the `uuidgen` tool on most UNIX command lines to
-get a fresh one.
-
-The `probes` section defines the metering probes that the agent shall run and
-the frequency of updates. The agent sends out metering data over two channels:
-The fast lane, and the slow lane. Data that isn’t subject to rapid change should
-take the slow lane path, that gets sent out every 300 seconds. The `interval`
-setting determines the amount of seconds between individual samples for a probe.
-Note that this probing happens independently of packet scheduling, so setting up
-intervals other than `60` or `300` is of limited use.
+The `probes` section defines any custom probes on top of the default set
+collected by the agent, as well as any customisations for these existing
+probes.
 
 Accessing opticon as a user
 ---------------------------
 
 After you used the admin API to create a tenant, you should be able to access
-the rest of the functionality from any machine running an opticon client. To
-allow for keystone authentication, add the endpoint to `opticon-cli.conf` like
-this:
-
-```
-endpoints {
-  keystone: "https://identity.stack.cloudvps.com/v2.0"
-  opticon: "http://192.168.1.1:8888/"
-}
-```
+the rest of the functionality from any machine running an opticon client. 
 
 The local `.opticonrc` shouldn't have an `admin_token`, but it’s possible to add
 some convenience to the workflow by picking a default tenant for commands; most
 users are likely to work with a single tenant and can do fine without typing
-`--tenant`, and a huge UUID after each command:
+`--tenant`, and a huge UUID after each command by adding this to the opticon-cli
+config:
 
 ```
 defaults {
@@ -296,7 +255,6 @@ for Keystone login credentials:
 $ opticon tenant-list
 % Login required
 
-  OpenStack Domain: identity.stack.cloudvps.com
   Username........: pi
   Password........: 
 
@@ -307,8 +265,8 @@ UUID                                 Hosts  Name
 ```
 
 The next time you issue a request, the client will use a cached version of the
-Keystone token it acquired with your username and password. If you’re having
-issues with your key, you can remove the cache file manually, it is stored in
+token it acquired with your username and password. If you’re having issues with
+your key, you can remove the cache file manually, it is stored in
 `$HOME/.opticon-token-cache`.
 
 Since this account only has one tenant, for the rest of this documentation, we
@@ -567,7 +525,7 @@ involving dictionaries:
 
 "key": 18372 # unsigned 63-bit integer
 
-"key": 1.3 # fractional number, range 0.000 - 255.999
+"key": 1.3 # fractional number
 
 # grouped values
 "key": {
