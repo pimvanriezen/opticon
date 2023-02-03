@@ -211,10 +211,11 @@ int load_cached_token (void) {
         token = var_get_str_forkey (cache, "external_token");
         
         if (token) {
-            dprintf ("%% Found token '%s' in cache\n", token);
             stat (path, &st);
+            dprintf ("%% Found token '%s' in cache age %i\n", token,
+                     tnow - st.st_mtime);
             /* re-validate after an hour */
-            if (tnow - st.st_mtime > 3600) {
+            if (tnow - st.st_mtime > 600) {
                 if (OPTIONS.auth == AUTH_INTERNAL) {
                     if (OPTIONS.opticon_token) free (OPTIONS.opticon_token);
                     OPTIONS.opticon_token = strdup (token);
@@ -223,15 +224,23 @@ int load_cached_token (void) {
                     if (OPTIONS.external_token) free (OPTIONS.external_token);
                     OPTIONS.external_token = strdup (token);
                 }
+                
                 var *vres = api_get_raw ("/token", 0);
+                
                 if (vres) {
-                    res = 1;
-                    var_free (vres);
+                    var *t = var_get_dict_forkey (vres, "token");
+                    const char *level = var_get_str_forkey (t, "userlevel");
                     
-                    /* refresh the file */
-                    write_cached_token (token);
+                    if (strcmp (level, "AUTH_GUEST") != 0) {
+                        res = 1;
+                        var_free (vres);
+                    
+                        /* refresh the file */
+                        write_cached_token (token);
+                    }
                 }
-                else {
+                
+                if (! res) {
                     if (OPTIONS.auth == AUTH_INTERNAL) {
                         OPTIONS.opticon_token[0] = 0;
                     }

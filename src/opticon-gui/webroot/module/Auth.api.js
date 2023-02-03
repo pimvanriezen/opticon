@@ -2,7 +2,7 @@ API.Auth = new Module.API("Auth");
 
 API.Auth.credentials = {
     token:"",
-    access:"gues",
+    access:"guest",
     username:"",
     password:"",
     tenant:"",
@@ -14,17 +14,35 @@ API.Auth.create = function() {
 
 API.Auth.login = function (username, password, cb) {
     var self = API.Auth;
-    let svc = "opticon";
-    let path = "/login";
-    if (conf.auth_method === undefined || conf.auth_method == "unithost") {
-        svc = "identity";
-        path = "/";
+    var svc;
+    var path;
+    
+    if (conf.auth_method === undefined) {
+        if (conf.url.unithost) {
+            conf.auth_method = "unithost";
+        }
+        else conf.auth_method = "internal";
     }
+    
+    switch (conf.auth_method) {
+        case "unithost":
+            svc = "identity";
+            path = "/"
+            break;
+        
+        case "internal":
+            svc = "opticon";
+            path = "/login";
+            break;
+    }
+    
     API.post (svc,path,{username,password}, function (err, data) {
         if (err) {
             cb (false);
             return;
         }
+        
+        console.log (data);
         
         if (data.token) {
             self.credentials.token = data.token;

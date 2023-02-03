@@ -431,9 +431,9 @@ void setup_matches (void) {
     #define _T_(xx,yy,zz) req_matchlist_add_text(&REQ_MATCHES,xx,yy,zz)
 
     _P_ ("/obligatory-dancing-bears", REQ_GET,    cmd_dancing_bears);
+    _P_ ("*",                         REQ_ANY,    flt_add_cors);
     _P_ ("/login",                    REQ_POST,   cmd_login);
     _P_ ("*",                         REQ_ANY,    flt_check_validuser);
-    _P_ ("*",                         REQ_ANY,    flt_add_cors);
     _P_ ("/",                         REQ_GET,    cmd_list_tenants);
     _P_ ("/",                         REQ_ANY,    err_method_not_allowed);
     _P_ ("/token",                    REQ_GET,    cmd_token);
