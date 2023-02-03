@@ -101,9 +101,14 @@ int cmd_set_user (req_context *ctx, req_arg *a, var *env, int *status) {
     }
     
     char salt[16];
-    salt[0] = rand() & 255;
-    salt[1] = rand() & 255;
-    salt[2] = 0;
+    salt[0] = '$';
+    salt[1] = '1';
+    salt[2] = '$';
+    
+    salt[3] = (rand() & 0x3f) + 0x30;
+    salt[4] = (rand() & 0x3f) + 0x30;
+    salt[5] = '$';
+    salt[6] = 0;
     
     char *passwd = pwcrypt (plainpw, salt);
     

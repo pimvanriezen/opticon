@@ -16,7 +16,7 @@ API.Auth.login = function (username, password, cb) {
     var self = API.Auth;
     let svc = "opticon";
     let path = "/login";
-    if (conf.auth_method === undefined || conf.auth_method = "unithost") {
+    if (conf.auth_method === undefined || conf.auth_method == "unithost") {
         svc = "identity";
         path = "/";
     }
