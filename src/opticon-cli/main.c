@@ -708,6 +708,9 @@ int main (int _argc, const char *_argv[]) {
             else if (OPTIONS.unithost_url && OPTIONS.unithost_url[0]) {
                 if (! unithost_login()) return 1;
             }
+            else if (OPTIONS.auth == AUTH_INTERNAL) {
+                if (! internal_login()) return 1;
+            }
         }
         else {
             dprintf ("%% Loaded cached token '%s'\n", OPTIONS.external_token);
