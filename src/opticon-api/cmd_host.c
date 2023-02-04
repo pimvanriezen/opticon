@@ -106,6 +106,8 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
     
     var *v_overview = var_get_dict_forkey (env, "overview");
     
+    log_info ("[overview] external_querytool: %s", OPTIONS.external_querytool);
+
     for (int c = 0; c<uuidcount; ++c) {
         if (db_open (DB, uuids[c], NULL)) {
             var *res = db_get_overview (DB);
