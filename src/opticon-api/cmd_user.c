@@ -119,6 +119,7 @@ int cmd_user_delete (req_context *ctx, req_arg *a, var *env, int *status) {
 }
 
 int cmd_user_set (req_context *ctx, req_arg *a, var *env, int *status) {
+    log_info ("cmd_user_set called");
     if (OPTIONS.auth != AUTH_INTERNAL) {
         var_set_str_forkey (env, "error", "External authentication configured");
         *status = 400;
