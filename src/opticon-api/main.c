@@ -439,8 +439,8 @@ void setup_matches (void) {
     _P_ ("/token",                    REQ_GET,    cmd_token);
     _P_ ("/session",                  REQ_GET,    flt_check_admin);
     _P_ ("/session",                  REQ_GET,    cmd_list_sessions);
-    _P_ ("/user/%S",                  REQ_UPDATE, cmd_user_set);
-    _P_ ("/user/%S",                  REQ_DELETE, cmd_user_delete);
+    _P_ ("/user/%s",                  REQ_UPDATE, cmd_user_set);
+    _P_ ("/user/%s",                  REQ_DELETE, cmd_user_delete);
     _P_ ("/any*",                     REQ_ANY,    flt_check_admin);
     _P_ ("/any/host/overview",        REQ_GET,    cmd_host_any_overview);
     _T_ ("/any/host/%U",              REQ_GET,    cmd_host_any_get);
