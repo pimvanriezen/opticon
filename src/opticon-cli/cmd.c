@@ -654,6 +654,12 @@ int cmd_user_create (int argc, const char *argv[]) {
     var *req = var_alloc();
     var_set_str_forkey (req, "password", password);
     var_set_str_forkey (req, "tenant", OPTIONS.tenant);
+    if (OPTIONS.admin) {
+        var_set_str_forkey (req, "level", "ADMIN");
+    }
+    else {
+        var_set_str_forkey (req, "level", "USER");
+    }
     var *apires = api_call ("PUT", req, "/user/%s", OPTIONS.username);
     var_free (req);
     var_free (apires);
