@@ -961,6 +961,27 @@ int cmd_get_record (int argc, const char *argv[]) {
                          fan_wid, fan_suf, fan_div);
             Vdone ("fan");
         }
+        
+        if (Vexist ("pkgl") &&
+            (VDint("pkgm","inq") || VDint("pkgm","reboot"))) {
+            term_new_column();
+            print_hdr ("System Updates", rsrc(icns.pkg));
+            
+            const char *pkg_hdr[] = {"PACKAGE","VERSION",NULL};
+            const char *pkg_fld[] = {"id","v",NULL};
+            columnalign pkg_align[] = {CA_L, CA_R, CA_NULL};
+            vartype pkg_tp[] = {VAR_STR, VAR_STR, VAR_NULL};
+            int pkg_wid[] = {12,12,0};
+            int pkg_div[] = {0,0,0};
+            const char *pkg_suf[] = {"","",NULL};
+            
+            var *v_pkg = var_get_array_forkey (apires, "pkgl");
+            print_table (v_pkg, pkg_hdr, pkg_fld, pkg_align, pkg_tp,
+                         pkg_wid, pkg_suf, pkg_div);
+                         
+            Vdone ("pkgl");
+            Vdone ("pkgm");
+        }
 
        /* -------------------------------------------------------------*/
         term_new_column();
