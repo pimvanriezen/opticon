@@ -68,6 +68,13 @@ extdata *extdata_new (uuid tenantid, uuid hostid) {
 var *extdata_get (uuid tenantid, uuid hostid, var *env) {
     const char *tool = OPTIONS.external_querytool;
     if (! tool) return NULL;
+
+    char tenantstr[40];
+    char hoststr[40];
+    uuid2str (tenantid, tenantstr);
+    uuid2str (hostid, hoststr);
+
+    log_info ("[extdata] Getting external data for host <%s>", hoststr);
     
     pthread_rwlock_rdlock (&dlist.lock);
 
@@ -78,19 +85,15 @@ var *extdata_get (uuid tenantid, uuid hostid, var *env) {
         if (now - crsr->lastrefresh < 600) {
             var *res = var_clone (crsr->data);
             pthread_rwlock_unlock (&dlist.lock);
+            log_info ("[extdata] Returning cached result");
             return res;
         }
     }
     
     pthread_rwlock_unlock (&dlist.lock);
 
-    char tenantstr[40];
-    char hoststr[40];
     char cmd[1024];
     
-    uuid2str (tenantid, tenantstr);
-    uuid2str (hostid, hoststr);
-
     sprintf (cmd, "%s %s %s", tool, tenantstr, hoststr);
     var *vout = var_alloc();
     FILE *f = popen_safe_env (cmd, "r", env);
@@ -98,6 +101,8 @@ var *extdata_get (uuid tenantid, uuid hostid, var *env) {
         var_read_json (vout, f);
         pclose_safe (f);
     }
+    
+    log_info ("[extdata] Ran %s", tool);
     
     pthread_rwlock_wrlock (&dlist.lock);
     crsr = extdata_find (tenantid, hostid);
