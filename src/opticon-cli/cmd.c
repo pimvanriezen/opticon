@@ -846,13 +846,22 @@ int cmd_get_record (int argc, const char *argv[]) {
         const char *hw = VDstr("os","hw");
         if (hw) print_value ("Hardware", "%s", hw);
 
+        var *cpus = var_get_array_forkey (apires, "cpu");
+        if (cpus && var_get_count (cpus)) {
+            var *vcpu = var_get_dict_atindex (cpus, 0);
+            print_value ("CPU",VT_YLW "%ix " VT_RST "%s",
+                         var_get_int_forkey (vcpu, "count"),
+                         var_get_str_forkey (vcpu, "model"));
+        }
+        Vdone("cpu");
+
         print_value ("OS/Arch",VT_YLW "%s %s " VT_RST "(%s)",
                      VDstr("os","kernel"), VDstr("os","version"),
                      VDstr("os","arch"));
         const char *dist = VDstr("os","distro");
         if (dist) print_value ("Distribution", VT_GRN "%s" VT_RST, dist);
         Vdone("os");
-    
+        
         /* -------------------------------------------------------------*/
         term_new_column();
         print_hdr ("Resources", rsrc(icns.gauge));
