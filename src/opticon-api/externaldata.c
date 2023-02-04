@@ -3,6 +3,7 @@
 #include <libopticon/popen.h>
 #include <libopticon/hash.h>
 #include <libopticon/var_parse.h>
+#include <libopticon/log.h>
 #include <time.h>
 #include <pthread.h>
 #include "options.h"

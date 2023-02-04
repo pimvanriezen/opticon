@@ -24,10 +24,14 @@ int cmd_host_overview (req_context *ctx, req_arg *a,
         db_free (DB);
         return err_not_found (ctx, a, env, status);
     }
+    
+    log_info ("[overview] external_querytool: %s", OPTIONS.external_querytool);
+    
     var *res = db_get_overview (DB);
     if (! res) res = var_alloc();
     else if (OPTIONS.external_querytool) {
         var *ov = var_find_key (res, "overview");
+        if (! ov) log_info ("[overview] no overview in res");
         var *crsr = NULL;
         if (ov) crsr = var_first (ov);
         var *outenv = var_alloc();
