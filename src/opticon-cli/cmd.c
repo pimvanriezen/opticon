@@ -291,7 +291,8 @@ int cmd_meter_list (int argc, const char *argv[]) {
     else {
         var *res_meter = var_get_dict_forkey (apires, "meter");
         if (var_get_count (res_meter)) {
-            term_printf ("From     Meter        Type      Unit    Description\n");
+            term_printf ("From     Meter        Type      "
+                         "Unit    Description\n");
             print_line();
             var *crsr = res_meter->value.arr.first;
             while (crsr) {
@@ -789,7 +790,8 @@ int cmd_get_record (int argc, const char *argv[]) {
         uint64_t uptime = Vint("uptime"); Vdone("uptime");
         uint64_t u_days = uptime / 86400ULL;
         uint64_t u_hours = (uptime - (86400 * u_days)) / 3600ULL;
-        uint64_t u_mins = (uptime - (86400 * u_days) - (3600 * u_hours)) / 60ULL;
+        uint64_t u_mins = (uptime - (86400 * u_days) -
+                          (3600 * u_hours)) / 60ULL;
         uint64_t u_sec = uptime % 60;
     
         if (u_days) {
@@ -812,7 +814,8 @@ int cmd_get_record (int argc, const char *argv[]) {
         uint64_t uptimea = VDint("agent","up");
         uint64_t ua_days = uptimea / 86400ULL;
         uint64_t ua_hours = (uptimea - (86400 * ua_days)) / 3600ULL;
-        uint64_t ua_mins = (uptimea - (86400 * ua_days) - (3600 * ua_hours)) / 60ULL;
+        uint64_t ua_mins = (uptimea - (86400 * ua_days) -
+                           (3600 * ua_hours)) / 60ULL;
         uint64_t ua_sec = uptimea % 60;
         
         Vdone("agent");
