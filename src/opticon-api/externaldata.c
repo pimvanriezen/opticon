@@ -8,6 +8,9 @@
 #include <pthread.h>
 #include "options.h"
 
+/*/ ======================================================================= /*/
+/** Cache structure for data from external source */
+/*/ ======================================================================= /*/
 typedef struct extdata_s {
     struct extdata_s    *prev;
     struct extdata_s    *next;
@@ -26,13 +29,17 @@ typedef struct extdatalist_s {
 
 static extdatalist dlist;
 
+/*/ ======================================================================= /*/
 /** Initialize the linked list an lock */
+/*/ ======================================================================= /*/
 void extdata_init (void) {
     dlist.first = dlist.last = NULL;
     pthread_rwlock_init (&dlist.lock, NULL);
 }
 
+/*/ ======================================================================= /*/
 /** Find a cache entry */
+/*/ ======================================================================= /*/
 extdata *extdata_find (uuid tenantid, uuid hostid) {
     uint32_t hash = hash_uuid (hostid);
     extdata *crsr = dlist.first;
@@ -46,7 +53,9 @@ extdata *extdata_find (uuid tenantid, uuid hostid) {
     return crsr;
 }
 
+/*/ ======================================================================= /*/
 /** Create and link a new cache entry */
+/*/ ======================================================================= /*/
 extdata *extdata_new (uuid tenantid, uuid hostid) {
     extdata *res = malloc (sizeof (extdata));
     res->next = NULL;
@@ -65,7 +74,9 @@ extdata *extdata_new (uuid tenantid, uuid hostid) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Load ext data either from cache or through its command. */
+/*/ ======================================================================= /*/
 var *extdata_get (uuid tenantid, uuid hostid, var *env) {
     const char *tool = OPTIONS.external_querytool;
     if (! tool) return NULL;

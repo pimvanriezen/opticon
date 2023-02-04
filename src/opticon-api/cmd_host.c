@@ -15,6 +15,9 @@
 
 static codec *JSONCODEC = NULL;
 
+/*/ ======================================================================= /*/
+/** Add external data to an overview result */
+/*/ ======================================================================= /*/
 void decorate_overview (req_context *ctx, var *res) {
     var *ov = var_find_key (res, "overview");
     if (! ov) return;
@@ -36,7 +39,9 @@ void decorate_overview (req_context *ctx, var *res) {
     var_free (outenv);
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/host/overview */
+/*/ ======================================================================= /*/
 int cmd_host_overview (req_context *ctx, req_arg *a,
                        var *env, int *status) {
     
@@ -58,6 +63,9 @@ int cmd_host_overview (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Find the tenant for a host requested through the 'any' tenant. */
+/*/ ======================================================================= /*/
 uuid cmd_host_any_resolve (req_context *ctx, const char *hostuuidstr) {
     db *DB = localdb_create (OPTIONS.dbpath);
     ctx->hostid = mkuuid (hostuuidstr);
@@ -95,7 +103,9 @@ uuid cmd_host_any_resolve (req_context *ctx, const char *hostuuidstr) {
     return uuidnil();
 }
 
+/*/ ======================================================================= /*/
 /** GET /any/host/overview */
+/*/ ======================================================================= /*/
 int cmd_host_any_overview (req_context *ctx, req_arg *a,
                            var *env, int *status) {
     int uuidcount = 0;
@@ -134,14 +144,18 @@ int cmd_host_any_overview (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /any/host/$HOST */
+/*/ ======================================================================= /*/
 int cmd_host_any_get (req_context *ctx, req_arg *a,
                       ioport *outio, int *status) {
     cmd_host_any_resolve (ctx, a->argv[0]);
     return cmd_host_get (ctx, a, outio, status);
 }
 
+/*/ ======================================================================= /*/
 /** GET /any/host/$HOST/tenant */
+/*/ ======================================================================= /*/
 int cmd_host_any_get_tenant (req_context *ctx, req_arg *a,
                              var *env, int *status) {
     uuid tenant = cmd_host_any_resolve (ctx, a->argv[0]);
@@ -150,7 +164,9 @@ int cmd_host_any_get_tenant (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/host/$HOST */
+/*/ ======================================================================= /*/
 int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
     var *err;
@@ -180,6 +196,17 @@ int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     host_delete (h);
     db_free (DB);
     
+    if (OPTIONS.external_querytool) {
+        var *outenv = var_alloc();
+        if (ctx->external_token) {
+            var_set_str_forkey (outenv, "token", ctx->external_token);
+        }
+        var *extra = extdata_get (ctx->tenantid, ctx->hostid, outenv);
+        if (extra) {
+        }
+        var_free (outenv);
+        
+    
     err = var_alloc();
     var_set_str_forkey (err, "error", "No current record found for host");
     var_write (err, outio);
@@ -188,7 +215,9 @@ int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** DELETE /$TENANT/host/$HOST */
+/*/ ======================================================================= /*/
 int cmd_host_remove (req_context *ctx, req_arg *a, var *env, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
@@ -208,7 +237,9 @@ int cmd_host_remove (req_context *ctx, req_arg *a, var *env, int *status) {
     return err_generic (env, "Could not delete host");
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/host/$HOST/log */
+/*/ ======================================================================= /*/
 int cmd_host_get_log (req_context *ctx, req_arg *a, var *env, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
@@ -228,7 +259,9 @@ int cmd_host_get_log (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/host/$HOST/watcher */
+/*/ ======================================================================= /*/
 int cmd_host_list_watchers (req_context *ctx, req_arg *a, 
                             var *env, int *status) {
     var *res = collect_meterdefs (ctx->tenantid, ctx->hostid, 1);
@@ -240,13 +273,14 @@ int cmd_host_list_watchers (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** POST /$TENANT/host/$HOST/watcher/$METERID 
   * watcher {
   *     warning { val: x, weight: 1.0 } # optional
   *     alert { val: x, weight: 1.0 } # optional
   *     critical { val: x, weight: 1.0 } #optional
-  * }
-  */
+  * } */
+/*/ ======================================================================= /*/
 int cmd_host_set_watcher (req_context *ctx, req_arg *a, 
                           var *env, int *status) {
     if (a->argc < 3) return err_server_error (ctx, a, env, status);
@@ -327,7 +361,9 @@ int cmd_host_set_watcher (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** DELETE /$TENANT/host/$HOST/watcher/$METERID */
+/*/ ======================================================================= /*/
 int cmd_host_delete_watcher (req_context *ctx, req_arg *a, 
                              var *env, int *status) {
     if (a->argc < 3) return err_server_error (ctx, a, env, status);
@@ -358,11 +394,17 @@ int cmd_host_delete_watcher (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Not implemented */
+/*/ ======================================================================= /*/
 int cmd_host_get_range (req_context *ctx, req_arg *a, 
                         var *env, int *status) {
     return err_server_error (ctx, a, env, status);
 }
 
+/*/ ======================================================================= /*/
+/** Get data at specific timestamp */
+/*/ ======================================================================= /*/
 int cmd_host_get_time (req_context *ctx, req_arg *a, 
                         ioport *outio, int *status) {
 
@@ -426,7 +468,9 @@ void add_graphdefs (var *into, var *from) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Gets graph definitions out of (default) config and host metadata */
+/*/ ======================================================================= /*/
 var *collect_graphdefs (uuid tenant, uuid host) {
     var *res = var_alloc();
     add_graphdefs (res, OPTIONS.gconf);
@@ -434,7 +478,9 @@ var *collect_graphdefs (uuid tenant, uuid host) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/host/$HOST/graph */
+/*/ ======================================================================= /*/
 int cmd_host_list_graphs (req_context *ctx, req_arg *a, var *env,
                           int *status) {
     var *res = collect_graphdefs (ctx->tenantid, ctx->hostid);
@@ -447,7 +493,9 @@ int cmd_host_list_graphs (req_context *ctx, req_arg *a, var *env,
     return 1;    
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/host/$HOST/graph/$graph/$datum/$timespan/$numsamples */
+/*/ ======================================================================= /*/
 int cmd_host_get_graph (req_context *ctx, req_arg *a, var *env,
                         int *status) {
     if (a->argc < 6) {

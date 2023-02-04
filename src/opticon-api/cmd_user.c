@@ -15,6 +15,9 @@
 #include "req_context.h"
 #include "authsession.h"
 
+/*/ ======================================================================= /*/
+/** Check a username/password against the user databse. */
+/*/ ======================================================================= /*/
 var *check_password (const char *u, const char *p) {
     char pwfile[1024];
     sprintf (pwfile, "%s/user.db", OPTIONS.dbpath);
@@ -37,6 +40,9 @@ var *check_password (const char *u, const char *p) {
     return NULL;
 }
 
+/*/ ======================================================================= /*/
+/** POST /login */
+/*/ ======================================================================= /*/
 int cmd_login (req_context *ctx, req_arg *a, var *env, int *status) {
     if (OPTIONS.auth != AUTH_INTERNAL) {
         var_set_str_forkey (env, "error", "External authentication required");
@@ -74,6 +80,9 @@ int cmd_login (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** DELETE /user/$username */
+/*/ ======================================================================= /*/
 int cmd_user_delete (req_context *ctx, req_arg *a, var *env, int *status) {
     if (OPTIONS.auth != AUTH_INTERNAL) {
         var_set_str_forkey (env, "error", "External authentication configured");
@@ -118,6 +127,9 @@ int cmd_user_delete (req_context *ctx, req_arg *a, var *env, int *status) {
     return err_server_error (ctx, a, env, status);
 }
 
+/*/ ======================================================================= /*/
+/** POST and PUT /user/$username */
+/*/ ======================================================================= /*/
 int cmd_user_set (req_context *ctx, req_arg *a, var *env, int *status) {
     if (OPTIONS.auth != AUTH_INTERNAL) {
         var_set_str_forkey (env, "error", "External authentication configured");

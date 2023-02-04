@@ -29,7 +29,9 @@ req_matchlist REQ_MATCHES;
     typedef enum MHD_Result MHDResult;
 #endif
 
+/*/ ======================================================================= /*/
 /** MHD callback function for setting the context headers */
+/*/ ======================================================================= /*/
 MHDResult enumerate_header (void *cls, enum MHD_ValueKind kind,
                             const char *key, const char *value) {
     req_context *ctx = (req_context *) cls;
@@ -37,7 +39,9 @@ MHDResult enumerate_header (void *cls, enum MHD_ValueKind kind,
     return MHD_YES;
 }
 
+/*/ ======================================================================= /*/
 /** MHD callback function for handling a connection */
+/*/ ======================================================================= /*/
 MHDResult answer_to_connection (void *cls, struct MHD_Connection *connection,
                                 const char *url, const char *method,
                                 const char *version, const char *upload_data,
@@ -105,7 +109,9 @@ MHDResult answer_to_connection (void *cls, struct MHD_Connection *connection,
     return MHD_YES;
 }
 
+/*/ ======================================================================= /*/
 /** Handle an X-Auth-Token header that should be passed to keystone */
+/*/ ======================================================================= /*/
 int handle_external_token_openstack (req_context *ctx) {
     if (! OPTIONS.keystone_url[0]) return 0;
     char *url = (char *) malloc (strlen(OPTIONS.keystone_url)+40);
@@ -159,15 +165,18 @@ int handle_external_token_openstack (req_context *ctx) {
     return retcode;;
 }
 
+/*/ ======================================================================= /*/
 /** Cache for looking up services in the unithost registry */
+/*/ ======================================================================= /*/
 static var *UNITHOST_CACHE = NULL;
 
+/*/ ======================================================================= /*/
 /** Resolves base url for a unithost service by name from unithost-registry.
   * \param registry_url Base URL for the unithost registry
   * \param svcname      The service name to look up
   * \return             Copied string with the resolved base URL, caller
-  *                     should free() when done.
-  */
+  *                     should free() when done. */
+/*/ ======================================================================= /*/
 char *resolve_unithost_service (const char *registry_url, const char *svcname) {
     if (UNITHOST_CACHE) {
         const char *v = var_get_str_forkey (UNITHOST_CACHE, svcname);
@@ -209,7 +218,9 @@ char *resolve_unithost_service (const char *registry_url, const char *svcname) {
     return retval;
 }
 
+/*/ ======================================================================= /*/
 /** Handle an X-Auth-Token header that should be passed to unithost */
+/*/ ======================================================================= /*/
 int handle_external_token_unithost (req_context *ctx) {
     if (! OPTIONS.unithost_url[0]) return 0;
     
@@ -286,7 +297,9 @@ int handle_external_token_unithost (req_context *ctx) {
     return retcode;;
 }
 
+/*/ ======================================================================= /*/
 /** Handle X-Auth-Token header */
+/*/ ======================================================================= /*/
 int handle_external_token (req_context *ctx) {
     if (! ctx->external_token) return 0;
     if (! ctx->external_token[0]) return 0;
@@ -304,6 +317,9 @@ int handle_external_token (req_context *ctx) {
     }
 }
 
+/*/ ======================================================================= /*/
+/** Add CORS headers. FIXME: be better about this. */
+/*/ ======================================================================= /*/
 int flt_add_cors (req_context *ctx, req_arg *a, var *out, int *status) {
     var_set_str_forkey (ctx->outhdr, "Content-type", "application/json");
     var_set_str_forkey (ctx->outhdr, "Access-Control-Allow-Origin","*");
@@ -316,7 +332,9 @@ int flt_add_cors (req_context *ctx, req_arg *a, var *out, int *status) {
     return 0;                  
 }
 
+/*/ ======================================================================= /*/
 /** Filter that croaks when no valid token was set */
+/*/ ======================================================================= /*/
 int flt_check_validuser (req_context *ctx, req_arg *a,
                          var *out, int *status) {
     
@@ -375,9 +393,10 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Filter that croaks when no valid token was set, or the user behind
-  * said token is a filthy peasant.
-  */
+  * said token is a filthy peasant. */
+/*/ ======================================================================= /*/
 int flt_check_admin (req_context *ctx, req_arg *a, var *out, int *status) {
     if (ctx->userlevel != AUTH_ADMIN) {
         return err_not_allowed (ctx, a, out, status);
@@ -385,7 +404,9 @@ int flt_check_admin (req_context *ctx, req_arg *a, var *out, int *status) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Filter that requires ADMIN or PROVISIONING role */
+/*/ ======================================================================= /*/
 int flt_check_prov (req_context *ctx, req_arg *a, var *out, int *status) {
     if ((ctx->userlevel != AUTH_ADMIN) && (ctx->userlevel != AUTH_PROV)) {
         return err_not_allowed (ctx, a, out, status);
@@ -393,9 +414,10 @@ int flt_check_prov (req_context *ctx, req_arg *a, var *out, int *status) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Filter that extracts the tenantid argumnt from the url, and croaks
-  * when it is invalid.
-  */
+  * when it is invalid. */
+/*/ ======================================================================= /*/
 int flt_check_tenant (req_context *ctx, req_arg *a, var *out, int *status) {
     if (a->argc<1) return err_server_error (ctx, a, out, status);
     ctx->tenantid = mkuuid (a->argv[0]);
@@ -415,7 +437,9 @@ int flt_check_tenant (req_context *ctx, req_arg *a, var *out, int *status) {
     return err_not_allowed (ctx, a, out, status);
 }
 
+/*/ ======================================================================= /*/
 /** Filter that extracts the host uuid argument from a url. */
+/*/ ======================================================================= /*/
 int flt_check_host (req_context *ctx, req_arg *a, var *out, int *status) {
     if (a->argc<2) return err_server_error (ctx, a, out, status);
     ctx->hostid = mkuuid (a->argv[1]);
@@ -425,7 +449,9 @@ int flt_check_host (req_context *ctx, req_arg *a, var *out, int *status) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Set up all the url routing */
+/*/ ======================================================================= /*/
 void setup_matches (void) {
     #define _P_(xx,yy,zz) req_matchlist_add(&REQ_MATCHES,xx,yy,zz)
     #define _T_(xx,yy,zz) req_matchlist_add_text(&REQ_MATCHES,xx,yy,zz)
@@ -491,8 +517,10 @@ void setup_matches (void) {
     #undef _T_
 }
 
+/*/ ======================================================================= /*/
 /** Daemon runner. Basically kicks microhttpd in action, then sits
   * back and enjoys the show. */
+/*/ ======================================================================= /*/
 int daemon_main (int argc, const char *argv[]) {
     if (strcmp (OPTIONS.logpath, "@syslog") == 0) {
         log_open_syslog ("opticon-api", OPTIONS.loglevel);
@@ -519,13 +547,17 @@ int daemon_main (int argc, const char *argv[]) {
     while (1) sleep (60);
 }
 
+/*/ ======================================================================= /*/
 /** Set up foreground flag */
+/*/ ======================================================================= /*/
 int set_foreground (const char *i, const char *v) {
     OPTIONS.foreground = 1;
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set up configuration file path */
+/*/ ======================================================================= /*/
 int set_confpath (const char *i, const char *v) {
     OPTIONS.confpath = v;
     return 1;
@@ -546,19 +578,25 @@ int set_gconfpath (const char *i, const char *v) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set up pidfile path */
+/*/ ======================================================================= /*/
 int set_pidfile (const char *i, const char *v) {
     OPTIONS.pidfile = v;
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Set the logfile path, @syslog for logging to syslog */
+/*/ ======================================================================= /*/
 int set_logpath (const char *i, const char *v) {
     OPTIONS.logpath = v;
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle --loglevel */
+/*/ ======================================================================= /*/
 int set_loglevel (const char *i, const char *v) {
     if (strcmp (v, "CRIT") == 0) OPTIONS.loglevel = LOG_CRIT;
     else if (strcmp (v, "ERR") == 0) OPTIONS.loglevel = LOG_ERR;
@@ -569,7 +607,9 @@ int set_loglevel (const char *i, const char *v) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle --admin-token */
+/*/ ======================================================================= /*/
 int conf_admin_token (const char *id, var *v, updatetype tp) {
     OPTIONS.admintoken = mkuuid (var_get_str (v));
     if (! uuidvalid (OPTIONS.admintoken)) {
@@ -579,6 +619,9 @@ int conf_admin_token (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Handle the auth_method configuration */
+/*/ ======================================================================= /*/
 int conf_auth_method (const char *id, var *v, updatetype tp) {
     const char *mth = var_get_str (v);
     if (strcmp (mth, "internal") == 0) OPTIONS.auth = AUTH_INTERNAL;
@@ -591,20 +634,26 @@ int conf_auth_method (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle auth/admin_host config */
+/*/ ======================================================================= /*/
 int conf_admin_host (const char *id, var *v, updatetype tp) {
     OPTIONS.adminhost = var_get_str (v);
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle auth/keystone_url config */
+/*/ ======================================================================= /*/
 int conf_keystone_url (const char *id, var *v, updatetype tp) {
     OPTIONS.keystone_url = var_get_str (v);
     if (OPTIONS.auth == AUTH_UNSET) OPTIONS.auth = AUTH_OPENSTACK;
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle auth/unithost_url config */
+/*/ ======================================================================= /*/
 int conf_unithost_url (const char *id, var *v, updatetype tp) {
     char *url = strdup (var_get_str (v));
     if (url[0]) {
@@ -616,7 +665,9 @@ int conf_unithost_url (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle auth/unithost_account_url config */
+/*/ ======================================================================= /*/
 int conf_unithost_account_url (const char *id, var *v, updatetype tp) {
     char *url = strdup (var_get_str (v));
     if (url[0]) {
@@ -627,19 +678,25 @@ int conf_unithost_account_url (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle network/port config */
+/*/ ======================================================================= /*/
 int conf_port (const char *id, var *v, updatetype tp) {
     OPTIONS.port = var_get_int (v);
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle database/path config */
+/*/ ======================================================================= /*/
 int conf_dbpath (const char *id, var *v, updatetype tp) {
     OPTIONS.dbpath = var_get_str (v);
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Handle plugin/querytool config */
+/*/ ======================================================================= /*/
 int conf_querytool (const char *id, var *v, updatetype tp) {
     OPTIONS.external_querytool = var_get_str (v);
     return 1;
@@ -647,7 +704,9 @@ int conf_querytool (const char *id, var *v, updatetype tp) {
 
 apioptions OPTIONS;
 
+/*/ ======================================================================= /*/
 /** Command line flags */
+/*/ ======================================================================= /*/
 cliopt CLIOPT[] = {
     {"--foreground","-f",OPT_FLAG,NULL,set_foreground},
     {"--autoexit","-x",OPT_FLAG,NULL,set_autoexit},
@@ -664,8 +723,10 @@ cliopt CLIOPT[] = {
     {NULL,NULL,0,NULL,NULL}
 };
 
+/*/ ======================================================================= /*/
 /** Application main. Handle command line flags, load configurations,
   * initialize, then kick off into daemon mode. */
+/*/ ======================================================================= /*/
 int main (int _argc, const char *_argv[]) {
     int argc = _argc;
     const char **argv = cliopt_dispatch (CLIOPT, _argv, &argc);
