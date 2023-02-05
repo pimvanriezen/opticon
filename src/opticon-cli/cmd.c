@@ -1084,6 +1084,21 @@ int cmd_get_record (int argc, const char *argv[]) {
         }
 
        /* ------------------------------------------------------------------*/
+        if ($exists ("phdns")) {
+            term_new_column();
+            print_hdr ("Pi-Hole DNS",rsrc(icns.dns));
+            print_value ("Block table size", VT_BLD "%i" VT_RST,
+                         $$int("phdns","sz"));
+            print_value ("Queries today", VT_BLD "%i" VT_RST,
+                         $$int("phdns","qnow"));
+            print_value ("Blocked today", VT_BLD "%i" VT_RST,
+                         $$int("phdns","bnow"));
+            print_value ("Blocked", VT_BLD "%.1f" VT_RST " %%",
+                         $$frac("phdns","pblk"));
+            $done ("phdns");
+        }
+        
+       /* ------------------------------------------------------------------*/
         if ($exists ("mysql")) {
             term_new_column();
             print_hdr ("MySQL Server",rsrc(icns.db));
