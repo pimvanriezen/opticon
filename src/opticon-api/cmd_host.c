@@ -196,17 +196,6 @@ int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
     host_delete (h);
     db_free (DB);
     
-    if (OPTIONS.external_querytool) {
-        var *outenv = var_alloc();
-        if (ctx->external_token) {
-            var_set_str_forkey (outenv, "token", ctx->external_token);
-        }
-        var *extra = extdata_get (ctx->tenantid, ctx->hostid, outenv);
-        if (extra) {
-        }
-        var_free (outenv);
-        
-    
     err = var_alloc();
     var_set_str_forkey (err, "error", "No current record found for host");
     var_write (err, outio);
