@@ -26,7 +26,9 @@
 #include "term.h"
 #include "readpass.h"
 
+/*/ ======================================================================= /*/
 /** The tenant-list command */
+/*/ ======================================================================= /*/
 int cmd_tenant_list (int argc, const char *argv[]) {
     var *res = api_get ("/");
     if (OPTIONS.json) {
@@ -53,7 +55,9 @@ int cmd_tenant_list (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The tenant-get-metadata command */
+/*/ ======================================================================= /*/
 int cmd_tenant_get_metadata (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -66,7 +70,9 @@ int cmd_tenant_get_metadata (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The tenant-set-metadata command */
+/*/ ======================================================================= /*/
 int cmd_tenant_set_metadata (int argc, const char *argv[]) {
     if (argc < 4) {
         fprintf (stderr, "%% Missing key and value arguments\n");
@@ -91,7 +97,9 @@ int cmd_tenant_set_metadata (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The tenant-set-quota command */
+/*/ ======================================================================= /*/
 int cmd_tenant_set_quota (int argc, const char *argv[]) {
     if (argc < 3) {
         fprintf (stderr, "%% Missing quota value\n");
@@ -113,7 +121,9 @@ int cmd_tenant_set_quota (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The tenant-get-quota command */
+/*/ ======================================================================= /*/
 int cmd_tenant_get_quota (int argc, const char *argv[]) {
     if (argc < 2) {
         fprintf (stderr, "%% Syntax error");
@@ -131,7 +141,9 @@ int cmd_tenant_get_quota (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The tenant-get-summary command */
+/*/ ======================================================================= /*/
 int cmd_tenant_get_summary (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -144,7 +156,9 @@ int cmd_tenant_get_summary (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The host-overview command */
+/*/ ======================================================================= /*/
 int cmd_host_overview (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -229,7 +243,9 @@ int cmd_host_overview (int argc, const char *argv[]) {
 }    
     
     
+/*/ ======================================================================= /*/
 /** The meter-create command */
+/*/ ======================================================================= /*/
 int cmd_meter_create (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -258,7 +274,9 @@ int cmd_meter_create (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The meter-delete command */
+/*/ ======================================================================= /*/
 int cmd_meter_delete (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -277,7 +295,9 @@ int cmd_meter_delete (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The meter-list command */
+/*/ ======================================================================= /*/
 int cmd_meter_list (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -317,7 +337,9 @@ int cmd_meter_list (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The watcher-set command */
+/*/ ======================================================================= /*/
 int cmd_watcher_set (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -383,7 +405,9 @@ int cmd_watcher_set (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The watcher-delete command */
+/*/ ======================================================================= /*/
 int cmd_watcher_delete (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -410,7 +434,9 @@ int cmd_watcher_delete (int argc, const char *argv[]) {
     return 0;    
 }
 
+/*/ ======================================================================= /*/
 /** Screen display function for watcher-related data */
+/*/ ======================================================================= /*/
 void print_data (const char *meterid, const char *trig, var *v) {
     const char *origin = var_get_str_forkey (v, "origin");
     if (! origin) origin = "default";
@@ -442,7 +468,9 @@ void print_data (const char *meterid, const char *trig, var *v) {
                  var_get_double_forkey (v, "weight"));
 }
 
+/*/ ======================================================================= /*/
 /** The watcher-list command */
+/*/ ======================================================================= /*/
 int cmd_watcher_list (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -485,7 +513,9 @@ int cmd_watcher_list (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** If OPTIONS.tenant is the default, unset it */
+/*/ ======================================================================= /*/
 void disregard_default_tenant (void) {
     var *conf_defaults = var_get_dict_forkey (OPTIONS.conf, "defaults");
     const char *deftenant = var_get_str_forkey (conf_defaults, "tenant");
@@ -493,7 +523,9 @@ void disregard_default_tenant (void) {
     if (strcmp (deftenant, OPTIONS.tenant) == 0) OPTIONS.tenant = "";
 }
 
+/*/ ======================================================================= /*/
 /** The tenant-delete command */
+/*/ ======================================================================= /*/
 int cmd_tenant_delete (int argc, const char *argv[]) {
     /* Avoid using the default tenant in this case */
     disregard_default_tenant();
@@ -510,7 +542,9 @@ int cmd_tenant_delete (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The tenant-create command */
+/*/ ======================================================================= /*/
 int cmd_tenant_create (int argc, const char *argv[]) {
     uuid tenant;
     
@@ -554,7 +588,9 @@ int cmd_tenant_create (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The host-list command */
+/*/ ======================================================================= /*/
 int cmd_host_list (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -610,7 +646,9 @@ int cmd_host_list (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The delete-host command */
+/*/ ======================================================================= /*/
 int cmd_remove_host (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -629,6 +667,9 @@ int cmd_remove_host (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
+/** The user-create command */
+/*/ ======================================================================= /*/
 int cmd_user_create (int argc, const char *argv[]) {
     char password[64];
     password[0] = 0;
@@ -667,6 +708,9 @@ int cmd_user_create (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
+/** The user-set-tenant command */
+/*/ ======================================================================= /*/
 int cmd_user_set_tenant (int argc, const char *argv[]) {
     if ((OPTIONS.tenant[0] == 0) ||
         (strcmp (OPTIONS.tenant, "any") == 0)) {
@@ -687,6 +731,9 @@ int cmd_user_set_tenant (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
+/** The user-set-password command */
+/*/ ======================================================================= /*/
 int cmd_user_set_password (int argc, const char *argv[]) {
     char password[64];
     password[0] = 0;
@@ -712,6 +759,9 @@ int cmd_user_set_password (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
+/** The user-delete command */
+/*/ ======================================================================= /*/
 int cmd_user_delete (int argc, const char *argv[]) {
     if (OPTIONS.username[0] == 0) {
         fprintf (stderr, "%% No username provided\n");
@@ -725,7 +775,9 @@ int cmd_user_delete (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** The get-record command */
+/*/ ======================================================================= /*/
 int cmd_get_record (int argc, const char *argv[]) {
     if (OPTIONS.tenant[0] == 0) {
         fprintf (stderr, "%% No tenantid provided\n");
@@ -753,41 +805,43 @@ int cmd_get_record (int argc, const char *argv[]) {
         return 0;
     }
     
-    #define Arr(x) var_get_array_forkey(apires,x)
-    #define Vint(x) var_get_int_forkey(apires,x)
-    #define Vstr(x) var_get_str_forkey(apires,x)
-    #define Vfrac(x) var_get_double_forkey(apires,x)
-    #define VDint(x,y) var_get_int_forkey(var_get_dict_forkey(apires,x),y)
-    #define VDstr(x,y) var_get_str_forkey(var_get_dict_forkey(apires,x),y)
-    #define VDfrac(x,y) var_get_double_forkey(var_get_dict_forkey(apires,x),y)
-    #define VAfrac(x,y) var_get_double_atindex(var_get_array_forkey(apires,x),y)
-    #define Vdone(x) var_delete_key(apires,x)
-    #define Vexist(x) var_find_key(apires,x)
-    /* -------------------------------------------------------------*/
+    #define $arr(x) var_get_array_forkey(apires,x)
+    #define $int(x) var_get_int_forkey(apires,x)
+    #define $str(x) var_get_str_forkey(apires,x)
+    #define $frac(x) var_get_double_forkey(apires,x)
+    #define $$int(x,y) var_get_int_forkey(var_get_dict_forkey(apires,x),y)
+    #define $$str(x,y) var_get_str_forkey(var_get_dict_forkey(apires,x),y)
+    #define $$frac(x,y) var_get_double_forkey(var_get_dict_forkey(apires,x),y)
+    #define $ifrac(x,y) var_get_double_atindex(var_get_array_forkey(apires,x),y)
+    #define $done(x) var_delete_key(apires,x)
+    #define $exists(x) var_find_key(apires,x)
+    /* ----------------------------------------------------------------------*/
     
     term_new_column();
     print_hdr ("Host", rsrc(icns.computer));
     print_value ("UUID", VT_YLW "%s" VT_RST, OPTIONS.host);
-    print_value ("Hostname", VT_YLW "%s" VT_RST, Vstr("hostname"));
+    print_value ("Hostname", VT_YLW "%s" VT_RST, $str("hostname"));
     print_value ("Address", VT_BLD "%s" VT_RST " (rtt: " VT_BLD "%.2f"
                             VT_RST " ms, " VT_BLD "%.0f" VT_RST " %% loss)",
-                            VDstr("link","ip"),
-                            VDfrac("link","rtt"),
-                            VDfrac("link","loss"));
+                            $$str("link","ip"),
+                            $$frac("link","rtt"),
+                            $$frac("link","loss"));
                             
-    print_value ("Version", VT_YLW "%s" VT_RST, VDstr("agent","v"));
-    print_value ("Status", "%s", decorate_status(Vstr("status")));
-    print_array ("Problems", Arr("problems"));
+    print_value ("Version", VT_YLW "%s" VT_RST, $$str("agent","v"));
+    print_value ("Status", "%s", decorate_status($str("status")));
+    print_array ("Problems", $arr("problems"));
     
-    Vdone("hostname");
-    Vdone("link");
-    Vdone("status");
-    Vdone("problems");
-    Vdone("version");
+    $done("hostname");
+    $done("link");
+    $done("status");
+    $done("problems");
+    $done("version");
     
+    /* ----------------------------------------------------------------------*/
+
     if (! OPTIONS.showgraphs) {
         char uptimestr[128];
-        uint64_t uptime = Vint("uptime"); Vdone("uptime");
+        uint64_t uptime = $int("uptime"); $done("uptime");
         uint64_t u_days = uptime / 86400ULL;
         uint64_t u_hours = (uptime - (86400 * u_days)) / 3600ULL;
         uint64_t u_mins = (uptime - (86400 * u_days) -
@@ -811,14 +865,14 @@ int cmd_get_record (int argc, const char *argv[]) {
 
         char uptimeastr[128];
         uptimeastr[0] = 0;
-        uint64_t uptimea = VDint("agent","up");
+        uint64_t uptimea = $$int("agent","up");
         uint64_t ua_days = uptimea / 86400ULL;
         uint64_t ua_hours = (uptimea - (86400 * ua_days)) / 3600ULL;
         uint64_t ua_mins = (uptimea - (86400 * ua_days) -
                            (3600 * ua_hours)) / 60ULL;
         uint64_t ua_sec = uptimea % 60;
         
-        Vdone("agent");
+        $done("agent");
         
         if (uptimea) {
             if (ua_days) {
@@ -843,50 +897,50 @@ int cmd_get_record (int argc, const char *argv[]) {
             print_value ("Uptime",VT_GRN "%s" VT_RST,uptimestr);
         }
 
-        const char *hw = VDstr("os","hw");
+        const char *hw = $$str("os","hw");
         if (hw) print_value ("Hardware", "%s", hw);
 
-        var *cpus = var_get_array_forkey (apires, "cpu");
+        var *cpus = $arr("cpu");
         if (cpus && var_get_count (cpus)) {
             var *vcpu = var_get_dict_atindex (cpus, 0);
             print_value ("CPU",VT_YLW "%ix " VT_RST "%s",
                          var_get_int_forkey (vcpu, "count"),
                          var_get_str_forkey (vcpu, "model"));
         }
-        Vdone("cpu");
+        $done("cpu");
 
         print_value ("OS/Arch",VT_YLW "%s %s " VT_RST "(%s)",
-                     VDstr("os","kernel"), VDstr("os","version"),
-                     VDstr("os","arch"));
-        const char *dist = VDstr("os","distro");
+                     $$str("os","kernel"), $$str("os","version"),
+                     $$str("os","arch"));
+        const char *dist = $$str("os","distro");
         if (dist) print_value ("Distribution", VT_GRN "%s" VT_RST, dist);
-        Vdone("os");
+        $done("os");
         
-        /* -------------------------------------------------------------*/
+        /* ------------------------------------------------------------------*/
         term_new_column();
         print_hdr ("Resources", rsrc(icns.gauge));
         print_value ("Processes",VT_BLD "%" PRIu64 VT_RST " "
                                  "(" VT_BLD "%" PRIu64 VT_RST " running, "
                                  VT_BLD "%" PRIu64 VT_RST " stuck)",
-                                 VDint("proc","total"),
-                                 VDint("proc","run"),
-                                 VDint("proc","stuck"));
-        Vdone("proc");
+                                 $$int("proc","total"),
+                                 $$int("proc","run"),
+                                 $$int("proc","stuck"));
+        $done("proc");
  
         print_value ("Load Average", VT_BLD "%6.2f" VT_RST " / "
                      VT_BLD "%6.2f" VT_RST " / " VT_BLD "%6.2f" VT_RST,
-                     VAfrac ("loadavg",0), VAfrac ("loadavg", 1),
-                     VAfrac ("loadavg",2));
-        Vdone ("loadavg");
+                     $ifrac ("loadavg",0), $ifrac ("loadavg", 1),
+                     $ifrac ("loadavg",2));
+        $done ("loadavg");
 
         char cpubuf[128];
-        sprintf (cpubuf, VT_BLD "%6.2f " VT_RST "%%", Vfrac("pcpu"));
+        sprintf (cpubuf, VT_BLD "%6.2f " VT_RST "%%", $frac("pcpu"));
     
         char meter[32];
         strcpy (meter, "-[                      ]+");
     
-        double iowait = VDfrac("io","pwait");
-        double pcpu = Vfrac("pcpu"); Vdone("pcpu");
+        double iowait = $$frac("io","pwait");
+        double pcpu = $frac("pcpu"); $done("pcpu");
         double level = 4.5;
     
         int pos = 2;
@@ -902,31 +956,32 @@ int cmd_get_record (int argc, const char *argv[]) {
             print_value ("CPU iowait", VT_BLD "%6.2f" VT_RST, iowait);
         }
         print_value ("Available RAM", VT_BLD "%.2f" VT_RST " MB",
-                     ((double)VDint("mem","total"))/1024.0);
+                     ((double)$$int("mem","total"))/1024.0);
         print_value ("Free RAM", VT_BLD "%.2f" VT_RST " MB",
-                     ((double)VDint("mem","free"))/1024.0);
+                     ((double)$$int("mem","free"))/1024.0);
     
         print_value ("Network in/out",     VT_BLD "%i" VT_RST " Kb/s "
                                        "(" VT_BLD "%i" VT_RST " pps) / "
                                            VT_BLD "%i" VT_RST " Kb/s "
                                        "(" VT_BLD "%i" VT_RST " pps)",
-                                       VDint("net","in_kbs"),
-                                       VDint("net","in_pps"),
-                                       VDint("net","out_kbs"),
-                                       VDint("net","out_pps"));
+                                       $$int("net","in_kbs"),
+                                       $$int("net","in_pps"),
+                                       $$int("net","out_kbs"),
+                                       $$int("net","out_pps"));
     
         print_value ("Disk i/o", VT_BLD "%i" VT_RST " rdops / "
                                  VT_BLD "%i" VT_RST " wrops",
-                     VDint("io","rdops"), VDint("io","wrops"));
+                     $$int("io","rdops"), $$int("io","wrops"));
     
-        Vdone("mem");
-        Vdone("net");
-        Vdone("io");
-        Vdone("badness");
+        $done("mem");
+        $done("net");
+        $done("io");
+        $done("badness");
 
         print_values (apires, NULL);
     
-        if (Vexist ("temp")) {
+        /* ------------------------------------------------------------------*/
+        if ($exists ("temp")) {
             term_new_column();
             print_hdr ("System Temperature", rsrc(icns.temp));
             
@@ -938,13 +993,14 @@ int cmd_get_record (int argc, const char *argv[]) {
             int temp_div[] = {0, 0, 0};
             const char *temp_suf[] = {"","°C",NULL};
             
-            var *v_temp = var_get_array_forkey (apires, "temp");
+            var *v_temp = $arr ("temp");
             print_table (v_temp, temp_hdr, temp_fld, temp_align, temp_tp,
                          temp_wid, temp_suf, temp_div);
-            Vdone ("temp");
+            $done ("temp");
         }
         
-        if (Vexist ("fan")) {
+        /* ------------------------------------------------------------------*/
+        if ($exists ("fan")) {
             term_new_column();
             print_hdr ("System Fans", rsrc(icns.fan));
             
@@ -956,14 +1012,15 @@ int cmd_get_record (int argc, const char *argv[]) {
             int fan_div[] = {0, 0, 0};
             const char *fan_suf[] = {"","%",NULL};
             
-            var *v_fan = var_get_array_forkey (apires, "fan");
+            var *v_fan = $arr("fan");
             print_table (v_fan, fan_hdr, fan_fld, fan_align, fan_tp,
                          fan_wid, fan_suf, fan_div);
-            Vdone ("fan");
+            $done ("fan");
         }
         
-        if (Vexist ("pkgl") &&
-            (VDint("pkgm","inq") || VDint("pkgm","reboot"))) {
+        /* ------------------------------------------------------------------*/
+        if ($exists ("pkgl") &&
+            ($$int("pkgm","inq") || $$int("pkgm","reboot"))) {
             term_new_column();
             print_hdr ("System Updates", rsrc(icns.pkg));
             
@@ -975,34 +1032,36 @@ int cmd_get_record (int argc, const char *argv[]) {
             int pkg_div[] = {0,0,0};
             const char *pkg_suf[] = {"","",NULL};
             
-            var *v_pkg = var_get_array_forkey (apires, "pkgl");
+            var *v_pkg = $arr ("pkgl");
             print_table (v_pkg, pkg_hdr, pkg_fld, pkg_align, pkg_tp,
                          pkg_wid, pkg_suf, pkg_div);
                          
-            Vdone ("pkgl");
-            Vdone ("pkgm");
+            $done ("pkgl");
+            $done ("pkgm");
         }
         
-        if (Vexist ("mysql")) {
+        /* ------------------------------------------------------------------*/
+        if ($exists ("mysql")) {
             term_new_column();
             print_hdr ("MySQL Server",rsrc(icns.db));
             print_value ("Configuration", VT_BLD "%s" VT_RST, 
-                         VDstr("mysql","conf"));
-            print_value ("Queries/second", "%.2f", VDfrac("mysql","qps"));
-            print_value ("Errors/second", "%.2f", VDfrac("mysql","erps"));
-            print_value ("Connections/second", "%.2f", VDfrac("mysql","cps"));
-            Vdone ("mysql");
+                         $$str("mysql","conf"));
+            print_value ("Queries/second", "%.2f", $$frac("mysql","qps"));
+            print_value ("Errors/second", "%.2f", $$frac("mysql","erps"));
+            print_value ("Connections/second", "%.2f", $$frac("mysql","cps"));
+            $done ("mysql");
         }
         
-        if (Vexist ("mssql")) {
+        /* ------------------------------------------------------------------*/
+        if ($exists ("mssql")) {
             term_new_column();
             print_hdr ("MS SQL Server",rsrc(icns.db));
-            print_value ("User Connections","%i",VDfrac("mssql","uc"));
-            print_value ("Requests/second","%i",VDfrac("mssql","bps"));
-            print_value ("Errors/second","%i",VDfrac("mssql","erps"));
+            print_value ("User Connections","%i",$$frac("mssql","uc"));
+            print_value ("Requests/second","%i",$$frac("mssql","bps"));
+            print_value ("Errors/second","%i",$$frac("mssql","erps"));
         }
 
-       /* -------------------------------------------------------------*/
+        /* ------------------------------------------------------------------*/
         term_new_column();
         print_hdr ("Process List", rsrc(icns.procs));
     
@@ -1015,13 +1074,13 @@ int cmd_get_record (int argc, const char *argv[]) {
         int top_div[] = {0, 0, 0, 0, 0, 0};
         const char *top_suf[] = {"",""," %", " %", "", NULL};
     
-        var *v_top = var_get_array_forkey (apires, "top");
+        var *v_top = $arr("top");
         print_table (v_top, top_hdr, top_fld, 
                      top_align, top_tp, top_wid, top_suf, top_div);
     
-        Vdone("top");
-        /* -------------------------------------------------------------*/
-        var *v_df = var_get_array_forkey (apires, "df");
+        $done("top");
+        /* ------------------------------------------------------------------*/
+        var *v_df = $arr("df");
         if (var_get_count (v_df) > 0) {
             term_new_column();
             print_hdr ("Storage", rsrc(icns.disks));
@@ -1042,16 +1101,15 @@ int cmd_get_record (int argc, const char *argv[]) {
             int df_div[] = {0, (1024), 0, 0, 0, 0};
             const char *df_suf[] = {""," GB", "", " %", "", ""};
     
-            var *v_df = var_get_array_forkey (apires, "df");
-    
             /*print_generic_table (v_df);*/
     
             print_table (v_df, df_hdr, df_fld,
                          df_aln, df_tp, df_wid, df_suf, df_div);
         }    
-        Vdone("df");
+        $done("df");
         
-        var *v_vm = var_get_array_forkey (apires, "vm");
+        /* ------------------------------------------------------------------*/
+        var *v_vm = $arr("vm");
         if (var_get_count (v_vm) > 0) {
             term_new_column();
             print_hdr ("Virtual Machines", rsrc(icns.vm));
@@ -1067,7 +1125,7 @@ int cmd_get_record (int argc, const char *argv[]) {
             print_table (v_vm, vm_hdr, vm_fld, vm_aln, vm_tp,
                          vm_wid, vm_suf, vm_div);
         }
-        Vdone("vm");
+        $done("vm");
     
         /** Print any remaining table data */
         print_tables (apires);
@@ -1135,7 +1193,9 @@ int cmd_get_record (int argc, const char *argv[]) {
     return 0;    
 }
 
+/*/ ======================================================================= /*/
 /** The session-list command [admin] */
+/*/ ======================================================================= /*/
 int cmd_session_list (int argc, const char *argv[]) {
     var *v = api_get ("/session");
 
@@ -1187,6 +1247,9 @@ int cmd_session_list (int argc, const char *argv[]) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
+/** Prints out a graph */
+/*/ ======================================================================= /*/
 void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
                       int indent) {
     var *apires = api_get ("/%s/host/%s/graph/%s/%s/43200/%i",
@@ -1231,7 +1294,9 @@ void cmd_print_graph (const char *graph_id, const char *datum_id, int width,
     print_graph (width, height, indent, max, dat);
 }
 
+/*/ ======================================================================= /*/
 /** The dancing-bears command */
+/*/ ======================================================================= /*/
 int cmd_bears (int argc, const char *argv[]) {
     var *v = api_get ("/obligatory-dancing-bears");
     puts (var_get_str_forkey (v,"bear"));
