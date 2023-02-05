@@ -943,8 +943,8 @@ int cmd_get_record (int argc, const char *argv[]) {
                          temp_wid, temp_suf, temp_div);
             Vdone ("temp");
         }
-    
-         if (Vexist ("fan")) {
+        
+        if (Vexist ("fan")) {
             term_new_column();
             print_hdr ("System Fans", rsrc(icns.fan));
             
@@ -981,6 +981,25 @@ int cmd_get_record (int argc, const char *argv[]) {
                          
             Vdone ("pkgl");
             Vdone ("pkgm");
+        }
+        
+        if (Vexist ("mysql")) {
+            term_new_column();
+            print_hdr ("MySQL Server",rsrc(icns.db));
+            print_value ("Configuration", VT_BLD "%s" VT_RST, 
+                         VDstr("mysql","conf"));
+            print_value ("Queries/second", "%.2f", VDfrac("mysql","qps"));
+            print_value ("Errors/second", "%.2f", VDfrac("mysql","erps"));
+            print_value ("Connections/second", "%.2f", VDfrac("mysql","cps"));
+            Vdone ("mysql");
+        }
+        
+        if (Vexist ("mssql")) {
+            term_new_column();
+            print_hdr ("MS SQL Server",rsrc(icns.db));
+            print_value ("User Connections","%i",VDfrac("mssql","uc");
+            print_value ("Requests/second","%i",VDfrac("mssql","bps"));
+            print_value ("Errors/second","%i",VDfrac("mssql","erps"));
         }
 
        /* -------------------------------------------------------------*/
