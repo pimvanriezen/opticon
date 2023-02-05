@@ -997,7 +997,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         if (Vexist ("mssql")) {
             term_new_column();
             print_hdr ("MS SQL Server",rsrc(icns.db));
-            print_value ("User Connections","%i",VDfrac("mssql","uc");
+            print_value ("User Connections","%i",VDfrac("mssql","uc"));
             print_value ("Requests/second","%i",VDfrac("mssql","bps"));
             print_value ("Errors/second","%i",VDfrac("mssql","erps"));
         }
