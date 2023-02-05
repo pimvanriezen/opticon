@@ -386,4 +386,21 @@
         description: "Errors/s"
         warning { cmp: gt, val: 0, weight: 1.0 }
     }
+    cntr {
+        type: table
+        description: Container Instances
+    }
+    cntr/name {
+        type: string
+        description: "Name"
+    }
+    cntr/image {
+        type: string
+        description: "Image"
+    }
+    cntr/size {
+        type: integer
+        description: "Size"
+        unit: "MB"
+    }
 }

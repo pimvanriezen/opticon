@@ -978,8 +978,6 @@ int cmd_get_record (int argc, const char *argv[]) {
         $done("io");
         $done("badness");
 
-        print_values (apires, NULL);
-    
         /* ------------------------------------------------------------------*/
         if ($exists ("temp")) {
             term_new_column();
@@ -1028,7 +1026,7 @@ int cmd_get_record (int argc, const char *argv[]) {
             const char *pkg_fld[] = {"id","v",NULL};
             columnalign pkg_align[] = {CA_L, CA_R, CA_NULL};
             vartype pkg_tp[] = {VAR_STR, VAR_STR, VAR_NULL};
-            int pkg_wid[] = {12,12,0};
+            int pkg_wid[] = {48,16,0};
             int pkg_div[] = {0,0,0};
             const char *pkg_suf[] = {"","",NULL};
             
@@ -1036,11 +1034,56 @@ int cmd_get_record (int argc, const char *argv[]) {
             print_table (v_pkg, pkg_hdr, pkg_fld, pkg_align, pkg_tp,
                          pkg_wid, pkg_suf, pkg_div);
                          
-            $done ("pkgl");
-            $done ("pkgm");
         }
+
+        $done ("pkgl");
+        $done ("pkgm");
         
         /* ------------------------------------------------------------------*/
+        if ($exists ("cntr")) {
+
+            term_new_column();
+            print_hdr ("Containers", rsrc(icns.container));
+            
+            const char *cntr_hdr[] = {"NAME","IMAGE","SIZE",NULL};
+            const char *cntr_fld[] = {"name","image","size",NULL};
+            columnalign cntr_align[] = {CA_L, CA_L, CA_R, CA_NULL};
+            vartype cntr_tp[] = {VAR_STR, VAR_STR, VAR_INT, VAR_NULL};
+            int cntr_wid[] = {16,32,10};
+            int cntr_div[] = {0,0,0,0};
+            const char *cntr_suf[] = {"","","MB",NULL};
+            
+            var *v_cntr = $arr ("cntr");
+            print_table (v_cntr, cntr_hdr, cntr_fld, cntr_align, cntr_tp,
+                         cntr_wid, cntr_suf, cntr_div);
+            
+            $done ("cntr");
+        }
+ 
+         /* ------------------------------------------------------------------*/
+        if ($exists ("bgp")) {
+
+            term_new_column();
+            print_hdr ("BGP Peers", rsrc(icns.router));
+            
+            const char *bgp_hdr[] = {"PEER ADDRESS","MSG SENT",
+                                      "MSG RECV","UPTIME","REMOTE AS",NULL};
+            const char *bgp_fld[] = {"peer","sent","recv","up","as",NULL};
+            columnalign bgp_align[] = {CA_L, CA_R, CA_R, CA_R, CA_R, CA_NULL};
+            vartype bgp_tp[] = {VAR_STR, VAR_INT, VAR_INT, VAR_STR,
+                                 VAR_INT,VAR_NULL};
+            int bgp_wid[] = {20,10,10,12,10,0};
+            int bgp_div[] = {0,0,0,0,0,0};
+            const char *bgp_suf[] = {"","","","","",NULL};
+            
+            var *v_bgp = $arr ("bgp");
+            print_table (v_bgp, bgp_hdr, bgp_fld, bgp_align, bgp_tp,
+                         bgp_wid, bgp_suf, bgp_div);
+            
+            $done ("bgp");
+        }
+
+       /* ------------------------------------------------------------------*/
         if ($exists ("mysql")) {
             term_new_column();
             print_hdr ("MySQL Server",rsrc(icns.db));
@@ -1061,6 +1104,9 @@ int cmd_get_record (int argc, const char *argv[]) {
             print_value ("Errors/second","%i",$$frac("mssql","erps"));
         }
 
+        /* ------------------------------------------------------------------*/
+        print_values (apires, NULL);
+    
         /* ------------------------------------------------------------------*/
         term_new_column();
         print_hdr ("Process List", rsrc(icns.procs));
@@ -1127,6 +1173,24 @@ int cmd_get_record (int argc, const char *argv[]) {
         }
         $done("vm");
     
+        /* ------------------------------------------------------------------*/
+        var *v_http = $arr("http");
+        if (var_get_count (v_http) > 0) {
+            term_new_column();
+            print_hdr ("Hosted Websites", rsrc(icns.www));
+            
+            const char *http_hdr[] = {"SITE","COUNT",NULL};
+            const char *http_fld[] = {"site","count",NULL};
+            columnalign http_aln[] = {CA_L,CA_R,CA_NULL};
+            vartype http_tp[] = {VAR_STR,VAR_INT,VAR_NULL};
+            int http_wid[] = {50,10,0};
+            int http_div[] = {0,0,0};
+            const char *http_suf[] = {"","",""};
+            print_table (v_http, http_hdr, http_fld, http_aln, http_tp,
+                         http_wid, http_suf, http_div);
+        }
+        $done("http");
+
         /** Print any remaining table data */
         print_tables (apires);
         term_end_column();
