@@ -1155,6 +1155,37 @@ int cmd_get_record (int argc, const char *argv[]) {
         $done("df");
         
         /* ------------------------------------------------------------------*/
+        if ($exists("raid")) {
+            var *v_raid = $arr("raid");
+            if (var_get_count (v_raid) > 0) {
+                term_new_column();
+                print_hdr ("RAID", rsrc(icns.raid));
+    
+                const char *raid_hdr[] = {
+                    "DEVICE","LEVEL","STATE","DISKS","FAILED",NULL
+                };
+                const char *raid_fld[] = {
+                    "dev","level","state","count","fail",NULL
+                };
+                columnalign raid_aln[] = {
+                    CA_L,CA_L,CA_L,CA_R,CA_R,CA_NULL
+                };
+                vartype raid_tp[] = {
+                    VAR_STR,VAR_STR,VAR_STR,VAR_INT,VAR_INT,VAR_NULL
+                };
+                int raid_wid[] = {10, 10, 16, 8, 8};
+                int raid_div[] = {0, 0, 0, 0, 0, 0};
+                const char *raid_suf[] = {""," ", "", "", "", ""};
+    
+                /*print_generic_table (v_raid);*/
+    
+                print_table (v_raid, raid_hdr, raid_fld,
+                             raid_aln, raid_tp, raid_wid, raid_suf, raid_div);
+            }
+        }
+        $done("raid");
+        
+        /* ------------------------------------------------------------------*/
         var *v_vm = $arr("vm");
         if (var_get_count (v_vm) > 0) {
             term_new_column();
