@@ -1158,7 +1158,7 @@ int cmd_get_record (int argc, const char *argv[]) {
             vartype df_tp[] = {
                 VAR_STR,VAR_INT,VAR_STR,VAR_DOUBLE,VAR_STR,VAR_NULL
             };
-            int df_wid[] = {24, 14, 6, 8, 0};
+            int df_wid[] = {28, 12, 6, 8, 0};
             int df_div[] = {0, (1024), 0, 0, 0, 0};
             const char *df_suf[] = {""," GB", "", " %", "", ""};
     
