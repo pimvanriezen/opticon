@@ -206,29 +206,75 @@ uint32_t getSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo, void 
 		}
 		else if (biosStructureHeader->type == 4) {
 			// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.3.0.pdf (paragraph 7.5)
-			if (processorIndex < 16) {
-				DProcessorInfo *processorInfo = &outSystemFirmwareInfo->processorInfos[processorIndex];
-				
-				processorInfo->hasData = true;
-				processorInfo->version = getStringFromBiosStringSet(stringSet, biosTableData[0x10]);
-				// 0x18 is a byte where bit 6 specifies if socket is populated
-				processorInfo->isSocketPopulated = biosTableData[0x18] & (1 << 6);
-				
-				if (processorInfo->isSocketPopulated) {
-					// @note Windows 2008 has bios version 2.3 so core count is not supported
-					if (biosVersion >= 0x0205) {
-						processorInfo->coreCount = biosTableData[0x23];
-						processorInfo->coreEnabled = biosTableData[0x24];
-						processorInfo->threadCount = biosTableData[0x25];
-						
-						if (processorInfo->coreCount == 0xff && biosVersion >= 0x0300) {
-							processorInfo->coreCount = biosTableData[0x2a] * 0x100 + biosTableData[0x2d];
+			
+			uint8_t useProcessorIndex = processorIndex;
+			
+			char *socketDesignation = getStringFromBiosStringSet(stringSet, biosTableData[0x04]);
+			bool isSocketPopulated = biosTableData[0x18] & (1 << 6);
+			
+			// @note Bios version 2.3 has no support for core count, so we merge all processors with the same socket designation into 1 and manually calculate the cores
+			// A windows 2008 vm reports "None" for the socket designation, so they are all merged into 1 processor, even though hyper-v splits cores per 20 across a new socket
+			if (biosVersion < 0x0205) {
+				for (uint8_t i = 0; i < 16; ++i) {
+					DProcessorInfo *processorInfo = &outSystemFirmwareInfo->processorInfos[i];
+					if (!processorInfo->hasData) continue;
+					
+					if (processorInfo->socketDesignation == NULL) {
+						if (socketDesignation == NULL) {
+							useProcessorIndex = i;
+							break;
 						}
-						if (processorInfo->coreEnabled == 0xff && biosVersion >= 0x0300) {
-							processorInfo->coreEnabled = biosTableData[0x2c] * 0x100 + biosTableData[0x2d];
+					}
+					else if (
+						socketDesignation != NULL
+						&& processorInfo->isSocketPopulated == isSocketPopulated
+						&& strcmp(processorInfo->socketDesignation, socketDesignation) == 0
+					) {
+						useProcessorIndex = i;
+						break;
+					}
+				}
+			}
+			
+			if (useProcessorIndex < 16) {
+				DProcessorInfo *processorInfo = &outSystemFirmwareInfo->processorInfos[useProcessorIndex];
+				
+				if (processorInfo->hasData) {
+					// If we reused a processor, then the bios version was < 2.5 and we have to manually count cores
+					// @note A windows 2008 vm always reports 64 processors with isSocketPopulated to false, all with the same socket designation ("None")
+					// But we merge all the empty sockets into a single processor and up the cores
+					++processorInfo->coreCount;
+					++processorInfo->coreEnabled;
+					// @todo use biosTableData[0x18] bits 2:0 for the cpu status (CPU Enabled) to up the coreEnabled
+				}
+				else {
+					processorInfo->hasData = true;
+					processorInfo->socketDesignation = socketDesignation;
+					processorInfo->version = getStringFromBiosStringSet(stringSet, biosTableData[0x10]);
+					// 0x18 is a byte where bit 6 specifies if socket is populated
+					processorInfo->isSocketPopulated = isSocketPopulated;
+					
+					if (processorInfo->isSocketPopulated) {
+						// @note Windows 2008 has bios version 2.3 so core count is not supported
+						if (biosVersion < 0x0205) {
+							processorInfo->coreCount = 1;
+							processorInfo->coreEnabled = 1;
+							processorInfo->threadCount = 0;
 						}
-						if (processorInfo->threadCount == 0xff && biosVersion >= 0x0300) {
-							processorInfo->threadCount = biosTableData[0x2e] * 0x100 + biosTableData[0x2f];
+						else {
+							processorInfo->coreCount = biosTableData[0x23];
+							processorInfo->coreEnabled = biosTableData[0x24];
+							processorInfo->threadCount = biosTableData[0x25];
+							
+							if (processorInfo->coreCount == 0xff && biosVersion >= 0x0300) {
+								processorInfo->coreCount = biosTableData[0x2a] * 0x100 + biosTableData[0x2d];
+							}
+							if (processorInfo->coreEnabled == 0xff && biosVersion >= 0x0300) {
+								processorInfo->coreEnabled = biosTableData[0x2c] * 0x100 + biosTableData[0x2d];
+							}
+							if (processorInfo->threadCount == 0xff && biosVersion >= 0x0300) {
+								processorInfo->threadCount = biosTableData[0x2e] * 0x100 + biosTableData[0x2f];
+							}
 						}
 					}
 					else {
@@ -237,8 +283,9 @@ uint32_t getSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo, void 
 						processorInfo->threadCount = 0;
 					}
 				}
+				
+				if (useProcessorIndex == processorIndex) ++processorIndex;
 			}
-			++processorIndex;
 		}
 		
 		// Skip over formatted area

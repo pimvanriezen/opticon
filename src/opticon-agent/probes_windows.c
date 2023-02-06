@@ -1767,8 +1767,6 @@ var *runprobe_cpu(probe *self) {
         if (!processorInfo.hasData) continue;
         if (!processorInfo.isSocketPopulated) continue;
         
-        // @todo windows 2008 does not support core count in bios
-        
         var *cpuDict = var_add_dict(cpusArray);
         
         if (processorInfo.version == NULL) {
