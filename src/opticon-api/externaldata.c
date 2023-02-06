@@ -121,7 +121,7 @@ var *extdata_get (uuid tenantid, uuid hostid, var *env) {
         crsr = extdata_new (tenantid, hostid);
     }
     crsr->data = vout;
-    crsr->lastrefresh = time (NULL);
+    crsr->lastrefresh = time (NULL) + (rand() & 63);
     var *res = var_clone (vout);
     pthread_rwlock_unlock (&dlist.lock);
     return res;
