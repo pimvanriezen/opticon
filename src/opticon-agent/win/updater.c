@@ -76,6 +76,8 @@ uint32_t loadUrlAlloc(const char *url, void **outBuffer) {
     // While WinHttpCrackUrl is available and seems identical to InternetCrackUrlW, it appears to fail on non http schemes, which is just stupid
     if (InternetCrackUrlA(url, strlen(url), ICU_DECODE, &urlComponents) == false) return GetLastError();
     
+    
+    
     //printf("url: %s://%s%s\n", scheme, hostname, path);
     //printf("extra: %s\n", extra);
     
@@ -91,8 +93,9 @@ uint32_t loadUrlAlloc(const char *url, void **outBuffer) {
     MultiByteToWideChar(CP_UTF8, 0, urlFullResource, -1, urlFullResourceWide, sizeof(urlFullResourceWide) / sizeof(wchar_t));
     
     
-    
-    HINTERNET session = WinHttpOpen(L"WinHTTP/1.0", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    // @note Windows 2008 fails with ERROR_INVALID_PARAMETER (87 / 0x57) if we pass WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY as the second argument
+    //HINTERNET session = WinHttpOpen(L"WinHTTP/1.0", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    HINTERNET session = WinHttpOpen(L"WinHTTP/1.0", 0, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (session == NULL) return GetLastError();
     
     // HINTERNET connection = WinHttpConnect(session, L"www.microsoft.com", INTERNET_DEFAULT_HTTPS_PORT, 0);
@@ -104,6 +107,8 @@ uint32_t loadUrlAlloc(const char *url, void **outBuffer) {
     HINTERNET request = WinHttpOpenRequest(connection, L"GET", urlFullResourceWide, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, flags);
     if (request == NULL) { e = GetLastError(); goto error_2; }
     
+    // @note Windows 2008 fails with: ERROR_WINHTTP_SECURE_FAILURE (0x2f8f) (because tls1.2 isn't on by default, and if it's on, it doesn't like the certificate)
+    // @note Windows 2012 fails with: ERROR_WINHTTP_SECURE_FAILURE (0x2f8f) (because tls1.2 isn't on by default)
     if (WinHttpSendRequest(request, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0) == false) { e = GetLastError(); goto error_3; }
     
     if (WinHttpReceiveResponse(request, NULL) == false) { e = GetLastError(); goto error_3; }
@@ -230,7 +235,9 @@ uint32_t downloadUrl(const char *url, const char *filePath) {
     MultiByteToWideChar(CP_UTF8, 0, urlFullResource, -1, urlFullResourceWide, sizeof(urlFullResourceWide) / sizeof(wchar_t));
     
     
-    HINTERNET session = WinHttpOpen(L"WinHTTP/1.0", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    // @note Windows 2008 fails with ERROR_INVALID_PARAMETER (87 / 0x57) if we pass WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY as the second argument
+    //HINTERNET session = WinHttpOpen(L"WinHTTP/1.0", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    HINTERNET session = WinHttpOpen(L"WinHTTP/1.0", 0, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (session == NULL) { e = GetLastError(); goto error_1; }
     
     HINTERNET connection = WinHttpConnect(session, hostnameWide, urlComponents.nPort, 0);

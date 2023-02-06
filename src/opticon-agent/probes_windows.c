@@ -1712,35 +1712,47 @@ var *runprobe_localip(probe *self) {
 
 // ============================================================================
 
+/**
+ *  @param      outProcessorBrand       Minimum 48 bytes
+ *  @returns    void
+**/
+void getCpuidProcessorBrand(char *outProcessorBrand) {
+    // @note __cpuid returns the info for the processor the function is executed on, so not 100% correct in case of multiple processors
+    
+    // https://learn.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?view=msvc-170
+    // https://en.wikipedia.org/wiki/CPUID#EAX=80000002h,80000003h,80000004h:_Processor_Brand_String
+    
+    // cpuInfo holds the 4 ints returned in the EAX, EBX, ECX and EDX registers
+    // For the cpuid functions 0x80000002, 0x80000003 and 0x80000004 we get the processor brand string as 16 bytes (chars) per function in those registers
+    int cpuInfo[4] = {0};
+    
+    // 0x80000000 is the function to determine the highest supported extended cpuid function
+    __cpuid(cpuInfo, 0x80000000);
+    unsigned int highestExtendedCpuidFunction = cpuInfo[0];
+    // Cap at 0x80000004 (we don't need to read higher than that)
+    if (highestExtendedCpuidFunction > 0x80000004) highestExtendedCpuidFunction = 0x80000004;
+    
+    // Processor brand string is 48 byte null terminated (3 x 16 bytes)
+    //char processorBrand[48];
+    memset(outProcessorBrand, 0, sizeof(outProcessorBrand));
+    for (int i = 0x80000002; i <= highestExtendedCpuidFunction; ++i) {
+        // We could also pass outProcessorBrand + offset instead of cpuInfo
+        __cpuid(cpuInfo, i);
+        if (i == 0x80000002) memcpy(outProcessorBrand, cpuInfo, sizeof(cpuInfo));
+        else if  (i == 0x80000003) memcpy(outProcessorBrand + 16, cpuInfo, sizeof(cpuInfo));
+        else if  (i == 0x80000004) memcpy(outProcessorBrand + 32, cpuInfo, sizeof(cpuInfo));
+    }
+}
+
 var *runprobe_cpu(probe *self) {
+    // Some (not all) hyper-v machines report processor version (model) as "None", so we use cpuid as a fallback (though that is x86 specific)
+    // The only other reliable way to get this information seems to be WMI (Win32_Processor)
+    // Processor brand string is 48 byte null terminated (3 x 16 bytes)
+    static char processorBrand[48] = {'\0'};
+    
     (void)self;
     uint32_t e;
     var *res = var_alloc();
-    
-    // @note __cpuid returns the info for the processor the function is executed on, so not really useful in case of multiple processors
-    //
-    //// https://learn.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?view=msvc-170
-    //
-    //// cpuInfo is used both as an int as well as 16 chars
-    //int cpuInfo[4] = {-1};
-    //
-    //// 0x80000000 gets the highest extended ID
-    //__cpuid(cpuInfo, 0x80000000);
-    //
-    //unsigned int highestExtendedId = cpuInfo[0];
-    //// Cap at 0x80000004 (we don't need to read higher than that)
-    //if (highestExtendedId > 0x80000004) highestExtendedId = 0x80000004;
-    //
-    //// Hold 3 x 16 bytes plus a null terminator
-    //char cpuModel[49];
-    //memset(cpuModel, 0, sizeof(cpuModel));
-    //for (int i = 0x80000002; i <= highestExtendedId; ++i) {
-    //    __cpuid(cpuInfo, i);
-    //    if (i == 0x80000002) memcpy(cpuModel, cpuInfo, sizeof(cpuInfo));
-    //    else if  (i == 0x80000003) memcpy(cpuModel + 16, cpuInfo, sizeof(cpuInfo));
-    //    else if  (i == 0x80000004) memcpy(cpuModel + 32, cpuInfo, sizeof(cpuInfo));
-    //}
-    
     
     DSystemFirmwareInfo systemFirmwareInfo;
     if ((e = getSystemFirmwareInfoAlloc(&systemFirmwareInfo))) {
@@ -1748,18 +1760,31 @@ var *runprobe_cpu(probe *self) {
         return res;
     }
     
+    
     var *cpusArray = var_get_array_forkey(res, "cpu");
     for (uint8_t i = 0; i < 16; ++i) {
-        if (!systemFirmwareInfo.processorInfos[i].hasData) continue;
+        DProcessorInfo processorInfo = systemFirmwareInfo.processorInfos[i];
+        if (!processorInfo.hasData) continue;
+        if (!processorInfo.isSocketPopulated) continue;
         
         var *cpuDict = var_add_dict(cpusArray);
         
-        log_debug("probe_cpu/cpu/model: %s", systemFirmwareInfo.processorInfos[i].version);
-        if (systemFirmwareInfo.processorInfos[i].version == NULL) var_set_str_forkey(cpuDict, "model", "");
-        else var_set_str_forkey(cpuDict, "model", systemFirmwareInfo.processorInfos[i].version);
+        if (processorInfo.version == NULL) {
+            log_debug("probe_cpu/cpu/model: %s", "");
+            var_set_str_forkey(cpuDict, "model", "");
+        }
+        else if (strcmp(processorInfo.version, "None") == 0) {
+            if (processorBrand[0] == '\0') getCpuidProcessorBrand(processorBrand);
+            log_debug("probe_cpu/cpu/model: %s", processorBrand);
+            var_set_str_forkey(cpuDict, "model", processorBrand);
+        }
+        else {
+            log_debug("probe_cpu/cpu/model: %s", processorInfo.version);
+            var_set_str_forkey(cpuDict, "model", processorInfo.version);
+        }
         
-        log_debug("probe_cpu/cpu/count: %u", systemFirmwareInfo.processorInfos[i].coreEnabled);
-        var_set_int_forkey(cpuDict, "count", systemFirmwareInfo.processorInfos[i].coreEnabled);
+        log_debug("probe_cpu/cpu/count: %u", processorInfo.coreEnabled);
+        var_set_int_forkey(cpuDict, "count", processorInfo.coreEnabled);
     }
     
     freeSystemFirmwareInfo(&systemFirmwareInfo);

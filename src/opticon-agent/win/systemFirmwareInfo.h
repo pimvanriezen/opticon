@@ -41,16 +41,19 @@ typedef struct DSystemInfo {
 
 typedef struct DProcessorInfo {
 	bool hasData;
-	char *version; // This is actually the model name e.g. "Intel(R) Core(TM) i5-5300U CPU @ 2.30GHz"
-	uint16_t coreEnabled;
-	uint16_t threadCount;
+	char *version; // This is actually the model name e.g. "Intel(R) Core(TM) i5-5300U CPU @ 2.30GHz" or "None" (on some vms)
+	char *socketDesignation; // e.g. "SOCKET 0" or "None" (on some vms)
+	bool isSocketPopulated;
+	uint16_t coreCount; // Officially v2.5+ (not available in windows 2008), but for bios version < 2.5 we manually merge processors with the same socket designation
+	uint16_t coreEnabled; // v2.5+
+	uint16_t threadCount; // v2.5+
 } DProcessorInfo;
 
 typedef struct DSystemFirmwareInfo {
 	void *rawBuffer;
 	DBiosInfo biosInfo;
 	DSystemInfo systemInfo;
-	DProcessorInfo processorInfos[16];
+	DProcessorInfo processorInfos[16]; // @todo hyper-v can go up to 1024 cores on 52 sockets
 } DSystemFirmwareInfo;
 
 
