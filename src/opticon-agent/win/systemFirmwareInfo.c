@@ -165,23 +165,22 @@ uint32_t getSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo, void 
 	DRawSmBiosData *biosData = (DRawSmBiosData *)rawBuffer;
 	int16_t biosVersion = biosData->SMBIOSMajorVersion * 0x100 + biosData->SMBIOSMinorVersion;
 	
+	//printf("\n\nbios v: %i %i\n", biosData->SMBIOSMajorVersion, biosData->SMBIOSMinorVersion);
+	
 	uint8_t processorIndex = 0;
 	BYTE *biosTableData = biosData->SMBIOSTableData;
 	while (biosTableData < biosData->SMBIOSTableData + biosData->Length) {
 		DSmBiosStructureHeader *biosStructureHeader = (DSmBiosStructureHeader *)biosTableData;
-		
-		// @todo describe why this should break (probably something to do with the end marker)
-		if (biosStructureHeader->length < 4) break;
 		
 		// Text strings associated with a given SMBIOS structure are appended directly after the formatted portion of the structure
 		char *stringSet = (char *)biosTableData;
 		// Skip over the formatted area
 		stringSet += biosStructureHeader->length;
 		
-		// @todo biosStructureHeader->type 1 should only exist once, don't know about type 0, but most likely also only once
 		
 		if (biosStructureHeader->type == 0) {
 			// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.3.0.pdf (paragraph 7.1)
+			// Only one type 0 structure exists
 			
 			outSystemFirmwareInfo->biosInfo.vendor = getStringFromBiosStringSet(stringSet, biosTableData[0x4]);
 			outSystemFirmwareInfo->biosInfo.version = getStringFromBiosStringSet(stringSet, biosTableData[0x5]);
@@ -191,8 +190,8 @@ uint32_t getSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo, void 
 			outSystemFirmwareInfo->biosInfo.embeddedControllerMinorRelease = biosTableData[0x17];
 		}
 		else if (biosStructureHeader->type == 1) {
-			// An SMBIOS implementation is associated with a single system instance and contains one and only one System Information (Type 1) structure
 			// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.3.0.pdf (paragraph 7.2)
+			// Only one type 1 structure exists
 			
 			outSystemFirmwareInfo->systemInfo.manufacturer = getStringFromBiosStringSet(stringSet, biosTableData[0x4]);
 			outSystemFirmwareInfo->systemInfo.productName = getStringFromBiosStringSet(stringSet, biosTableData[0x5]);
@@ -206,19 +205,87 @@ uint32_t getSystemFirmwareInfo(DSystemFirmwareInfo *outSystemFirmwareInfo, void 
 			outSystemFirmwareInfo->systemInfo.family = getStringFromBiosStringSet(stringSet, biosTableData[0x1a]);
 		}
 		else if (biosStructureHeader->type == 4) {
-			if (processorIndex < 16) {
-				outSystemFirmwareInfo->processorInfos[processorIndex].hasData = true;
-				outSystemFirmwareInfo->processorInfos[processorIndex].version = getStringFromBiosStringSet(stringSet, biosTableData[0x10]);
-				
-				// @todo
-				//if (biosVersion >= 0x0300) {
-				//biosTableData[0x2c] + biosTableData[0x2d];
-				//biosTableData[0x2e] + biosTableData[0x2f];
-				
-				outSystemFirmwareInfo->processorInfos[processorIndex].coreEnabled = biosTableData[0x23];
-				outSystemFirmwareInfo->processorInfos[processorIndex].threadCount = biosTableData[0x24];
+			// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.3.0.pdf (paragraph 7.5)
+			
+			uint8_t useProcessorIndex = processorIndex;
+			
+			char *socketDesignation = getStringFromBiosStringSet(stringSet, biosTableData[0x04]);
+			bool isSocketPopulated = biosTableData[0x18] & (1 << 6);
+			
+			// @note Bios version 2.3 has no support for core count, so we merge all processors with the same socket designation into 1 and manually calculate the cores
+			// A windows 2008 vm reports "None" for the socket designation, so they are all merged into 1 processor, even though hyper-v splits cores per 20 across a new socket
+			if (biosVersion < 0x0205) {
+				for (uint8_t i = 0; i < 16; ++i) {
+					DProcessorInfo *processorInfo = &outSystemFirmwareInfo->processorInfos[i];
+					if (!processorInfo->hasData) continue;
+					
+					if (processorInfo->socketDesignation == NULL) {
+						if (socketDesignation == NULL) {
+							useProcessorIndex = i;
+							break;
+						}
+					}
+					else if (
+						socketDesignation != NULL
+						&& processorInfo->isSocketPopulated == isSocketPopulated
+						&& strcmp(processorInfo->socketDesignation, socketDesignation) == 0
+					) {
+						useProcessorIndex = i;
+						break;
+					}
+				}
 			}
-			++processorIndex;
+			
+			if (useProcessorIndex < 16) {
+				DProcessorInfo *processorInfo = &outSystemFirmwareInfo->processorInfos[useProcessorIndex];
+				
+				if (processorInfo->hasData) {
+					// If we reused a processor, then the bios version was < 2.5 and we have to manually count cores
+					// @note A windows 2008 vm always reports 64 processors with isSocketPopulated to false, all with the same socket designation ("None")
+					// But we merge all the empty sockets into a single processor and up the cores
+					++processorInfo->coreCount;
+					++processorInfo->coreEnabled;
+					// @todo use biosTableData[0x18] bits 2:0 for the cpu status (CPU Enabled) to up the coreEnabled
+				}
+				else {
+					processorInfo->hasData = true;
+					processorInfo->socketDesignation = socketDesignation;
+					processorInfo->version = getStringFromBiosStringSet(stringSet, biosTableData[0x10]);
+					// 0x18 is a byte where bit 6 specifies if socket is populated
+					processorInfo->isSocketPopulated = isSocketPopulated;
+					
+					if (processorInfo->isSocketPopulated) {
+						// @note Windows 2008 has bios version 2.3 so core count is not supported
+						if (biosVersion < 0x0205) {
+							processorInfo->coreCount = 1;
+							processorInfo->coreEnabled = 1;
+							processorInfo->threadCount = 0;
+						}
+						else {
+							processorInfo->coreCount = biosTableData[0x23];
+							processorInfo->coreEnabled = biosTableData[0x24];
+							processorInfo->threadCount = biosTableData[0x25];
+							
+							if (processorInfo->coreCount == 0xff && biosVersion >= 0x0300) {
+								processorInfo->coreCount = biosTableData[0x2a] * 0x100 + biosTableData[0x2d];
+							}
+							if (processorInfo->coreEnabled == 0xff && biosVersion >= 0x0300) {
+								processorInfo->coreEnabled = biosTableData[0x2c] * 0x100 + biosTableData[0x2d];
+							}
+							if (processorInfo->threadCount == 0xff && biosVersion >= 0x0300) {
+								processorInfo->threadCount = biosTableData[0x2e] * 0x100 + biosTableData[0x2f];
+							}
+						}
+					}
+					else {
+						processorInfo->coreCount = 0;
+						processorInfo->coreEnabled = 0;
+						processorInfo->threadCount = 0;
+					}
+				}
+				
+				if (useProcessorIndex == processorIndex) ++processorIndex;
+			}
 		}
 		
 		// Skip over formatted area
