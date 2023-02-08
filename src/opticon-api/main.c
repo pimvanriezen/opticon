@@ -269,18 +269,21 @@ int handle_external_token_unithost (req_context *ctx) {
                 retcode = 1;
                 ctx->userlevel = AUTH_USER;
             }
-            else {
-                var *roles = var_get_array_forkey (res, "roles");
-                if (roles) {
-                    if (var_contains_str (roles, "ADMIN")) {
-                        retcode = 1;
-                        ctx->userlevel = AUTH_ADMIN;
-                    }
-                    else if (var_contains_str (roles, "PROVISIONING")) {
-                        retcode = 1;
-                        ctx->userlevel = AUTH_PROV;
-                    }
-                }
+        }
+        else {
+            ctx->auth_tenantcount = 0;
+            ctx->auth_tenants = NULL;
+        }
+        
+        var *roles = var_get_array_forkey (res, "roles");
+        if (roles) {
+            if (var_contains_str (roles, "ADMIN")) {
+                retcode = 1;
+                ctx->userlevel = AUTH_ADMIN;
+            }
+            else if (var_contains_str (roles, "PROVISIONING")) {
+                retcode = 1;
+                ctx->userlevel = AUTH_PROV;
             }
         }
         var_free (res);
