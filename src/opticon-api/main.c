@@ -258,6 +258,7 @@ int handle_external_token_unithost (req_context *ctx) {
             ctx->auth_tenantcount = 1;
             ctx->auth_tenants = malloc (sizeof (uuid));
             ctx->auth_tenants[0] = u;
+            
             const char *strid = var_get_str_forkey (res, "tenant");
             var *acc = var_find_key (res, "account");
             if (acc) {
@@ -269,17 +270,16 @@ int handle_external_token_unithost (req_context *ctx) {
                 retcode = 1;
                 ctx->userlevel = AUTH_USER;
             }
-            else {
-                var *roles = var_get_array_forkey (res, "roles");
-                if (roles) {
-                    if (var_contains_str (roles, "ADMIN")) {
-                        retcode = 1;
-                        ctx->userlevel = AUTH_ADMIN;
-                    }
-                    else if (var_contains_str (roles, "PROVISIONING")) {
-                        retcode = 1;
-                        ctx->userlevel = AUTH_PROV;
-                    }
+            
+            var *roles = var_get_array_forkey (res, "roles");
+            if (roles) {
+                if (var_contains_str (roles, "ADMIN")) {
+                    retcode = 1;
+                    ctx->userlevel = AUTH_ADMIN;
+                }
+                else if (var_contains_str (roles, "PROVISIONING")) {
+                    retcode = 1;
+                    ctx->userlevel = AUTH_PROV;
                 }
             }
         }
@@ -518,6 +518,14 @@ void setup_matches (void) {
 }
 
 /*/ ======================================================================= /*/
+/** Panic handler for microhttpd */
+/*/ ======================================================================= /*/
+static void panic_func (void *cls, const char *file, unsigned int line,
+                        const char *reason) {
+    log_error ("[httpd] Error %s:%u: %s", file, line, reason);
+}
+
+/*/ ======================================================================= /*/
 /** Daemon runner. Basically kicks microhttpd in action, then sits
   * back and enjoys the show. */
 /*/ ======================================================================= /*/
@@ -533,6 +541,7 @@ int daemon_main (int argc, const char *argv[]) {
 
     struct MHD_Daemon *daemon;
     unsigned int flags = MHD_USE_THREAD_PER_CONNECTION;
+    MHD_set_panic_func (&panic_func, NULL);
     daemon = MHD_start_daemon (flags, OPTIONS.port, NULL, NULL,
                                &answer_to_connection, NULL,
                                MHD_OPTION_CONNECTION_LIMIT,
