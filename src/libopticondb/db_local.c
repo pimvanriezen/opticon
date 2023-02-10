@@ -301,6 +301,9 @@ uint64_t localdb_find_index (FILE *fix, time_t ts) {
 int localdb_get_current (db *d, host *into) {
     localdb *self = (localdb *) d;
     FILE *curf = localdb_open_current_read (self, into->uuid);
+    if (! curf) {
+        return 0;
+    }
     ioport *dbport = ioport_create_filereader (curf);
     uint64_t pad = ioport_read_u64 (dbport);
     if (pad != 0) {
