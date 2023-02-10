@@ -373,8 +373,14 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
         if (cache) {
             if (ctx->auth_tenants) {
                 free (ctx->auth_tenants);
+                ctx->auth_tenants = NULL;
             }
-            ctx->auth_tenants = cache->tenantlist;
+
+            if (cache->tenantcount) {            
+                ctx->auth_tenants = malloc (cache->tenantcount * sizeof(uuid));
+                memcpy (ctx->auth_tenants, cache->tenantlist,
+                        cache->tenantcount * sizeof(uuid));
+            }
             ctx->auth_tenantcount = cache->tenantcount;
             ctx->userlevel = cache->userlevel;
             free (cache);
