@@ -676,6 +676,24 @@ void daemon_sighup_handler (int sig) {
 }
 
 /*/ ======================================================================= /*/
+/** Load host data on restoring sessions */
+/*/ ======================================================================= /*/
+void restore_host_current (uuid tenantid, host *h) {
+    char hostidstr[40];
+    uuid2str (h->uuid, hostidstr);
+    
+    db *DB = localdb_create (APP.dbpath);
+    if (db_open (DB, tenantid, NULL)) {
+        if (db_host_exists (DB, h->uuid)) {
+            db_get_current (DB, h);
+            log_info ("Repopulating host <%s>: %i", hostidstr, h->mcount);
+        }
+        db_close (DB);
+    }
+    db_free (DB);
+}
+
+/*/ ======================================================================= /*/
 /** Main loop. Waits for a packet, then handles it. */
 /*/ ======================================================================= /*/
 int daemon_main (int argc, const char *argv[]) {
@@ -696,6 +714,8 @@ int daemon_main (int argc, const char *argv[]) {
         log_info ("Restoring sessions");
         sessiondb_restore (slist);
         var_free (slist);
+        var 
+        
         session_expire (time(NULL) - 905);
     }
     

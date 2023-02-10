@@ -40,6 +40,8 @@ typedef struct sessiondb_s {
     sessionlist          s[256];
 } sessiondb;
 
+typedef void (*restore_cb)(uuid, host *);
+
 /* ============================== GLOBALS ============================== */
 
 extern sessiondb SESSIONS;
@@ -48,7 +50,7 @@ extern sessiondb SESSIONS;
 
 void         sessiondb_init (void);
 var         *sessiondb_save (void);
-void         sessiondb_restore (var *);
+void         sessiondb_restore (var *, restore_cb cb);
 void         sessiondb_remove_tenant (uuid tenantid);
 
 session     *session_alloc (void);

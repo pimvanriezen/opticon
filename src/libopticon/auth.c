@@ -77,7 +77,7 @@ void sessiondb_remove_tenant (uuid tenantid) {
 /*/ ======================================================================= /*/
 /** Restore the sessionlist from imported JSON */
 /*/ ======================================================================= /*/
-void sessiondb_restore (var *list) {
+void sessiondb_restore (var *list, restore_cb cb) {
     var *v_session = var_get_array_forkey (list, "session");
     var *crsr = v_session->value.arr.first;
     while (crsr) {
@@ -92,6 +92,7 @@ void sessiondb_restore (var *list) {
         str2ip (var_get_str_forkey (crsr, "remote"), &s->remote);
         host *h = host_find (s->tenantid, s->hostid);
         if (! h) { free(s); continue; }
+        if (cb) cb (s->tenantid, h);
         s->host = h;
         session_link (s);
         crsr = crsr->next;
