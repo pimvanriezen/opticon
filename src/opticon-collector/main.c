@@ -667,6 +667,7 @@ void restore_host_current (uuid tenantid, host *h) {
         db_close (DB);
     }
     db_free (DB);
+    h->lastmodified = time(NULL);
 }
 
 /*/ ======================================================================= /*/
