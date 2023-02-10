@@ -712,13 +712,10 @@ int daemon_main (int argc, const char *argv[]) {
     var *slist = db_get_global (APP.db, "sessions");
     if (slist) {
         log_info ("Restoring sessions");
-        sessiondb_restore (slist);
+        sessiondb_restore (slist, restore_host_current);
         var_free (slist);
-        var 
-        
         session_expire (time(NULL) - 905);
     }
-    
     
     /* Set up threads */
     APP.queue = packetqueue_create (1024, APP.transport);
