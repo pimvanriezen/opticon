@@ -90,7 +90,7 @@ void meter_setcount (meter *m, unsigned int count) {
 
     /* Empty value/array shortcut: deallocate and be done */    
     if (cnt >= SZ_EMPTY_VAL) {
-        m->count = cnt;
+        m->count = count;
         m->lastmodified = m->host->lastmodified;
         if (m->d.any) {
             free (m->d.any);
@@ -119,7 +119,7 @@ void meter_setcount (meter *m, unsigned int count) {
         
         default:
             m->d.any = NULL;
-            m->count = -1;
+            m->count = SZ_EMPTY_VALUE;
             break;
     }
     
