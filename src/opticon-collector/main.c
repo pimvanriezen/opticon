@@ -327,25 +327,12 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
         host *h = S->host;
         pthread_rwlock_wrlock (&h->lock);
         
-        if (h->mcount == 0) {
-            db *DB = localdb_create (APP.dbpath);
-            if (db_open (DB, S->tenantid, NULL)) {
-                if (db_host_exists (DB, S->hostid)) {
-                    db_get_current (DB, h);
-                    log_info ("Repopulating host <%s>: %i", s_hostid,
-                              h->mcount);
-                }
-                db_close (DB);
-            }
-            db_free (DB);
-        }
-        
         char addrbuf[64];
         ip2str (&S->remote, addrbuf);
-        meterid_t mid_agentip = makeid ("link/ip", MTYPE_STR, 0);
-        meter *m_agentip = host_get_meter (h, mid_agentip);
-        meter_setcount (m_agentip, 0);
-        meter_set_str (m_agentip, 0, addrbuf);
+        meterid_t mid_linkip = makeid ("link/ip", MTYPE_STR, 0);
+        meter *m_linkip = host_get_meter (h, mid_linkip);
+        meter_setcount (m_linkip, 0);
+        meter_set_str (m_linkip, 0, addrbuf);
         pthread_rwlock_unlock (&h->lock);
     }
     
@@ -479,17 +466,6 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     
     /* Write the new meterdata into the host */
     host *H = S->host;
-
-    if (H->mcount == 0) {
-        db *DB = localdb_create (APP.dbpath);
-        if (db_open (DB, S->tenantid, NULL)) {
-            if (db_host_exists (DB, S->hostid)) {
-                db_get_current (DB, H);
-            }
-            db_close (DB);
-        }
-        db_free (DB);
-    }
 
     int i = 0;    
     for (i=0; i<4; ++i) {
