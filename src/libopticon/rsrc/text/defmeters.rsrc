@@ -388,7 +388,7 @@
     }
     cntr {
         type: table
-        description: Container Instances
+        description: "Container Instances"
     }
     cntr/name {
         type: string
