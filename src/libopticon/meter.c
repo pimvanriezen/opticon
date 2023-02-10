@@ -119,7 +119,7 @@ void meter_setcount (meter *m, unsigned int count) {
         
         default:
             m->d.any = NULL;
-            m->count = SZ_EMPTY_VALUE;
+            m->count = SZ_EMPTY_VAL;
             break;
     }
     
