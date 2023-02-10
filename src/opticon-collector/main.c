@@ -480,6 +480,17 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
     /* Write the new meterdata into the host */
     host *H = S->host;
 
+    if (H->mcount == 0) {
+        db *DB = localdb_create (APP.dbpath);
+        if (db_open (DB, S->tenantid, NULL)) {
+            if (db_host_exists (DB, S->hostid)) {
+                db_get_current (DB, H);
+            }
+            db_close (DB);
+        }
+        db_free (DB);
+    }
+
     int i = 0;    
     for (i=0; i<4; ++i) {
       if (pthread_rwlock_trywrlock (&H->lock) == 0) break;
