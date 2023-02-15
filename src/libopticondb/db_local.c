@@ -878,7 +878,8 @@ int localdb_remove_host (db *d, uuid hostid) {
     /* Remove host from overview, since if the tenant has no sessions left
        the host will keep lingering. */    
     var *ov = db_get_overview ((db *)self);
-    var_delete_key (ov, uuidstr);
+    var *ovdict = var_get_dict_forkey (ov, "overview");
+    var_delete_key (ovdict, uuidstr);
     db_set_overview ((db *)self, ov);
     return 1;
 }
