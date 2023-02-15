@@ -155,7 +155,7 @@ int handle_external_token_openstack (req_context *ctx) {
     }
                    
     log_info ("%s [AUTH_TOKEN] %03i FWD %s %s <%c%c...>",
-              ctx->remote, retcode ? 200 : 401, url,
+              ctx->remote, retcode ? 200 : 403, url,
               retcode?"ACCEPT":"REJECT",
               ctx->external_token[0], ctx->external_token[1]);
     
@@ -291,7 +291,7 @@ int handle_external_token_unithost (req_context *ctx) {
     }
     
     log_info ("%s [AUTH_TOKEN] %03i FWD %s %s (Token %c%c...)",
-              ctx->remote, retcode ? 200 : 401, url,
+              ctx->remote, retcode ? 200 : 403, url,
               retcode?"ACCEPT":"REJECT",
               ctx->external_token[0], ctx->external_token[1]);
     
@@ -354,7 +354,7 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
             return 0;
         }
         if (strcmp (OPTIONS.adminhost, ctx->remote) != 0) {
-            log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (IP)", ctx->remote); 
+            log_info ("%s [AUTH_LOCAL] 403 LOCALDB REJECT (IP)", ctx->remote); 
             ctx->userlevel = AUTH_GUEST;
             return 0;
         }
@@ -363,7 +363,7 @@ int flt_check_validuser (req_context *ctx, req_arg *a,
         }
         else {
             uuid2str (ctx->opticon_token, uuidstr);
-            log_info ("%s [AUTH_LOCAL] 401 LOCALDB REJECT (Token %c%c...)",
+            log_info ("%s [AUTH_LOCAL] 403 LOCALDB REJECT (Token %c%c...)",
                       ctx->remote, uuidstr[0], uuidstr[1]);
             ctx->userlevel = AUTH_GUEST;
         }

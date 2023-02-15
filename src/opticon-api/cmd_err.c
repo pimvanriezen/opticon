@@ -23,14 +23,14 @@ int err_generic (var *out, const char *fmt, ...) {
 /** Generate a generic 401 error */
 int err_unauthorized (req_context *ctx, req_arg *a, var *out, int *status) {
     var_set_str_forkey (out, "error", "Unauthorized access");
-    *status = 401;
+    *status = 403;
     return 1;    
 }
 
 /** Generate a generic 403 error */
 int err_not_allowed (req_context *ctx, req_arg *a, var *out, int *status) {
     var_set_str_forkey (out, "error", "Permission denied");
-    *status = 403;
+    *status = 401;
     return 1;    
 }
 
