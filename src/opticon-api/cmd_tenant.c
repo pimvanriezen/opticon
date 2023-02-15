@@ -10,6 +10,7 @@
 #include "cmd.h"
 #include "options.h"
 
+/*/ ======================================================================= /*/
 /** Build up a summarized collection of meter information bound to
   * a specific tenant or host.
   * \param tenant The tenant uuid
@@ -17,6 +18,7 @@
   * \param watchonly If 1, collect watcher data, not meter data
   * \return var object ready for transmission.
   */
+/*/ ======================================================================= /*/
 var *collect_meterdefs (uuid tenant, uuid host, int watchonly) {
     char tenantstr[40];
     uuid2str (tenant, tenantstr);
@@ -153,7 +155,9 @@ var *collect_meterdefs (uuid tenant, uuid host, int watchonly) {
     return conf;
 }
 
+/*/ ======================================================================= /*/
 /** GET / */
+/*/ ======================================================================= /*/
 int cmd_list_tenants (req_context *ctx, req_arg *a, var *env, int *status) {
     int count = 0;
     var *v_tenants = var_get_array_forkey (env, "tenant");
@@ -198,7 +202,9 @@ int cmd_list_tenants (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /token */
+/*/ ======================================================================= /*/
 int cmd_token (req_context *ctx, req_arg *a, var *env, int *status) {
     var *env_token = var_get_dict_forkey (env, "token");
     switch (ctx->userlevel) {
@@ -226,7 +232,9 @@ int cmd_token (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT */
+/*/ ======================================================================= /*/
 int cmd_tenant_get (req_context *ctx, req_arg *a, var *env, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
@@ -244,7 +252,9 @@ int cmd_tenant_get (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/quota */
+/*/ ======================================================================= /*/
 int cmd_tenant_get_quota (req_context *ctx, req_arg *a, var *env, int *st) {
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
@@ -273,12 +283,14 @@ int cmd_tenant_get_quota (req_context *ctx, req_arg *a, var *env, int *st) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** POST /$TENANT
   * tenant: {
   *     key: "base64", # optional
   *     name: "tenant name"
   * }
   */
+/*/ ======================================================================= /*/
 int cmd_tenant_create (req_context *ctx, req_arg *a, var *env, int *status) {
     aeskey key;
     if (! var_find_key (ctx->bodyjson, "tenant")) {
@@ -319,12 +331,14 @@ int cmd_tenant_create (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** PUT /$TENANT
   * tenant: {
   *     key: "base64",
   *     name: "tenant name" # optional (needs admin)
   * }
   */
+/*/ ======================================================================= /*/
 int cmd_tenant_update (req_context *ctx, req_arg *a, var *env, int *status) {
     aeskey key;
     var *vopts = var_get_dict_forkey (ctx->bodyjson, "tenant");
@@ -378,7 +392,9 @@ int cmd_tenant_update (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** DELETE /$TENANT */
+/*/ ======================================================================= /*/
 int cmd_tenant_delete (req_context *ctx, req_arg *a, var *env, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
@@ -392,7 +408,9 @@ int cmd_tenant_delete (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/meta */
+/*/ ======================================================================= /*/
 int cmd_tenant_get_meta (req_context *ctx, req_arg *a,
                          var *env, int *status) {
     
@@ -411,7 +429,9 @@ int cmd_tenant_get_meta (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/summary */
+/*/ ======================================================================= /*/
 int cmd_tenant_get_summary (req_context *ctx, req_arg *a,
                             var *env, int *status) {
     
@@ -430,11 +450,13 @@ int cmd_tenant_get_summary (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** POST /$TENANT/meta 
   * metadata: {
   *    key: value, ...
   * }
   */
+/*/ ======================================================================= /*/
 int cmd_tenant_set_meta (req_context *ctx, req_arg *a, 
                          var *env, int *status) {
 
@@ -456,7 +478,9 @@ int cmd_tenant_set_meta (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/meter */
+/*/ ======================================================================= /*/
 int cmd_tenant_list_meters (req_context *ctx, req_arg *a, 
                             var *env, int *status) {
     var *res = collect_meterdefs (ctx->tenantid, uuidnil(), 0);
@@ -468,6 +492,7 @@ int cmd_tenant_list_meters (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Utility function for getting a meterid string out of the
   * argument list. Because meterids can contain slashes, the
   * actual id is sometimes 1, sometimes 2 arguments long.
@@ -480,6 +505,7 @@ int cmd_tenant_list_meters (req_context *ctx, req_arg *a,
   * \return 1 on success, 0 if a valid meterid couldn't be
   *         extracted.
   */
+/*/ ======================================================================= /*/
 int set_meterid (char *meterid, req_arg *a, int pos) {
     const char *meterpart = a->argv[pos];
     if (a->argc == (pos+1)) {
@@ -498,6 +524,7 @@ int set_meterid (char *meterid, req_arg *a, int pos) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** POST /$TENANT/meter/$meterid[/$subid] 
   * meter: {
   *     type: "integer",
@@ -505,6 +532,7 @@ int set_meterid (char *meterid, req_arg *a, int pos) {
   *     unit: "storpels/s" # optional
   * }
   */
+/*/ ======================================================================= /*/
 int cmd_tenant_set_meter (req_context *ctx, req_arg *a, 
                           var *env, int *status) {
     if (a->argc < 2) return err_server_error (ctx, a, env, status);
@@ -561,7 +589,9 @@ int cmd_tenant_set_meter (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** DELETE /$TENANT/meter/$meterid[/$subid] */
+/*/ ======================================================================= /*/
 int cmd_tenant_delete_meter (req_context *ctx, req_arg *a, 
                              var *env, int *status) {
     if (a->argc < 2) return err_server_error (ctx, a, env, status);
@@ -586,7 +616,9 @@ int cmd_tenant_delete_meter (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/watcher */
+/*/ ======================================================================= /*/
 int cmd_tenant_list_watchers (req_context *ctx, req_arg *a, 
                             var *env, int *status) {
     var *res = collect_meterdefs (ctx->tenantid, uuidnil(), 1);
@@ -598,14 +630,16 @@ int cmd_tenant_list_watchers (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** POST /$TENANT/watcher/$METERID
   * watcher {
   *     warning { cmp: gt, value: 10, weight:1.0 } # optional
   * }
   */
+/*/ ======================================================================= /*/
 int cmd_tenant_set_watcher (req_context *ctx, req_arg *a, 
                             var *env, int *status) {
-    if (a->argc < 2) return err_server_error (ctx, a, env, status);
+    if (a->argc < 2) return err_bad_request (ctx, a, env, status);
 
     char meterid[16];
     if (! set_meterid (meterid, a, 1)) err_bad_request (ctx, a, env, status);
@@ -645,7 +679,9 @@ int cmd_tenant_set_watcher (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** DELETE /$TENANT/watcher/$METERID */
+/*/ ======================================================================= /*/
 int cmd_tenant_delete_watcher (req_context *ctx, req_arg *a, 
                                var *env, int *status) {
     if (a->argc < 2) return err_server_error (ctx, a, env, status);
@@ -673,7 +709,9 @@ int cmd_tenant_delete_watcher (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Format a timestamp for output */
+/*/ ======================================================================= /*/
 static char *timfmt (time_t w, int json) {
     struct tm tm;
     if (json) gmtime_r (&w, &tm);
@@ -683,7 +721,9 @@ static char *timfmt (time_t w, int json) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** GET /$TENANT/host */
+/*/ ======================================================================= /*/
 int cmd_tenant_list_hosts (req_context *ctx, req_arg *a, 
                             var *env, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
