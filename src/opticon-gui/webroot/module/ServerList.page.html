@@ -45,6 +45,9 @@
           <img class="osicon" src="{{osIcon(o)}}" height="16"
                style="margin-bottom:-4px;">
           <b>{{o.hostname}}</b>
+          <span v-if="o.external && o.external.description">
+            ({{o.external.description}})
+          </span>
         </td>
         <td width="20" align="center">
           <span v-if="(o['pkgm/inq']>0)||(o['pkgm/reboot'])">
