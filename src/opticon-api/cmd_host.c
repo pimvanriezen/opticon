@@ -425,6 +425,9 @@ int cmd_host_get_time (req_context *ctx, req_arg *a,
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Get list of active sessions to collector */
+/*/ ======================================================================= /*/
 int cmd_list_sessions (req_context *ctx, req_arg *a, var *env, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
     var *list = db_get_global (DB, "sessions");
@@ -441,6 +444,9 @@ int cmd_list_sessions (req_context *ctx, req_arg *a, var *env, int *status) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Fill in graph definition */
+/*/ ======================================================================= /*/
 void add_graphdefs (var *into, var *from) {
     if (from->type != VAR_DICT) return;
     var *fcrsr = from->value.arr.first;
