@@ -35,9 +35,11 @@
 
 const char *localdb_error = NULL;
 
+/*/ ======================================================================= /*/
 /** Convert epoch time to a GMT date stamp integer, to be used as part of
   * the filename of underlying database files.
   */
+/*/ ======================================================================= /*/
 datestamp time2date (time_t in) {
     datestamp res = 0;
     struct tm tmin;
@@ -47,12 +49,14 @@ datestamp time2date (time_t in) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Bind a localdb to a specific, existing, tenant.
   * \param d The db handle
   * \param tenant The tenant uuid
   * \param options Driver-specific options (unused).
   * \return 1 on success, 0 on failure.
   */
+/*/ ======================================================================= /*/
 int localdb_open (db *d, uuid tenant, var *options) {
     localdb *self = (localdb *) d;
     char *insertpos = NULL;
@@ -80,6 +84,9 @@ int localdb_open (db *d, uuid tenant, var *options) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Checks if a host exists for a given tenant */
+/*/ ======================================================================= /*/
 bool localdb_host_exists (db *d, uuid hostid) {
     localdb *self = (localdb *) d;
     char uuidstr[40];
@@ -99,7 +106,9 @@ bool localdb_host_exists (db *d, uuid hostid) {
     }
 }
 
+/*/ ======================================================================= /*/
 /** Open the database file for a specified datestamp */
+/*/ ======================================================================= /*/
 FILE *localdb_open_dbfile (localdb *ctx, uuid hostid, datestamp dt, int flags) {
     char uuidstr[40];
     struct stat st;
@@ -128,7 +137,9 @@ FILE *localdb_open_dbfile (localdb *ctx, uuid hostid, datestamp dt, int flags) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Open the index file for a specified datestamp */
+/*/ ======================================================================= /*/
 FILE *localdb_open_indexfile (localdb *ctx, uuid hostid, datestamp dt, int flags) {
     char uuidstr[40];
     struct stat st;
@@ -157,7 +168,9 @@ FILE *localdb_open_indexfile (localdb *ctx, uuid hostid, datestamp dt, int flags
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Open a host's current.db for writing */
+/*/ ======================================================================= /*/
 FILE *localdb_open_current (localdb *ctx, uuid hostid, int flags) {
     char uuidstr[40];
     struct stat st;
@@ -188,7 +201,9 @@ FILE *localdb_open_current (localdb *ctx, uuid hostid, int flags) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Open a host's current.db for reading */
+/*/ ======================================================================= /*/
 FILE *localdb_open_current_read (localdb *ctx, uuid hostid) {
     char uuidstr[40];
     struct stat st;
@@ -202,7 +217,9 @@ FILE *localdb_open_current_read (localdb *ctx, uuid hostid) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Indicate that we're done writing to a host's current.db */
+/*/ ======================================================================= /*/
 void localdb_done_current (localdb *ctx, uuid hostid) {
     char uuidstr[40];
     struct stat st;
@@ -220,10 +237,12 @@ void localdb_done_current (localdb *ctx, uuid hostid) {
     free (oldpath);
 }
 
+/*/ ======================================================================= /*/
 /** Utility function for reading an encoded 64 bits integer out
   * of a FILE stream. This because setting up an iobuffer for
   * just this task stinks for the index.
   */
+/*/ ======================================================================= /*/
 uint64_t localdb_read64 (FILE *fix) {
     uint64_t dt, res;
     if (fread (&dt, sizeof (res), 1, fix) == 0) {
@@ -232,6 +251,7 @@ uint64_t localdb_read64 (FILE *fix) {
     return be64toh (dt);
 }
 
+/*/ ======================================================================= /*/
 /** Get the offset for the closest matching record to a given timestamp
   * out of an indexfile.
   * \param fix The indexfile
@@ -239,6 +259,7 @@ uint64_t localdb_read64 (FILE *fix) {
   * \return Offset inside the dbfile of the wanted record, or
   *         LOCALDB_OFFS_INVALID if something went wrong.
   */
+/*/ ======================================================================= /*/
 uint64_t localdb_find_index (FILE *fix, time_t ts) {
     uint64_t first_when;
     uint64_t last_when;
@@ -297,7 +318,9 @@ uint64_t localdb_find_index (FILE *fix, time_t ts) {
     return lastmatch;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_current() */
+/*/ ======================================================================= /*/
 int localdb_get_current (db *d, host *into) {
     localdb *self = (localdb *) d;
     FILE *curf = localdb_open_current_read (self, into->uuid);
@@ -317,7 +340,9 @@ int localdb_get_current (db *d, host *into) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_record() */
+/*/ ======================================================================= /*/
 int localdb_get_record (db *d, time_t when, host *into) {
     localdb *self = (localdb *) d;
     datestamp dt = time2date (when);
@@ -368,7 +393,9 @@ int localdb_get_record (db *d, time_t when, host *into) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_value_range_int() */
+/*/ ======================================================================= /*/
 uint64_t *localdb_get_value_range_int (db *d, time_t start, time_t end,
                                        int numsamples, meterid_t key,
                                        uint8_t arrayindex, host *h) {
@@ -396,7 +423,9 @@ uint64_t *localdb_get_value_range_int (db *d, time_t start, time_t end,
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_value_range_frac() */
+/*/ ======================================================================= /*/
 double *localdb_get_value_range_frac (db *d, time_t start, time_t end,
                                       int numsamples, meterid_t key,
                                       uint8_t arrayindex, host *h) {
@@ -424,7 +453,9 @@ double *localdb_get_value_range_frac (db *d, time_t start, time_t end,
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_save_record() */
+/*/ ======================================================================= /*/
 int localdb_save_record (db *dbctx, time_t when, host *h) {
     localdb *self = (localdb *) dbctx;
     datestamp dt = time2date (when);
@@ -479,7 +510,9 @@ int localdb_save_record (db *dbctx, time_t when, host *h) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_delete_host_date() */
+/*/ ======================================================================= /*/
 void localdb_delete_host_date (db *dbctx, uuid hostid, time_t ti) {
     datestamp dt = time2date (ti);
     localdb *self = (localdb *) dbctx;
@@ -497,7 +530,9 @@ void localdb_delete_host_date (db *dbctx, uuid hostid, time_t ti) {
     return;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_usage() */
+/*/ ======================================================================= /*/
 int localdb_get_usage (db *dbctx, usage_info *into, uuid hostid) {
     localdb *self = (localdb *) dbctx;
     char uuidstr[40];
@@ -570,21 +605,27 @@ int localdb_get_usage (db *dbctx, usage_info *into, uuid hostid) {
     return 0;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_close() */
+/*/ ======================================================================= /*/
 void localdb_close (db *dbctx) {
     localdb *self = (localdb *) dbctx;
     free (self->path);
     self->path = NULL;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_free() */
+/*/ ======================================================================= /*/
 void localdb_free (db *dbctx) {
     localdb *self = (localdb *) dbctx;
     codec_release (self->codec);
     free (self->pathprefix);
 }
 
+/*/ ======================================================================= /*/
 /** Recurse over a directory structure fishing for uuids */
+/*/ ======================================================================= /*/
 void recurse_subs (const char *path, int depthleft,
                    int *alloc, int *outsz, uuid **res) {
     char *newpath;
@@ -622,7 +663,9 @@ void recurse_subs (const char *path, int depthleft,
     closedir (D);
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_list_tenants() */
+/*/ ======================================================================= /*/
 uuid *localdb_list_tenants (db *d, int *outsz) {
     localdb *self = (localdb *) d;
     int alloc = 4;
@@ -633,9 +676,11 @@ uuid *localdb_list_tenants (db *d, int *outsz) {
 }
 
 
+/*/ ======================================================================= /*/
 /** Implementation for db_create_tenant(). Creates the
   * necessary directory structures.
   */
+/*/ ======================================================================= /*/
 int localdb_create_tenant (db *d, uuid tenant, var *meta) {
     localdb *self = (localdb *) d;
     char *insertpos = NULL;
@@ -702,10 +747,12 @@ int localdb_create_tenant (db *d, uuid tenant, var *meta) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Utility function for cleaning out disk directories (rm -rf).
   * \param path The directory to remove recursively.
   * \return 1 on success, 0 on failure.
   */
+/*/ ======================================================================= /*/
 int localdb_remove_dir (const char *path) {
     char *newpath;
     struct dirent *dir;
@@ -747,7 +794,9 @@ int localdb_remove_dir (const char *path) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_remove_tenant() */
+/*/ ======================================================================= /*/
 int localdb_remove_tenant (db *d, uuid tenantid) {
     localdb *self = (localdb *) d;
     char *insertpos = NULL;
@@ -778,7 +827,9 @@ int localdb_remove_tenant (db *d, uuid tenantid) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_remove_host() */
+/*/ ======================================================================= /*/
 int localdb_remove_host (db *d, uuid hostid) {
     struct stat st;
     localdb *self = (localdb *) d;
@@ -832,7 +883,9 @@ int localdb_remove_host (db *d, uuid hostid) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_list_hosts() */
+/*/ ======================================================================= /*/
 uuid *localdb_list_hosts (db *d, int *outsz) {
     localdb *self = (localdb *) d;
     uuid *res = (uuid *) malloc (4 * sizeof (uuid));
@@ -870,7 +923,9 @@ uuid *localdb_list_hosts (db *d, int *outsz) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_tenantdata */
+/*/ ======================================================================= /*/
 var *localdb_get_tenantdata (db *d, const char *suffx) {
     localdb *self = (localdb *) d;
     struct stat st;
@@ -906,22 +961,30 @@ var *localdb_get_tenantdata (db *d, const char *suffx) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_metadata() */
+/*/ ======================================================================= /*/
 var *localdb_get_metadata (db *d) {
     return localdb_get_tenantdata (d, "metadata");
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_summary() */
+/*/ ======================================================================= /*/
 var *localdb_get_summary (db *d) {
     return localdb_get_tenantdata (d, "summary");
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_overview() */
+/*/ ======================================================================= /*/
 var *localdb_get_overview (db *d) {
     return localdb_get_tenantdata (d, "overview");
 }
 
+/*/ ======================================================================= /*/
 /** Generic function for storing tenant-related data */
+/*/ ======================================================================= /*/
 int localdb_store_tenantdata (db *d, var *v, const char *suffx) {
     localdb *self = (localdb *) d;
     int res = 0;
@@ -955,22 +1018,30 @@ int localdb_store_tenantdata (db *d, var *v, const char *suffx) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_set_metadata() */
+/*/ ======================================================================= /*/
 int localdb_set_metadata (db *d, var *v) {
     return localdb_store_tenantdata (d, v, "metadata");
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_set_summary() */
+/*/ ======================================================================= /*/
 int localdb_set_summary (db *d, var *v) {
     return localdb_store_tenantdata (d, v, "summary");
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_set_overview() */
+/*/ ======================================================================= /*/
 int localdb_set_overview (db *d, var *v) {
     return localdb_store_tenantdata (d, v, "overview");
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_hostmeta() */
+/*/ ======================================================================= /*/
 var *localdb_get_hostmeta (db *d, uuid hostid) {
     localdb *self = (localdb *) d;
     char uuidstr[40];
@@ -1007,7 +1078,9 @@ var *localdb_get_hostmeta (db *d, uuid hostid) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_hostmeta_changed() */
+/*/ ======================================================================= /*/
 time_t localdb_get_hostmeta_changed (db *d, uuid hostid) {
     struct stat st;
     localdb *self = (localdb *) d;
@@ -1020,7 +1093,9 @@ time_t localdb_get_hostmeta_changed (db *d, uuid hostid) {
     return st.st_mtime;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_set_metadata() */
+/*/ ======================================================================= /*/
 int localdb_set_hostmeta (db *d, uuid hostid, var *v) {
     localdb *self = (localdb *) d;
     int res = 0;
@@ -1054,19 +1129,25 @@ int localdb_set_hostmeta (db *d, uuid hostid, var *v) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Converts a timestamp to an offset in a graph file. A graph file is always
     30 days worth of 5 minute samples. */
+/*/ ======================================================================= /*/
 uint32_t localdb_graph_offset (time_t ti) {
     uint32_t clipped = (uint32_t) (ti % (30 * 86400));
     return (clipped / 300);
 }
 
+/*/ ======================================================================= /*/
 /** Calculate next offset in graph data */
+/*/ ======================================================================= /*/
 uint32_t localdb_offset_next (uint32_t i) {
     return ((i+1) % GRAPHDATASZ);
 }
 
+/*/ ======================================================================= /*/
 /** Maps a host's logfile into memory, returning a handle */
+/*/ ======================================================================= /*/
 hostloghandle *localdb_open_log (localdb *self, uuid hostid) {
     struct stat st;
     int initialize=0;
@@ -1107,14 +1188,18 @@ hostloghandle *localdb_open_log (localdb *self, uuid hostid) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Unmaps a previously opened log */
+/*/ ======================================================================= /*/
 void localdb_close_log (hostloghandle *hdl) {
     if (hdl->data) munmap (hdl->data, sizeof (hostlogdata));
     if (hdl->fd >= 0) close (hdl->fd);
     free (hdl);
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_write_log() */
+/*/ ======================================================================= /*/
 void localdb_write_log (db *d, uuid hostid, const char *subsystem,
                         const char *msg) {
     localdb *self = (localdb *) d;
@@ -1136,7 +1221,9 @@ void localdb_write_log (db *d, uuid hostid, const char *subsystem,
     }
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_log() */
+/*/ ======================================================================= /*/
 var *localdb_get_log (db *d, uuid hostid) {
     localdb *self = (localdb *) d;
     hostloghandle *log = localdb_open_log (self, hostid);
@@ -1159,7 +1246,9 @@ var *localdb_get_log (db *d, uuid hostid) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Utility function that opens and mmaps a graph file. */
+/*/ ======================================================================= /*/
 graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
                                const char *v) {
     graphdata *res = NULL;
@@ -1205,14 +1294,18 @@ graphdata *localdb_open_graph (localdb *self, uuid hostid, const char *id,
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Utility function that closes a previously opened graph file. */
+/*/ ======================================================================= /*/
 void localdb_close_graph (localdb *self, graphdata *data) {
     munmap (data, sizeof(graphdata));
     close (self->graphfd);
     self->graphfd = -1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_set_graph() */
+/*/ ======================================================================= /*/
 int localdb_set_graph (db *d, uuid hostid, const char *id, const char *key,
                        double val) {
     localdb *self = (localdb *) d;
@@ -1234,7 +1327,9 @@ int localdb_set_graph (db *d, uuid hostid, const char *id, const char *key,
     return 1;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_graph() */
+/*/ ======================================================================= /*/
 double *localdb_get_graph (db *d, uuid hostid, const char *id,
                            const char *key, time_t interval,
                            int numsamples) {
@@ -1291,7 +1386,9 @@ double *localdb_get_graph (db *d, uuid hostid, const char *id,
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_set_global() */
+/*/ ======================================================================= /*/
 int localdb_set_global (db *d, const char *id, var *v) {
     int res = 0;
     FILE *F;
@@ -1323,7 +1420,9 @@ int localdb_set_global (db *d, const char *id, var *v) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Implementation for db_get_global() */
+/*/ ======================================================================= /*/
 var *localdb_get_global (db *d, const char *id) {
     localdb *self = (localdb *) d;
     struct stat st;
@@ -1359,10 +1458,12 @@ var *localdb_get_global (db *d, const char *id) {
     return res;
 }
 
+/*/ ======================================================================= /*/
 /** Allocate an unbound localdb object.
   * \param prefix The path prefix for local storage.
   * \return A database handle (or NULL).
   */
+/*/ ======================================================================= /*/
 db *localdb_create (const char *prefix) {
     localdb *self = (localdb *) malloc (sizeof (localdb));
     if (!self) return NULL;
