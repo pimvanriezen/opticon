@@ -211,7 +211,7 @@ int cmd_host_remove (req_context *ctx, req_arg *a, var *env, int *status) {
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
         db_free (DB);
-        return 0;
+        return err_not_found (ctx, a, env, status);
     }
     
     if (db_remove_host (DB, ctx->hostid)) {
@@ -280,7 +280,7 @@ int cmd_host_set_watcher (req_context *ctx, req_arg *a,
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
         db_free (DB);
-        return 0;
+        return err_not_found (ctx, a, env, status);
     }
     
     var *def = collect_meterdefs (ctx->tenantid, uuidnil(), 0);
@@ -363,7 +363,7 @@ int cmd_host_delete_watcher (req_context *ctx, req_arg *a,
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
         db_free (DB);
-        return 0;
+        return err_not_found (ctx, a, env, status);
     }
 
     var *hmeta = db_get_hostmeta (DB, ctx->hostid);
@@ -400,7 +400,7 @@ int cmd_host_get_time (req_context *ctx, req_arg *a,
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
         db_free (DB);
-        return 0;
+        return err_not_found (ctx, a, env, status);
     }
     if (!JSONCODEC) JSONCODEC = codec_create_json();
     host *h = host_alloc();
