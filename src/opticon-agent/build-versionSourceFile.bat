@@ -11,9 +11,10 @@ echo Git command not found
 goto exit
 
 :continue_1
+@rem https://ss64.com/nt/syntax-replace.html
 FOR /F %%a IN ('git describe --tags') DO set gitTag=%%a
-set remove=%gitTag:*-=%
-call set versionNumber=%%gitTag:-%remove%=%%
+set remove=%gitTag:*-g=%
+call set versionNumber=%%gitTag:-g%remove%=%%
 if NOT [%versionNumber%]==[] ( goto continue_2 )
 echo Version tag from git is empty
 goto exit

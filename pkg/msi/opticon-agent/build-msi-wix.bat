@@ -22,9 +22,10 @@ echo Git command not found
 goto exit
 
 :continue_1
+@rem https://ss64.com/nt/syntax-replace.html
 FOR /F %%a IN ('git describe --tags') DO set gitTag=%%a
-set remove=%gitTag:*-=%
-call set versionNumber=%%gitTag:-%remove%=%%
+set remove=%gitTag:*-g=%
+call set versionNumber=%%gitTag:-g%remove%=%%
 if NOT [%versionNumber%]==[] ( goto continue_2 )
 echo Version tag from git is empty
 goto exit
@@ -34,8 +35,12 @@ goto exit
 
 @rem set versionNumber=0.9.5
 
+@rem MSI version number can only be in the form of "x.x.x.x" (where x is a number)
+@rem So we replace any dash "-" with a dot "."
+call set msiVersionNumber=%%versionNumber:-=.%%
 
-call :echoCommand candle opticon-agent.wxs -arch x64 -dbuildMode="%buildMode%" -dversionNumber="%versionNumber%" -ext WixUIExtension -ext WixUtilExtension -o ../../../build/opticon-agent/msi/opticon-agent.wixobj
+
+call :echoCommand candle opticon-agent.wxs -arch x64 -dbuildMode="%buildMode%" -dversionNumber="%msiVersionNumber%" -ext WixUIExtension -ext WixUtilExtension -o ../../../build/opticon-agent/msi/opticon-agent.wixobj
 if %ERRORLEVEL% EQU 0 (
 	@rem -spdb suppresses the output of opticon-agent.wixpdb (it contains extra symbol information about the .msi, it may be useful to archive this file to build patch files)
 	call :echoCommand light ../../../build/opticon-agent/msi/opticon-agent.wixobj -spdb -ext WixUIExtension -ext WixUtilExtension -cultures:en-us -o ../../../bin/opticon-agent-%versionNumber%%buildFileNameAddition%.msi
