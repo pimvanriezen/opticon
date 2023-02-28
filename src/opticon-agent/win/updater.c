@@ -46,8 +46,8 @@ BOOLAPI InternetCrackUrlA(LPCSTR lpszUrl,DWORD dwUrlLength,DWORD dwFlags,LPURL_C
 
 
 typedef enum DInstallType {
-    INSTALLTYPE_UPDATE,
-    INSTALLTYPE_INSTALLLATEST       // @note This does not force a reinstall if the exact msi package is already installed
+    INSTALLTYPE_UPDATE,         // This does not force a reinstall if the exact same version is already installed
+    INSTALLTYPE_INSTALLLATEST   // This forces a reinstall even if the exact same version is already installed
 } DInstallType;
 
 
@@ -486,7 +486,6 @@ static uint32_t _install(const char *url, const char *channel, DInstallType inst
     
     bool doInstall = false;
     if (installType == INSTALLTYPE_UPDATE) {
-        
         if (strcmp(targetVersion, VERSION) == 0) {
             log_info("No new version available");
         }
