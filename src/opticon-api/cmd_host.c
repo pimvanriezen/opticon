@@ -399,8 +399,13 @@ int cmd_host_get_time (req_context *ctx, req_arg *a,
 
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
+        var *err = var_alloc();
+        var_set_str_forkey (err, "error", "Not found");
+        *status = 404;
+        var_write (err, outio);
+        var_free (err);
         db_free (DB);
-        return err_not_found (ctx, a, env, status);
+        return 1;
     }
     if (!JSONCODEC) JSONCODEC = codec_create_json();
     host *h = host_alloc();
