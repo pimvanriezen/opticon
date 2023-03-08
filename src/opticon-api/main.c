@@ -329,6 +329,8 @@ int flt_add_cors (req_context *ctx, req_arg *a, var *out, int *status) {
     var_set_str_forkey (ctx->outhdr, "Access-Control-Allow-Origin","*");
     var_set_str_forkey (ctx->outhdr, "Access-Control-Allow-Methods",
                         "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+    var_set_str_forkey (ctx->outhdr, "Access-Control-Allow-Headers",
+                        "Content-type, X-Auth-Token");
     if (ctx->method == REQ_OPTIONS) {
         *status = 200;
         return 1;
