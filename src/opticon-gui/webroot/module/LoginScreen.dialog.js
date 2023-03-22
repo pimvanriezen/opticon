@@ -25,6 +25,14 @@ LoginScreen.open = function() {
     self.View.username = "";
     self.View.password = "";
     self.View.error = "";
+    
+    console.log ("LOGINSCREEN " + window.location.hash)
+    
+    if (window.location.hash.indexOf('&auth_token=')>=0) {
+        Router.handle (window.location.hash.split('#')[1]);
+        return;
+    }
+    
     self.show();
     self.isOpen = true;
     $(".uSideBar").hide();

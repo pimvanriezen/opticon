@@ -15,6 +15,13 @@ App.activate = function(defaultpath) {
     var self = App;
     var inhash = window.location.hash.split('#')[1];
 
+    if (inhash && inhash.indexOf ("&auth_token=") >= 0) {
+        let token = inhash.replace (/.*&auth_token=/, "");
+        API.Auth.setToken (token);
+        inhash = inhash.split('&')[0];
+        
+    }
+
     if ((!inhash) || (inhash=="") || (inhash=="/")) {
         inhash = defaultpath;
     }

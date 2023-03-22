@@ -12,6 +12,47 @@ API.Auth.credentials = {
 API.Auth.create = function() {
 }
 
+API.Auth.setToken = function (token, cb) {
+    var self = API.Auth;
+    self.credentials.token = token;
+    if (conf.auth_method == "internal") {
+        API.headers["X-Opticon-Token"] = token;
+        API.get ("opticon","/token",function (err, data) {
+            self.credentials.access = "user";
+            if (data.token.userlevel == "AUTH_ADMIN") {
+                self.credentials.access = "admin";
+            };
+            self.credentials.username = username;
+            self.credentials.roles = ["USER"];
+            self.credentials.tenant = data.token.tenants[0];
+            cb (true);
+        })
+        return;
+    }
+
+    API.headers["X-Auth-Token"] = token;
+    
+    API.get ("account","/token",function (err, data) {
+        self.credentials.access = "user";
+        self.credentials.username = data.username;
+        self.credentials.roles = data.roles;
+        self.credentials.uuid = data.uuid;
+        self.credentials.tenant = data.tenant;
+        
+        if (data.roles.indexOf("ADMIN")>=0) {
+            self.credentials.access = "admin";
+        }
+        
+        cb (true);
+        if (! self.timeout) {
+            $(window).focus(function (event) {
+                self.checkAccess();
+            });
+            self.timeout = setTimeout (self.checkAccessJob, 30000);
+        }
+    });
+}
+
 API.Auth.login = function (username, password, cb) {
     var self = API.Auth;
     var svc;
@@ -45,43 +86,7 @@ API.Auth.login = function (username, password, cb) {
         console.log (data);
         
         if (data.token) {
-            self.credentials.token = data.token;
-            if (conf.auth_method == "internal") {
-                API.headers["X-Opticon-Token"] = data.token;
-                API.get ("opticon","/token",function (err, data) {
-                    self.credentials.access = "user";
-                    if (data.token.userlevel == "AUTH_ADMIN") {
-                        self.credentials.access = "admin";
-                    };
-                    self.credentials.username = username;
-                    self.credentials.roles = ["USER"];
-                    self.credentials.tenant = data.token.tenants[0];
-                    cb (true);
-                })
-                return;
-            }
-
-            API.headers["X-Auth-Token"] = data.token;
-            
-            API.get ("account","/token",function (err, data) {
-                self.credentials.access = "user";
-                self.credentials.username = data.username;
-                self.credentials.roles = data.roles;
-                self.credentials.uuid = data.uuid;
-                self.credentials.tenant = data.tenant;
-                
-                if (data.roles.indexOf("ADMIN")>=0) {
-                    self.credentials.access = "admin";
-                }
-                
-                cb (true);
-                if (! self.timeout) {
-                    $(window).focus(function (event) {
-                        self.checkAccess();
-                    });
-                    self.timeout = setTimeout (self.checkAccessJob, 30000);
-                }
-            });
+            self.setToken (data.token, cb);
         }
         else {
             cb (false);
