@@ -281,6 +281,7 @@ void ping_run_receiver_v4 (thread *self) {
         ip = (struct ip *) buf;
         hlen = ip->ip_hl << 2;
         icp = (struct icmp *)(buf + hlen);
+        if (icp->type != ICMP_ECHOREPLY) continue;
         
         pingtarget *tgt = pingtarget_open (&faddr, false);
         if (tgt) {
