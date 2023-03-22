@@ -934,7 +934,7 @@ td.ipaddr {
     width: 240px;
 }
 
-@media (max-width: 1350px) {
+@media (max-width: 1450px) {
     .nonarrow {
         display: none;
     }
@@ -942,7 +942,7 @@ td.ipaddr {
     }
 }
 
-@media (min-width: 1350px) {
+@media (min-width: 1450px) {
     .onlynarrow {
         display:  none;
     }

@@ -14,6 +14,7 @@
       <td width="*">
         <b>Hostname</b>
       </td>
+      <td class="nonarrow" v-if="showextra" width="80"><b>Label</b></td>
       <td width="20" align="center"><img src="icon/header-pkg.png" height="16"></td>
       <td width="100"><b>Status</b></td>
       <td class="ipaddr"><b>IP Address</b></td>
@@ -41,13 +42,17 @@
     <table cellspacing="0" border="0" class="tbserverlist" width="100%">
       <tr height="32" v-for="o in overview"
           v-on:click="rowClick(o.id)">
-        <td width="*">
-          <img class="osicon" src="{{osIcon(o)}}" height="16"
+        <td width="*"><table border="0" cellspacing="0"><tr>
+          <td>
+            <img class="osicon" src="{{osIcon(o)}}" height="16"
                style="margin-bottom:-4px;">
-          <b>{{o.hostname}}</b>
-          <span v-if="o.external && o.external.description">
-            ({{o.external.description}})
-          </span>
+          </td><td>
+            <b>{{o.hostname}}</b>
+          </td></tr></table>
+        </td>
+        <td class="nonarrow" v-if="showextra" width="80">
+          <span v-if="o.external.description">{{o.external.description}}</span>
+          <span v-if="!o.external.description">–</span>
         </td>
         <td width="20" align="center">
           <span v-if="(o['pkgm/inq']>0)||(o['pkgm/reboot'])">

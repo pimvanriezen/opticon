@@ -12,6 +12,7 @@ ServerList.create = function () {
         overview: [],
         haveselection: false,
         selected: "",
+        showextra: false,
         empty: false,
         server_status: "ALL",
     });
@@ -60,6 +61,9 @@ ServerList.refresh = function () {
                 }
                 srv.id = i;
                 nwlist.push (srv);
+                if (srv.external && srv.external.description) {
+                    self.View.showextra = true;
+                }
                 count++;
             }
             
