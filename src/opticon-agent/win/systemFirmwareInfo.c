@@ -38,7 +38,8 @@ static void getUuidFromBiosTableData(uint8_t *outByteArray16, const BYTE *biosTa
 	// has consistently used little-endian byte encoding for the first three fields: time_low, time_mid, time_hi_and_version.
 	// Supposedly this was only done/described as of version 2.6 of the SMBIOS specification? (though the text seems to indicate the industry did this all along).
 	// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.3.0.pdf (paragraph 7.2.1)
-	if (biosVersion >= 0x0206) {
+	// Hyper-V generation1 vms have a BIOS version < 2.6 and use the little-endian encoding, so just use it always
+	//if (biosVersion >= 0x0206) {
 		outByteArray16[0] = biosTableData[3];
 		outByteArray16[1] = biosTableData[2];
 		outByteArray16[2] = biosTableData[1];
@@ -47,17 +48,17 @@ static void getUuidFromBiosTableData(uint8_t *outByteArray16, const BYTE *biosTa
 		outByteArray16[5] = biosTableData[4];
 		outByteArray16[6] = biosTableData[7];
 		outByteArray16[7] = biosTableData[6];
-	}
-	else {
-		outByteArray16[0] = biosTableData[0];
-		outByteArray16[1] = biosTableData[1];
-		outByteArray16[2] = biosTableData[2];
-		outByteArray16[3] = biosTableData[3];
-		outByteArray16[4] = biosTableData[4];
-		outByteArray16[5] = biosTableData[5];
-		outByteArray16[6] = biosTableData[6];
-		outByteArray16[7] = biosTableData[7];
-	}
+	//}
+	//else {
+	//	outByteArray16[0] = biosTableData[0];
+	//	outByteArray16[1] = biosTableData[1];
+	//	outByteArray16[2] = biosTableData[2];
+	//	outByteArray16[3] = biosTableData[3];
+	//	outByteArray16[4] = biosTableData[4];
+	//	outByteArray16[5] = biosTableData[5];
+	//	outByteArray16[6] = biosTableData[6];
+	//	outByteArray16[7] = biosTableData[7];
+	//}
 	
 	outByteArray16[8] = biosTableData[8];
 	outByteArray16[9] = biosTableData[9];
