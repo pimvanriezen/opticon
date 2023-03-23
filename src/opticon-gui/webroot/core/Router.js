@@ -53,16 +53,17 @@ Router.addRoute = function (path, object) {
 Router.handle = function (path) {
     var self = Router;
     
-    console.log ("ROUTER HANDLE "+path);
+    console.log ("[Router] handle "+path);
     
     if (path && path.indexOf ("&auth_token=") >= 0) {
         let token = path.replace (/.*&auth_token=/, "");
-        console.log ("SET TOKEN "+token)
         API.Auth.setToken (token, function() {});
         path = path.split('&')[0];
         window.location.hash = "#" + path;
         return;
     }
+    
+    if (path == "/") path = "/Server";
 
     var elements = path.split ("/");
     if (elements[0] == "") elements.splice(0,1);

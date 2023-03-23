@@ -26,13 +26,10 @@ LoginScreen.open = function() {
     self.View.password = "";
     self.View.error = "";
     
-    console.log ("LOGINSCREEN " + window.location.hash)
+    console.log ("[Login] hash: " + window.location.hash)
     
     if (window.location.hash.indexOf('&auth_token=')>=0) {
-        let path = window.location.hash.split('#')[1];
-        if (path == '/') Router.activate ("/Server");
-        else Router.activate (path);
-        return;
+        App.activate ("/Server");
     }
     
     self.show();

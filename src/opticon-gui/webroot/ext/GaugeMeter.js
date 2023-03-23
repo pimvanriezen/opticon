@@ -94,13 +94,11 @@
             }
             /* Get data attributes as options from div tag. Fall back to defaults when not exists. */
             function getDataAttr(t) {
-                console.log ("getData",t.first().attr("data-percent"));
                 $.each(dataAttr, function (index, element) {
                     let tde = t.first().attr("data-"+element);
                     if(tde !== undefined && tde !== null){
                         option[element] = tde;
                     } else {
-                        console.log ("grrr:",element,tde);
                         option[element] = $(defaults).attr(element);
                     }
 
@@ -181,14 +179,11 @@
             if (option.used) {
                 option.used = parseFloat (option.used);
                 option.total = parseFloat (option.total);
-                console.log ("used:"+option.used+" "+Number.isInteger(option.used));
             }
 
             if(Number.isFinite(option.used) && Number.isFinite(option.total)){
                 var u = option.used;
                 var t = option.total;
-                console.log ("u:"+u);
-                console.log ("t:"+u);
                 if(Number.isInteger(option.min)) {
                     if(option.min < 0) {
                         t -= option.min;
@@ -204,13 +199,9 @@
                 }
             }
             
-            console.log ("c = "+c);
-            
             if(c < 0) c = 0;
             if(c > 100) c = 100;
             
-            console.log ("c = "+c);
-
             if( option.text !== "" && option.text !== null && option.text !== undefined){
                 if(option.append !== "" && option.append !== null && option.append !== undefined){
                     r = option.text + "<u>" + option.append + "</u>";

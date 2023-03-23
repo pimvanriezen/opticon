@@ -21,7 +21,7 @@ Module.done = function(mname) {
         eval (exec);
     }
     catch (e) {
-        console.log ("got exception: ", e);
+        console.log ("[Module] got exception: ", e);
         throw (e);
     }
     self.loaded++;
@@ -55,7 +55,7 @@ Module.loadCode = function(mname, mtype) {
             
         self.done(mname);
     }).fail (function (jqx, textstatus) {
-        console.log ("ajax fail");
+        console.log ("[Module] ajax fail");
     });
 }
 
@@ -82,7 +82,7 @@ Module.loadAPI = function(mname) {
             
         self.done("API." + mname);
     }).fail (function (jqx, textstatus) {
-        console.log ("ajax fail");
+        console.log ("[Module] ajax fail");
     });
 }
 
@@ -405,7 +405,7 @@ Module.Page.prototype.createView = function(data) {
     
     self.Vidi = new Vidi.View (this.id, opt);
     self.View = this.Vidi.view;
-    console.log ("View created",self);
+    console.log ("[Module] View created",self);
     MarkupDecorators.button.mountBadges($("#"+this.id))
 }
 
@@ -561,7 +561,7 @@ Module.Wizard.prototype.nextPage = function(e) {
     if (v.$isView == undefined) v = this.View;
     if (!v || v.$isView == undefined) v = this.view;
     if (! v) {
-        console.log ("WTF:",this);
+        console.log ("[Wizard] Could not resolve view:",this);
     }
 
     if (v.pagecount && v.pagecount>1) {
@@ -606,5 +606,5 @@ Module.Wizard.prototype.createView = function(data) {
     
     this.Vidi = new Vidi.View (this.id, opt);
     this.View = this.Vidi.view;
-    console.log ("View created", this);
+    console.log ("[Wizard] View created", this);
 }

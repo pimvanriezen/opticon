@@ -262,7 +262,6 @@ ServerView.onHide = function() {
 }
 
 ServerView.onResize = function() {
-    console.log ("resize");
     var self = ServerView;
     self.Vidi.render();
 }
@@ -305,7 +304,6 @@ ServerView.makeLayout = function(q, portWidth) {
     let cpos = 0;
     let yoffs = 20;
     let xoffs = (((portWidth-rightmost)/2)-leftmost) - 10/*margin/2*/;
-    console.log ("widths: " + JSON.stringify(widths));
     if (widths.length == 2) {
         let widest = widths[1];
         if (widest > (portWidth-20)) {
@@ -323,7 +321,7 @@ ServerView.makeLayout = function(q, portWidth) {
     let numc = 0;
     let numw = widths.length;
     if (numw != 2) {
-        console.log ("Unknown layout scheme", widths.length, widths);
+        console.log ("[ServerView] Unknown layout scheme", widths.length, widths);
         return;
     }
     
@@ -348,8 +346,6 @@ ServerView.makeLayout = function(q, portWidth) {
         }
         return -1;
     });
-    
-    console.log ("sorted", objtable[width]);
     
     wcolumnh[0] = oheight;
     wcolumnh[1] = oheight;
@@ -433,7 +429,6 @@ ServerView.makeLayout = function(q, portWidth) {
             let diff = maxh - columnh[col];
             let delta = diff;
             let cdelta = diff / (outcolumns[col].length-1);
-            console.log ("cdelta: "+cdelta);
             if (cdelta > 64) continue; // if it's too much, just don't.
             
             for (let i = outcolumns[col].length-1; i>0; --i) {

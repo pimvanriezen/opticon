@@ -83,12 +83,12 @@ API.Auth.login = function (username, password, cb) {
             return;
         }
         
-        console.log (data);
-        
         if (data.token) {
+            console.log ("[API] Login successful");
             self.setToken (data.token, cb);
         }
         else {
+            console.log ("[API] Login failed");
             cb (false);
         }
     });
