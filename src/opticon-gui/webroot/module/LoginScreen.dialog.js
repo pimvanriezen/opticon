@@ -29,7 +29,10 @@ LoginScreen.open = function() {
     console.log ("[Login] hash: " + window.location.hash)
     
     if (window.location.hash.indexOf('&auth_token=')>=0) {
+        self.hide();
+        App.handleLogin();
         App.activate ("/Server");
+        return;
     }
     
     self.show();
