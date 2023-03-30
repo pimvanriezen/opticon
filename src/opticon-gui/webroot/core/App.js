@@ -24,6 +24,8 @@ App.activate = function(defaultpath) {
                 inhash = defaultpath;
             }
 
+            window.location.hash = inhash;
+            
             Router.activate (inhash);
             self.handle (inhash);
         });

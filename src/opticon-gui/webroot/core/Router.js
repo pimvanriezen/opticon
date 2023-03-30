@@ -57,9 +57,10 @@ Router.handle = function (path) {
     
     if (path && path.indexOf ("&auth_token=") >= 0) {
         let token = path.replace (/.*&auth_token=/, "");
-        API.Auth.setToken (token, function() {});
-        path = path.split('&')[0];
-        window.location.hash = "#" + path;
+        API.Auth.setToken (token, function() {
+            path = path.split('&')[0];
+            window.location.hash = "#" + path;
+        });
         return;
     }
     
