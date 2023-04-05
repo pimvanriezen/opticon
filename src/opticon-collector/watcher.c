@@ -480,6 +480,7 @@ void watchthread_handle_host (host *host) {
 /*/ ======================================================================= /*/
 void overviewthread_run (thread *self) {
     thread_setname (self, "overview");
+    char uuidstr[40];
     tenant *tcrsr;
     timer ti;
     time_t t_now = time (NULL);
@@ -501,6 +502,10 @@ void overviewthread_run (thread *self) {
             
             var *n = tenant_check_notification (tcrsr);
             if (n) {
+                uuid2str (tcrsr->uuid, uuidstr);
+                log_info ("Notification triggered for tenant <%s>: %i",
+                          uuidstr, var_get_count (n));
+                          
                 // FIXME do something
                 var_free (n);
             }
