@@ -41,7 +41,7 @@ LoginScreen.open = function() {
     $(".uContent").hide();
     $("#LoginScreen-username").focus();
     
-    if (conf.autologin.username) {
+    if (conf.autologin && conf.autologin.username) {
         self.View.username = conf.autologin.username;
         self.View.password = conf.autologin.password;
     }
