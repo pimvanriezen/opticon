@@ -2,6 +2,7 @@
 #include <libopticon/compress.h>
 #include <libopticon/aes.h>
 #include <libopticon/fillrandom.h>
+#include <libopticon/log.h>
 #include <netinet/in.h>
 #include <fcntl.h>
 
@@ -218,6 +219,15 @@ authinfo *ioport_unwrap_authdata (ioport *in, resolve_tenantkey_f resolve) {
                     success = 1;
                 }
                 res->serial = serial;
+            }
+            else {
+                if (! k) {
+                    log_error ("authdata: Could not resolve tenant");
+                }
+                else {
+                    log_error ("authdata: Decrypt error: %s",
+                               ioport_decrypt_error);
+                }
             }
         }
     }

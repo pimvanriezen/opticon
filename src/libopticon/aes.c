@@ -363,12 +363,14 @@ int ioport_encrypt (aeskey *k, ioport *in, ioport *out, time_t ts,
     return 1;
 }
 
-int decrypt_serial;
-int decrypt_pserial;
-int decrypt_diff;
+const char *ioport_decrypt_error = "";
 
 int ioport_decrypt (aeskey *k, ioport *in, ioport *out, time_t ts,
                     uint32_t serial) {
+    int decrypt_serial;
+    int decrypt_pserial;
+    int decrypt_diff;
+
     size_t left;
     size_t sz;
     size_t done = 0;
@@ -406,9 +408,15 @@ int ioport_decrypt (aeskey *k, ioport *in, ioport *out, time_t ts,
             decrypt_serial = serial;
             decrypt_pserial = pserial;
             
-            if (pserial != serial) return 0;
+            if (pserial != serial) {
+                ioport_decrypt_error = "Invalid decrypted packet";
+                return 0;
+            }
             decrypt_diff = diff = (pts < uts) ? (uts-pts) : (pts - uts);
-            if (diff > 180) return 0;
+            if (diff > 180) {
+                ioport_decrypt_error = "Timestamp mismatch";
+                return 0;
+            }
             ioport_write (out, (char *) buf+8, left-8);
             done += (left - 8);
             absorb_ts = 0;
