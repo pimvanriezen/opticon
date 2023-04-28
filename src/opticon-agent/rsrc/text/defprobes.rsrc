@@ -109,5 +109,5 @@ omreport {
     type: exec
     check: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/omreport.probe.ps1\" check"
     call: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/omreport.probe.ps1\""
-    frequency: high
+    frequency: low
 }
