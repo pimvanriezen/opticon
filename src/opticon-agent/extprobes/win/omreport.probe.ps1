@@ -159,6 +159,6 @@ Disk Cache Policy                 : Unchanged
 }
 
 $result = @{
-	om = $ok
+	omreport = $ok
 }
 $result | ConvertTo-Json -Depth 10
