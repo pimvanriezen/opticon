@@ -159,10 +159,12 @@
 			<Custom Action="opticonAgent.readPropsFromConfigFile" After="CostFinalize" />
 		</InstallUISequence>
 		
-		<!-- The INSTALLDIR folder only exists in a deferred action (for a fresh install), and elevated privileges are only available in deferred actions, also we need Impersonate "no" to prevent access denied -->
+		<!-- The INSTALLDIR folder only exists in a deferred action (for a fresh install), and elevated privileges are only available in deferred actions (and commit actions?), also we need Impersonate "no" to prevent access denied -->
 		<!-- We need a separate custom action to pass any properties to our deferred dll custom action as a "CustomActionData" property -->
 		<!-- The Property attribute of that 'passer' custom action *must* be the Id of the dll CustomAction -->
 		<!-- The Value is passed a string with the [PROPNAME] vars replaced (you can parse the resulting string yourself in the dll, e.g. semicolon separated) -->
+		<!-- @note It's also be possible the use <Property /> for static values or <SetProperty /> for dynamic values to set the CustomActionData -->
+		
 		
 		<!-- <CustomAction Id="opticonAgent.debugProperties.setCustomDataAction" Property="opticonAgent.debugProperties.dllAction" Value="installPath=[INSTALLDIR];existingInstallPath=[PROP_EXISTING_INSTALLDIR];installType=[PROP_INSTALL_TYPE];Installed=[Installed];REINSTALL=[REINSTALL];UPGRADINGPRODUCTCODE=[UPGRADINGPRODUCTCODE];REMOVE=[REMOVE]" Return="check" /> -->
 		<!-- <CustomAction Id="opticonAgent.debugProperties.setCustomDataAction" Property="opticonAgent.debugProperties.dllAction" Value="tenantId=[PROP_TENANT_ID]" Return="check" /> -->
@@ -176,6 +178,18 @@
 		
 		<CustomAction Id="opticonAgent.deleteGeneratedFiles.setCustomDataAction" Property="opticonAgent.deleteGeneratedFiles.dllAction" Value="installPath=[INSTALLDIR]" Return="check" />
 		<CustomAction Id="opticonAgent.deleteGeneratedFiles.dllAction" BinaryKey="opticonAgent.msiCustomActionBinary" DllEntry="deleteGeneratedFiles" Execute="deferred" Impersonate="no" Return="check" />
+		
+		
+		<!-- We use the WixQuietExec custom action to avoid showing a flash of the command line window during the install -->
+		<!-- The property below is also passed as CustomActionData but it's static -->
+		<!-- @note Wix needs the executable name to be in quotes -->
+		<Property Id="opticonAgent.firewallAllowInboundPing.createRule" Value="&quot;netsh&quot; advfirewall firewall add rule name=&quot;Opticon-Agent: ICMP Allow incoming V4 echo request&quot; protocol=&quot;icmpv4:8,any&quot; dir=in action=allow" />
+		<CustomAction Id="opticonAgent.firewallAllowInboundPing.createRule" BinaryKey="WixCA" DllEntry="WixQuietExec64" Execute="deferred" Impersonate="no" Return="check" />
+		
+		<Property Id="opticonAgent.firewallAllowInboundPing.deleteRule" Value="&quot;netsh&quot; advfirewall firewall delete rule name=&quot;Opticon-Agent: ICMP Allow incoming V4 echo request&quot;" />
+		<!-- @note We ignore the return-code of the netsh command because if the rule is not found, it will exit with an error code -->
+		<CustomAction Id="opticonAgent.firewallAllowInboundPing.deleteRule" BinaryKey="WixCA" DllEntry="WixQuietExec64" Execute="deferred" Impersonate="no" Return="ignore" />
+		
 		
 		<InstallExecuteSequence>
 			<!-- The text inside the Custom element is the conditions for when to execute that custom action. -->
@@ -199,6 +213,11 @@
 			<!-- Only run in the existing msi for an uninstall (full uninstall, not a "remove" because of an upgrade) -->
 			<Custom Action="opticonAgent.deleteGeneratedFiles.setCustomDataAction" After="MsiUnpublishAssemblies"></Custom>
   			<Custom Action="opticonAgent.deleteGeneratedFiles.dllAction" After="opticonAgent.deleteGeneratedFiles.setCustomDataAction"><![CDATA[PROP_INSTALL_TYPE = "uninstall"]]></Custom>
+  			
+  			<!-- Always delete the firewall rule first (and only create it for an install/upgrade/change) -->
+  			<Custom Action="opticonAgent.firewallAllowInboundPing.deleteRule" After="InstallInitialize" />
+  			<!-- Only run in the new msi for an install or upgrade or in the existing msi for a change -->
+  			<Custom Action="opticonAgent.firewallAllowInboundPing.createRule" After="opticonAgent.firewallAllowInboundPing.deleteRule"><![CDATA[PROP_INSTALL_TYPE = "install" OR PROP_INSTALL_TYPE = "upgradeNewMsi" OR PROP_INSTALL_TYPE = "change"]]></Custom>
 		</InstallExecuteSequence>
 		
 		<UI>
