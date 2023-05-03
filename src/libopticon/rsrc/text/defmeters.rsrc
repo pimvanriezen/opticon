@@ -404,7 +404,8 @@
         unit: "MB"
     }
     omreport {
-        type: boolean
+        type: integer
         description: "OpenManage Health"
+        warning { cmp: gt, val: 0, weight: 1.0 }
     }
 }
