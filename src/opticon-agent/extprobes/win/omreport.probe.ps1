@@ -159,6 +159,7 @@ Disk Cache Policy                 : Unchanged
 }
 
 $result = @{
-	omreport = $ok
+	# Probes don't support booleans, so report 0 or 1 instead
+	omreport = $( if ($ok) { 1 } else { 0 } )
 }
 $result | ConvertTo-Json -Depth 10
