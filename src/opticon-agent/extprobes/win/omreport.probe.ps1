@@ -17,34 +17,60 @@ if ($args[0] -eq 'check') {
 
 # @note If a pipeline has no result to return, it returns null which evaluates to false in an if-statement
 
-$ok = $true
+
+$health = New-Object System.Collections.Generic.List[System.Object]
+
+## Chassis Health
+#$example = 'Health
+#
+#SEVERITY : COMPONENT
+#Ok       : Main System Chassis
+#
+#For further help, type the command followed by -?
+#'
+##$hasProblem = $example -split "`r`n" |
+#$hasProblem = omreport system |
+#	Select-Object -Skip 3 |
+#	Select-String -CaseSensitive -Pattern '^([^\s:]+)\s*: ' |
+#	Where-Object { $_.Matches[0].Groups[1].Value -ne 'Ok' } |
+#	ForEach-Object -Process { $true }
+#	Select-Object -First 1
 
 
-# Chassis Health
-if ($ok) {
-	$example = 'Health
+# Chassis components health
+$example = 'Health
+
+Main System Chassis
 
 SEVERITY : COMPONENT
-Ok       : Main System Chassis
+Ok       : Fans
+Ok       : Intrusion
+Ok       : Memory
+Ok       : Power Supplies
+Ok       : Power Management
+Ok       : Processors
+Ok       : Temperatures
+Ok       : Voltages
+Ok       : Hardware Log
+Ok       : Batteries
 
 For further help, type the command followed by -?
+
 '
-	#$hasProblem = $example -split "`r`n" |
-	$hasProblem = omreport system |
-		Select-Object -Skip 3 |
-		Select-String -CaseSensitive -Pattern '^([^\s:]+)\s*: ' |
-		Where-Object { $_.Matches[0].Groups[1].Value -ne 'Ok' } |
-		ForEach-Object -Process { $true }
-		Select-Object -First 1
-	if ($hasProblem) {
-		$ok = $false
+$example -split "`r`n" |
+#omreport chassis |
+	Select-Object -Skip 5 |
+	Select-String -CaseSensitive -Pattern '^([a-zA-Z]+)\s+: ([a-zA-Z]+)' |
+	ForEach-Object -Process {
+		$health.Add(@{
+			id = $_.Matches[0].Groups[2].Value
+			s = $_.Matches[0].Groups[1].Value
+		})
 	}
-}
 
 
-# Storage Controller Health
-if ($ok) {
-	$example = ' Controller  PERC H730P Mini(Embedded)
+# Storage health
+$example = ' Controller  PERC H730P Mini(Embedded)
 
 Controller
 ID                                            : 0
@@ -92,21 +118,20 @@ T10 Protection Information Capable            : No
 Non-RAID HDD Disk Cache Policy                : Unchanged
 Current Controller Mode                       : RAID
 '
-	#$hasProblem = $example -split "`r`n" |
-	$hasProblem = omreport storage controller |
-		Select-String -CaseSensitive -Pattern '^Status\s*: (.*)' |
-		Where-Object { $_.Matches[0].Groups[1].Value -ne 'Ok' } |
-		ForEach-Object -Process { $true } |
-		Select-Object -First 1
-	if ($hasProblem) {
-		$ok = $false
-	}
-}
+$example -split "`r`n" |
+#omreport storage controller |
+	Select-String -CaseSensitive -Pattern '^Status\s+: ([a-zA-Z]+)' |
+	ForEach-Object -Process {
+		$health.Add(@{
+			id = 'Storage'
+			s = $_.Matches[0].Groups[1].Value
+		})
+	} |
+	Select-Object -First 1
 
 
 # Storage Virtual Disk Health
-if ($ok) {
-	$example = 'List of Virtual Disks in the System
+$example = 'List of Virtual Disks in the System
 
 Controller PERC H730P Mini (Embedded)
 ID                                : 0
@@ -147,19 +172,11 @@ Cache Policy                      : Not Applicable
 Stripe Element Size               : 64 KB
 Disk Cache Policy                 : Unchanged
 '
-	#$hasProblem = $example -split "`r`n" |
-	$hasProblem = omreport storage vdisk |
-		Select-String -CaseSensitive -Pattern '^Status\s*: (.*)' |
-		Where-Object { $_.Matches[0].Groups[1].Value -ne 'Ok' } |
-		ForEach-Object -Process { $true } |
-		Select-Object -First 1
-	if ($hasProblem) {
-		$ok = $false
-	}
-}
+#$example -split "`r`n" |
+#omreport storage vdisk |
+
 
 $result = @{
-	# Probes don't support booleans, so report 0 or 1 instead
-	omreport = $( if ($ok) { 1 } else { 0 } )
+	health = $health
 }
 $result | ConvertTo-Json -Depth 10

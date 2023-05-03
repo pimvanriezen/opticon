@@ -83,6 +83,12 @@ who {
     call: probe_who
     frequency: low
 }
+omreport {
+    platform: windows
+    type: built-in
+    call: probe_omreport
+    frequency: low
+}
 updates {
     platform: linux
     type: exec
@@ -103,11 +109,4 @@ mssql {
     check: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/mssql.probe.ps1\" check"
     call: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/mssql.probe.ps1\""
     frequency: high
-}
-omreport {
-    platform: windows
-    type: exec
-    check: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/omreport.probe.ps1\" check"
-    call: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/omreport.probe.ps1\""
-    frequency: low
 }
