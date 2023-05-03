@@ -464,7 +464,8 @@ var *runprobe_net(probe *self) {
         log_error("Failed to format net query counter: %" PRIx32, status);
         return res;
     }
-    value = pdhValue.largeValue / 1024;
+    // Convert Bytes to KB to kbit
+    value = pdhValue.largeValue / 1024 * 8;
     log_debug("probe_net/in_kbs: %" PRIu64, value);
     var_set_int_forkey(netDict, "in_kbs", value);
     
@@ -482,7 +483,8 @@ var *runprobe_net(probe *self) {
         log_error("Failed to format net query counter: %" PRIx32, status);
         return res;
     }
-    value = pdhValue.largeValue / 1024;
+    // Convert Bytes to KB to kbit
+    value = pdhValue.largeValue / 1024 * 8;
     log_debug("probe_net/out_kbs: %" PRIu64, value);
     var_set_int_forkey(netDict, "out_kbs", value);
     

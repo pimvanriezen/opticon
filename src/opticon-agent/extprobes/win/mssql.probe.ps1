@@ -64,7 +64,3 @@ if ($mssql.Count -gt 0) {
 	$result['mssql'] = $mssql
 }
 $result | ConvertTo-Json -Depth 10
-
-
-
-

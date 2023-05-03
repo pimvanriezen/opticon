@@ -403,4 +403,8 @@
         description: "Size"
         unit: "MB"
     }
+    omreport {
+        type: boolean
+        description: "OpenManage Health"
+    }
 }
