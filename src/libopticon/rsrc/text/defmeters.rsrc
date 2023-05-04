@@ -403,9 +403,16 @@
         description: "Size"
         unit: "MB"
     }
-    omreport {
-        type: integer
-        description: "OpenManage Health"
-        warning { cmp: gt, val: 0, weight: 1.0 }
+    health {
+        type: table
+        description: "System Health"
+    }
+    health/id {
+        type: string
+        description: "Component"
+    }
+    health/s {
+        type: string
+        description: "Status"
     }
 }

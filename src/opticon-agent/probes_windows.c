@@ -33,6 +33,14 @@ NTSYSAPI NTSTATUS NTAPI RtlGetVersion(IN OUT PRTL_OSVERSIONINFOW lpVersionInform
 #include "opticon-agent.h"
 #include "probes.h"
 
+
+
+
+// For probe_omreport, maybe reuse that probe for linux?
+#include <libopticon/popen.h>
+#include <sys/select.h>
+#include <errno.h>
+
 // ============================================================================
 
 var *runprobe_hostname(probe *self) {
@@ -1796,6 +1804,213 @@ var *runprobe_cpu(probe *self) {
 
 // ============================================================================
 
+void omreport_chassis(var *healthArray) {
+    //Example output of "omreport chassis":
+    //Health
+    //
+    //Main System Chassis
+    //
+    //SEVERITY : COMPONENT
+    //Ok       : Fans
+    //Ok       : Intrusion
+    //Ok       : Memory
+    //Ok       : Power Supplies
+    //Ok       : Power Management
+    //Ok       : Processors
+    //Ok       : Temperatures
+    //Ok       : Voltages
+    //Ok       : Hardware Log
+    //Ok       : Batteries
+    //
+    //For further help, type the command followed by -?
+    
+    FILE *proc = popen_safe("omreport chassis", "r");
+    if (proc == NULL) {
+        log_warn("probe_omreport: Could not open 'omreport chassis': %s", strerror(errno));
+        return;
+    }
+    
+    log_debug("probe_omreport: Called 'omreport chassis'");
+    
+    const uint8_t FINDING_COMPONENTS = 0;
+    const uint8_t PROCESSING_COMPONENTS = 1;
+    const uint8_t DONE = 2;
+    
+    uint8_t state = FINDING_COMPONENTS;
+    while (true) {
+        char line[256] = "";
+        if (fgets(line, sizeof(line), proc) == NULL) break;
+        if (line[0] == '\0') continue;
+        
+        // Strip line endings
+        line[strcspn(line, "\r\n")] = '\0';
+        
+        if (state == FINDING_COMPONENTS) {
+            if (strcmp(line, "SEVERITY : COMPONENT") == 0) {
+                state = PROCESSING_COMPONENTS;
+            }
+        }
+        else if (state == PROCESSING_COMPONENTS) {
+            if (line[0] == '\0') {
+                // Don't break but wait until the process is done (i.e. keep reading the output to prevent "The process tried to write to a nonexistent pipe.")
+                state = DONE;
+            }
+            else {
+                // Find space
+                char *found;
+                found = strchr(line, ' ');
+                if (found != NULL) {
+                    // Terminate line at found char to copy status
+                    *found = '\0';
+                    char status[256];
+                    strcpy(status, line);
+                    // Move past the found char
+                    ++found;
+                    // Find colon
+                    found = strchr(found, ':');
+                    if (found != NULL) {
+                        // Move past the colon
+                        ++found;
+                        if (found[0] == ' ') {
+                            // Move past the space
+                            ++found;
+                            
+                            var *healthComponentDict = var_add_dict(healthArray);
+                            var_set_str_forkey(healthComponentDict, "id", found);
+                            var_set_str_forkey(healthComponentDict, "s", status);
+                            
+                            log_debug("probe_omreport/id: %s", found);
+                            log_debug("probe_omreport/s: %s", status);
+                        }
+                    }
+                }
+                
+            }
+        }
+    }
+    int pret = pclose_safe(proc);
+    int status = WEXITSTATUS(pret);
+    log_debug("probe_omreport: chassis complete %i %i", status, pret);
+}
+
+bool strstarts(const char *str, const char *prefix) {
+     return strncmp(str, prefix, strlen(prefix)) == 0;
+}
+
+void omreport_storage(var *healthArray) {
+    //Example output of "omreport storage controller":
+    // Controller  PERC H730P Mini(Embedded)
+    //
+    //Controller
+    //ID                                            : 0
+    //Status                                        : Ok
+    //Name                                          : PERC H730P Mini
+    //Slot ID                                       : Embedded
+    //State                                         : Ready
+    //Firmware Version                              : 25.5.9.0001
+    //Minimum Required Firmware Version             : Not Applicable
+    //Driver Version                                : 6.604.06.00
+    //Minimum Required Driver Version               : Not Applicable
+    //Storport Driver Version                       : 10.0.20348.740
+    //Minimum Required Storport Driver Version      : Not Applicable
+    //Number of Connectors                          : 2
+    //Rebuild Rate                                  : 30%
+    //BGI Rate                                      : 30%
+    //Check Consistency Rate                        : 30%
+    //Reconstruct Rate                              : 30%
+    //Alarm State                                   : Not Applicable
+    //Cluster Mode                                  : Not Applicable
+    //SCSI Initiator ID                             : Not Applicable
+    //Cache Memory Size                             : 2048 MB
+    //Patrol Read Mode                              : Auto
+    //Patrol Read State                             : Stopped
+    //Patrol Read Rate                              : 30%
+    //Patrol Read Iterations                        : 74
+    //Abort Check Consistency on Error              : Disabled
+    //Allow Revertible Hot Spare and Replace Member : Enabled
+    //Load Balance                                  : Not Applicable
+    //Auto Replace Member on Predictive Failure     : Disabled
+    //Redundant Path view                           : Not Applicable
+    //CacheCade Capable                             : Not Applicable
+    //Persistent Hot Spare                          : Disabled
+    //Encryption Capable                            : Yes
+    //Encryption Key Present                        : No
+    //Encryption Mode                               : None
+    //Preserved Cache                               : Not Applicable
+    //Spin Down Unconfigured Drives                 : Disabled
+    //Spin Down Hot Spares                          : Disabled
+    //Spin Down Configured Drives                   : Disabled
+    //Automatic Disk Power Saving (Idle C)          : Disabled
+    //Start Time (HH:MM)                            : Not Applicable
+    //Time Interval for Spin Up (in Hours)          : Not Applicable
+    //T10 Protection Information Capable            : No
+    //Non-RAID HDD Disk Cache Policy                : Unchanged
+    //Current Controller Mode                       : RAID
+    
+    FILE *proc = popen_safe("omreport storage controller", "r");
+    if (proc == NULL) {
+        log_warn("probe_omreport: Could not open omreport storage controller: %s", strerror(errno));
+        return;
+    }
+    
+    log_debug("probe_omreport: Called 'omreport storage controller'");
+    
+    const uint8_t FINDING_STATUS = 0;
+    const uint8_t DONE = 1;
+    
+    uint8_t state = FINDING_STATUS;
+    while (true) {
+        char line[256] = "";
+        if (fgets(line, sizeof(line), proc) == NULL) break;
+        if (line[0] == '\0') continue;
+        
+        // Strip line endings
+        line[strcspn(line, "\r\n")] = '\0';
+        
+        if (state == FINDING_STATUS) {
+            if (strstarts(line, "Status")) {
+                char *found;
+                // Find colon
+                found = strchr(line, ':');
+                if (found != NULL) {
+                    // Move past the colon
+                    ++found;
+                    if (found[0] == ' ') {
+                        // Move past the space
+                        ++found;
+                        
+                        var *healthComponentDict = var_add_dict(healthArray);
+                        var_set_str_forkey(healthComponentDict, "id", "Storage");
+                        var_set_str_forkey(healthComponentDict, "s", found);
+                        
+                        log_debug("probe_omreport/id: Storage");
+                        log_debug("probe_omreport/s: %s", found);
+                    }
+                }
+                
+                // Don't break but wait until the process is done (i.e. keep reading the output to prevent "The process tried to write to a nonexistent pipe.")
+                state = DONE;
+            }
+        }
+    }
+    int pret = pclose_safe(proc);
+    int status = WEXITSTATUS(pret);
+    log_debug("probe_omreport: storage controller complete %i %i", status, pret);
+}
+
+var *runprobe_omreport(probe *self) {
+    (void)self;
+    var *res = var_alloc();
+    
+    var *healthArray = var_get_array_forkey(res, "health");
+    omreport_chassis(healthArray);
+    omreport_storage(healthArray);
+    
+    return res;
+}
+
+// ============================================================================
+
 builtinfunc BUILTINS[] = {
     {"probe_cpu", runprobe_cpu},
     {"probe_version", runprobe_version},
@@ -1812,5 +2027,6 @@ builtinfunc BUILTINS[] = {
     {"probe_proc", runprobe_proc},
     {"probe_who", runprobe_who},
     {"probe_localip", runprobe_localip},
+    {"probe_omreport", runprobe_omreport},
     {NULL, NULL}
 };
