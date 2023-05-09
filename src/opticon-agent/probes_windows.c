@@ -2027,6 +2027,6 @@ builtinfunc BUILTINS[] = {
     {"probe_proc", runprobe_proc},
     {"probe_who", runprobe_who},
     {"probe_localip", runprobe_localip},
-    {"probe_omreport", runprobe_omreport},
+    //{"probe_omreport", runprobe_omreport},
     {NULL, NULL}
 };

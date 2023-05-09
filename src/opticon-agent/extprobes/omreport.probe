@@ -1,0 +1,110 @@
+#!/bin/bash
+cat << _EOF_
+{
+    "health":[
+_EOF_
+
+## Chassis health
+
+#Example output of "omreport chassis":
+#Health
+#
+#Main System Chassis
+#
+#SEVERITY : COMPONENT
+#Ok       : Fans
+#Ok       : Intrusion
+#Ok       : Memory
+#Ok       : Power Supplies
+#Ok       : Power Management
+#Ok       : Processors
+#Ok       : Temperatures
+#Ok       : Voltages
+#Ok       : Hardware Log
+#Ok       : Batteries
+#
+#For further help, type the command followed by -?
+
+readonly FINDING_COMPONENTS=0
+readonly PROCESSING_COMPONENTS=1
+readonly DONE=2
+
+state=$FINDING_COMPONENTS
+
+opticon-helper omreport chassis | while read status colon component; do
+  if [ $state = $FINDING_COMPONENTS ]; then
+    if [ "$status" = "SEVERITY" -a $component = "COMPONENT" ]; then
+      state=$PROCESSING_COMPONENTS
+    fi
+  elif [ $state = $PROCESSING_COMPONENTS ]; then
+    if [ "$status" = "" ]; then
+      state=$DONE
+    else
+      echo "        { id:\"$component\", s:$status }"
+    fi
+  fi
+done
+
+# Storage health
+
+#Example output of "omreport storage controller":
+# Controller  PERC H730P Mini(Embedded)
+#
+#Controller
+#ID                                            : 0
+#Status                                        : Ok
+#Name                                          : PERC H730P Mini
+#Slot ID                                       : Embedded
+#State                                         : Ready
+#Firmware Version                              : 25.5.9.0001
+#Minimum Required Firmware Version             : Not Applicable
+#Driver Version                                : 6.604.06.00
+#Minimum Required Driver Version               : Not Applicable
+#Storport Driver Version                       : 10.0.20348.740
+#Minimum Required Storport Driver Version      : Not Applicable
+#Number of Connectors                          : 2
+#Rebuild Rate                                  : 30%
+#BGI Rate                                      : 30%
+#Check Consistency Rate                        : 30%
+#Reconstruct Rate                              : 30%
+#Alarm State                                   : Not Applicable
+#Cluster Mode                                  : Not Applicable
+#SCSI Initiator ID                             : Not Applicable
+#Cache Memory Size                             : 2048 MB
+#Patrol Read Mode                              : Auto
+#Patrol Read State                             : Stopped
+#Patrol Read Rate                              : 30%
+#Patrol Read Iterations                        : 74
+#Abort Check Consistency on Error              : Disabled
+#Allow Revertible Hot Spare and Replace Member : Enabled
+#Load Balance                                  : Not Applicable
+#Auto Replace Member on Predictive Failure     : Disabled
+#Redundant Path view                           : Not Applicable
+#CacheCade Capable                             : Not Applicable
+#Persistent Hot Spare                          : Disabled
+#Encryption Capable                            : Yes
+#Encryption Key Present                        : No
+#Encryption Mode                               : None
+#Preserved Cache                               : Not Applicable
+#Spin Down Unconfigured Drives                 : Disabled
+#Spin Down Hot Spares                          : Disabled
+#Spin Down Configured Drives                   : Disabled
+#Automatic Disk Power Saving (Idle C)          : Disabled
+#Start Time (HH:MM)                            : Not Applicable
+#Time Interval for Spin Up (in Hours)          : Not Applicable
+#T10 Protection Information Capable            : No
+#Non-RAID HDD Disk Cache Policy                : Unchanged
+#Current Controller Mode                       : RAID
+
+# Regarding the sed script:
+# -n is silent because we already print the match using p;
+# The substitution is inside the block to allow for "print and quit" after the first match (which is what "p;q;") does
+health=$(opticon-helper omreport storage controller | sed -n -E -e "/^Status\s+: ([a-zA-Z]+)/{s//\1/p;q;}")
+if [ ! -z "$health" ]; then
+  echo "        { id:\"Storage\", s:$health }"
+fi
+
+cat << _EOF_
+    ]
+}
+_EOF_

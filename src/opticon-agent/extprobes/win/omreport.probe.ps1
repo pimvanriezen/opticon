@@ -20,7 +20,7 @@ if ($args[0] -eq 'check') {
 
 $health = New-Object System.Collections.Generic.List[System.Object]
 
-## Chassis Health
+# Chassis Health
 #$example = 'Health
 #
 #SEVERITY : COMPONENT
