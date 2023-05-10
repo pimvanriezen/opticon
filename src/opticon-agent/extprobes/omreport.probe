@@ -1,29 +1,26 @@
-# Allow try/catch on non-terminating errors (making them terminating)
-$ErrorActionPreference = 'Stop'
+#!/bin/bash
 
-$useExampleCommand = $false
+useExampleCommand=0
 
-$omreportCommand = "omreport"
-if ($useExampleCommand) {
-	$omreportCommand = ".\omreport.probe.ps1 example"
-}
+omreportCommand="omreport"
+if [ $useExampleCommand = 1 ]; then
+  omreportCommand="./omreport.probe example"
+fi
 
-# If script is called with argument "check" it will exit with an error code if the "omreport" command is not found
-# (so the agent will disable the probe)
-if ($args[0] -eq 'check') {
-	Try {
-		Get-Command omreport
-	}
-	Catch {
-		exit 1
-	}
-	
-	Return
-}
-elseif ($args[0] -eq 'example') {
-	if ($args[1] -eq 'chassis') {
-		# Example output of "omreport chassis"
-		'Health
+
+
+if [ "$1" = "check" ]; then
+  command -v $omreportCommand >/dev/null 2>&1
+  if [ ! $? = 0 ]; then
+    exit 1
+  fi
+  
+  exit 0
+elif [ "$1" = "example" ]; then
+  if [ "$2" = "chassis" ]; then
+    # Example output of "omreport chassis"
+    cat << _EOF_
+Health
 
 Main System Chassis
 
@@ -40,13 +37,12 @@ Ok       : Hardware Log
 Ok       : Batteries
 
 For further help, type the command followed by -?
-
-' -split "`r`n"
-	}
-	elseif ($args[1] -eq 'storage') {
-		if ($args[2] -eq 'controller') {
-			# Example output of "omreport storage controller"
-			' Controller  PERC H730P Mini(Embedded)
+_EOF_
+  elif [ "$2" = "storage" ]; then
+    if [ "$3" = "controller" ]; then
+      # Example output of "omreport storage controller"
+      cat << _EOF_
+ Controller  PERC H730P Mini(Embedded)
 
 Controller
 ID                                            : 0
@@ -110,11 +106,11 @@ Slot ID                                       : Embedded
 State                                         : Ready
 Firmware Version                              : 2.5.13.3024
 Minimum Required Firmware Version             : Not Applicable
-' -split "`r`n"
-		}
-		elseif ($args[2] -eq 'vdisk') {
-			# Example output of "omreport storage vdisk"
-			'List of Virtual Disks in the System
+_EOF_
+    elif [ "$3" = "vdisk" ]; then
+      # Example output of "omreport storage vdisk"
+      cat << _EOF_
+List of Virtual Disks in the System
 
 Controller PERC H730P Mini (Embedded)
 ID                                : 0
@@ -154,153 +150,140 @@ Write Policy                      : Write Back
 Cache Policy                      : Not Applicable
 Stripe Element Size               : 64 KB
 Disk Cache Policy                 : Unchanged
-' -split "`r`n"
-		}
-	}
-	
-	Return
-}
+_EOF_
+    fi
+  fi
+  
+  exit 0
+fi
+
+# If you want to use a multiline string in a while read loop:
+#printf "%s\n" "$example" |
 
 
-# If you want to use a multiline string in a pipeline:
-#$example -split "`r`n" |
+cat << _EOF_
+{
+    "health":[
+_EOF_
 
 
-# If a pipeline has no result to return, it returns null which evaluates to false in an if-statement
+# Chassis health
+readonly FINDING_COMPONENTS=0
+readonly PROCESSING_COMPONENTS=1
+readonly DONE=2
+state=$FINDING_COMPONENTS
 
-
-$health = New-Object System.Collections.Generic.List[System.Object]
-
-
-# Chassis components health
-Set-Variable FINDING_COMPONENTS -Option Constant -Value 0
-Set-Variable PROCESSING_COMPONENTS -Option Constant -Value 1
-$state = $FINDING_COMPONENTS
-
-Invoke-Expression ($omreportCommand + ' chassis') |
-	Select-String -CaseSensitive -Pattern '^(\S+)\s+: (\S+)' |
-	ForEach-Object -Process {
-		$status = $_.Matches[0].Groups[1].Value
-		$component = $_.Matches[0].Groups[2].Value
-		
-		if ($state -eq $FINDING_COMPONENTS) {
-			if ($status -eq 'SEVERITY' -And $component -eq 'COMPONENT') {
-				$state = $PROCESSING_COMPONENTS
-			}
-		}
-		elseif ($state -eq $PROCESSING_COMPONENTS) {
-			$health.Add(@{
-				id = $component
-				s = $status.ToUpper()
-			})
-		}
-	}
+$omreportCommand chassis |
+  while read status colon component; do
+    if [ $state = $FINDING_COMPONENTS ]; then
+      if [ "$status" = "SEVERITY" -a "$component" = "COMPONENT" ]; then
+        state=$PROCESSING_COMPONENTS
+      fi
+    elif [ $state = $PROCESSING_COMPONENTS ]; then
+      if [ "$status" = "" ]; then
+        state=$DONE
+      else
+        # The ^^ means convert to uppercase
+        echo "        { id:\"$component\", s:\"${status^^}\" }"
+      fi
+    fi
+  done
 
 
 # Storage Controller health
-Set-Variable FINDING_CONTROLLER -Option Constant -Value 0
-Set-Variable PROCESSING_CONTROLLER -Option Constant -Value 1
-$state = $FINDING_CONTROLLER
 
-$controllerId = ''
-$controllerStatus = ''
-$controllerName = ''
-Invoke-Expression ($omreportCommand + ' storage controller') |
-	ForEach-Object -Process {
-		if ($state -eq $FINDING_CONTROLLER) {
-			if ($_.StartsWith('Controller')) {
-				$state = $PROCESSING_CONTROLLER
-			}
-		}
-		elseif ($state -eq $PROCESSING_CONTROLLER) {
-			if ($_ -match '^(\S+)\s+: (\S+)') {
-				$key = $Matches[1]
-				$value = $Matches[2]
-				
-				if ($key -eq 'ID') {
-					$controllerId = $value
-				}
-				elseif ($key -eq 'Status') {
-					$controllerStatus = $value
-				}
-				elseif ($key -eq 'Name') {
-					$controllerName = $value
-					
-					$health.Add(@{
-						id = 'Storage Controller ' + $controllerId + ' ' + $controllerName
-						s = $controllerStatus.ToUpper()
-					})
-					$state = $FINDING_CONTROLLER
-				}
-			}
-		}
-	}
+# Regarding the sed script:
+# -n is silent because we already print the match using p;
+# The substitution is inside the block to allow for "print and quit" after the first match (which is what "p;q;") does
+#status=$($omreportCommand storage controller | sed -n -E -e "/^Status\s+: (\S+)/{s//\1/p;q;}")
+#if [ ! -z "$status" ]; then
+#    # The ^^ means convert to uppercase
+#  echo "        { id:\"Storage Controller\", s:\"${status^^}\" }"
+#fi
+
+
+readonly FINDING_CONTROLLER=0
+readonly PROCESSING_CONTROLLER=1
+state=$FINDING_CONTROLLER
+
+controllerId=""
+controllerStatus=""
+controllerName=""
+$omreportCommand storage controller |
+  while read key colon value; do
+    if [ $state = $FINDING_CONTROLLER ]; then
+      if [ "$key" = "Controller" ]; then
+        state=$PROCESSING_CONTROLLER
+      fi
+    elif [ $state = $PROCESSING_CONTROLLER ]; then
+      if [ "$key" = "ID" ]; then
+        controllerId=$value
+      elif [ "$key" = "Status" ]; then
+        controllerStatus=$value
+      elif [ "$key" = "Name" ]; then
+        controllerName=$value
+        
+        # The ^^ means convert to uppercase
+        echo "        { id:\"Storage Controller $controllerId $controllerName\", s:\"${controllerStatus^^}\" }"
+        state=$FINDING_CONTROLLER
+      fi
+    fi
+  done
+
+
+cat << _EOF_
+    ]
+_EOF_
 
 
 # Storage Virtual Disks (raid sets, include their own health status)
-$raid = New-Object System.Collections.Generic.List[System.Object]
+cat << _EOF_
+    "raid":[
+_EOF_
 
-Set-Variable FINDING_VDISKCONTROLLER -Option Constant -Value 0
-Set-Variable FINDING_VDISK -Option Constant -Value 1
-Set-Variable PROCESSING_VDISK -Option Constant -Value 2
-$state = $FINDING_VDISK_CONTROLLER
+readonly FINDING_VDISK_CONTROLLER=0
+readonly FINDING_VDISK=1
+readonly PROCESSING_VDISK=2
+state=$FINDING_VDISK_CONTROLLER
 
-$vdiskController = ''
-$vdiskId = ''
-$vdiskStatus = ''
-$vdiskName = ''
-$vdiskLayout = ''
-Invoke-Expression ($omreportCommand + ' storage vdisk') |
-	ForEach-Object -Process {
-		if ($state -eq $FINDING_VDISK_CONTROLLER) {
-			if ($_.StartsWith('Controller ')) {
-				$vdiskController = $_.Substring(11) # 11 is the length of "Controller "
-				$state = $FINDING_VDISK
-			}
-		}
-		elseif ($state -eq $FINDING_VDISK) {
-			if ($_ -match '^(\S+)\s+: (\S+)') {
-				$key = $Matches[1]
-				$value = $Matches[2]
-				
-				if ($key -eq 'ID') {
-					$vdiskId = $value
-	      			$state = $PROCESSING_VDISK
-				}
-			}
-		}
-		elseif ($state -eq $PROCESSING_VDISK) {
-			if ($_ -match '^(\S+)\s+: (\S+)') {
-				$key = $Matches[1]
-				$value = $Matches[2]
-				
-				if ($key -eq 'Status') {
-					$vdiskStatus = $value
-				}
-				elseif ($key -eq 'Name') {
-					$vdiskName = $value
-				}
-				elseif ($key -eq 'Layout') {
-					$vdiskLayout = $value
-					
-					$raid.Add(@{
-						dev = $vdiskController
-						name = 'Vdisk ' + $vdiskId + ': ' + $vdiskName
-						level = $vdiskLayout.ToLower().Replace('-', '')
-						state = $vdiskStatus.ToUpper()
-					})
-	      			$state = $FINDING_VDISK
-				}
-			}
-			elseif ($_ -eq '') {
-	      		$state = $FINDING_VDISK_CONTROLLER
-			}
-		}
-	}
+vdiskController=""
+vdiskId=""
+vdiskStatus=""
+vdiskName=""
+vdiskLayout=""
+$omreportCommand storage vdisk |
+  while read key colon value; do
+    if [ $state = $FINDING_VDISK_CONTROLLER ]; then
+      if [ "$key" = "Controller" ]; then
+        vdiskController="${colon} ${value}"
+        state=$FINDING_VDISK
+      fi
+    elif [ $state = $FINDING_VDISK ]; then
+      if [ "$key" = "ID" ]; then
+        vdiskId=$value
+        state=$PROCESSING_VDISK
+      fi
+    elif [ $state = $PROCESSING_VDISK ]; then
+      if [ "$key" = "Status" ]; then
+        vdiskStatus=$value
+      elif [ "$key" = "Name" ]; then
+        vdiskName=$value
+      elif [ "$key" = "Layout" ]; then
+        vdiskLayout=$value
+        # The ^^ means convert to uppercase
+        vdiskStatus=${vdiskStatus^^}
+        # The ,, means convert to lowercase
+        vdiskLayout=$(echo "${vdiskLayout,,}" | sed -e 's/-//')
+        
+        echo "        { dev: \"$vdiskController\", name:\"Vdisk $vdiskId: $vdiskName\", level:\"$vdiskLayout\", state:\"${vdiskStatus}\" }"
+        state=$FINDING_VDISK
+      elif [ "$key" = "" ]; then
+        state=$FINDING_VDISK_CONTROLLER
+      fi
+    fi
+  done
 
-
-$result = @{
-	health = $health
-	raid = $raid
+cat << _EOF_
+    ]
 }
-$result | ConvertTo-Json -Depth 10
+_EOF_

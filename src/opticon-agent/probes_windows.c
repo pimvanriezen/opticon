@@ -1803,7 +1803,7 @@ var *runprobe_cpu(probe *self) {
 }
 
 // ============================================================================
-
+/*
 void omreport_chassis(var *healthArray) {
     //Example output of "omreport chassis":
     //Health
@@ -2008,7 +2008,7 @@ var *runprobe_omreport(probe *self) {
     
     return res;
 }
-
+*/
 // ============================================================================
 
 builtinfunc BUILTINS[] = {
@@ -2027,6 +2027,6 @@ builtinfunc BUILTINS[] = {
     {"probe_proc", runprobe_proc},
     {"probe_who", runprobe_who},
     {"probe_localip", runprobe_localip},
-    {"probe_omreport", runprobe_omreport},
+    //{"probe_omreport", runprobe_omreport},
     {NULL, NULL}
 };
