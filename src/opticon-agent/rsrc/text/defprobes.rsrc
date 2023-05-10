@@ -83,7 +83,7 @@ who {
     call: probe_who
     frequency: low
 }
-omreport {
+omreportwin {
     platform: windows
     type: exec
     check: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/omreport.probe.ps1\" check"
@@ -93,7 +93,7 @@ omreport {
 omreport {
     platform: linux
     type: exec
-    check: /var/lib/opticon/probes/omreport.check
+    check: /var/lib/opticon/probes/omreport.probe check
     call: /var/lib/opticon/probes/omreport.probe
     frequency: low
 }

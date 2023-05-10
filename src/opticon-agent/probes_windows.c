@@ -1803,7 +1803,7 @@ var *runprobe_cpu(probe *self) {
 }
 
 // ============================================================================
-
+/*
 void omreport_chassis(var *healthArray) {
     //Example output of "omreport chassis":
     //Health
@@ -2008,7 +2008,7 @@ var *runprobe_omreport(probe *self) {
     
     return res;
 }
-
+*/
 // ============================================================================
 
 builtinfunc BUILTINS[] = {
