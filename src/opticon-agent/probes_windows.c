@@ -36,10 +36,10 @@ NTSYSAPI NTSTATUS NTAPI RtlGetVersion(IN OUT PRTL_OSVERSIONINFOW lpVersionInform
 
 
 
-// For probe_omreport, maybe reuse that probe for linux?
-#include <libopticon/popen.h>
-#include <sys/select.h>
-#include <errno.h>
+// For probe_omreport
+//#include <libopticon/popen.h>
+//#include <sys/select.h>
+//#include <errno.h>
 
 // ============================================================================
 
@@ -2027,6 +2027,6 @@ builtinfunc BUILTINS[] = {
     {"probe_proc", runprobe_proc},
     {"probe_who", runprobe_who},
     {"probe_localip", runprobe_localip},
-    //{"probe_omreport", runprobe_omreport},
+    //{"probe_omreport", runprobe_omreport}, // @note The omreport probe is made 'pluginnable' as an extprobe
     {NULL, NULL}
 };
