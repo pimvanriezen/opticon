@@ -151,6 +151,191 @@ Cache Policy                      : Not Applicable
 Stripe Element Size               : 64 KB
 Disk Cache Policy                 : Unchanged
 _EOF_
+    elif [ "$3" = "pdisk" ]; then
+      # Example output of "omreport storage pdisk controller=0 vdisk=0"
+      cat << _EOF_
+List of Physical Disks belonging to OS
+
+Controller PERC H710 Mini (Embedded)
+
+Span 0
+ID                              : 0:1:0
+Status                          : Ok
+Name                            : Physical Disk 0:1:0
+State                           : Online
+Power Status                    : Spun Up
+Bus Protocol                    : SATA
+Media                           : HDD
+Part of Cache Pool              : Not Applicable
+Remaining Rated Write Endurance : Not Applicable
+Failure Predicted               : No
+Revision                        : RA0A
+Driver Version                  : Not Applicable
+Model Number                    : Not Applicable
+T10 PI Capable                  : No
+Certified                       : Yes
+Encryption Capable              : No
+Encryption Protocol             : Not Applicable
+Encrypted                       : Not Applicable
+Progress                        : Not Applicable
+Mirror Set ID                   : 0
+Capacity                        : 2,794.00 GB (3000034656256 bytes)
+Used RAID Disk Space            : 2,794.00 GB (3000034656256 bytes)
+Available RAID Disk Space       : 0.00 GB (0 bytes)
+Hot Spare                       : No
+Vendor ID                       : DELL(tm)
+Product ID                      : ST33000650NS
+Serial No.                      : Z295Q995
+Part Number                     : TH0JMN63212332CI00SJA02
+Negotiated Speed                : 3.00 Gbps
+Capable Speed                   : 3.00 Gbps
+PCIe Negotiated Link Width      : Not Applicable
+PCIe Maximum Link Width         : Not Applicable
+Logical Block size              : 512B
+Device Write Cache              : Not Applicable
+Manufacture Day                 : Not Available
+Manufacture Week                : Not Available
+Manufacture Year                : Not Available
+SAS Address                     : 0x4433221104000000
+WWN                             : 0x4433221104000000
+Non-RAID HDD Disk Cache Policy  : Not Applicable
+Disk Cache Policy               : Not Applicable
+Sub Vendor                      : Not Available
+Cryptographic Erase Capable     : No
+
+ID                              : 0:1:1
+Status                          : Ok
+Name                            : Physical Disk 0:1:1
+State                           : Online
+Power Status                    : Spun Up
+Bus Protocol                    : SATA
+Media                           : HDD
+Part of Cache Pool              : Not Applicable
+Remaining Rated Write Endurance : Not Applicable
+Failure Predicted               : No
+Revision                        : RA0A
+Driver Version                  : Not Applicable
+Model Number                    : Not Applicable
+T10 PI Capable                  : No
+Certified                       : Yes
+Encryption Capable              : No
+Encryption Protocol             : Not Applicable
+Encrypted                       : Not Applicable
+Progress                        : Not Applicable
+Mirror Set ID                   : 0
+Capacity                        : 2,794.00 GB (3000034656256 bytes)
+Used RAID Disk Space            : 2,794.00 GB (3000034656256 bytes)
+Available RAID Disk Space       : 0.00 GB (0 bytes)
+Hot Spare                       : No
+Vendor ID                       : DELL(tm)
+Product ID                      : ST33000650NS
+Serial No.                      : Z295LCG6
+Part Number                     : TH0JMN63212332CK005AA02
+Negotiated Speed                : 3.00 Gbps
+Capable Speed                   : 3.00 Gbps
+PCIe Negotiated Link Width      : Not Applicable
+PCIe Maximum Link Width         : Not Applicable
+Logical Block size              : 512B
+Device Write Cache              : Not Applicable
+Manufacture Day                 : Not Available
+Manufacture Week                : Not Available
+Manufacture Year                : Not Available
+SAS Address                     : 0x4433221105000000
+WWN                             : 0x4433221105000000
+Non-RAID HDD Disk Cache Policy  : Not Applicable
+Disk Cache Policy               : Not Applicable
+Sub Vendor                      : Not Available
+Cryptographic Erase Capable     : No
+
+Span 1
+ID                              : 0:1:2
+Status                          : Ok
+Name                            : Physical Disk 0:1:2
+State                           : Online
+Power Status                    : Spun Up
+Bus Protocol                    : SATA
+Media                           : HDD
+Part of Cache Pool              : Not Applicable
+Remaining Rated Write Endurance : Not Applicable
+Failure Predicted               : No
+Revision                        : RA0A
+Driver Version                  : Not Applicable
+Model Number                    : Not Applicable
+T10 PI Capable                  : No
+Certified                       : Yes
+Encryption Capable              : No
+Encryption Protocol             : Not Applicable
+Encrypted                       : Not Applicable
+Progress                        : Not Applicable
+Mirror Set ID                   : 0
+Capacity                        : 2,794.00 GB (3000034656256 bytes)
+Used RAID Disk Space            : 2,794.00 GB (3000034656256 bytes)
+Available RAID Disk Space       : 0.00 GB (0 bytes)
+Hot Spare                       : No
+Vendor ID                       : DELL(tm)
+Product ID                      : ST33000650NS
+Serial No.                      : Z295R9H6
+Part Number                     : TH0JMN63212332CK0032A02
+Negotiated Speed                : 3.00 Gbps
+Capable Speed                   : 3.00 Gbps
+PCIe Negotiated Link Width      : Not Applicable
+PCIe Maximum Link Width         : Not Applicable
+Logical Block size              : 512B
+Device Write Cache              : Not Applicable
+Manufacture Day                 : Not Available
+Manufacture Week                : Not Available
+Manufacture Year                : Not Available
+SAS Address                     : 0x4433221106000000
+WWN                             : 0x4433221106000000
+Non-RAID HDD Disk Cache Policy  : Not Applicable
+Disk Cache Policy               : Not Applicable
+Sub Vendor                      : Not Available
+Cryptographic Erase Capable     : No
+
+ID                              : 0:1:3
+Status                          : Ok
+Name                            : Physical Disk 0:1:3
+State                           : Online
+Power Status                    : Spun Up
+Bus Protocol                    : SATA
+Media                           : HDD
+Part of Cache Pool              : Not Applicable
+Remaining Rated Write Endurance : Not Applicable
+Failure Predicted               : No
+Revision                        : RA0A
+Driver Version                  : Not Applicable
+Model Number                    : Not Applicable
+T10 PI Capable                  : No
+Certified                       : Yes
+Encryption Capable              : No
+Encryption Protocol             : Not Applicable
+Encrypted                       : Not Applicable
+Progress                        : Not Applicable
+Mirror Set ID                   : 0
+Capacity                        : 2,794.00 GB (3000034656256 bytes)
+Used RAID Disk Space            : 2,794.00 GB (3000034656256 bytes)
+Available RAID Disk Space       : 0.00 GB (0 bytes)
+Hot Spare                       : No
+Vendor ID                       : DELL(tm)
+Product ID                      : ST33000650NS
+Serial No.                      : Z295LY0R
+Part Number                     : TH0JMN63212332CJ00T2A02
+Negotiated Speed                : 3.00 Gbps
+Capable Speed                   : 3.00 Gbps
+PCIe Negotiated Link Width      : Not Applicable
+PCIe Maximum Link Width         : Not Applicable
+Logical Block size              : 512B
+Device Write Cache              : Not Applicable
+Manufacture Day                 : Not Available
+Manufacture Week                : Not Available
+Manufacture Year                : Not Available
+SAS Address                     : 0x4433221107000000
+WWN                             : 0x4433221107000000
+Non-RAID HDD Disk Cache Policy  : Not Applicable
+Disk Cache Policy               : Not Applicable
+Sub Vendor                      : Not Available
+Cryptographic Erase Capable     : No
+_EOF_
     fi
   fi
   
@@ -191,42 +376,23 @@ $omreportCommand chassis |
 
 
 # Storage Controller health
-
-# Regarding the sed script:
-# -n is silent because we already print the match using p;
-# The substitution is inside the block to allow for "print and quit" after the first match (which is what "p;q;") does
-#status=$($omreportCommand storage controller | sed -n -E -e "/^Status\s+: (\S+)/{s//\1/p;q;}")
-#if [ ! -z "$status" ]; then
-#    # The ^^ means convert to uppercase
-#  echo "        { id:\"Storage Controller\", s:\"${status^^}\" }"
-#fi
-
-
-readonly FINDING_CONTROLLER=0
-readonly PROCESSING_CONTROLLER=1
-state=$FINDING_CONTROLLER
+controllerIds=()
 
 controllerId=""
 controllerStatus=""
 controllerName=""
 $omreportCommand storage controller |
   while read key colon value; do
-    if [ $state = $FINDING_CONTROLLER ]; then
-      if [ "$key" = "Controller" ]; then
-        state=$PROCESSING_CONTROLLER
-      fi
-    elif [ $state = $PROCESSING_CONTROLLER ]; then
-      if [ "$key" = "ID" ]; then
-        controllerId=$value
-      elif [ "$key" = "Status" ]; then
-        controllerStatus=$value
-      elif [ "$key" = "Name" ]; then
-        controllerName=$value
-        
-        # The ^^ means convert to uppercase
-        echo "        { id:\"Storage Controller $controllerId $controllerName\", s:\"${controllerStatus^^}\" }"
-        state=$FINDING_CONTROLLER
-      fi
+    if [ "$key" = "ID" ]; then
+      controllerId=$value
+      controllerIds+=($controllerId)
+    elif [ "$key" = "Status" ]; then
+      controllerStatus=$value
+    elif [ "$key" = "Name" ]; then
+      controllerName=$value
+      
+      # The ^^ means convert to uppercase
+      echo "        { id:\"Storage Controller $controllerId $controllerName\", s:\"${controllerStatus^^}\" }"
     fi
   done
 
@@ -236,52 +402,52 @@ cat << _EOF_
 _EOF_
 
 
-# Storage Virtual Disks (raid sets, include their own health status)
+# Storage Virtual Disks (raid sets)
 cat << _EOF_
     "raid":[
 _EOF_
 
-readonly FINDING_VDISK_CONTROLLER=0
-readonly FINDING_VDISK=1
-readonly PROCESSING_VDISK=2
-state=$FINDING_VDISK_CONTROLLER
-
-vdiskController=""
-vdiskId=""
-vdiskStatus=""
-vdiskName=""
-vdiskLayout=""
-$omreportCommand storage vdisk |
-  while read key colon value; do
-    if [ $state = $FINDING_VDISK_CONTROLLER ]; then
-      if [ "$key" = "Controller" ]; then
-        vdiskController="${colon} ${value}"
-        state=$FINDING_VDISK
+for controllerId in ${controllerIds[@]}; do
+  vdiskController=""
+  vdiskId=""
+  vdiskStatus=""
+  vdiskName=""
+  vdiskLayout=""
+  $omreportCommand storage vdisk controller=$controllerId |
+    while read key colon value; do
+        if [ "$key" = "Controller" ]; then
+          vdiskController="${colon} ${value}"
+        elif [ "$key" = "ID" ]; then
+          vdiskId=$value
+        elif [ "$key" = "Status" ]; then
+          vdiskStatus=$value
+        elif [ "$key" = "Name" ]; then
+          vdiskName=$value
+        elif [ "$key" = "Layout" ]; then
+          vdiskLayout=$value
+          # The ^^ means convert to uppercase
+          vdiskStatus=${vdiskStatus^^}
+          # The ,, means convert to lowercase
+          vdiskLayout=$(echo "${vdiskLayout,,}" | sed -e 's/-//')
+          
+          vdiskDriveCount=0
+          vdiskFailCount=0
+          
+          $omreportCommand storage pdisk controller=$controllerId vdisk=$vdiskId |
+          while read key colon value; do
+            ((++vdiskDriveCount))
+            if [ "$key" = "Status" ]; then
+              if [ ! "$value" = "Ok" ]; then
+                ((++vdiskFailCount))
+              fi
+            fi
+          done
+          
+          echo "        { dev: \"$vdiskController\", name:\"Vdisk $vdiskId: $vdiskName\", level:\"$vdiskLayout\", state:\"${vdiskStatus}\", count:${vdiskDriveCount}, count:${vdiskFailCount} }"
+        fi
       fi
-    elif [ $state = $FINDING_VDISK ]; then
-      if [ "$key" = "ID" ]; then
-        vdiskId=$value
-        state=$PROCESSING_VDISK
-      fi
-    elif [ $state = $PROCESSING_VDISK ]; then
-      if [ "$key" = "Status" ]; then
-        vdiskStatus=$value
-      elif [ "$key" = "Name" ]; then
-        vdiskName=$value
-      elif [ "$key" = "Layout" ]; then
-        vdiskLayout=$value
-        # The ^^ means convert to uppercase
-        vdiskStatus=${vdiskStatus^^}
-        # The ,, means convert to lowercase
-        vdiskLayout=$(echo "${vdiskLayout,,}" | sed -e 's/-//')
-        
-        echo "        { dev: \"$vdiskController\", name:\"Vdisk $vdiskId: $vdiskName\", level:\"$vdiskLayout\", state:\"${vdiskStatus}\" }"
-        state=$FINDING_VDISK
-      elif [ "$key" = "" ]; then
-        state=$FINDING_VDISK_CONTROLLER
-      fi
-    fi
-  done
+    done
+done
 
 cat << _EOF_
     ]

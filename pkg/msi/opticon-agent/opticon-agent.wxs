@@ -61,6 +61,9 @@
 						<Component Id="opticonAgent.omreportProbeFileComponent" Guid="7d2c0755-179c-4fe3-a8df-b337bb4b6301" Win64="yes">
 							<File Id="opticonAgent.omreportProbeFile" KeyPath="yes" Source="../../../src/opticon-agent/extprobes/win/omreport.probe.ps1" Name="omreport.probe.ps1" />
 						</Component>
+						<Component Id="opticonAgent.storageSpacesProbeFileComponent" Guid="00c23092-fb8e-4fc1-a756-ceb6458946e4" Win64="yes">
+							<File Id="opticonAgent.storageSpacesProbeFile" KeyPath="yes" Source="../../../src/opticon-agent/extprobes/win/storagespaces.probe.ps1" Name="storagespaces.probe.ps1" />
+						</Component>
 					</Directory>
 				</Directory>
 			</Directory>
@@ -72,6 +75,7 @@
 			<ComponentRef Id="opticonAgent.exampleConfigFileComponent" />
 			<ComponentRef Id="opticonAgent.mssqlProbeFileComponent" />
 			<ComponentRef Id="opticonAgent.omreportProbeFileComponent" />
+			<ComponentRef Id="opticonAgent.storageSpacesProbeFileComponent" />
 		</Feature>
 		
 		

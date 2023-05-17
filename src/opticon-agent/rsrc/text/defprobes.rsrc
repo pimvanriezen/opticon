@@ -123,5 +123,5 @@ storagespaces {
     type: exec
     check: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/storagespaces.probe.ps1\" check"
     call: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/storagespaces.probe.ps1\""
-    frequency: high
+    frequency: low
 }

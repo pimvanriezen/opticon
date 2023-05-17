@@ -23,6 +23,10 @@ $raid = New-Object System.Collections.Generic.List[System.Object]
 
 
 Get-VirtualDisk | ForEach-Object -Process {
+	if ($_.FriendlyName -eq 'ClusterPerformanceHistory') {
+		Return
+	}
+	
 	$driveCount = 0
 	$failCount = 0
 	Get-PhysicalDisk -VirtualDisk $_ | ForEach-Object -Process {
