@@ -455,7 +455,11 @@ static uint32_t _install(const char *url, const char *channel, DInstallType inst
     //printf("\n%s\n", json);
     
     var *versionsVar = var_alloc();
-    if (var_parse_json(versionsVar, json) == 0) { e = 0xcde269d2; goto error_1; }
+    if (var_parse_json(versionsVar, json) == 0) {
+        log_error("Failed to parse versions json");
+        e = 0xcde269d2;
+        goto error_1;
+    }
     
     var *allChannelDict = var_find_key(versionsVar, "channel");
     if (allChannelDict == NULL) {
@@ -508,8 +512,12 @@ static uint32_t _install(const char *url, const char *channel, DInstallType inst
         
         const char *msiFileName = var_get_str(msiVar);
         if (msiFileName == NULL) {
-            log_error("Did not find any msi name");
             e = 0x8b58b278;
+            goto error_1;
+        }
+        if (*msiFileName == '\0') {
+            log_error("Msi name is empty");
+            e = 0xd62e0c61;
             goto error_1;
         }
         
