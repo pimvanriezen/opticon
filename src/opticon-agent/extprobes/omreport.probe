@@ -1,12 +1,8 @@
 #!/bin/bash
 
-useExampleCommand=0
-
 omreportCommand="omreport"
-if [ $useExampleCommand = 1 ]; then
-  omreportCommand="./omreport.probe example"
-fi
-
+# Uncomment for testing:
+#omreportCommand="./omreport.example"
 
 
 if [ "$1" = "check" ]; then
@@ -16,149 +12,7 @@ if [ "$1" = "check" ]; then
   fi
   
   exit 0
-elif [ "$1" = "example" ]; then
-  if [ "$2" = "chassis" ]; then
-    # Example output of "omreport chassis"
-    cat << _EOF_
-Health
-
-Main System Chassis
-
-SEVERITY : COMPONENT
-Ok       : Fans
-Ok       : Intrusion
-Ok       : Memory
-Ok       : Power Supplies
-Ok       : Power Management
-Ok       : Processors
-Ok       : Temperatures
-Ok       : Voltages
-Ok       : Hardware Log
-Ok       : Batteries
-
-For further help, type the command followed by -?
-_EOF_
-  elif [ "$2" = "storage" ]; then
-    if [ "$3" = "controller" ]; then
-      # Example output of "omreport storage controller"
-      cat << _EOF_
- Controller  PERC H730P Mini(Embedded)
-
-Controller
-ID                                            : 0
-Status                                        : Ok
-Name                                          : PERC H730P Mini
-Slot ID                                       : Embedded
-State                                         : Ready
-Firmware Version                              : 25.5.9.0001
-Minimum Required Firmware Version             : Not Applicable
-Driver Version                                : 6.604.06.00
-Minimum Required Driver Version               : Not Applicable
-Storport Driver Version                       : 10.0.20348.740
-Minimum Required Storport Driver Version      : Not Applicable
-Number of Connectors                          : 2
-Rebuild Rate                                  : 30%
-BGI Rate                                      : 30%
-Check Consistency Rate                        : 30%
-Reconstruct Rate                              : 30%
-Alarm State                                   : Not Applicable
-Cluster Mode                                  : Not Applicable
-SCSI Initiator ID                             : Not Applicable
-Cache Memory Size                             : 2048 MB
-Patrol Read Mode                              : Auto
-Patrol Read State                             : Stopped
-Patrol Read Rate                              : 30%
-Patrol Read Iterations                        : 74
-Abort Check Consistency on Error              : Disabled
-Allow Revertible Hot Spare and Replace Member : Enabled
-Load Balance                                  : Not Applicable
-Auto Replace Member on Predictive Failure     : Disabled
-Redundant Path view                           : Not Applicable
-CacheCade Capable                             : Not Applicable
-Persistent Hot Spare                          : Disabled
-Encryption Capable                            : Yes
-Encryption Key Present                        : No
-Encryption Mode                               : None
-Preserved Cache                               : Not Applicable
-Spin Down Unconfigured Drives                 : Disabled
-Spin Down Hot Spares                          : Disabled
-Spin Down Configured Drives                   : Disabled
-Automatic Disk Power Saving (Idle C)          : Disabled
-Start Time (HH:MM)                            : Not Applicable
-Time Interval for Spin Up (in Hours)          : Not Applicable
-T10 Protection Information Capable            : No
-Non-RAID HDD Disk Cache Policy                : Unchanged
-Current Controller Mode                       : RAID
-
-Controller
-ID                                            : 1
-Status                                        : Ok
-Name                                          : PCIe SSD Subsystem
-Slot ID                                       : Not Applicable
-State                                         : Ready
-Firmware Version                              : Not Available
-
-Controller
-ID                                            : 2
-Status                                        : Ok
-Name                                          : BOSS-S1
-Slot ID                                       : Embedded
-State                                         : Ready
-Firmware Version                              : 2.5.13.3024
-Minimum Required Firmware Version             : Not Applicable
-_EOF_
-    elif [ "$3" = "vdisk" ]; then
-      # Example output of "omreport storage vdisk"
-      cat << _EOF_
-List of Virtual Disks in the System
-
-Controller PERC H730P Mini (Embedded)
-ID                                : 0
-Status                            : Non-Critical
-Name                              : STORAGE
-State                             : Degraded
-Hot Spare Policy violated         : Not Assigned
-Encrypted                         : No
-Layout                            : RAID-5
-Size                              : 1,197.06 GB (1285329059840 bytes)
-T10 Protection Information Status : No
-Associated Fluid Cache State      : Not Applicable
-Device Name                       : Windows Disk 0
-Bus Protocol                      : SATA
-Media                             : SSD
-Read Policy                       : Read Ahead
-Write Policy                      : Write Back
-Cache Policy                      : Not Applicable
-Stripe Element Size               : 64 KB
-Disk Cache Policy                 : Unchanged
-
-ID                                : 1
-Status                            : Non-Critical
-Name                              : OS
-State                             : Degraded
-Hot Spare Policy violated         : Not Assigned
-Encrypted                         : No
-Layout                            : RAID-5
-Size                              : 103.19 GB (110803746816 bytes)
-T10 Protection Information Status : No
-Associated Fluid Cache State      : Not Applicable
-Device Name                       : Windows Disk 1
-Bus Protocol                      : SATA
-Media                             : SSD
-Read Policy                       : Read Ahead
-Write Policy                      : Write Back
-Cache Policy                      : Not Applicable
-Stripe Element Size               : 64 KB
-Disk Cache Policy                 : Unchanged
-_EOF_
-    fi
-  fi
-  
-  exit 0
 fi
-
-# If you want to use a multiline string in a while read loop:
-#printf "%s\n" "$example" |
 
 
 cat << _EOF_
@@ -191,80 +45,49 @@ $omreportCommand chassis |
 
 
 # Storage Controller health
-
-# Regarding the sed script:
-# -n is silent because we already print the match using p;
-# The substitution is inside the block to allow for "print and quit" after the first match (which is what "p;q;") does
-#status=$($omreportCommand storage controller | sed -n -E -e "/^Status\s+: (\S+)/{s//\1/p;q;}")
-#if [ ! -z "$status" ]; then
-#    # The ^^ means convert to uppercase
-#  echo "        { id:\"Storage Controller\", s:\"${status^^}\" }"
-#fi
-
-
-readonly FINDING_CONTROLLER=0
-readonly PROCESSING_CONTROLLER=1
-state=$FINDING_CONTROLLER
+controllerIds=()
 
 controllerId=""
 controllerStatus=""
 controllerName=""
-$omreportCommand storage controller |
-  while read key colon value; do
-    if [ $state = $FINDING_CONTROLLER ]; then
-      if [ "$key" = "Controller" ]; then
-        state=$PROCESSING_CONTROLLER
-      fi
-    elif [ $state = $PROCESSING_CONTROLLER ]; then
-      if [ "$key" = "ID" ]; then
-        controllerId=$value
-      elif [ "$key" = "Status" ]; then
-        controllerStatus=$value
-      elif [ "$key" = "Name" ]; then
-        controllerName=$value
-        
-        # The ^^ means convert to uppercase
-        echo "        { id:\"Storage Controller $controllerId $controllerName\", s:\"${controllerStatus^^}\" }"
-        state=$FINDING_CONTROLLER
-      fi
-    fi
-  done
-
+while read key colon value; do
+  if [ "$key" = "ID" ]; then
+    controllerId=$value
+    controllerIds+=($controllerId)
+  elif [ "$key" = "Status" ]; then
+    controllerStatus=$value
+  elif [ "$key" = "Name" ]; then
+    controllerName=$value
+    
+    # The ^^ means convert to uppercase
+    echo "        { id:\"Storage Controller $controllerId $controllerName\", s:\"${controllerStatus^^}\" }"
+  fi
+done < <($omreportCommand storage controller)
+# Using process substitution instead of a pipe to be able to modify the controllerIds array
 
 cat << _EOF_
     ]
 _EOF_
 
 
-# Storage Virtual Disks (raid sets, include their own health status)
+# Storage Virtual Disks (raid sets)
 cat << _EOF_
     "raid":[
 _EOF_
 
-readonly FINDING_VDISK_CONTROLLER=0
-readonly FINDING_VDISK=1
-readonly PROCESSING_VDISK=2
-state=$FINDING_VDISK_CONTROLLER
-
-vdiskController=""
-vdiskId=""
-vdiskStatus=""
-vdiskName=""
-vdiskLayout=""
-$omreportCommand storage vdisk |
-  while read key colon value; do
-    if [ $state = $FINDING_VDISK_CONTROLLER ]; then
+for controllerId in ${controllerIds[@]}; do
+  vdiskController=""
+  vdiskId=""
+  vdiskStatus=""
+  vdiskName=""
+  vdiskLayout=""
+  $omreportCommand storage vdisk controller=$controllerId |
+    while read key colon value; do
       if [ "$key" = "Controller" ]; then
         vdiskController="${colon} ${value}"
-        state=$FINDING_VDISK
-      fi
-    elif [ $state = $FINDING_VDISK ]; then
-      if [ "$key" = "ID" ]; then
+      elif [ "$key" = "ID" ]; then
         vdiskId=$value
-        state=$PROCESSING_VDISK
-      fi
-    elif [ $state = $PROCESSING_VDISK ]; then
-      if [ "$key" = "Status" ]; then
+      elif [ "$key" = "Status" ]; then
         vdiskStatus=$value
       elif [ "$key" = "Name" ]; then
         vdiskName=$value
@@ -275,13 +98,28 @@ $omreportCommand storage vdisk |
         # The ,, means convert to lowercase
         vdiskLayout=$(echo "${vdiskLayout,,}" | sed -e 's/-//')
         
-        echo "        { dev: \"$vdiskController\", name:\"Vdisk $vdiskId: $vdiskName\", level:\"$vdiskLayout\", state:\"${vdiskStatus}\" }"
-        state=$FINDING_VDISK
-      elif [ "$key" = "" ]; then
-        state=$FINDING_VDISK_CONTROLLER
+        vdiskDriveCount=0
+        vdiskFailCount=0
+        while read key colon value; do
+          if [ "$key" = "Status" ]; then
+            ((++vdiskDriveCount))
+            if [ ! "$value" = "Ok" ]; then
+              ((++vdiskFailCount))
+            fi
+          fi
+        done < <($omreportCommand storage pdisk controller=$controllerId vdisk=$vdiskId)
+        
+        echo "        {
+          dev: \"$vdiskController\",
+          name: \"vdisk $vdiskId: $vdiskName\",
+          level: \"$vdiskLayout\",
+          state: \"${vdiskStatus}\",
+          count: ${vdiskDriveCount},
+          fail: ${vdiskFailCount}
+        }"
       fi
-    fi
-  done
+    done
+done
 
 cat << _EOF_
     ]

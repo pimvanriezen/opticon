@@ -93,7 +93,7 @@ omreportwin {
 omreport {
     platform: linux
     type: exec
-    check: /var/lib/opticon/probes/omreport.probe check
+    check: "/var/lib/opticon/probes/omreport.probe check"
     call: /var/lib/opticon/probes/omreport.probe
     frequency: low
 }
@@ -117,4 +117,11 @@ mssql {
     check: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/mssql.probe.ps1\" check"
     call: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/mssql.probe.ps1\""
     frequency: high
+}
+storagespaces {
+    platform: windows
+    type: exec
+    check: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/storagespaces.probe.ps1\" check"
+    call: "powershell.exe -ExecutionPolicy Bypass -NonInteractive -NoProfile -File \"extprobes/storagespaces.probe.ps1\""
+    frequency: low
 }

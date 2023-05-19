@@ -689,6 +689,9 @@ int app_main (int _argc, const char *_argv[]) {
             crsr = crsr->next;
         }
     }
+    else {
+        log_error ("Failed to parse default probes");
+    }
     
     opticonf_handle_config (APP.conf);
 
