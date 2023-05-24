@@ -1,6 +1,6 @@
 #!/bin/bash
 
-omreportCommand="omreport"
+omreportCommand="/opt/dell/srvadmin/bin/omreport"
 # Uncomment for testing:
 #omreportCommand="./omreport.example"
 
