@@ -391,7 +391,8 @@ void watchthread_handle_host (host *host) {
            are no problems, it should be going down. */
         if (! problemcount) {
             if (host->badness > 100.0) host->badness = host->badness/2.0;
-            else if (host->badness > 1.0) host->badness = host->badness *0.75;
+            else if (host->badness > 50.0) host->badness = host->badness *0.75;
+            else if (host->badness > 25.0) host->badness = host->badness - 12.50;
             else host->badness = 0.0;
             meter_set_empty_array (m_problems);
         }
@@ -505,6 +506,7 @@ void overviewthread_run (thread *self) {
                 uuid2str (tcrsr->uuid, uuidstr);
                 log_info ("Notification triggered for tenant <%s>: %i",
                           uuidstr, var_get_count (n));
+                
                           
                 // FIXME do something
                 var_free (n);
