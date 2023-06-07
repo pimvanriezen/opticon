@@ -43,12 +43,13 @@ int main (int argc, const char *argv[]) {
     }
     
     assert (badness == 8.0);
+    assert (maxtrigger == WATCH_ALERT);
     printf ("base badness %.2f mt %i\n", badness, maxtrigger);
     
     maxtrigger = WATCH_NONE;
     badness = 0.0;
     mw = wl->first;
-    
+
     while (mw) {
         double nb = calculate_badness (m_load, mw, adj, &maxtrigger);
         if (nb > badness) badness = nb;
@@ -56,5 +57,6 @@ int main (int argc, const char *argv[]) {
     }
     
     assert (badness == 5.0);
+    assert (maxtrigger == WATCH_WARN);
     return 0;
 }
