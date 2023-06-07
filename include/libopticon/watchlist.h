@@ -3,6 +3,7 @@
 
 #include <libopticon/meter.h>
 #include <libopticon/var.h>
+#include <libopticon/log.h>
 #include <pthread.h>
 
 /* =============================== TYPES =============================== */
@@ -127,4 +128,6 @@ graphtarget *graphlist_begin (graphlist *);
 graphtarget *graphlist_next (graphlist *, graphtarget *);
 void         graphlist_break (graphlist *);
 
+double       calculate_badness (meter *m, meterwatch *, watchadjust *,
+                                watchtrigger *);
 #endif
