@@ -92,7 +92,7 @@ var *extdata_get (uuid tenantid, uuid hostid, var *env) {
 
     if (crsr) {
         time_t now = time (NULL);
-        if (now - crsr->lastrefresh < 600) {
+        if (now - crsr->lastrefresh < 1200) {
             var *res = var_clone (crsr->data);
             pthread_rwlock_unlock (&dlist.lock);
             return res;
@@ -121,7 +121,7 @@ var *extdata_get (uuid tenantid, uuid hostid, var *env) {
         crsr = extdata_new (tenantid, hostid);
     }
     crsr->data = vout;
-    crsr->lastrefresh = time (NULL) + (rand() & 63);
+    crsr->lastrefresh = time (NULL) + (rand() & 511);
     var *res = var_clone (vout);
     pthread_rwlock_unlock (&dlist.lock);
     return res;
