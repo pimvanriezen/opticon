@@ -31,6 +31,7 @@ ServerList.activate = function (argv) {
     self.View.haveselection = false;
     self.View.selected = "";
     self.selectedObject = null;
+    self.loaded = false;
     self.refresh();
     Module.backgroundInterval = 30000;
     Module.setBackground (self.refresh);
@@ -48,7 +49,13 @@ ServerList.refresh = function () {
     let nwlist = [];
     let count = 0;
     
+    if (! self.loaded) App.busy();
+    
     API.Opticon.Host.getOverview (function (err, res) {
+        if (! self.loaded) {
+            App.done();
+            self.loaded = true;
+        }
         if (! err) {
             for (var i in res.overview) {
                 let srv = res.overview[i];
