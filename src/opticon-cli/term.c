@@ -9,8 +9,8 @@
 #include <stdarg.h>
 #include "term.h"
 
-struct termios NewInAttribs;
-struct termios OldInAttribs;
+static struct termios NewInAttribs;
+static struct termios OldInAttribs;
 terminfo TERMINFO;
 
 // ============================================================================

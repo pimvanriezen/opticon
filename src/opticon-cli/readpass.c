@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct termios NewInAttribs;
-struct termios OldInAttribs;
+static struct termios NewInAttribs;
+static struct termios OldInAttribs;
 
 void readpass (char *buf, int size) {
     int fd = 1;
