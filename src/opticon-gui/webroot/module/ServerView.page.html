@@ -921,9 +921,7 @@
       <td width="*"><b>Meter</b></td>
       <td width="120"><b>Level</b></td>
       <td width="140"><b>Compare</b></td>
-      <td width="80"><b>Global</b></td>
-      <td width="80"><b>Tenant</b></td>
-      <td width="80"><b>Host</b></td>
+      <td width="120"><b>Value</b></td>
     </tr>
   </table>
 </div>
@@ -933,59 +931,22 @@
     <table cellspacing="0" border="0" class="tbserverlist" width="100%">
       <tr height="32" v-for="t in triggers">
         <td width="*">{{t.meter}}</td>
-        <td width="120">
-          <select v-model="t.level" id="t.level">
-            <option value="WARN">WARN</option>
-            <option value="ALERT">ALERT</option>
-            <option value="CRITICAL">CRITICAL</option>
-          </select>
-        </td>
+        <td width="120">{{t.level.toUpperCase()}}</td>
         
         <td width="140">
-          <select v-model="t.compare" id="t.compare">
-            <option v-if="t.type=='int'" value="count">Value Count</option>
-            <option v-if="t.type=='str'" value="match">String Match</option>
-            <option value="eq">Exact Match</option>
-            <option value="lt">Less Than</option>
-            <option value="gt">Greater Than</option>
+          <select v-model="t.cmp" id="t.cmp">
+            <option value="count">cnt</option>
+            <option v-if="t.type=='str'" value="match">&nbsp;~&nbsp;</option>
+            <option value="eq">&nbsp;=&nbsp;</option>
+            <option value="lt">&nbsp;&lt;&nbsp;</option>
+            <option value="gt">&nbsp;&gt;&nbsp;</option>
           </select>
         </td>
         
-        <td width="80">
-          <span v-if="t.type=='frac'">
-            {{parseFloat(t.value.global).toFixed(2)}}
-          </span>
-          <span v-if="t.type=='int'">
-            {{parseInt(t.value.global)}}
-          </span>
-          <span v-if="t.type=='str'">
-            {{t.value.global}}
-          </span>
+        <td width="120">
+          <input v-model="t.val" class="trigger-input">
         </td>
 
-        <td width="80">
-          <span v-if="t.type=='frac'">
-            {{parseFloat(t.value.tenant).toFixed(2)}}
-          </span>
-          <span v-if="t.type=='int'">
-            {{parseInt(t.value.tenant)}}
-          </span>
-          <span v-if="t.type=='str'">
-            {{t.value.tenant}}
-          </span>
-        </td>
-        
-        <td width="80">
-          <span v-if="t.type=='frac'">
-            {{parseFloat(t.value.host).toFixed(2)}}
-          </span>
-          <span v-if="t.type=='int'">
-            {{parseInt(t.value.host)}}
-          </span>
-          <span v-if="t.type=='str'">
-            {{t.value.host}}
-          </span>
-        </td>
       </tr>
     </table>
 

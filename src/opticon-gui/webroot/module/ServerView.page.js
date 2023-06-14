@@ -86,6 +86,36 @@ ServerView.refresh = function() {
             else self.View.empty = true;
         });
     });
+    
+    API.Opticon.Host.listWatchers (self.tenantid, self.id, function (res) {
+        let out = [];
+        if (res) {
+            for (key in res.watcher) {
+                let w = res.watcher[key];
+                
+                let obj = { meter: key, type: w.type };
+                if (w.warning) {
+                    obj.level = "warning";
+                    obj.cmp = w.warning.cmp;
+                    obj.val = w.warning.val;
+                    out.push (Vidi.clone(obj));
+                }
+                if (w.alert) {
+                    obj.level = "alert";
+                    obj.cmp = w.alert.cmp;
+                    obj.val = w.alert.val;
+                    out.push (Vidi.clone(obj));
+                }
+                if (w.critical) {
+                    obj.level = "critical";
+                    obj.cmp = w.critical.cmp;
+                    obj.val = w.critical.val;
+                    out.push (Vidi.clone(obj));
+                }
+            }
+        }
+        self.View.triggers = out;
+    });
 }
 
 ServerView.refreshGraph = function(graph,datum,title,unit) {
