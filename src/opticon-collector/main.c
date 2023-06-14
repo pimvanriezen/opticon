@@ -526,6 +526,32 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
 }
 
 /*/ ======================================================================= /*/
+/** Dump all tenant-level watcher data to a file for temporary debugging
+  * purposes. */
+/*/ ======================================================================= /*/
+void dump_tenant_debug (void) {
+    char tmpstr[48];
+    FILE *f = fopen ("/tmp/opticon-collector.dump","w");
+    tenant *T = tenant_first (TENANT_LOCK_READ);
+    while (T) {
+        uuid2str (T->uuid, tmpstr);
+        fprintf (f, "tenant %s { \n", tmpstr);
+        
+        meterwatch *mw = T->watch.first;
+        while (mw) {
+            id2str (mw->id, tmpstr);
+            fprintf (f, "  watcher '%s' tr:%i tp:%i\n", tmpstr, mw->trigger,
+                     mw->tp);
+            mw = mw->next;
+        }
+        
+        T = tenant_next (T, TENANT_LOCK_READ);
+    }
+    fprintf (f, "}\n");
+    fclose (f);
+}
+
+/*/ ======================================================================= /*/
 /** Thread runner for the reaper. This thread goes over the tenant list,
   * figuring out how much storage they have in use. If this is over the
   * set quota, it starts culling days from the database starting at
@@ -541,6 +567,10 @@ void reaper_run (thread *self) {
         time_t earliest = 0;
         time_t tnow = time (NULL);
         uuid *tenants = db_list_tenants (APP.reaperdb, &numtenants);
+        
+        // FIXME remove again
+        dump_tenant_debug();
+        
         log_info ("Starting quota reaper run for %i tenants", numtenants);
         for (int i=0; i<numtenants; ++i) {
             char uuidstr[40];
