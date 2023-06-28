@@ -31,15 +31,15 @@ if [ "$pman" = "dnf" ]; then
   printf "}\n"
 elif [ "$pman" = "apt" ]; then
   printf "pkgl [\n"
-  while read iid v rest; do
-    id=$(echo "$iid" | cut -f1 -d/)
+  while read blah id rest; do
     if [ ! -z "$id" ]; then
+      v=$(echo "$rest" | cut -f2 -d'(' | cut -f1 -d' ')
       cnt=$((cnt + 1))
       if [ $cnt -lt 10 ]; then
         printf "    { id:\"%s\", v:\"%s\" }\n" "$id" "$v"
       fi
     fi
-  done < <(apt list --upgradable 2>/dev/null | grep /)
+  done < <(apt upgrade --simulate 2>/dev/null | grep ^Inst)
   printf "]\n"
  
   nr=$(which needrestart)
