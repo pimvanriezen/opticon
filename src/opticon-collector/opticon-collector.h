@@ -27,6 +27,7 @@ typedef struct appcontext_s {
     packetqueue     *queue;
     intransport     *transport;
     watchlist        watch;
+    var             *watchdef;
     graphlist       *graphlist;
     thread          *watchthread;
     thread          *overviewthread;

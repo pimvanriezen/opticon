@@ -114,6 +114,10 @@ void watchlist_populate (watchlist *w, var *v_meters) {
             var *v_alert = var_get_dict_forkey (mdef, "alert");
             var *v_crit = var_get_dict_forkey (mdef, "critical");
             const char *type = var_get_str_forkey (mdef, "type");
+            if (! type) {
+                var *v_fallback = var_get_dict_forkey (APP.watchdef, mdef->id);
+                type = var_get_str_forkey (v_fallback, "type");
+            }
             if (type && (v_warn || v_alert || v_crit)) {
                 metertype_t tp;
                 if (memcmp (type, "int", 3) == 0) tp = MTYPE_INT;
@@ -863,6 +867,7 @@ int conf_db_path (const char *id, var *v, updatetype tp) {
 int conf_meters (const char *id, var *v, updatetype tp) {
     if (tp == UPDATE_REMOVE) return 0;
     watchlist_populate (&APP.watch, v);
+    APP.watchdef = var_clone (v);
     return 1;
 }
 
