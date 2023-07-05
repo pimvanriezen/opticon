@@ -534,8 +534,11 @@ void handle_meter_packet (ioport *pktbuf, uint32_t netid) {
   * purposes. */
 /*/ ======================================================================= /*/
 void dump_tenant_debug (void) {
+    if (! APP.dumppath) return;
+    if (! APP.dumppath[0]) return;
+    
     char tmpstr[48];
-    FILE *f = fopen ("/tmp/opticon-collector.dump","w");
+    FILE *f = fopen (APP.dumppath,"w");
     tenant *T = tenant_first (TENANT_LOCK_READ);
     while (T) {
         uuid2str (T->uuid, tmpstr);
@@ -881,6 +884,15 @@ int conf_graph (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Set up debug dump path, if any */
+/*/ ======================================================================= /*/
+int conf_dump_path (const char *id, var *v, updatetype tp) {
+    if (tp == UPDATE_REMOVE) return 0;
+    APP.dumppath = strdup (var_get_str (v));
+    return 1;
+}
+
 appcontext APP; /**< Global application context */
 
 /*/ ======================================================================= /*/
@@ -912,9 +924,11 @@ int main (int _argc, const char *_argv[]) {
     opticonf_add_reaction ("database/path", conf_db_path);
     opticonf_add_reaction ("meter", conf_meters);
     opticonf_add_reaction ("graph", conf_graph);
+    opticonf_add_reaction ("debug/dump", conf_dump_path);
     
     APP.transport = intransport_create_udp();
     APP.codec = codec_create_pkt();
+    APP.dumppath = NULL;
 
     APP.conf = var_alloc();
     

@@ -40,6 +40,7 @@ typedef struct appcontext_s {
     const char      *mconfpath;
     const char      *pidfile;
     const char      *dbpath;
+    const char      *dumppath;
     int              foreground;
     int              listenport;
     const char      *listenaddr;
