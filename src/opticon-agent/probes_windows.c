@@ -827,7 +827,9 @@ var *runprobe_uname(probe *self) {
 // ============================================================================
 
 var *runprobe_df(probe *self) {
-    (void)self;
+    var *skipdevices = var_get_array_forkey(self->options, "skip");
+    var *matchdevices = var_get_array_forkey(self->options, "match");
+    
     var *res = var_alloc();
     var *dfArray = var_get_array_forkey(res, "df");
     
@@ -880,6 +882,9 @@ var *runprobe_df(probe *self) {
     // Each loop: skip over the single drive plus the null terminator for the next single drive
     for (char *singleLogicalDriveString = logicalDriveStrings; *singleLogicalDriveString != '\0'; singleLogicalDriveString += strlen(singleLogicalDriveString) + 1) {
         if (GetDriveTypeA(singleLogicalDriveString) != DRIVE_FIXED) continue;
+        
+        if (var_get_count(matchdevices) > 0 && !matchlist(singleLogicalDriveString, matchdevices)) continue;
+        if (matchlist(singleLogicalDriveString, skipdevices)) continue;
         
         var *dfDict = var_add_dict(dfArray);
         
