@@ -98,18 +98,24 @@ ServerView.refresh = function() {
                     obj.level = "warning";
                     obj.cmp = w.warning.cmp;
                     obj.val = w.warning.val;
+                    if (w.warning.origin == "host") obj.custom = true;
+                    else obj.custom = false;
                     out.push (Vidi.clone(obj));
                 }
                 if (w.alert) {
                     obj.level = "alert";
                     obj.cmp = w.alert.cmp;
                     obj.val = w.alert.val;
+                    if (w.alert.origin == "host") obj.custom = true;
+                    else obj.custom = false;
                     out.push (Vidi.clone(obj));
                 }
                 if (w.critical) {
                     obj.level = "critical";
                     obj.cmp = w.critical.cmp;
                     obj.val = w.critical.val;
+                    if (w.critical.origin == "host") obj.custom = true;
+                    else obj.custom = false;
                     out.push (Vidi.clone(obj));
                 }
             }

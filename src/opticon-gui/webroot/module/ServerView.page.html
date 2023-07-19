@@ -878,7 +878,7 @@
   </table>
 </div>
 
-<div class="uSelectList uServerList" v-on:click="deSelect">
+<div class="uSelectList uServerList">
   <div v-show="empty" class="uNoResults">
     <center>No log entries.</center>
   </div>
@@ -921,12 +921,14 @@
       <td width="*"><b>Meter</b></td>
       <td width="120"><b>Level</b></td>
       <td width="140"><b>Compare</b></td>
+      <td width="20">&nbsp;</td>
       <td width="120"><b>Value</b></td>
+      <td width="20">&nbsp;</td>
     </tr>
   </table>
 </div>
 
-<div class="uSelectList uServerList" v-on:click="deSelect">
+<div class="uSelectList uServerList">
   <span v-if="!empty">
     <table cellspacing="0" border="0" class="tbserverlist" width="100%">
       <tr height="32" v-for="t in triggers">
@@ -934,19 +936,18 @@
         <td width="120">{{t.level.toUpperCase()}}</td>
         
         <td width="140">
-          <select v-model="t.cmp" id="t.cmp">
-            <option value="count">cnt</option>
-            <option v-if="t.type=='str'" value="match">&nbsp;~&nbsp;</option>
-            <option value="eq">&nbsp;=&nbsp;</option>
-            <option value="lt">&nbsp;&lt;&nbsp;</option>
-            <option value="gt">&nbsp;&gt;&nbsp;</option>
-          </select>
+          {{t.cmp}}
         </td>
         
-        <td width="120">
-          <input v-model="t.val" class="trigger-input">
-        </td>
 
+        <td width="20">
+          <input type="checkbox" v-model="t.custom">
+        </td>
+        <td width="120" align="right">
+          <span v-show="t.custom"><input v-model="t.val" class="trigger-input"></span>
+          <span v-show="!t.custom">{{t.val}}</span>
+        </td>
+        <td width="20">&nbsp;</td>
       </tr>
     </table>
 
