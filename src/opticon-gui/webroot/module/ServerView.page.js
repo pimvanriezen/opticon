@@ -504,6 +504,14 @@ ServerView.fixLayout = function() {
     ServerView.makeLayout (q, $("#ServerView .contentarea").width()-20);
 }
 
+ServerView.translateComp = function (v) {
+    if (v == "lt") return "<";
+    if (v == "gt") return ">";
+    if (v == "match") return "String Match";
+    if (v == "count") return "Count";
+    return v;
+}
+
 ServerView.linuxIcon = function(kernel) {
     let distro = ServerView.View.data.os.distro;
     if (/Cumulus/.test (distro)) return "icon/nvidia.png";
