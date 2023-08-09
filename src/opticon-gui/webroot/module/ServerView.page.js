@@ -121,6 +121,7 @@ ServerView.refresh = function() {
             }
         }
         self.View.triggers = out;
+        self.origtriggers = Vidi.clone (out);
     });
 }
 
