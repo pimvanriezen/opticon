@@ -64,7 +64,11 @@ if [ "$slave_running" = "OFF" ]; then
     echo "    conf: MASTER"
   fi
 else
-  echo "    conf: SLAVE"
+  if [ -z "$slave_running" ]; then
+    echo "    conf: STANDALONE"
+  else
+    echo "    conf: SLAVE"
+  fi
 fi
 echo "    qps: $qps"
 echo "    erps: $eps"
