@@ -512,6 +512,7 @@ void setup_matches (void) {
     _P_ ("/%U/host/%U",               REQ_DELETE, cmd_host_remove);
     _P_ ("/%U/host/%U",               REQ_ANY,    err_method_not_allowed);
     _P_ ("/%U/host/%U/log",           REQ_GET,    cmd_host_get_log);
+    _P_ ("/%U/host/%U/externaldata",  REQ_GET,    cmd_host_get_external);
     _P_ ("/%U/host/%U/watcher",       REQ_GET,    cmd_host_list_watchers);
     _P_ ("/%U/host/%U/watcher",       REQ_ANY,    err_method_not_allowed);
     _P_ ("/%U/host/%U/watcher/%S",    REQ_UPDATE, cmd_host_set_watcher);

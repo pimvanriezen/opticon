@@ -205,6 +205,32 @@ int cmd_host_get (req_context *ctx, req_arg *a, ioport *outio, int *status) {
 }
 
 /*/ ======================================================================= /*/
+/** GET /$TENANT/host/$HOST/externaldata */
+/*/ ======================================================================= /*/
+int cmd_host_get_external (req_context*ctx, req_arg *a, var *env,int *status) {
+    db *DB = localdb_create (OPTIONS.dbpath);
+    var *err;
+    
+    if (! db_open (DB, ctx->tenantid, NULL)) {
+        db_free (DB);
+        *status = 404;
+        var_set_str_forkey (env, "error", "Tenant not found");
+        return 1;
+    }
+    var *outenv = var_alloc();
+    if (ctx->external_token) {
+        var_set_str_forkey (outenv, "token", ctx->external_token);
+    }
+    var *extra = extdata_get (ctx->tenantid, ctx->hostid, outenv);
+    if (extra) {
+        var_link_as (extra, env, "external");
+    }
+    var_free (outenv);
+    *status = 200;
+    return 1;
+}
+
+/*/ ======================================================================= /*/
 /** DELETE /$TENANT/host/$HOST */
 /*/ ======================================================================= /*/
 int cmd_host_remove (req_context *ctx, req_arg *a, var *env, int *status) {
