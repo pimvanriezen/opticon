@@ -38,6 +38,11 @@ ServerView.activate = function(argv) {
             API.Opticon.Tenant.getMeta (self.tenantid, function (res) {
                 if (res) self.View.meta = res.metadata;
             });
+            API.Opticon.Host.getExternalData (self.tenantid, self.id,
+                                              function (res) {
+                if (res) self.View.external = res.external;
+                else self.View.external = {};
+            });
             Module.backgroundInterval = 30000;
             Module.setBackground (self.refresh);
             self.refresh();
