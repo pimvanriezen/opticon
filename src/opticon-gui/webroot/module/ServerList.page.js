@@ -45,11 +45,15 @@ ServerList.activate = function (argv) {
 }
 
 ServerList.matchHost = function (q, host) {
+    let lq = String(q).toLowerCase();
+    
     if (host.hostname) {
-        if (host.hostname.indexOf (q) >= 0) return true;
+        let lh = String(host.hostname).toLowerCase();
+        if (lh.indexOf (lq) >= 0) return true;
     }
     if (host.external && host.external.description) {
-        if (host.external.description.indexOf (q) >= 0) return true;
+        let ld = String(host.external.description).toLowerCase();
+        if (ld.indexOf (lq) >= 0) return true;
     }
     return false;
 }
