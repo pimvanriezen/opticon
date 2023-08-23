@@ -44,8 +44,73 @@ ServerList.activate = function (argv) {
     }, 8000);
 }
 
+ServerList.queryHost = function (q, host) {
+    let terms = q.split(' ');
+    for (let term of terms) {
+        let w = [];
+        let comp = '>';
+        
+        if (term.indexOf('=')>=0) {
+            w = term.split('=');
+            comp = '=';
+        }
+        else if (term.indexOf('<')>=0) {
+            w = term.split('<');
+            comp = '<';
+        }
+        else if (term.indexOf('>')>=0) {
+            w = term.split('>');
+            comp = '>';
+        }
+        else if (term.indexOf('~')>=0) {
+            w = term.split('~');
+            comp = '~';
+        }
+        else return false;
+
+        let param = w[0];
+        let val = w[1];
+        let crsr = host;
+        let path = param.split(' ');
+        for (let pathelm of path) {
+            crsr = crsr[pathelm];
+        }
+        
+        console.log ("comp "+param+" "+comp+" "+val);
+        console.log (crsr);
+        
+        switch (comp) {
+            case '=':
+                if (crsr === undefined) return false;
+                if (crsr != val) return false;
+                break;
+            
+            case '<':
+                if (crsr === undefined) return false;
+                if (parseFloat(crsr) >= parseFloat (val)) return false;
+                break;
+            
+            case '>':
+                if (crsr === undefined) return false;
+                if (parseFloat(crsr) <= parseFloat (val)) return false;
+                break;
+            
+            case '~':
+                if (crsr === undefined) return false;
+                if (String(crsr).toLowerCase().indexOf(val)<0) return false;
+                break;
+            
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+
 ServerList.matchHost = function (q, host) {
     let lq = String(q).toLowerCase();
+    
+    if (lq[0] == ':') return ServerList.queryHost (lq.substring(1), host);
     
     if (host.hostname) {
         let lh = String(host.hostname).toLowerCase();
