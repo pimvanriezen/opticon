@@ -50,7 +50,7 @@
             <img class="osicon" src="{{osIcon(o)}}" height="16"
                style="margin-bottom:-4px;">
           </td><td>
-            <b>{{o.hostname}}</b>
+            <b>{{String(o.hostname).toLowerCase()}}</b>
           </td></tr></table>
         </td>
         <td class="nonarrow" v-if="showextra" width="80">
