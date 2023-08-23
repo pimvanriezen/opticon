@@ -6,6 +6,9 @@ ServerView.create = function() {
         empty:true,
         data:{
         },
+        external:{
+            description:""
+        },
         tab:"Overview",
         scale:86400,
         log:[]
@@ -89,6 +92,15 @@ ServerView.refresh = function() {
                 self.View.log = res.log;
             }
             else self.View.empty = true;
+        });
+        
+        API.Opticon.Host.getExternalData (self.tenantid, self.id, function (res) {
+            if (res && res.external) {
+                self.View.external = { description: res.external.description };
+            }
+            else {
+                self.View.external = { description: "" };
+            }
         });
     });
     

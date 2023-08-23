@@ -35,6 +35,10 @@
           <tr>
             <td colspan="2">&nbsp;</td>
           </tr>
+          <tr v-if="external.description">
+            <td style="color:#888888;" width="30%">Label</td>
+            <td>{{external.description}}</td>
+          </tr>
           <tr v-if="meta.name">
             <td style="color:#888888;" width="30%">Tenant</td>
             <td>{{meta.name}}</td>
@@ -200,6 +204,10 @@
           <tr>
             <td style="color:#888888;" width="22%">UUID</td>
             <td class="unit">{{id}}</td>
+          </tr>
+          <tr v-if="external.description">
+            <td style="color:#888888;" width="22%">Label</td>
+            <td>{{external.description}}</td>
           </tr>
           <tr v-if="meta.name">
             <td style="color:#888888;" width="22%">Tenant</td>
