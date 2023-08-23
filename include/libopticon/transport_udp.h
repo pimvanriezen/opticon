@@ -14,6 +14,7 @@
 typedef struct udp_outtransport_s {
     outtransport     super; /**< The transport */
     struct addrinfo *peeraddr; /**< Configured peer address */
+    struct addrinfo *bindaddr; /**< Configured bind address */
     int              sock; /**< Socket to use */
 } udp_outtransport;
 

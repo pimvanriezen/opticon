@@ -12,6 +12,16 @@ int outtransport_setremote (outtransport *t, const char *addr, int port) {
 }
 
 /*/ ======================================================================= /*/
+/** Set up the local bind address for a transport.
+  * \param t The outtransport to connect.
+  * \param addr The address to connect to (hostname or ip address).
+  * \ return 1 on success, 0 on failure. */
+/*/ ======================================================================= /*/
+int outtransport_setlocal (outtransport *t, const char *addr) {
+    return t->setlocal (t, addr);
+}
+
+/*/ ======================================================================= /*/
 /** Send a packet to the remote host.
   * \param t The outtransport to use.
   * \param d The data to transmit.

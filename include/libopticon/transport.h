@@ -11,6 +11,7 @@ struct outtransport_s; /* forward declaration */
 struct intransport_s; /* forward declaration */
 
 typedef int (*setremote_f)(struct outtransport_s *, const char *, int);
+typedef int (*setlocal_f)(struct outtransport_s *, const char *);
 typedef int (*sendpkt_f)(struct outtransport_s *, void *, size_t);
 typedef void (*outclose_f)(struct outtransport_s *);
 typedef int (*setlistenport_f)(struct intransport_s *, const char *, int);
@@ -21,6 +22,7 @@ typedef void (*inclose_f)(struct intransport_s *);
 /** Abstract outtransport handle */
 typedef struct outtransport_s {
     setremote_f     setremote; /**< Method */
+    setlocal_f      setlocal; /**< Method */
     sendpkt_f       send; /**< Method */
     outclose_f      close; /**< Method */
 } outtransport;
@@ -36,6 +38,7 @@ typedef struct intransport_s {
 
 int      outtransport_setremote (outtransport *t, const char *addr,
                                  int port);
+int      outtransport_setlocal (outtransport *t, const char *addr);
 int      outtransport_send (outtransport *t, void *d, size_t sz);
 void     outtransport_close (outtransport *t);
 

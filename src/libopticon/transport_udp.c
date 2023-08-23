@@ -45,6 +45,48 @@ int udp_outtransport_setremote (outtransport *t, const char *addr,
 }
 
 /*/ ======================================================================= /*/
+/** Implementation of outtransport_setlocal() */
+/*/ ======================================================================= /*/
+int udp_outtransport_setlocal (outtransport *t, const char *addr) {
+    udp_outtransport *self = (udp_outtransport *) t;
+    struct addrinfo hints;
+    char portstr[4];
+    int port = 0;
+    
+    if (self->bindaddr) free (self->bindaddr);
+    
+    memset (&hints, 0, sizeof (hints));
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_DGRAM;
+    sprintf (portstr, "0");
+    
+    if (getaddrinfo (addr, portstr, &hints, &(self->bindaddr)) != 0) {
+        return 0;
+    }
+ 
+ #ifdef OS_LINUX   
+    /* glibc sucks */
+    if (self->bindaddr->ai_family == AF_INET6) {
+        struct sockaddr_in6 *sin6 =
+            (struct sockaddr_in6 *) self->bindaddr->ai_addr;
+        sin6->sin6_port = htons (port);
+    }
+    else {
+        struct sockaddr_in *sin =
+            (struct sockaddr_in *) self->bindaddr->ai_addr;
+        sin->sin_port = htons (port);
+    }
+#endif
+    
+    if (self->sock < 0) return 0;
+
+    bind (self->sock, (struct sockaddr *) self->bindaddr->ai_addr,
+          self->bindaddr->ai_addrlen);
+    
+    return 1;
+}
+
+/*/ ======================================================================= /*/
 /** Implementation of outtransport_send() */
 /*/ ======================================================================= /*/
 int udp_outtransport_send (outtransport *t, void *data, size_t sz) {
@@ -74,8 +116,10 @@ void udp_outtransport_close (outtransport *t) {
 outtransport *outtransport_create_udp (void) {
     udp_outtransport *self = malloc (sizeof (udp_outtransport));
     self->peeraddr = NULL;
+    self->bindaddr = NULL;
     self->sock = -1;
     self->super.setremote = udp_outtransport_setremote;
+    self->super.setlocal = udp_outtransport_setlocal;
     self->super.send = udp_outtransport_send;
     self->super.close = udp_outtransport_close;
     return (outtransport *) self;

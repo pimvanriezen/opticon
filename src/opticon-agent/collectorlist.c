@@ -10,6 +10,7 @@ collector *collector_new (collectorlist *parent) {
     self->next = self->prev = NULL;
     self->port = 0;
     self->addr = NULL;
+    self->bindaddr = NULL;
     self->transport = NULL;
     self->resender = NULL;
     self->lastkeyrotate = (time_t) 0;
@@ -30,6 +31,7 @@ void collectorlist_init (collectorlist *self) {
 
 void collectorlist_add_host (collectorlist *self, var *data) {
     const char *addr = var_get_str_forkey (data, "address");
+    const char *bind = var_get_str_forkey (data, "bind");
     const char *tenantid = var_get_str_forkey (data, "tenant");
     const char *tenantkey = var_get_str_forkey (data, "key");
     uuid hostid = var_get_uuid_forkey (data, "host");
@@ -51,6 +53,12 @@ void collectorlist_add_host (collectorlist *self, var *data) {
        
     collector *c = collector_new (self);
     
+    if (bind) {
+        c->bindaddr = strdup (addr);
+    }
+    else {
+        c->bindaddr = NULL;
+    }
     c->addr = strdup (addr);
     c->auth.sessionid = 0;
     c->auth.serial = 0;
@@ -78,6 +86,9 @@ void collectorlist_start (collectorlist *self) {
             exit (1);
         }
         else {
+            if (c->bindaddr) {
+                outtransport_setlocal (c->transport, c->bindaddr);
+            }
             c->resender = authresender_create (c->transport);
         }
         c = c->next;

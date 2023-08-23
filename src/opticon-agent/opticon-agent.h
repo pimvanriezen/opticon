@@ -71,6 +71,7 @@ typedef struct collector_s {
     struct collector_s  *next;
     int                  port;
     const char          *addr;
+    const char          *bindaddr;
     authinfo             auth;
     time_t               lastkeyrotate;
     outtransport        *transport;
