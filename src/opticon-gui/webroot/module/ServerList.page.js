@@ -36,6 +36,9 @@ ServerList.activate = function (argv) {
     Module.backgroundInterval = 30000;
     Module.setBackground (self.refresh);
     self.show();
+
+    $("#"+self.id+" .uSearchInput input").focus();
+
     self.checkTimer = setTimeout (function() {
         $("#honking-checkmark").fadeIn(5000);
     }, 8000);
@@ -114,6 +117,13 @@ ServerList.refresh = function () {
 
 ServerList.search = function () {
     ServerList.refresh();
+}
+
+ServerList.clearSearch = function () {
+    var self = ServerList;
+    
+    self.View.query = "";
+    self.refresh();
 }
 
 // --------------------------------------------------------------------------

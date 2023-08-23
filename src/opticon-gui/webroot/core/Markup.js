@@ -583,6 +583,7 @@ MarkupDecorators.searchinput = function (e, mname) {
     nelm.setAttribute ("v-on:input", cb);
     nelm.setAttribute ("type", "text");
     nelm.setAttribute ("placeholder", ph);
+    nelm.setAttribute ("spellcheck", "false");
     nelm.setAttribute ("onkeydown",
         "MarkupDecorators.searchinput.keyHandler(event,"+mname+
         ",'"+mname+"','"+type+"')");  
