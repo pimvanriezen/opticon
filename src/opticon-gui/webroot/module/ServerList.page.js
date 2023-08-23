@@ -41,6 +41,16 @@ ServerList.activate = function (argv) {
     }, 8000);
 }
 
+ServerList.matchHost = function (q, host) {
+    if (host.hostname) {
+        if (host.hostname.indexOf (q) >= 0) return true;
+    }
+    if (host.external && host.external.description) {
+        if (host.external.description.indexOf (q) >= 0) return true;
+    }
+    return false;
+}
+
 // --------------------------------------------------------------------------
 // Refresh task.
 // --------------------------------------------------------------------------
@@ -65,6 +75,9 @@ ServerList.refresh = function () {
                 }
                 else if (srv.status == "WARN") {
                     if (self.View.server_status == "ALERT") continue;
+                }
+                if (self.View.query) {
+                    if (! self.matchHost (self.View.query, srv)) continue;
                 }
                 srv.id = i;
                 nwlist.push (srv);
@@ -97,6 +110,10 @@ ServerList.refresh = function () {
             self.View.overview = nwlist;
         }
     });    
+}
+
+ServerList.search = function () {
+    ServerList.refresh();
 }
 
 // --------------------------------------------------------------------------

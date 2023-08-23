@@ -1,8 +1,11 @@
 <!-- toolbar -->
 <form class="uToolbar">
-  <div class="uToolbarButton">
+  <div class="uSearchButton">
     <u-tabgroup cb="switchTab" name="server_status"
                 tabs="ALERT:Alert,WARN:Warnings,ALL:All"></u-tabgroup>
+  </div>
+  <div class="uSearchInput right">
+    <u-searchinput name="query" cb="search">Search</u-searchinput>
   </div>
 </form>
 
