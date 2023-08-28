@@ -301,7 +301,9 @@ int cmd_host_set_watcher (req_context *ctx, req_arg *a,
     if (a->argc < 3) return err_server_error (ctx, a, env, status);
 
     char meterid[16];
-    if (! set_meterid (meterid, a, 2)) err_bad_request (ctx, a, env, status);
+    if (! set_meterid (meterid, a, 2)) {
+        return err_bad_request (ctx, a, env, status);
+    }
 
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {
@@ -384,7 +386,9 @@ int cmd_host_delete_watcher (req_context *ctx, req_arg *a,
     if (a->argc < 3) return err_server_error (ctx, a, env, status);
 
     char meterid[16];
-    if (! set_meterid (meterid, a, 2)) err_bad_request (ctx, a, env, status);
+    if (! set_meterid (meterid, a, 2)) {
+        return err_bad_request (ctx, a, env, status);
+    }
 
     db *DB = localdb_create (OPTIONS.dbpath);
     if (! db_open (DB, ctx->tenantid, NULL)) {

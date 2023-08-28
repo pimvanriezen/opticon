@@ -25,7 +25,7 @@ for test in $FILES; do
     rm -f out/${ofile}.build
     exit 1
   fi
-  $CC -g -o bin/$ofile ${ofile}.o ../lib/libhttp.a ../lib/libopticondb.a ../lib/libopticon.a -lpthread -lz -lm >>out/${ofile}.build 2>&1
+  $CC $CFLAGS -g -o bin/$ofile ${ofile}.o ../lib/libhttp.a ../lib/libopticondb.a ../lib/libopticon.a -lpthread -lz -lm >>out/${ofile}.build 2>&1
   if [ ! $? = 0 ]; then
     echo " FAIL"
     cat out/${ofile}.build
