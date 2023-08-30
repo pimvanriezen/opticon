@@ -783,7 +783,6 @@
             <th align="left">PID</td>
             <th align="left">User</td>
             <th align="right">CPU%</td>
-            <th align="right">Mem%</td>
             <th align="right" class="nonarrow">Mem%</td>
             <th></th>
             <th align="left">Name</td>
@@ -792,7 +791,6 @@
             <td width="5%">{{proc.pid}}</td>
             <td>{{translateUser(proc.user)}}</td>
             <td width="8%" align="right">{{parseFloat(proc.pcpu).toFixed(2)}}</td>
-            <td width="8%" align="right">{{parseFloat(proc.pmem).toFixed(2)}}</td>
             <td width="8%" align="right" class="nonarrow">{{parseFloat(proc.pmem).toFixed(2)}}</td>
             <td width="2%">&nbsp;</td>
             <td>{{proc.name}}</td>
