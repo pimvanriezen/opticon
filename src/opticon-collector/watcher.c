@@ -374,7 +374,6 @@ void overviewthread_run (thread *self) {
                 db_set_overview (APP.overviewdb, overv);
                 db_close (APP.overviewdb);
             }
-            var_free (overv);
             
             var *n = tenant_check_notification (tcrsr);
             if (n) {
@@ -382,11 +381,24 @@ void overviewthread_run (thread *self) {
                 log_info ("Notification triggered for tenant <%s>: %i",
                           uuidstr, var_get_count (n));
                 
-                          
+                var *crsr = var_first (n);
+                while (crsr) {
+                    var *ovdata = var_find_key (overv, crsr->id);
+                    if (ovdata) {
+                        var_merge (crsr, ovdata);
+                    }
+                    crsr = crsr->next;
+                }
+                
+                
+                // n now contains the notifications plus extracted
+                // overview data for the hosts involved.
+                
                 // FIXME do something
                 var_free (n);
             }
             
+            var_free (overv);
             tcrsr = tenant_next (tcrsr, TENANT_LOCK_READ);
         }
         
