@@ -893,6 +893,15 @@ int conf_dump_path (const char *id, var *v, updatetype tp) {
     return 1;
 }
 
+/*/ ======================================================================= /*/
+/** Set up path for notification script, if any */
+/*/ ======================================================================= /*/
+int conf_notify (const char *id, var *v, updatetype tp) {
+    if (tp == UPDATE_REMOVE) return 0;
+    APP.notifypath = strdup (var_get_str (v));
+    return 1;
+}
+
 appcontext APP; /**< Global application context */
 
 /*/ ======================================================================= /*/
@@ -925,10 +934,12 @@ int main (int _argc, const char *_argv[]) {
     opticonf_add_reaction ("meter", conf_meters);
     opticonf_add_reaction ("graph", conf_graph);
     opticonf_add_reaction ("debug/dump", conf_dump_path);
+    opticonf_add_reaction ("notify/call", conf_notify);
     
     APP.transport = intransport_create_udp();
     APP.codec = codec_create_pkt();
     APP.dumppath = NULL;
+    APP.notifypath = NULL;
 
     APP.conf = var_alloc();
     
