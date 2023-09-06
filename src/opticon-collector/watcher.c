@@ -8,10 +8,12 @@
 #include <libopticon/util.h>
 #include <libopticon/var.h>
 #include <libopticon/var_parse.h>
+#include <libopticon/var_dump.h>
 #include <libopticon/react.h>
 #include <libopticon/daemon.h>
 #include <libopticon/log.h>
 #include <libopticon/cliopt.h>
+#include <libopticon/popen.h>
 #include <libopticon/transport_udp.h>
 #include <libopticon/summary.h>
 #include <libopticon/timer.h>
@@ -390,6 +392,11 @@ void overviewthread_run (thread *self) {
                     crsr = crsr->next;
                 }
                 
+                if (APP.notifypath) {
+                    FILE *fcmd = popen_safe (APP.notifypath, "w");
+                    var_dump (n, fcmd);
+                    pclose_safe (fcmd);
+                }
                 
                 // n now contains the notifications plus extracted
                 // overview data for the hosts involved.
