@@ -42,14 +42,10 @@ elif [ "$pman" = "apt" ]; then
   done < <(apt upgrade --simulate 2>/dev/null | grep ^Inst)
   printf "]\n"
  
-  nr=$(which needrestart)
-  if [ ! -z "$nr" ]; then
-    kcur=$(needrestart -b | grep ^NEEDRESTART-KCUR | sed -e 's/.*: //')
-    kexp=$(needrestart -b | grep ^NEEDRESTART-KCUR | sed -e 's/.*: //')
-    if [ "$kcur" != "$kexp" ]; then
-      reboot=1
-    fi
+  if [ -e /var/run/reboot-required]; then
+    reboot=1
   fi
+
   printf "pkgm {\n"
   printf "    inq: %i\n" "$cnt"
   printf "    reboot: %i\n" "$reboot"
