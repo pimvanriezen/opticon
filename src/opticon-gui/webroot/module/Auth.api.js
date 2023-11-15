@@ -86,6 +86,7 @@ API.Auth.login = function (username, password, cb) {
         if (data.token) {
             console.log ("[API] Login successful");
             self.setToken (data.token, cb);
+            self.credentials.password = password;
         }
         else {
             console.log ("[API] Login failed");
@@ -106,11 +107,15 @@ API.Auth.checkAccess = function() {
     
     API.get("account","/token",function(err,data) {
         if (err || (! data.authenticated)) {
-            if (! self.credentials.username) return;
-            if (self.credentials.username == "") return;
+            if (! self.credentials.username) {
+                clearTimeout (self.timeout);
+                Logout();
+                return;
+            }
             self.login (self.credentials.username,
                         self.credentials.password, function(res) {
                 if (! res) {
+                    clearTimeout (self.timeout);
                     Logout();
                 }
             });
