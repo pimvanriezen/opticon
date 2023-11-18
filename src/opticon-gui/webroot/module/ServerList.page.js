@@ -50,7 +50,11 @@ ServerList.queryHost = function (q, host) {
         let w = [];
         let comp = '>';
         
-        if (term.indexOf('=')>=0) {
+        if (term.indexOf('!=')>=0) {
+            w = term.split('!=');
+            comp = '!';
+        }
+        else if (term.indexOf('=')>=0) {
             w = term.split('=');
             comp = '=';
         }
@@ -80,6 +84,10 @@ ServerList.queryHost = function (q, host) {
         console.log (crsr);
         
         switch (comp) {
+            case '!=':
+                if (crsr == val) return false;
+                break;
+                
             case '=':
                 if (crsr === undefined) return false;
                 if (crsr != val) return false;
