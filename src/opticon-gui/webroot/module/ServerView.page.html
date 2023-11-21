@@ -608,13 +608,13 @@
                 <tr>
                   <td style="color:#888888;">Requests per second</td>
                   <td align="right">
-                    {{data.mssql.bps}}
+                    {{parseFloat(data.mssql.bps).toFixed(2)}}
                   </td>
                 </tr>
                 <tr>
                   <td style="color:#888888;">Errors per second</td>
                   <td align="right">
-                    {{data.mssql.erps}}
+                    {{parseFloat(data.mssql.erps).toFixed(2)}}
                   </td>
                 </tr>
               </table>
