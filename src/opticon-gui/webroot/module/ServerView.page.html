@@ -466,9 +466,15 @@
             <td width="20%" style="color:#555555;white-space: nowrap;"
                 v-bind:class="devClass(dsk.device)">{{devName(dsk.device)}}</td>
             <td width="5%">{{dsk.fs}}</td>
-            <td align="right" width="20%">{{ktoh(dsk.size*1024).size}} <span class="unit">{{ktoh(dsk.size*1024).unit}}</span></td>
+            <td align="right" width="20%">
+              <div v-bind:title="usageTitle(dsk)">
+                {{ktoh(dsk.size*1024).size}} <span class="unit">{{ktoh(dsk.size*1024).unit}}</span>
+              </div>
+            </td>
             <td align="center" width="20%">
-              <u-meter width="60" var="dsk.pused"></u-meter>
+              <div v-bind:title="usageTitle(dsk)">
+                <u-meter width="60" var="dsk.pused"></u-meter>
+              </div>
             </td>
             <td>{{dsk.mount}}</td>
           </tr>

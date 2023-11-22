@@ -530,6 +530,20 @@ ServerView.translateComp = function (v) {
     return v;
 }
 
+ServerView.usageTitle = function(dsk) {
+    let freekb = ((dsk.size*1024)*(100-dsk.pused)/100);
+    let hval = ServerView.ktoh(freekb);
+    
+    let rest = "";
+    rest += String(parseFloat (hval.size).toFixed(1));
+    rest += " " + String (hval.unit);
+    
+    let merge = "Usage: " + String(parseFloat(dsk.pused).toFixed(1)) + "%, " + 
+                String(rest) + " free";
+    
+    return merge;
+}
+
 ServerView.linuxIcon = function(kernel) {
     let distro = ServerView.View.data.os.distro;
     if (/Cumulus/.test (distro)) return "icon/nvidia.png";
