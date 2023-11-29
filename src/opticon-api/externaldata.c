@@ -6,6 +6,7 @@
 #include <libopticon/log.h>
 #include <time.h>
 #include <pthread.h>
+#include <stdlib.h>
 #include "options.h"
 
 /*/ ======================================================================= /*/
@@ -92,7 +93,9 @@ var *extdata_get (uuid tenantid, uuid hostid, var *env) {
 
     if (crsr) {
         time_t now = time (NULL);
-        if (now - crsr->lastrefresh < 1200) {
+        time_t tdiff = (now - crsr->lastrefresh);
+        
+        if ((tdiff < 1800) || (rand()&15)) {
             var *res = var_clone (crsr->data);
             pthread_rwlock_unlock (&dlist.lock);
             return res;
