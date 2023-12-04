@@ -29,7 +29,7 @@ endif
 ifeq (windows,$(OSNAME))
   CFLAGS+=-isystem ../../lib/winlibc/additional/include
   CFLAGS+=-DOS_WINDOWS -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0601
-  LDFLAGS+=-lkernel32 -luser32 -lws2_32 -lbcrypt -lpdh -lntdll -ladvapi32 -lwtsapi32 -lpsapi -liphlpapi -lwinhttp -lwininet
+  LDFLAGS+=-lkernel32 -luser32 -lws2_32 -lbcrypt -lpdh -lntdll -ladvapi32 -lwtsapi32 -lpsapi -liphlpapi -lwinhttp -lwininet -lole32 -loleaut32
   LDFLAGS+=-l:libz.a -l:libpthread.a
 endif
 

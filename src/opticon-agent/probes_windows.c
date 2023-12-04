@@ -15,6 +15,10 @@
 #include <winternl.h> // For NtQuerySystemInformation
 #include <ntstatus.h> // For STATUS_SUCCESS
 #include <intrin.h> // For __cpuid
+//#include <Objbase.h> // For COM?
+// Need to include initguid.h before wuapi.h
+#include <initguid.h> // For the guids defined in wuapi.h (i.e. CLSID_UpdateSession)
+#include <wuapi.h> // For IUpdateSession
 
 // ----------------------------------------------------------------------------
 // @note The RtlGetVersion function is declared in ntddk.h which is part of the DDK (Driver Development Kit) which apparently cannot work together with the 'user-mode' windows.h
@@ -662,6 +666,7 @@ var *runprobe_uptime(probe *self) {
     // @alternative Windows Performance Counters: System Up Time
     
     uint64_t seconds;
+    // @todo possibly available on earlier *server* systems (Windows Server 2008 R2)
     if (IsWindows7OrGreater()) {
         uint64_t ticks;
         if (QueryUnbiasedInterruptTime(&ticks) == false) {
@@ -2016,6 +2021,101 @@ var *runprobe_omreport(probe *self) {
 */
 // ============================================================================
 
+static bool isUpdatesProbeInitialized = false;
+
+var *runprobe_updates(probe *self) {
+    (void)self;
+    uint32_t e;
+    var *res = var_alloc();
+    
+    // @todo IsWindowsXPOrGreater?
+    
+    if (!isUpdatesProbeInitialized) {
+        //HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+        e = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+        if (FAILED(e)) {
+            log_error("Failed to initialize COM: %" PRIx32, e);
+            return res;
+        }
+        
+        isUpdatesProbeInitialized = true;
+    }
+    
+    IUpdateSession *updateSession = NULL;
+    e = CoCreateInstance(&CLSID_UpdateSession, NULL, CLSCTX_INPROC_SERVER, &IID_IUpdateSession, (void **)&updateSession);
+    if (FAILED(e)) {
+        log_error("Failed to create update session: %" PRIx32, e);
+        return res;
+    }
+    
+    IUpdateSearcher *updateSearcher = NULL;
+    e = updateSession->lpVtbl->CreateUpdateSearcher(updateSession, &updateSearcher);
+    if (FAILED(e)) {
+        log_error("Failed to create update searcher: %" PRIx32, e);
+        updateSession->lpVtbl->Release(updateSession);
+        return res;
+    }
+    
+    // @todo online once every 24 hours
+    updateSearcher->lpVtbl->put_Online(updateSearcher, false);
+    
+    BSTR criteria = SysAllocString(L"IsHidden=0 and IsInstalled=0 and DeploymentAction=*");
+    ISearchResult *searchResult = NULL;
+    e = updateSearcher->lpVtbl->Search(updateSearcher, criteria, &searchResult);
+    SysFreeString(criteria);
+    if (FAILED(e)) {
+        log_error("Failed to search for updates: %" PRIx32, e);
+        updateSearcher->lpVtbl->Release(updateSearcher);
+        updateSession->lpVtbl->Release(updateSession);
+        return res;
+    }
+    
+    var *updatesArray = var_get_array_forkey(res, "updates");
+    
+    IUpdateCollection *updateCollection;
+    searchResult->lpVtbl->get_Updates(searchResult, &updateCollection);
+    LONG updateCount;
+    updateCollection->lpVtbl->get_Count(updateCollection, &updateCount);
+    for (size_t i = 0; i < updateCount; ++i) {
+        IUpdate *update = NULL;
+        updateCollection->lpVtbl->get_Item(updateCollection, i, &update);
+        
+        var *updateDict = var_add_dict(updatesArray);
+        
+        BSTR nameWide;
+        update->lpVtbl->get_Title(update, &nameWide);
+        
+        char nameChar[256];
+        // Pass -1 for cchWideChar to tell it the input is a null terminated string
+        WideCharToMultiByte(CP_UTF8, 0, nameWide, -1, nameChar, sizeof(nameChar), NULL, NULL);
+        
+        //printf("%ls\n", nameWide);
+        SysFreeString(nameWide);
+        
+        //printf("%s\n", nameChar);
+        log_debug("probe_updates: %s", nameChar);
+        var_set_str_forkey(updateDict, "name", nameChar);
+        
+        IWindowsDriverUpdate *driverUpdate = NULL;
+        e = update->lpVtbl->QueryInterface(update, &IID_IWindowsDriverUpdate, (void **)&driverUpdate);
+        if (SUCCEEDED(e)) {
+            //printf("DRIVER\n");
+            driverUpdate->lpVtbl->Release(driverUpdate);
+        }
+        
+        update->lpVtbl->Release(update);
+    }
+    updateCollection->lpVtbl->Release(updateCollection);
+    
+    searchResult->lpVtbl->Release(searchResult);
+    updateSearcher->lpVtbl->Release(updateSearcher);
+    updateSession->lpVtbl->Release(updateSession);
+    
+    return res;
+}
+
+// ============================================================================
+
 builtinfunc BUILTINS[] = {
     {"probe_cpu", runprobe_cpu},
     {"probe_version", runprobe_version},
@@ -2033,5 +2133,6 @@ builtinfunc BUILTINS[] = {
     {"probe_who", runprobe_who},
     {"probe_localip", runprobe_localip},
     //{"probe_omreport", runprobe_omreport}, // @note The omreport probe is made 'pluginnable' as an extprobe
+    {"probe_updates", runprobe_updates},
     {NULL, NULL}
 };
