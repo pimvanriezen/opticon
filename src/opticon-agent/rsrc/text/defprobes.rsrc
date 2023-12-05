@@ -104,7 +104,7 @@ updates {
     call: /var/lib/opticon/probes/updates.probe
     frequency: low
 }
-updates_win {
+updateswin {
     platform: windows
     type: built-in
     call: probe_updates
