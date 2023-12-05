@@ -685,8 +685,8 @@ var *runprobe_uptime(probe *self) {
     var_set_int_forkey(res, "uptime", seconds);
     
     // Include agent uptime
-    var *res_agent = var_get_dict_forkey (res, "agent");
-    var_set_int_forkey(res_agent, "up", difftime(time(NULL), APP.starttime));
+    var *agentDict = var_get_dict_forkey(res, "agent");
+    var_set_int_forkey(agentDict, "up", difftime(time(NULL), APP.starttime));
     
     return res;
 }
