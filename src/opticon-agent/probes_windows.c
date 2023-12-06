@@ -8,13 +8,18 @@
 #include <pdh.h>
 #include <pdhmsg.h>
 #include <winioctl.h> // For VOLUME_DISK_EXTENTS
-#include <psapi.h> // For EnumProcesses
-#include <wtsapi32.h> // For WTSEnumerateSessionsA
-#include <iphlpapi.h> // For GetAdaptersAddresses
-#include <versionhelpers.h> // For IsWindows7OrGreater
-#include <winternl.h> // For NtQuerySystemInformation
+#include <psapi.h> // For EnumProcesses()
+#include <wtsapi32.h> // For WTSEnumerateSessionsA()
+#include <iphlpapi.h> // For GetAdaptersAddresses()
+#include <versionhelpers.h> // For IsWindows7OrGreater()
+#include <winternl.h> // For NtQuerySystemInformation()
 #include <ntstatus.h> // For STATUS_SUCCESS
-#include <intrin.h> // For __cpuid
+#include <intrin.h> // For __cpuid()
+//#include <Objbase.h> // For COM?
+// Need to include initguid.h before wuapi.h
+#include <initguid.h> // For the macro DEFINE_GUID by which the guids are defined in wuapi.h (i.e. CLSID_UpdateSession)
+#include <wuapi.h> // For IUpdateSession
+#include <time.h> // For time()
 
 // ----------------------------------------------------------------------------
 // @note The RtlGetVersion function is declared in ntddk.h which is part of the DDK (Driver Development Kit) which apparently cannot work together with the 'user-mode' windows.h
@@ -662,6 +667,7 @@ var *runprobe_uptime(probe *self) {
     // @alternative Windows Performance Counters: System Up Time
     
     uint64_t seconds;
+    // @todo possibly available on earlier *server* systems (Windows Server 2008 R2)
     if (IsWindows7OrGreater()) {
         uint64_t ticks;
         if (QueryUnbiasedInterruptTime(&ticks) == false) {
@@ -679,9 +685,8 @@ var *runprobe_uptime(probe *self) {
     var_set_int_forkey(res, "uptime", seconds);
     
     // Include agent uptime
-    time_t tnow = time(NULL);
-    var *res_agent = var_get_dict_forkey (res, "agent");
-    var_set_int_forkey(res_agent, "up", (tnow - APP.starttime));
+    var *agentDict = var_get_dict_forkey(res, "agent");
+    var_set_int_forkey(agentDict, "up", difftime(time(NULL), APP.starttime));
     
     return res;
 }
@@ -1776,13 +1781,13 @@ var *runprobe_cpu(probe *self) {
     }
     
     
-    var *cpusArray = var_get_array_forkey(res, "cpu");
+    var *cpuArray = var_get_array_forkey(res, "cpu");
     for (uint8_t i = 0; i < 16; ++i) {
         DProcessorInfo processorInfo = systemFirmwareInfo.processorInfos[i];
         if (!processorInfo.hasData) continue;
         if (!processorInfo.isSocketPopulated) continue;
         
-        var *cpuDict = var_add_dict(cpusArray);
+        var *cpuDict = var_add_dict(cpuArray);
         
         if (processorInfo.version == NULL) {
             log_debug("probe_cpu/cpu/model: %s", "");
@@ -2016,6 +2021,189 @@ var *runprobe_omreport(probe *self) {
 */
 // ============================================================================
 
+typedef struct DUpdatesProbeState {
+    time_t lastOnlineSearchTime;
+} DUpdatesProbeState;
+
+static DUpdatesProbeState updatesProbeState;
+static bool isUpdatesProbeInitialized = false;
+
+var *runprobe_updates(probe *self) {
+    (void)self;
+    uint32_t e;
+    var *res = var_alloc();
+    
+    bool searchOnline = false;
+    
+    if (!isUpdatesProbeInitialized) {
+        e = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+        if (FAILED(e)) {
+            log_error("Failed to initialize COM: %" PRIx32, e);
+            return res;
+        }
+        
+        updatesProbeState.lastOnlineSearchTime = time(NULL);
+        
+        isUpdatesProbeInitialized = true;
+        
+        searchOnline = true;
+    }
+    
+    
+    // @note Alternative is IUpdate2::get_RebootRequired
+    ISystemInformation *systemInformation = NULL;
+    e = CoCreateInstance(&CLSID_SystemInformation, NULL, CLSCTX_INPROC_SERVER, &IID_ISystemInformation, (void **)&systemInformation);
+    if (FAILED(e)) {
+        log_error("Failed to create system information: %" PRIx32, e);
+        return res;
+    }
+    
+    VARIANT_BOOL isRebootRequired;
+    systemInformation->lpVtbl->get_RebootRequired(systemInformation, &isRebootRequired);
+    
+    
+    // Search online once every 24 hours
+    time_t now = time(NULL);
+    if (difftime(now, updatesProbeState.lastOnlineSearchTime) > 86400) {
+        updatesProbeState.lastOnlineSearchTime = now;
+        searchOnline = true;
+    }
+    
+    IUpdateSession *updateSession = NULL;
+    e = CoCreateInstance(&CLSID_UpdateSession, NULL, CLSCTX_INPROC_SERVER, &IID_IUpdateSession, (void **)&updateSession);
+    if (FAILED(e)) {
+        log_error("Failed to create update session: %" PRIx32, e);
+        return res;
+    }
+    
+    IUpdateSearcher *updateSearcher = NULL;
+    e = updateSession->lpVtbl->CreateUpdateSearcher(updateSession, &updateSearcher);
+    if (FAILED(e)) {
+        log_error("Failed to create update searcher: %" PRIx32, e);
+        updateSession->lpVtbl->Release(updateSession);
+        return res;
+    }
+    
+    updateSearcher->lpVtbl->put_Online(updateSearcher, searchOnline);
+    
+    // https://learn.microsoft.com/en-us/windows/win32/api/wuapi/nf-wuapi-iupdatesearcher-search
+    // DeploymentAction 1 is should be installed (and will be installed automatically if auto updates are enabled)
+    // DeploymentAction 4 is optional
+    // Not sure how to properly distinguish optional driver updates and a "quality" software update such as "Cumulative Update Preview for Windows 10 Version 22H2"
+    // except that the latter has AutoSelectOnWebSites true
+    // The search criteria do somehow accept "IsAssigned" which is not a property on IUpdate, but is documented as:
+    // "Finds updates that are intended for deployment by Automatic Updates."
+    
+    // @note If we don't explicitely include "DeploymentAction = *" it won't show updates with DeploymentAction 4
+    BSTR criteria = SysAllocString(L"IsInstalled = 0 AND IsHidden = 0 AND DeploymentAction = * AND IsAssigned = 1");
+    ISearchResult *searchResult = NULL;
+    e = updateSearcher->lpVtbl->Search(updateSearcher, criteria, &searchResult);
+    SysFreeString(criteria);
+    if (FAILED(e)) {
+        log_error("Failed to search for updates: %" PRIx32, e);
+        updateSearcher->lpVtbl->Release(updateSearcher);
+        updateSession->lpVtbl->Release(updateSession);
+        return res;
+    }
+    
+    var *pkglArray = var_get_array_forkey(res, "pkgl");
+    
+    IUpdateCollection *updateCollection;
+    searchResult->lpVtbl->get_Updates(searchResult, &updateCollection);
+    LONG updateCount;
+    updateCollection->lpVtbl->get_Count(updateCollection, &updateCount);
+    for (size_t i = 0; i < updateCount && i < 10; ++i) {
+        IUpdate *update = NULL;
+        updateCollection->lpVtbl->get_Item(updateCollection, i, &update);
+        
+        var *updateDict = var_add_dict(pkglArray);
+        
+        BSTR nameWide;
+        update->lpVtbl->get_Title(update, &nameWide);
+        //printf("%ls\n", nameWide);
+        
+        char nameChar[256];
+        // Pass -1 for cchWideChar to tell it the input is a null terminated string
+        WideCharToMultiByte(CP_UTF8, 0, nameWide, -1, nameChar, sizeof(nameChar), NULL, NULL);
+        //printf("%s\n", nameChar);
+        
+        SysFreeString(nameWide);
+        
+        log_debug("probe_updates/id: %s", nameChar);
+        var_set_str_forkey(updateDict, "id", nameChar);
+        
+        DATE publishDate;
+        update->lpVtbl->get_LastDeploymentChangeTime(update, &publishDate);
+        
+        
+        BSTR dateWide;
+        // Assume LOCALE_INVARIANT will always use the format mm/dd/yyyy
+        e = VarBstrFromDate(publishDate, LOCALE_INVARIANT, 0, &dateWide);
+        if (FAILED(e)) {
+            log_error("Failed to convert update publish date to string: %" PRIx32, e);
+        }
+        else {
+            //printf("%ls\n", dateWide);
+            
+            char dateChar[11]; // 10 chars plus a null terminator
+            // Pass -1 for cchWideChar to tell it the input is a null terminated string
+            WideCharToMultiByte(CP_UTF8, 0, dateWide, -1, dateChar, sizeof(dateChar), NULL, NULL);
+            //printf("%s\n", dateChar);
+            
+            SysFreeString(dateWide);
+            
+            // Convert format from mm/dd/yyyy to yyyy-mm-dd
+            char date[11]; // 10 chars plus a null terminator
+            date[0] = dateChar[6];
+            date[1] = dateChar[7];
+            date[2] = dateChar[8];
+            date[3] = dateChar[9];
+            date[4] = '-';
+            date[5] = dateChar[0];
+            date[6] = dateChar[1];
+            date[7] = '-';
+            date[8] = dateChar[3];
+            date[9] = dateChar[4];
+            date[10] = '\0';
+            
+            //printf("%s\n", date);
+            
+            log_debug("probe_updates/v: %s", date);
+            var_set_str_forkey(updateDict, "v", date);
+        }
+        
+        //UpdateType updateType;
+        //update->lpVtbl->get_Type(update, &updateType);
+        //if (updateType == utDriver) {
+        //    printf("DRIVER\n");
+        //}
+        
+        //IUpdate5::get_AutoDownload
+        
+        //IWindowsDriverUpdate *driverUpdate = NULL;
+        //e = update->lpVtbl->QueryInterface(update, &IID_IWindowsDriverUpdate, (void **)&driverUpdate);
+        //if (SUCCEEDED(e)) {
+        //    //printf("DRIVER\n");
+        //    driverUpdate->lpVtbl->Release(driverUpdate);
+        //}
+        
+        update->lpVtbl->Release(update);
+    }
+    updateCollection->lpVtbl->Release(updateCollection);
+    
+    searchResult->lpVtbl->Release(searchResult);
+    updateSearcher->lpVtbl->Release(updateSearcher);
+    updateSession->lpVtbl->Release(updateSession);
+    
+    var *pkgmDict = var_get_dict_forkey(res, "pkgm");
+    var_set_int_forkey(pkgmDict, "inq", updateCount);
+    var_set_int_forkey(pkgmDict, "reboot", isRebootRequired ? 1 : 0);
+    
+    return res;
+}
+
+// ============================================================================
+
 builtinfunc BUILTINS[] = {
     {"probe_cpu", runprobe_cpu},
     {"probe_version", runprobe_version},
@@ -2033,5 +2221,6 @@ builtinfunc BUILTINS[] = {
     {"probe_who", runprobe_who},
     {"probe_localip", runprobe_localip},
     //{"probe_omreport", runprobe_omreport}, // @note The omreport probe is made 'pluginnable' as an extprobe
+    {"probe_updates", runprobe_updates},
     {NULL, NULL}
 };

@@ -104,6 +104,12 @@ updates {
     call: /var/lib/opticon/probes/updates.probe
     frequency: low
 }
+updateswin {
+    platform: windows
+    type: built-in
+    call: probe_updates
+    frequency: low
+}
 raid {
     platform: linux
     type: exec
