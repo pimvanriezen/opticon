@@ -76,16 +76,15 @@ int daemon_main (int argc, const char *argv[]) {
     }
 #endif
     
+    time_t tlast = APP.starttime = time (NULL);
+    time_t nextslow = tlast + 5;
+    time_t nextsend = tlast + 10;
+    time_t nextupdate = tlast + 10;
     
     popen_init();
     probelist_start (&APP.probes);
     collectorlist_start (&APP.collectors);
     
-    time_t tlast = APP.starttime = time (NULL);
-    time_t nextslow = tlast + 5;
-    time_t nextsend = tlast + 10;
-    time_t nextupdate = tlast + 10;
-
     bool firstround = true;
     int slowround = 0;
 
