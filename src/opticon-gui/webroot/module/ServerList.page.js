@@ -74,6 +74,7 @@ ServerList.queryHost = function (q, host) {
 
         let param = w[0];
         let val = w[1];
+        let lval = String(val).toLowerCase();
         let crsr = host;
         let path = param.split(' ');
         for (let pathelm of path) {
@@ -105,7 +106,7 @@ ServerList.queryHost = function (q, host) {
             
             case '~':
                 if (crsr === undefined) return false;
-                if (String(crsr).toLowerCase().indexOf(val)<0) return false;
+                if (String(crsr).toLowerCase().indexOf(lval)<0) return false;
                 break;
             
             default:
