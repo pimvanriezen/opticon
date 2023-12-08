@@ -118,7 +118,9 @@ ServerList.queryHost = function (q, host) {
 ServerList.matchHost = function (q, host) {
     let lq = String(q).toLowerCase();
     
-    if (lq[0] == ':') return ServerList.queryHost (lq.substring(1), host);
+    if (lq[0] == ':') {
+        return ServerList.queryHost (String(q).substring(1), host);
+    }
     
     if (host.hostname) {
         let lh = String(host.hostname).toLowerCase();
