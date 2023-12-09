@@ -218,10 +218,12 @@
 			<Custom Action="opticonAgent.deleteGeneratedFiles.setCustomDataAction" After="MsiUnpublishAssemblies"></Custom>
   			<Custom Action="opticonAgent.deleteGeneratedFiles.dllAction" After="opticonAgent.deleteGeneratedFiles.setCustomDataAction"><![CDATA[PROP_INSTALL_TYPE = "uninstall"]]></Custom>
   			
-  			<!-- Always delete the firewall rule first (and only create it for an install/upgrade/change) -->
-  			<Custom Action="opticonAgent.firewallAllowInboundPing.deleteRule" After="InstallInitialize" />
-  			<!-- Only run in the new msi for an install or upgrade or in the existing msi for a change -->
-  			<Custom Action="opticonAgent.firewallAllowInboundPing.createRule" After="opticonAgent.firewallAllowInboundPing.deleteRule"><![CDATA[PROP_INSTALL_TYPE = "install" OR PROP_INSTALL_TYPE = "upgradeNewMsi" OR PROP_INSTALL_TYPE = "change"]]></Custom>
+  			<!-- Always delete the firewall rule first to avoid creating duplicate entries (as well as part of the cleanup for a full uninstall) -->
+  			<!-- Do not run this as part of upgradeExistingMsi because the new msi (upgradeNewMsi) is installed *before* the old msi is uninstalled/removed (upgradeExistingMsi) -->
+  			<!-- so the remove of the existing msi would delete the rule *after* the new msi created it -->
+  			<Custom Action="opticonAgent.firewallAllowInboundPing.deleteRule" After="InstallInitialize"><![CDATA[PROP_INSTALL_TYPE <> "upgradeExistingMsi"]]></Custom>
+  			<!-- Only run in the new msi for an install or upgrade or in the existing msi for a change or repair -->
+  			<Custom Action="opticonAgent.firewallAllowInboundPing.createRule" After="opticonAgent.firewallAllowInboundPing.deleteRule"><![CDATA[PROP_INSTALL_TYPE = "install" OR PROP_INSTALL_TYPE = "upgradeNewMsi" OR PROP_INSTALL_TYPE = "change" OR PROP_INSTALL_TYPE = "repair"]]></Custom>
 		</InstallExecuteSequence>
 		
 		<UI>
