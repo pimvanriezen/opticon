@@ -27,15 +27,20 @@ CFLAGS+=-DOSNAME=$(OSNAME) -DOSREL=$(OSREL) -DOSRELMAJOR=$(OSRELMAJOR)
 OBJS_OPTICONCOLLECTOR = main.o watcher.o ping.o
 LIBS = ../../lib/libopticondb.a ../../lib/libopticon.a 
 				  
-all: ../../bin/opticon-collector
+all: ../../bin/opticon-collector ../../bin/opticon-decode
 
 ../../bin/opticon-collector: $(OBJS_OPTICONCOLLECTOR) $(LIBS)
 	@echo "[LINK ] opticon-collector"
 	@$(CC) $(LDFLAGS) -o ../../bin/opticon-collector \
 		$(OBJS_OPTICONCOLLECTOR) $(LIBS) $(LPTHREAD) -lm -lz
 
+../../bin/opticon-decode: decode.o $(LIBS)
+	@echo "[LINK ] opticon-decode"
+	@$(CC) $(LDFLAGS) -o ../../bin/opticon-decode \
+	    decode.o $(LIBS) $(LPTHREAD) -lm -lz
+
 clean:
-	rm -f *.o ../../bin/opticon-collector
+	rm -f *.o ../../bin/opticon-collector ../../bin/opticon-decode
 
 .SUFFIXES: .c .o
 .c.o:

@@ -101,6 +101,7 @@ cp pkg/opticon-collector.debian-postinst.sh $BUILDROOT/DEBIAN/postinst
 
 # Copy binaries, scripts and example config
 cp bin/opticon-collector $BUILDROOT/usr/sbin/
+cp bin/opticon-decode $BUILDROOT/usr/bin/
 chmod 750 $BUILDROOT/usr/sbin/opticon-collector
 cp -p init/opticon-collector.service $BUILDROOT/lib/systemd/system/
 cp src/opticon-collector/opticon-collector.conf.example $BUILDROOT/etc/opticon/
