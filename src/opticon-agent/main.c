@@ -35,7 +35,8 @@
     #pragma push_macro("_fmode")
         // Clear the MinGW define
         #undef _fmode
-        // Set the global filemode to binary (instead of text mode that converts \r\n to \n in fread())
+        // Set the global filemode to binary (instead of text mode that
+        // converts \r\n to \n in fread())
         int _fmode = _O_BINARY;
     #pragma pop_macro("_fmode")
 #endif
@@ -60,9 +61,15 @@ int daemon_main (int argc, const char *argv[]) {
     
 #if defined (OS_WINDOWS)
     if (APP.win.servicecommand != NULL) {
-        if (strcmp (APP.win.servicecommand, "install") == 0) return installWindowsService(false);
-        else if (strcmp (APP.win.servicecommand, "installAndStart") == 0) return installWindowsService(true);
-        else if (strcmp (APP.win.servicecommand, "uninstall") == 0) return uninstallWindowsService();
+        if (strcmp (APP.win.servicecommand, "install") == 0) {
+            return installWindowsService(false);
+        }
+        else if (strcmp (APP.win.servicecommand, "installAndStart") == 0) {
+            return installWindowsService(true);
+        }
+        else if (strcmp (APP.win.servicecommand, "uninstall") == 0) {
+            return uninstallWindowsService();
+        }
     }
     else if (APP.win.updatecommand != NULL) {
         if (APP.win.updateurl == NULL) {
@@ -70,9 +77,16 @@ int daemon_main (int argc, const char *argv[]) {
             return 0xdae8eaa8;
         }
         
-        if (strcmp (APP.win.updatecommand, "check") == 0) return checkUpdate(APP.win.updateurl, APP.win.updatechannel);
-        else if (strcmp (APP.win.updatecommand, "update") == 0) return checkAndInstallUpdate(APP.win.updateurl, APP.win.updatechannel);
-        else if (strcmp (APP.win.updatecommand, "installLatest") == 0) return installLatest(APP.win.updateurl, APP.win.updatechannel);
+        if (strcmp (APP.win.updatecommand, "check") == 0) {
+            return checkUpdate(APP.win.updateurl, APP.win.updatechannel);
+        }
+        else if (strcmp (APP.win.updatecommand, "update") == 0) {
+            return checkAndInstallUpdate(APP.win.updateurl,
+                                         APP.win.updatechannel);
+        }
+        else if (strcmp (APP.win.updatecommand, "installLatest") == 0) {
+            return installLatest(APP.win.updateurl, APP.win.updatechannel);
+        }
     }
 #endif
     
@@ -136,7 +150,7 @@ int daemon_main (int argc, const char *argv[]) {
         probe *p = APP.probes.first;
         time_t wakenext = tnow + 300;
 
-        /* Go over the probes to figure out whether we should kick them */        
+        /* Go over the probes to figure out whether we should kick them */
         while (p) {
             time_t firewhen = p->lastpulse + p->interval;
             if (firewhen <= tnow) {
@@ -299,13 +313,18 @@ int daemon_main (int argc, const char *argv[]) {
                     log_warn ("Update url not specified in config");
                 }
                 else {
-                    checkAndInstallUpdate(APP.win.updateurl, APP.win.updatechannel);
+                    checkAndInstallUpdate(APP.win.updateurl,
+                                          APP.win.updatechannel);
                 }
             }
             
-            /* Schedule somewhere in the next 24 hours (to spread out calls to the update server more or less evenly across the day) */
-            nextupdate = firstround ? nextupdate + 300 + (rand() % 86400) : nextupdate + 86400;
-            log_debug ("Scheduling next update check in %i seconds", nextupdate - tnow);
+            /* Schedule somewhere in the next 24 hours (to spread out calls
+               to the update server more or less evenly across the day) */
+            nextupdate =
+                firstround ? nextupdate+300+(rand()%86400) : nextupdate+86400;
+                
+            log_debug ("Scheduling next update check in %i seconds",
+                       nextupdate - tnow);
         }
 #endif
 
@@ -422,7 +441,11 @@ int conf_winupdate (const char *id, var *v, updatetype tp) {
     APP.win.updateurl = var_get_str_forkey (v, "url");
     const char *channel = var_get_str_forkey (v, "channel");
     APP.win.updatechannel = channel ? channel : "stable";
-    APP.win.updateenabled = var_find_key (v, "enabled") ? (var_get_int_forkey (v, "enabled") == 1) : 1;
+    
+    APP.win.updateenabled = 1;
+    if (var_find_key (v, "enabled")) {
+        APP.win.updateenabled = (var_get_int_forkey (v, "enabled") == 1);
+    }
     
     return 1;
 }
