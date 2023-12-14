@@ -699,6 +699,11 @@ int app_main (int _argc, const char *_argv[]) {
         return 1;
     }
     
+    if (! APP.collectors.first) {
+        log_error ("No valid collectors specified");
+        return 1;
+    }
+    
 #if defined (OS_WINDOWS)
     return daemon_main(argc, argv);
 #else

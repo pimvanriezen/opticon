@@ -41,12 +41,12 @@ void collectorlist_add_host (collectorlist *self, var *data) {
         return;
     }
     
-    if (! tenantid) {
+    if ((! tenantid) || (! tenantid[0])) {
         log_error ("No tenant specification for collector");
         return;
     }
     
-    if (! tenantkey) {
+    if ((! tenantkey) || (! tenantkey[0])) {
         log_error ("No tenant key provided for collector");
         return;
     }
