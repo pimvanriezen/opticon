@@ -118,7 +118,8 @@ int daemon_main (int argc, const char *argv[]) {
                 
                 uint32_t sid = c->auth.sessionid;
                 if (! sid) sid = gen_sessionid();
-                log_debug ("Authenticating session <%08x>", sid);
+                log_info ("Authenticating session <%08x> to %s", sid,
+                          c->addr);
                 c->auth.sessionid = sid;
                 c->auth.serial = 0;
             
