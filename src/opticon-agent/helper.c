@@ -1,7 +1,22 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <grp.h>
+#include <stdlib.h>
+
+// We can't trust the PATH to be sensible in an environment where we're
+// spawned from a service. Assume default system paths, anything outside
+// will need an explicit path specified. This is undesirable for, e.g.,
+// /usr/sbin, because some tools are not consistent in their location between
+// different distros.
+const char *ALLOWED_DEFAULTPATHS[] = {
+    "/bin",
+    "/sbin",
+    "/usr/bin",
+    "/usr/sbin",
+    NULL
+};
 
 int main (int argc, char *const *argv) {
     if (geteuid()) {
@@ -72,7 +87,28 @@ int main (int argc, char *const *argv) {
         return 1;
     }
     
+    char *execpath = (char *) malloc ((size_t) strlen(argv[1])+128);
+    if (argv[1][0] == '/') {
+        strcpy (execpath, argv[1]);
+    }
+    else {
+        struct stat st;
+        int i = 0;
+        const char *c = ALLOWED_DEFAULTPATHS[i];
+        while (ALLOWED_DEFAULTPATHS[i]) {
+            sprintf (execpath, "%s/%s", ALLOWED_DEFAULTPATHS[i], argv[1]);
+            if (stat (execpath, &st) == 0) break;
+            execpath[0] = 0;
+            i++;
+        }
+        if (execpath[0] == 0) {
+            fprintf (stderr, "%% Command '%s' not found in default paths",
+                     argv[1]);
+            return 1;   
+        }
+    }
+    
     setregid (0, 0);
     setreuid (0, 0);
-    return execvp (argv[1], argv+1);
+    return execvp (execpath, argv+1);
 }
