@@ -2,7 +2,7 @@
    cpu { meter: pcpu, type: frac, func: avg }
    warning { meter: status, type: string, func: count, match: WARN }
    alert { meter: status, type: string, func: count, match: ALERT }
-   critical { meter: status, type: string, func: count, match: CRITICAL }
+   critical { meter: status, type: string, func: count, match: CRIT }
    stale { meter: status, type: string, func: count, match: STALE }
    ok { meter: status, type: string, func: count, match: OK }
    netin { meter: net/in_kbs, type: int, func: total }
