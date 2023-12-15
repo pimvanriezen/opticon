@@ -1,3 +1,6 @@
+// --------------------------------------------------------------------------
+// consts and enums
+// --------------------------------------------------------------------------
 const ST_WAITSTART = 0; // Waiting for varname, or '('
 const ST_READVAR = 1; // Reading varname
 const ST_WAITCMP = 2; // Waiting for comparator
@@ -15,16 +18,25 @@ const TP_NESTSTART = "(";
 const TP_NESTEND = ")";
 const TP_NEST = "nest";
 
+// --------------------------------------------------------------------------
+// Determines whether a character is white space.
+// --------------------------------------------------------------------------
 function isspace(c) {
     if (c == " ") return true;
     if (c == "\t") return true;
     if (c == "\n") return true;
 }
 
+// --------------------------------------------------------------------------
+// Determines if a character is valid for a variable name.
+// --------------------------------------------------------------------------
 function isvalidvar(c) {
     return String(c).match (/[._a-zA-Z0-9]+/) ? true : false;
 }
 
+// --------------------------------------------------------------------------
+// Determines if 1 or 2 characters are valid comparators
+// --------------------------------------------------------------------------
 function iscmp(cc) {
     if (cc[0] == '=') return true;
     if (cc == '!=') return true;
@@ -35,10 +47,16 @@ function iscmp(cc) {
     if (cc[0] == '>') return true;
 }
 
+// --------------------------------------------------------------------------
+// Determines if a character is plausibly part of a number
+// --------------------------------------------------------------------------
 function isnumber(c) {
     return String(c).match (/[.0-9]+/) ? true : false;
 }
 
+// --------------------------------------------------------------------------
+// Tokenizes a search query
+// --------------------------------------------------------------------------
 function querysplit(instring) {
     
     let res = [];
@@ -219,6 +237,24 @@ function querysplit(instring) {
     return res;
 }
 
+// --------------------------------------------------------------------------
+// Create a query object directly from a query string
+// --------------------------------------------------------------------------
+function mkquery(q) {
+    let res = null
+    try {
+        res = querytree(querysplit(q+' '));
+    }
+    catch (e) {
+        console.log ("Invalid query: "+e);
+        return null;
+    }
+    return res;
+}
+
+// --------------------------------------------------------------------------
+// Create a query object from a tokenized query string.
+// --------------------------------------------------------------------------
 function querytree(indata) {
     let res = {
         tree:[]
@@ -233,18 +269,9 @@ function querytree(indata) {
     return res;
 }
 
-function mkquery(q) {
-    let res = null
-    try {
-        res = querytree(querysplit(q+' '));
-    }
-    catch (e) {
-        console.log ("Invalid query: "+e);
-        return null;
-    }
-    return res;
-}
-
+// --------------------------------------------------------------------------
+// Compare two values that are version strings
+// --------------------------------------------------------------------------
 function vcompare (left, right) {
     let l = String(left).replace('.','-');
     let r = String(right).replace('.','-');
@@ -258,6 +285,9 @@ function vcompare (left, right) {
     return 0;
 }
 
+// --------------------------------------------------------------------------
+// Match an object against a parse tree.
+// --------------------------------------------------------------------------
 function querytree_match(tree, obj) {
     for (let idx=0; idx<tree.length; ++idx) {
         let node = tree[idx];
@@ -310,6 +340,9 @@ function querytree_match(tree, obj) {
     }
 }
 
+// --------------------------------------------------------------------------
+// Turn tokenized data into a parse tree.
+// --------------------------------------------------------------------------
 function querytree_into(indata, into, pos, oneshot) {
     if (! pos) {
         pos = 0;
