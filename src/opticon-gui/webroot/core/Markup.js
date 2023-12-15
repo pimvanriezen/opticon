@@ -575,6 +575,8 @@ MarkupDecorators.searchinput = function (e, mname) {
     var cb = e.getAttribute ("cb");
     var name = e.getAttribute ("name");
     var type = e.getAttribute ("type");
+    var id = e.getAttribute ("id");
+    var validate = e.getAttribute ("validate");
     var ph = e.innerHTML;
     var nelm;
 
@@ -583,9 +585,13 @@ MarkupDecorators.searchinput = function (e, mname) {
     nelm = document.createElement ("input");
     nelm.setAttribute ("v-model", name);
     nelm.setAttribute ("v-on:input", cb);
+    if (validate) nelm.setAttribute ("v-bind:class", validate + "()?'':'error'");
+    if (validate) nelm.setAttribute ("x-validate", validate);
     nelm.setAttribute ("type", "text");
     nelm.setAttribute ("placeholder", ph);
     nelm.setAttribute ("spellcheck", "false");
+    if (id) nelm.setAttribute ("id",id);
+    
     nelm.setAttribute ("onkeydown",
         "MarkupDecorators.searchinput.keyHandler(event,"+mname+
         ",'"+mname+"','"+type+"')");  

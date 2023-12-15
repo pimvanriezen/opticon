@@ -15,7 +15,18 @@ ServerList.create = function () {
         showextra: false,
         empty: false,
         server_status: "ALL",
+        query:"",
+        queryvalid:true,
     });
+}
+
+ServerList.checkquery = function() {
+    var self = ServerList;
+     let qstr = String(self.View.query);
+     if (qstr[0] != ':') return true;
+     if (! self.queryObj) return false;
+     if (self.queryObj.tree.length) return true;
+     return false;
 }
 
 // --------------------------------------------------------------------------
@@ -154,8 +165,12 @@ ServerList.refresh = function () {
         }
         if (! err) {
             let qstr = String(self.View.query);
+            self.View.queryvalid = true;
             if (qstr[0] == ':') {
                 self.queryObj = mkquery (qstr.substring(1));
+                if (! self.queryObj) {
+                    self.View.queryvalid = false;
+                }
             }
             else self.queryObj = null;
             

@@ -4,6 +4,11 @@ input[type=button],button
     font-family: "Helvetica Neue", sans-serif;
 }
 
+input.error
+{
+    color: #c02020;
+}
+
 *:focus {outline:none !important}
 
 html, body
