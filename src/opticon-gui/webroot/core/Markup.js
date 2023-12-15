@@ -555,10 +555,12 @@ MarkupDecorators.listkeyboard.keyHandler = function(e,obj,mname) {
 
         case 37: // left
             if (event.ctrlKey || event.metaKey) App.tabGroupCursor(event);
+            else return true;
             break;
 
         case 39: // right
             if (event.ctrlKey || event.metaKey) App.tabGroupCursor(event);
+            else return true;
             break;
     }
     e.preventDefault();
@@ -664,10 +666,12 @@ MarkupDecorators.searchinput.keyHandler = function(e,obj,mname,type) {
 
         case 37: // left
             if (e.ctrlKey || e.metaKey) App.tabGroupCursor (e);
+            else return true;
             break;
 
         case 39: // right
             if (e.ctrlKey || e.metaKey) App.tabGroupCursor (e);
+            else return true;
             break;
             
         default: return;

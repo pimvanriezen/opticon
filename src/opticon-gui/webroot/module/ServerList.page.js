@@ -44,7 +44,9 @@ ServerList.activate = function (argv) {
     }, 8000);
 }
 
-ServerList.queryHost = function (q, host) {
+ServerList.queryHost = function (qstr, host) {
+    let q = mkquery (qstr);
+    
     let terms = q.split(' ');
     for (let term of terms) {
         let w = [];
@@ -118,9 +120,10 @@ ServerList.queryHost = function (q, host) {
 
 ServerList.matchHost = function (q, host) {
     let lq = String(q).toLowerCase();
+    let self = ServerList;
     
-    if (lq[0] == ':') {
-        return ServerList.queryHost (String(q).substring(1), host);
+    if (self.queryObj) {
+        return self.queryObj.match (host);
     }
     
     if (host.hostname) {
@@ -150,6 +153,12 @@ ServerList.refresh = function () {
             self.loaded = true;
         }
         if (! err) {
+            let qstr = String(self.View.query);
+            if (qstr[0] == ':') {
+                self.queryObj = mkquery (qstr.substring(1));
+            }
+            else self.queryObj = null;
+            
             for (var i in res.overview) {
                 let srv = res.overview[i];
                 if (srv.hostname === undefined) continue;
@@ -160,7 +169,7 @@ ServerList.refresh = function () {
                     if (self.View.server_status == "ALERT") continue;
                 }
                 if (self.View.query) {
-                    if (! self.matchHost (self.View.query, srv)) continue;
+                    if (! self.matchHost (qstr, srv)) continue;
                 }
                 srv.id = i;
                 nwlist.push (srv);
