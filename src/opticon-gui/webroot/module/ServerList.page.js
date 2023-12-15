@@ -15,18 +15,20 @@ ServerList.create = function () {
         showextra: false,
         empty: false,
         server_status: "ALL",
-        query:"",
-        queryvalid:true,
+        query:""
     });
 }
 
+// --------------------------------------------------------------------------
+// Validate the search field if it has a query string.
+// --------------------------------------------------------------------------
 ServerList.checkquery = function() {
     var self = ServerList;
-     let qstr = String(self.View.query);
-     if (qstr[0] != ':') return true;
-     if (! self.queryObj) return false;
-     if (self.queryObj.tree.length) return true;
-     return false;
+    let qstr = String(self.View.query);
+    if (qstr[0] != ':') return true;
+    if (! self.queryObj) return false;
+    if (self.queryObj.tree.length) return true;
+    return false;
 }
 
 // --------------------------------------------------------------------------
@@ -55,80 +57,9 @@ ServerList.activate = function (argv) {
     }, 8000);
 }
 
-ServerList.queryHost = function (qstr, host) {
-    let q = mkquery (qstr);
-    
-    let terms = q.split(' ');
-    for (let term of terms) {
-        let w = [];
-        let comp = '>';
-        
-        if (term.indexOf('!=')>=0) {
-            w = term.split('!=');
-            comp = '!';
-        }
-        else if (term.indexOf('=')>=0) {
-            w = term.split('=');
-            comp = '=';
-        }
-        else if (term.indexOf('<')>=0) {
-            w = term.split('<');
-            comp = '<';
-        }
-        else if (term.indexOf('>')>=0) {
-            w = term.split('>');
-            comp = '>';
-        }
-        else if (term.indexOf('~')>=0) {
-            w = term.split('~');
-            comp = '~';
-        }
-        else return false;
-
-        let param = w[0];
-        let val = w[1];
-        let lval = String(val).toLowerCase();
-        let crsr = host;
-        let path = param.split(' ');
-        for (let pathelm of path) {
-            crsr = crsr[pathelm];
-        }
-        
-        console.log ("comp "+param+" "+comp+" "+val);
-        console.log (crsr);
-        
-        switch (comp) {
-            case '!=':
-                if (crsr == val) return false;
-                break;
-                
-            case '=':
-                if (crsr === undefined) return false;
-                if (crsr != val) return false;
-                break;
-            
-            case '<':
-                if (crsr === undefined) return false;
-                if (parseFloat(crsr) >= parseFloat (val)) return false;
-                break;
-            
-            case '>':
-                if (crsr === undefined) return false;
-                if (parseFloat(crsr) <= parseFloat (val)) return false;
-                break;
-            
-            case '~':
-                if (crsr === undefined) return false;
-                if (String(crsr).toLowerCase().indexOf(lval)<0) return false;
-                break;
-            
-            default:
-                return false;
-        }
-    }
-    return true;
-}
-
+// --------------------------------------------------------------------------
+// Match an overview row against the search field.
+// --------------------------------------------------------------------------
 ServerList.matchHost = function (q, host) {
     let lq = String(q).toLowerCase();
     let self = ServerList;
@@ -165,14 +96,9 @@ ServerList.refresh = function () {
         }
         if (! err) {
             let qstr = String(self.View.query);
-            self.View.queryvalid = true;
             if (qstr[0] == ':') {
                 self.queryObj = mkquery (qstr.substring(1));
-                if (! self.queryObj) {
-                    self.View.queryvalid = false;
-                }
             }
-            else self.queryObj = null;
             
             for (var i in res.overview) {
                 let srv = res.overview[i];
@@ -213,16 +139,22 @@ ServerList.refresh = function () {
                 return 0;
             });
             
-            self.View.empty = (count == 0);
+            self.View.empty = ((count == 0) && (! self.queryObj));
             self.View.overview = nwlist;
         }
     });    
 }
 
+// --------------------------------------------------------------------------
+// No-op callback for the search bar
+// --------------------------------------------------------------------------
 ServerList.search = function () {
     ServerList.refresh();
 }
 
+// --------------------------------------------------------------------------
+// Clear the search/query
+// --------------------------------------------------------------------------
 ServerList.clearSearch = function () {
     var self = ServerList;
     
@@ -317,12 +249,18 @@ ServerList.translateUnit = function (val, base, unit) {
     return parseFloat(val).toFixed(2) + " " + unit;
 }
 
+// --------------------------------------------------------------------------
+// Create icon-specific offsets for the os/distro icon
+// --------------------------------------------------------------------------
 ServerList.osMargin = function(obj) {
     let self = ServerList;
     if (self.osIcon(obj) == "icon/apple.png") return "margin-bottom:-2px;";
     return "margin-bottom:-4px;";
 }
 
+// --------------------------------------------------------------------------
+// Generate a distro icon
+// --------------------------------------------------------------------------
 ServerList.osIcon = function(obj) {
     let kernel = obj["os/kernel"];
     let kvers = obj["os/version"];
@@ -344,6 +282,9 @@ ServerList.osIcon = function(obj) {
     return "icon/linux.png";
 }
 
+// --------------------------------------------------------------------------
+// Generate update indicators.
+// --------------------------------------------------------------------------
 ServerList.pkgDotClass = function(q, r) {
     if (r) return "dot red";
     if (q == 0) return "";
