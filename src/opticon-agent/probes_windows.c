@@ -227,7 +227,7 @@ var *runprobe_cpuusage(probe *self) {
             return res;
         }
         
-        if ((status = PdhAddCounterA(cpuUsageProbeState.query, "\\Processor Information(_Total)\\% Processor Time", (DWORD_PTR)NULL, &cpuUsageProbeState.counter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(cpuUsageProbeState.query, "\\Processor Information(_Total)\\% Processor Time", (DWORD_PTR)NULL, &cpuUsageProbeState.counter)) != ERROR_SUCCESS) {
             log_error("Failed to add cpu usage query counter: %" PRIx32, status);
             return res;
         }
@@ -333,7 +333,7 @@ var *runprobe_loadavg(probe *self) {
             return res;
         }
         
-        if ((status = PdhAddCounterA(loadAverageProbeState.query, "\\System\\Processor Queue Length", (DWORD_PTR)NULL, &loadAverageProbeState.counter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(loadAverageProbeState.query, "\\System\\Processor Queue Length", (DWORD_PTR)NULL, &loadAverageProbeState.counter)) != ERROR_SUCCESS) {
             log_error("Failed to add load average query counter: %" PRIx32, status);
             return res;
         }
@@ -431,19 +431,19 @@ var *runprobe_net(probe *self) {
             return res;
         }
         
-        if ((status = PdhAddCounterA(netProbeState.query, "\\Network Interface(*)\\Bytes Received/sec", (DWORD_PTR)NULL, &netProbeState.bytesReceivedCounter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(netProbeState.query, "\\Network Interface(*)\\Bytes Received/sec", (DWORD_PTR)NULL, &netProbeState.bytesReceivedCounter)) != ERROR_SUCCESS) {
             log_error("Failed to add net query counter: %" PRIx32, status);
             return res;
         }
-        if ((status = PdhAddCounterA(netProbeState.query, "\\Network Interface(*)\\Packets Received/sec", (DWORD_PTR)NULL, &netProbeState.packetsReceivedCounter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(netProbeState.query, "\\Network Interface(*)\\Packets Received/sec", (DWORD_PTR)NULL, &netProbeState.packetsReceivedCounter)) != ERROR_SUCCESS) {
             log_error("Failed to add net query counter: %" PRIx32, status);
             return res;
         }
-        if ((status = PdhAddCounterA(netProbeState.query, "\\Network Interface(*)\\Bytes Sent/sec", (DWORD_PTR)NULL, &netProbeState.bytesSentCounter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(netProbeState.query, "\\Network Interface(*)\\Bytes Sent/sec", (DWORD_PTR)NULL, &netProbeState.bytesSentCounter)) != ERROR_SUCCESS) {
             log_error("Failed to add net query counter: %" PRIx32, status);
             return res;
         }
-        if ((status = PdhAddCounterA(netProbeState.query, "\\Network Interface(*)\\Packets Sent/sec", (DWORD_PTR)NULL, &netProbeState.packetsSentCounter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(netProbeState.query, "\\Network Interface(*)\\Packets Sent/sec", (DWORD_PTR)NULL, &netProbeState.packetsSentCounter)) != ERROR_SUCCESS) {
             log_error("Failed to add net query counter: %" PRIx32, status);
             return res;
         }
@@ -469,46 +469,97 @@ var *runprobe_net(probe *self) {
     
     var *netDict = var_get_dict_forkey(res, "net");
     
-    PDH_FMT_COUNTERVALUE pdhValue;
+    DWORD counterItemsBufferSize;
+    PDH_FMT_COUNTERVALUE_ITEM *counterItems;
+    DWORD counterItemsLength = 0;
     uint64_t value;
     
+    
     // net/in_kbs
-    if ((status = PdhGetFormattedCounterValue(netProbeState.bytesReceivedCounter, PDH_FMT_LARGE, NULL, &pdhValue)) != ERROR_SUCCESS) {
+    counterItemsBufferSize = 0;
+    if ((status = PdhGetFormattedCounterArrayA(netProbeState.bytesReceivedCounter, PDH_FMT_LARGE, &counterItemsBufferSize, &counterItemsLength, NULL)) != PDH_MORE_DATA) {
         log_error("Failed to format net query counter: %" PRIx32, status);
         return res;
     }
-    // Convert Bytes to KB to kbit
-    value = pdhValue.largeValue / 1024 * 8;
-    log_debug("probe_net/in_kbs: %" PRIu64, value);
-    var_set_int_forkey(netDict, "in_kbs", value);
+    if (counterItemsLength > 0) {
+        counterItems = malloc(counterItemsBufferSize);
+        if ((status = PdhGetFormattedCounterArrayA(netProbeState.bytesReceivedCounter, PDH_FMT_LARGE, &counterItemsBufferSize, &counterItemsLength, counterItems)) != ERROR_SUCCESS) {
+            log_error("Failed to format net query counter: %" PRIx32, status);
+            return res;
+        }
+        value = 0;
+        for (size_t i = 0; i < counterItemsLength; ++i) {
+            // Convert Bytes to KB to kbit
+            value += counterItems[i].FmtValue.largeValue / 1024 * 8;
+        }
+        free(counterItems);
+        log_debug("probe_net/in_kbs: %" PRIu64, value);
+        var_set_int_forkey(netDict, "in_kbs", value);
+    }
     
     // net/in_pps
-    if ((status = PdhGetFormattedCounterValue(netProbeState.packetsReceivedCounter, PDH_FMT_LARGE, NULL, &pdhValue)) != ERROR_SUCCESS) {
+    counterItemsBufferSize = 0;
+    if ((status = PdhGetFormattedCounterArrayA(netProbeState.packetsReceivedCounter, PDH_FMT_LARGE, &counterItemsBufferSize, &counterItemsLength, NULL)) != PDH_MORE_DATA) {
         log_error("Failed to format net query counter: %" PRIx32, status);
         return res;
     }
-    value = pdhValue.largeValue;
-    log_debug("probe_net/in_pps: %" PRIu64, value);
-    var_set_int_forkey(netDict, "in_pps", value);
+    if (counterItemsLength > 0) {
+        counterItems = malloc(counterItemsBufferSize);
+        if ((status = PdhGetFormattedCounterArrayA(netProbeState.packetsReceivedCounter, PDH_FMT_LARGE, &counterItemsBufferSize, &counterItemsLength, counterItems)) != ERROR_SUCCESS) {
+            log_error("Failed to format net query counter: %" PRIx32, status);
+            return res;
+        }
+        value = 0;
+        for (size_t i = 0; i < counterItemsLength; ++i) {
+            value += counterItems[i].FmtValue.largeValue;
+        }
+        free(counterItems);
+        log_debug("probe_net/in_pps: %" PRIu64, value);
+        var_set_int_forkey(netDict, "in_pps", value);
+    }
     
     // net/out_kbs
-    if ((status = PdhGetFormattedCounterValue(netProbeState.bytesSentCounter, PDH_FMT_LARGE, NULL, &pdhValue)) != ERROR_SUCCESS) {
+    counterItemsBufferSize = 0;
+    if ((status = PdhGetFormattedCounterArrayA(netProbeState.bytesSentCounter, PDH_FMT_LARGE, &counterItemsBufferSize, &counterItemsLength, NULL)) != PDH_MORE_DATA) {
         log_error("Failed to format net query counter: %" PRIx32, status);
         return res;
     }
-    // Convert Bytes to KB to kbit
-    value = pdhValue.largeValue / 1024 * 8;
-    log_debug("probe_net/out_kbs: %" PRIu64, value);
-    var_set_int_forkey(netDict, "out_kbs", value);
+    if (counterItemsLength > 0) {
+        counterItems = malloc(counterItemsBufferSize);
+        if ((status = PdhGetFormattedCounterArrayA(netProbeState.bytesSentCounter, PDH_FMT_LARGE, &counterItemsBufferSize, &counterItemsLength, counterItems)) != ERROR_SUCCESS) {
+            log_error("Failed to format net query counter: %" PRIx32, status);
+            return res;
+        }
+        value = 0;
+        for (size_t i = 0; i < counterItemsLength; ++i) {
+            // Convert Bytes to KB to kbit
+            value += counterItems[i].FmtValue.largeValue / 1024 * 8;
+        }
+        free(counterItems);
+        log_debug("probe_net/out_kbs: %" PRIu64, value);
+        var_set_int_forkey(netDict, "out_kbs", value);
+    }
     
     // net/out_pps
-    if ((status = PdhGetFormattedCounterValue(netProbeState.packetsSentCounter, PDH_FMT_LARGE, NULL, &pdhValue)) != ERROR_SUCCESS) {
+    counterItemsBufferSize = 0;
+    if ((status = PdhGetFormattedCounterArrayA(netProbeState.packetsSentCounter, PDH_FMT_LARGE, &counterItemsBufferSize, &counterItemsLength, NULL)) != PDH_MORE_DATA) {
         log_error("Failed to format net query counter: %" PRIx32, status);
         return res;
     }
-    value = pdhValue.largeValue;
-    log_debug("probe_net/out_pps: %" PRIu64, value);
-    var_set_int_forkey(netDict, "out_pps", value);
+    if (counterItemsLength > 0) {
+        counterItems = malloc(counterItemsBufferSize);
+        if ((status = PdhGetFormattedCounterArrayA(netProbeState.packetsSentCounter, PDH_FMT_LARGE, &counterItemsBufferSize, &counterItemsLength, counterItems)) != ERROR_SUCCESS) {
+            log_error("Failed to format net query counter: %" PRIx32, status);
+            return res;
+        }
+        value = 0;
+        for (size_t i = 0; i < counterItemsLength; ++i) {
+            value += counterItems[i].FmtValue.largeValue;
+        }
+        free(counterItems);
+        log_debug("probe_net/out_pps: %" PRIu64, value);
+        var_set_int_forkey(netDict, "out_pps", value);
+    }
     
     return res;
 }
@@ -541,16 +592,16 @@ var *runprobe_io(probe *self) {
             return res;
         }
         
-        if ((status = PdhAddCounterA(diskIoProbeState.query, "\\PhysicalDisk(_Total)\\Disk Reads/sec", (DWORD_PTR)NULL, &diskIoProbeState.readsCounter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(diskIoProbeState.query, "\\PhysicalDisk(_Total)\\Disk Reads/sec", (DWORD_PTR)NULL, &diskIoProbeState.readsCounter)) != ERROR_SUCCESS) {
             log_error("Failed to add disk io query counter: %" PRIx32, status);
             return res;
         }
-        if ((status = PdhAddCounterA(diskIoProbeState.query, "\\PhysicalDisk(_Total)\\Disk Writes/sec", (DWORD_PTR)NULL, &diskIoProbeState.writesCounter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(diskIoProbeState.query, "\\PhysicalDisk(_Total)\\Disk Writes/sec", (DWORD_PTR)NULL, &diskIoProbeState.writesCounter)) != ERROR_SUCCESS) {
             log_error("Failed to add disk io query counter: %" PRIx32, status);
             return res;
         }
         
-        if ((status = PdhAddCounterA(diskIoProbeState.query, "\\PhysicalDisk(_Total)\\Avg. Disk sec/Transfer", (DWORD_PTR)NULL, &diskIoProbeState.waitCounter)) != ERROR_SUCCESS) {
+        if ((status = PdhAddEnglishCounterA(diskIoProbeState.query, "\\PhysicalDisk(_Total)\\Avg. Disk sec/Transfer", (DWORD_PTR)NULL, &diskIoProbeState.waitCounter)) != ERROR_SUCCESS) {
             log_error("Failed to add disk io query counter: %" PRIx32, status);
             return res;
         }
