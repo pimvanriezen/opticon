@@ -442,9 +442,10 @@ int cmd_tenant_get_summary (req_context *ctx, req_arg *a,
     }
     var *v_meta = var_get_dict_forkey (env, "summary");
     var *summ = db_get_summary (DB);
-    if (! summ) summ = var_alloc();
-    var_copy (v_meta, summ);
-    var_free (summ);
+    if (summ) {
+        var_copy (v_meta, summ);
+        var_free (summ);
+    }
     db_free (DB);
     *status = 200;
     return 1;
