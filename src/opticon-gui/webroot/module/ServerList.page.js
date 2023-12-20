@@ -64,7 +64,7 @@ ServerList.matchHost = function (q, host) {
     let lq = String(q).toLowerCase();
     let self = ServerList;
     
-    if (self.queryObj) {
+    if (self.queryObj && self.queryObj.tree.length) {
         return self.queryObj.match (host);
     }
     
@@ -158,6 +158,7 @@ ServerList.search = function () {
 ServerList.clearSearch = function () {
     var self = ServerList;
     
+    delete self.queryObj;
     self.View.query = "";
     self.refresh();
 }
