@@ -209,7 +209,7 @@ ServerList.sortFunc = function (left, right) {
         
             case "ipaddress":
                 lval = left["link/ip"] + " " + left["agent/ip"];
-                rval = right["link/ip"] + " " + right["link/ip"];
+                rval = right["link/ip"] + " " + right["agent/ip"];
                 break;
             
             case "cpu":
