@@ -195,35 +195,60 @@ ServerList.sortFunc = function (left, right) {
     let lval = "";
     let rval = "";
     
-    switch (sortby) {
-        case "hostname":
-            lval = String(left.hostname).toLowerCase();
-            rval = String(right.hostname).toLowerCase();
-            break;
+    try {
+        switch (sortby) {
+            case "hostname":
+                lval = String(left.hostname).toLowerCase();
+                rval = String(right.hostname).toLowerCase();
+                break;
         
-        case "label":
-            if (left.external) lval = left.external.description;
-            if (right.external) rval = right.external.description;
-            break;
+            case "label":
+                if (left.external) lval = left.external.description;
+                if (right.external) rval = right.external.description;
+                break;
         
-        case "ipaddress":
-            lval = left["link/ip"] + " " + left["agent/ip"];
-            rval = right["link/ip"] + " " + right["link/ip"];
-            break;
+            case "ipaddress":
+                lval = left["link/ip"] + " " + left["agent/ip"];
+                rval = right["link/ip"] + " " + right["link/ip"];
+                break;
             
-        case "cpu":
-            lval = left["pcpu"];
-            rval = right["pcpu"];
-            break;
+            case "cpu":
+                lval = left["pcpu"];
+                rval = right["pcpu"];
+                break;
         
-        case "loadavg":
-            lval = left["loadavg"];
-            rval = right["loadavg"];
-            break;
-    }
+            case "loadavg":
+                lval = parseFloat(left["loadavg"]);
+                rval = parseFloat(right["loadavg"]);
+                break;
+                
+            case "diskio":
+                lval = left["io/rdops"] + left["io/wrops"];
+                rval = right["io/rdops"] + right["io/wrops"];
+                break;
+            
+            case "netio":
+                lval = left["net/in_kbs"] + left["net/out_kbs"];
+                rval = right["net/in_kbs"] + right["net/out_kbs"];
+                break;
+            
+            case "rtt":
+                lval = left["link/rtt"];
+                rval = right["link/rtt"];
+                break;
+            
+            case "freeram":
+                lval = left["mem/free"];
+                rval = right["mem/free"];
+                break;
+        }
     
-    if (lval < rval) return SRTLESS;
-    if (lval > rval) return SRTMORE;
+        if (lval < rval) return SRTLESS;
+        if (lval > rval) return SRTMORE;
+    }
+    catch (e) {
+        console.log ("sort exception", e);
+    }
     return 0;
 }
 
