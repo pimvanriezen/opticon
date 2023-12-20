@@ -15,19 +15,61 @@
   <table cellspacing="0" border="0" class="tbserverlist" width="100%">
     <tr height="22">
       <td width="*">
-        <b>Hostname</b>
+        <div class="tbhead" v-on:click="setSort('hostname')">
+          <b>Hostname</b><span v-if="sort=='hostname'"> {{sortArrow()}}</span>
+        <div>
       </td>
-      <td class="nonarrow" v-if="showextra" width="80"><b>Label</b></td>
+      <td class="nonarrow" v-if="showextra" width="80">
+        <div class="tbhead" v-on:click="setSort('label')">
+          <b>Label</b><span v-if="sort=='label'"> {{sortArrow()}}</span>
+        <div>
+      </td>
       <td width="20" align="center"><img src="icon/header-pkg.png" height="16"></td>
-      <td width="100"><b>Status</b></td>
-      <td class="ipaddr"><b>IP Address</b></td>
-      <td class="nonwide" width="64" align="center"><b>CPU</b></td>
-      <td class="onlywide" width="128" align="center"><b>CPU</b></td>
-      <td class="nonarrow" width="64" align="right"><b>Load</td>
-      <td class="nonarrow" width="112" align="right"><b>Disk I/O</td>
-      <td width="112" align="right"><b>Net I/O</td>
-      <td width="100" align="right" class="onlywide"><b>Free RAM</b></td>
-      <td width="80" align="right"><b>RTT</td>
+      <td width="100">
+        <div class="tbhead" v-on:click="setSort('status')">
+          <b>Status</b><span v-if="sort=='status'"> {{sortArrow()}}</span>
+        <div>
+      </td>
+      <td class="ipaddr">
+        <div class="tbhead" v-on:click="setSort('ipaddress')">
+          <b>IP Address</b><span v-if="sort=='ipaddress'"> {{sortArrow()}}</span>
+        <div>
+      </td>
+      <td class="nonwide" width="64" align="center">
+        <div class="tbhead" v-on:click="setSort('cpu')">
+          <b>CPU</b><span v-if="sort=='cpu'"> {{sortArrow()}}</span>
+        <div>
+      </td>
+      <td class="onlywide" width="128" align="center">
+        <div class="tbhead" v-on:click="setSort('cpu')">
+          <b>CPU</b><span v-if="sort=='cpu'"> {{sortArrow()}}</span>
+        <div>
+      </td>
+      <td class="nonarrow" width="64" align="right">
+        <div class="tbhead" v-on:click="setSort('loadavg')">
+          <b>Load</b><span v-if="sort=='loadavg'"> {{sortArrow()}}</span>
+        <div>
+      </td>
+      <td class="nonarrow" width="112" align="right">
+        <div class="tbhead" v-on:click="setSort('diskio')">
+          <b>Disk I/O</b><span v-if="sort=='diskio'"> {{sortArrow()}}</span>
+        <div>
+      </td>
+      <td width="112" align="right">
+        <div class="tbhead" v-on:click="setSort('netio')">
+          <b>Net I/O</b><span v-if="sort=='netio'"> {{sortArrow()}}</span>
+        <div>
+      </td>
+      <td width="100" align="right" class="onlywide">
+        <div class="tbhead" v-on:click="setSort('freeram')">
+          <b>Free RAM</b><span v-if="sort=='freeram'"> {{sortArrow()}}</span>
+        <div>
+      </td>
+      <td width="80" align="right">
+        <div class="tbhead" v-on:click="setSort('rtt')">
+          <b>RTT</b><span v-if="sort=='rtt'"> {{sortArrow()}}</span>
+        <div>
+      </td>
     </tr>
   </table>
 </div>
