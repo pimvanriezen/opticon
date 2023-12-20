@@ -962,6 +962,10 @@ td.ipaddr {
     }
 }
 
+.tbhead {
+    cursor: pointer;
+}
+
 .leftcolumn table tr td {
     padding-bottom: 6px !important;
 }

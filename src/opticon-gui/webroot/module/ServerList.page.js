@@ -15,7 +15,9 @@ ServerList.create = function () {
         showextra: false,
         empty: false,
         server_status: "ALL",
-        query:""
+        query:"",
+        sort:"status",
+        sortorder:"descending"
     });
 }
 
@@ -35,6 +37,35 @@ ServerList.checkquery = function() {
 // Stores the loaded parent customer's id.
 // --------------------------------------------------------------------------
 ServerList.selectedObject = null;
+
+ServerList.setSort = function (label) {
+    var self = ServerList;
+    
+    if (self.View.sort != label) {
+        self.View.sort = label;
+        self.reSort();
+        return;
+    }
+    
+    if (self.View.sortorder == "descending") {
+        self.View.sortorder = "ascending";
+    }
+    else {
+        self.View.sortorder = "descending";
+    }
+    
+    self.reSort();
+}
+
+ServerList.sortArrow = function() {
+    let self = ServerList;
+    if (self.View.sortorder == "ascending") {
+        return "▲";
+    }
+    else {
+        return "▼";
+    }
+}
 
 // --------------------------------------------------------------------------
 // Activate method. Loads customer from backend API.
@@ -94,6 +125,7 @@ ServerList.refresh = function () {
             App.done();
             self.loaded = true;
         }
+        
         if (! err) {
             let qstr = String(self.View.query);
             if (qstr[0] == ':') {
@@ -120,29 +152,86 @@ ServerList.refresh = function () {
                 count++;
             }
             
-            let stval = {
-                "OK":0,
-                "WARN":1,
-                "ALERT":2,
-                "CRIT":3,
-                "DEAD":4,
-                "STALE":4
-            }
-            
-            nwlist = nwlist.sort (function (left, right) {
-                if (stval[left.status] < stval[right.status]) return 1;
-                if (stval[left.status] > stval[right.status]) return -1;
-                if (left.pcpu < right.pcpu) return 1;
-                if (left.pcpu > right.pcpu) return -1;
-                if (left.loadavg < right.loadavg) return 1;
-                if (left.loadavg > right.loadavg) return -1;
-                return 0;
-            });
+            self.rawdata = Vidi.clone (nwlist);
+            nwlist = nwlist.sort (self.sortFunc);
             
             self.View.empty = ((count == 0) && (! self.queryObj));
             self.View.overview = nwlist;
         }
     });    
+}
+
+ServerList.sortFunc = function (left, right) {
+    let self = ServerList;
+    let sortby = self.View.sort;
+    let sortord = self.View.sortorder;
+    let stval = {
+        "OK":0,
+        "WARN":1,
+        "ALERT":2,
+        "CRIT":3,
+        "DEAD":4,
+        "STALE":4
+    };
+        
+    let SRTLESS = 1;
+    let SRTMORE = -1;
+    
+    if (sortord == 'ascending') {
+        SRTLESS = -1;
+        SRTMORE = 1;
+    }
+    
+    if (sortby == "status") {
+        if (stval[left.status] < stval[right.status]) return SRTLESS;
+        if (stval[left.status] > stval[right.status]) return SRTMORE;
+        if (left.pcpu < right.pcpu) return SRTLESS;
+        if (left.pcpu > right.pcpu) return SRTMORE;
+        if (left.loadavg < right.loadavg) return SRTLESS;
+        if (left.loadavg > right.loadavg) return SRTMORE;
+        return 0;
+    }
+    
+    let lval = "";
+    let rval = "";
+    
+    switch (sortby) {
+        case "hostname":
+            lval = String(left.hostname).toLowerCase();
+            rval = String(right.hostname).toLowerCase();
+            break;
+        
+        case "label":
+            if (left.external) lval = left.external.description;
+            if (right.external) rval = right.external.description;
+            break;
+        
+        case "ipaddress":
+            lval = left["link/ip"] + " " + left["agent/ip"];
+            rval = right["link/ip"] + " " + right["link/ip"];
+            break;
+            
+        case "cpu":
+            lval = left["pcpu"];
+            rval = right["pcpu"];
+            break;
+        
+        case "loadavg":
+            lval = left["loadavg"];
+            rval = right["loadavg"];
+            break;
+    }
+    
+    if (lval < rval) return SRTLESS;
+    if (lval > rval) return SRTMORE;
+    return 0;
+}
+
+ServerList.reSort = function() {
+    let self = ServerList;
+    let nwlist = self.rawdata;
+    nwlist = nwlist.sort(self.sortFunc);
+    self.View.overview = nwlist;
 }
 
 // --------------------------------------------------------------------------
