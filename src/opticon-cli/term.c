@@ -349,7 +349,8 @@ int main (void) {
     term_new_column();
     term_print_hdr ("Test", &rsrc.icns.computer);
     term_write ("Hello, <y>world</> how are <b>you</> doing?\n"
-                "This is a test of the column system, I hope it goes well.\n\n");
+                "This is a test of the column system, "
+                "I hope it goes well.\n\n");
 
     term_new_column();
     term_print_hdr ("Another Column", &rsrc.icns.gauge);

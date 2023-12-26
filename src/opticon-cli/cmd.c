@@ -819,15 +819,14 @@ int cmd_get_record (int argc, const char *argv[]) {
     
     term_new_column();
     print_hdr ("Host", rsrc(icns.computer));
-    print_value ("UUID", VT_YLW "%s" VT_RST, OPTIONS.host);
-    print_value ("Hostname", VT_YLW "%s" VT_RST, $str("hostname"));
-    print_value ("Address", VT_BLD "%s" VT_RST " (rtt: " VT_BLD "%.2f"
-                            VT_RST " ms, " VT_BLD "%.0f" VT_RST " %% loss)",
+    print_value ("UUID", "<y>%s</>", OPTIONS.host);
+    print_value ("Hostname", "<y>%s</>", $str("hostname"));
+    print_value ("Address", "<b>%s</> (rtt: <b>%.2f</> ms, <b>%.0f</> %% loss)",
                             $$str("link","ip"),
                             $$frac("link","rtt"),
                             $$frac("link","loss"));
                             
-    print_value ("Version", VT_YLW "%s" VT_RST, $$str("agent","v"));
+    print_value ("Version", "<y>%s</>", $$str("agent","v"));
     print_value ("Status", "%s", decorate_status($str("status")));
     print_array ("Problems", $arr("problems"));
     
@@ -890,11 +889,10 @@ int cmd_get_record (int argc, const char *argv[]) {
                                      ua_sec, (ua_sec==1)?"":"s");
             }
             
-            print_value ("Uptime",VT_GRN "%s" VT_RST " (Agent: %s)",
-                                  uptimestr, uptimeastr);
+            print_value ("Uptime","<g>%s</> (Agent: %s)",uptimestr, uptimeastr);
         }
         else {
-            print_value ("Uptime",VT_GRN "%s" VT_RST,uptimestr);
+            print_value ("Uptime","<g>%s</>", uptimestr);
         }
 
         const char *hw = $$str("os","hw");
@@ -903,32 +901,31 @@ int cmd_get_record (int argc, const char *argv[]) {
         var *cpus = $arr("cpu");
         if (cpus && var_get_count (cpus)) {
             var *vcpu = var_get_dict_atindex (cpus, 0);
-            print_value ("CPU",VT_YLW "%ix " VT_RST "%s",
+            print_value ("CPU","<y>%ix</> %s",
                          var_get_int_forkey (vcpu, "count"),
                          var_get_str_forkey (vcpu, "model"));
         }
         $done("cpu");
 
-        print_value ("OS/Arch",VT_YLW "%s %s " VT_RST "(%s)",
+        print_value ("OS/Arch", "<y>%s %s</> (%s)",
                      $$str("os","kernel"), $$str("os","version"),
                      $$str("os","arch"));
+                     
         const char *dist = $$str("os","distro");
-        if (dist) print_value ("Distribution", VT_GRN "%s" VT_RST, dist);
+        if (dist) print_value ("Distribution", "<g>%s</>", dist);
         $done("os");
         
         /* ------------------------------------------------------------------*/
         term_new_column();
         print_hdr ("Resources", rsrc(icns.gauge));
-        print_value ("Processes",VT_BLD "%" PRIu64 VT_RST " "
-                                 "(" VT_BLD "%" PRIu64 VT_RST " running, "
-                                 VT_BLD "%" PRIu64 VT_RST " stuck)",
-                                 $$int("proc","total"),
-                                 $$int("proc","run"),
-                                 $$int("proc","stuck"));
+        print_value ("Processes", "<b>%" PRIu64 "</> (<b>%" PRIu64 "</> "
+                                  "running, <b>%" PRIu64 "</> stuck)",
+                                  $$int("proc","total"),
+                                  $$int("proc","run"),
+                                  $$int("proc","stuck"));
         $done("proc");
  
-        print_value ("Load Average", VT_BLD "%6.2f" VT_RST " / "
-                     VT_BLD "%6.2f" VT_RST " / " VT_BLD "%6.2f" VT_RST,
+        print_value ("Load Average","<b>%6.2f</> / <b>%6.2f</> / <b>%6.2f</>",
                      $ifrac ("loadavg",0), $ifrac ("loadavg", 1),
                      $ifrac ("loadavg",2));
         $done ("loadavg");
@@ -953,24 +950,22 @@ int cmd_get_record (int argc, const char *argv[]) {
     
         print_gauge_value ("CPU", "%", pcpu, 100);
         if (iowait>0.001) {
-            print_value ("CPU iowait", VT_BLD "%6.2f" VT_RST, iowait);
+            print_value ("CPU iowait", "<b>%6.2f</>", iowait);
         }
-        print_value ("Available RAM", VT_BLD "%.2f" VT_RST " MB",
+        print_value ("Available RAM", "<b>%.2f</> MB",
                      ((double)$$int("mem","total"))/1024.0);
-        print_value ("Free RAM", VT_BLD "%.2f" VT_RST " MB",
+        
+        print_value ("Free RAM","<b>%.2f</> MB",
                      ((double)$$int("mem","free"))/1024.0);
     
-        print_value ("Network in/out",     VT_BLD "%i" VT_RST " Kb/s "
-                                       "(" VT_BLD "%i" VT_RST " pps) / "
-                                           VT_BLD "%i" VT_RST " Kb/s "
-                                       "(" VT_BLD "%i" VT_RST " pps)",
+        print_value ("Network in/out", "<b>%i</> Kb/s (<b>%i</> pps) / "
+                                       "<b>%i</> Kb/s (<b>%i</> pps)",
                                        $$int("net","in_kbs"),
                                        $$int("net","in_pps"),
                                        $$int("net","out_kbs"),
                                        $$int("net","out_pps"));
     
-        print_value ("Disk i/o", VT_BLD "%i" VT_RST " rdops / "
-                                 VT_BLD "%i" VT_RST " wrops",
+        print_value ("Disk i/o", "<b>%i</> rdops / <b>%i</> wrops",
                      $$int("io","rdops"), $$int("io","wrops"));
     
         $done("mem");
@@ -1087,14 +1082,10 @@ int cmd_get_record (int argc, const char *argv[]) {
         if ($exists ("phdns")) {
             term_new_column();
             print_hdr ("Pi-Hole DNS",rsrc(icns.dns));
-            print_value ("Block table size", VT_BLD "%i" VT_RST,
-                         $$int("phdns","sz"));
-            print_value ("Queries today", VT_BLD "%i" VT_RST,
-                         $$int("phdns","qnow"));
-            print_value ("Blocked today", VT_BLD "%i" VT_RST,
-                         $$int("phdns","bnow"));
-            print_value ("Blocked", VT_BLD "%.1f" VT_RST " %%",
-                         $$frac("phdns","pblk"));
+            print_value ("Block table size", "<b>%i</>", $$int("phdns","sz"));
+            print_value ("Queries today", "%i", $$int("phdns","qnow"));
+            print_value ("Blocked today", "%i", $$int("phdns","bnow"));
+            print_value ("Blocked", "<b>%.1f</>", $$frac("phdns","pblk"));
             $done ("phdns");
         }
         
@@ -1102,8 +1093,7 @@ int cmd_get_record (int argc, const char *argv[]) {
         if ($exists ("mysql")) {
             term_new_column();
             print_hdr ("MySQL Server",rsrc(icns.db));
-            print_value ("Configuration", VT_BLD "%s" VT_RST, 
-                         $$str("mysql","conf"));
+            print_value ("Configuration", "<b>%s</>", $$str("mysql","conf"));
             print_value ("Queries/second", "%.2f", $$frac("mysql","qps"));
             print_value ("Errors/second", "%.2f", $$frac("mysql","erps"));
             print_value ("Connections/second", "%.2f", $$frac("mysql","cps"));

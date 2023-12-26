@@ -285,7 +285,8 @@ void req_write_response (struct MHD_Connection *conn, var *res, int status,
     void *buf = (void *) ioport_get_buffer (out);
     size_t buflen = ioport_read_available (out);
     struct MHD_Response *response;
-    response = MHD_create_response_from_buffer (buflen, buf, MHD_RESPMEM_MUST_COPY);
+    response = MHD_create_response_from_buffer (buflen, buf,
+                                                MHD_RESPMEM_MUST_COPY);
     
     var *hc = outhdr->value.arr.first;
     while (hc) {
