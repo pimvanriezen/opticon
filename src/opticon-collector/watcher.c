@@ -393,8 +393,11 @@ void overviewthread_run (thread *self) {
                     crsr = crsr->next;
                 }
                 
+                char cmd[1024];
+                sprintf (cmd, "%s %s", APP.notifypath, uuidstr);
+                
                 if (APP.notifypath) {
-                    FILE *fcmd = popen_safe (APP.notifypath, "w");
+                    FILE *fcmd = popen_safe (cmd, "w");
                     if (fcmd) {
                         var_dump (n, fcmd);
                         pclose_safe (fcmd);
