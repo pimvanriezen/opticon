@@ -383,7 +383,8 @@ void overviewthread_run (thread *self) {
                 log_info ("Notification triggered for tenant <%s>: %i",
                           uuidstr, var_get_count (n));
                 
-                var *crsr = var_first (n);
+                var *vissues = var_get_dict_forkey (n, "issues");
+                var *crsr = var_first (vissues);
                 while (crsr) {
                     var *ovdata = var_find_key (overv, crsr->id);
                     if (ovdata) {
@@ -394,8 +395,10 @@ void overviewthread_run (thread *self) {
                 
                 if (APP.notifypath) {
                     FILE *fcmd = popen_safe (APP.notifypath, "w");
-                    var_dump (n, fcmd);
-                    pclose_safe (fcmd);
+                    if (fcmd) {
+                        var_dump (n, fcmd);
+                        pclose_safe (fcmd);
+                    }
                 }
                 
                 // n now contains the notifications plus extracted
