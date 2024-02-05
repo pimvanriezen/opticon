@@ -1086,84 +1086,42 @@ static bool isTopProbeInitialized = false;
 
 #define E_TOPPROBE_NO_FREE_SLOT 0x162d8a68
 
+static inline double calculateProcessInterestingness(const DTopProbeProcess *process) {
+    // Interestingness is a weighted average represented by a number between 0 and 100
+    // Cpu usage has a weight of 2
+    double cpuWeight = 2.0;
+    double memoryWeight = 1.0;
+    return ((process->cpuUsagePercent * cpuWeight) + (process->memoryUsagePercent * memoryWeight)) / (cpuWeight + memoryWeight);
+}
+
 static uint32_t getSlotIndexForProcess(size_t *outIndex, const DTopProbeProcess *process, const DTopProbeProcess *processList, size_t processListItemCount) {
-    bool foundSLot = false;
+    bool foundSlot = false;
     
-    // Find a free slot
+    double interestingness = calculateProcessInterestingness(process);
+    double interestingnessOfBumped = 0;
     for (size_t i = 0; i < processListItemCount; ++i) {
         const DTopProbeProcess *checkProcess = &processList[i];
-        if (checkProcess->hasData) continue;
+        if (!checkProcess->hasData) {
+            // Free slot found
+            foundSlot = true;
+            *outIndex = i;
+            break;
+        }
         
-        // Free slot found
-        foundSLot = true;
-        *outIndex = i;
-        break;
-    }
-    
-    // If no free slot was found, check if this process is 'interesting' enough to bump an existing process
-    
-    // Check if its cpu usage is higher
-    if (!foundSLot) {
-        double largestDiff = 0;
-        for (size_t i = 0; i < processListItemCount; ++i) {
-            const DTopProbeProcess *checkProcess = &processList[i];
+        double checkInterestingness = calculateProcessInterestingness(checkProcess);
+        if (interestingness > checkInterestingness && (!foundSlot || checkInterestingness < interestingnessOfBumped)) {
+            // Bump the old, but keep looping to bump the least interesting process to bump
+            foundSlot = true;
+            interestingnessOfBumped = checkInterestingness;
+            *outIndex = i;
             
-            double cpuUsageDiff = process->cpuUsagePercent - checkProcess->cpuUsagePercent;
-            if (cpuUsageDiff > 0) {
-                // Bump the old
-                foundSLot = true;
-                
-                // Prefer to bump the least interesting
-                if (cpuUsageDiff > largestDiff) {
-                    largestDiff = cpuUsageDiff;
-                    *outIndex = i;
-                }
-            }
+            //if (_tmp_debug) {
+            //    printf("%s %f/%f gets slot of %s %f/%f\n", process->processName, process->cpuUsagePercent, process->memoryUsagePercent, checkProcess->processName, checkProcess->cpuUsagePercent, checkProcess->memoryUsagePercent);
+            //}
         }
     }
     
-    // Check if its cpu usage is equal, but memory is higher
-    if (!foundSLot) {
-        double largestDiff = 0;
-        for (size_t i = 0; i < processListItemCount; ++i) {
-            const DTopProbeProcess *checkProcess = &processList[i];
-            
-            double memoryUsageDiff = process->memoryUsagePercent - checkProcess->memoryUsagePercent;
-            if (process->cpuUsagePercent == checkProcess->cpuUsagePercent && memoryUsageDiff > 0) {
-                // Bump the old
-                foundSLot = true;
-                
-                // Prefer to bump the least interesting
-                if (memoryUsageDiff > largestDiff) {
-                    largestDiff = memoryUsageDiff;
-                    *outIndex = i;
-                }
-            }
-        }
-    }
-    
-    // Check if its cpu usage difference is insignificant (< 2% of total), but memory is significantly higher (> 10% of total)
-    if (!foundSLot) {
-        double largestDiff = 0;
-        for (size_t i = 0; i < processListItemCount; ++i) {
-            const DTopProbeProcess *checkProcess = &processList[i];
-            
-            double cpuUsageDiff = process->cpuUsagePercent - checkProcess->cpuUsagePercent;
-            double memoryUsageDiff = process->memoryUsagePercent - checkProcess->memoryUsagePercent;
-            if (cpuUsageDiff > -2.0 && memoryUsageDiff > 10.0) {
-                // Bump the old
-                foundSLot = true;
-                
-                // Prefer to bump the least interesting
-                if (memoryUsageDiff > largestDiff) {
-                    largestDiff = memoryUsageDiff;
-                    *outIndex = i;
-                }
-            }
-        }
-    }
-    
-    if (!foundSLot) return E_TOPPROBE_NO_FREE_SLOT;
+    if (!foundSlot) return E_TOPPROBE_NO_FREE_SLOT;
     
     return 0;
 }
@@ -1211,9 +1169,6 @@ static uint32_t sampleTopProbe() {
         for (size_t i = 0; i < TRACK_MAX_NUMBER_OF_PROCESSES; ++i) {
             DTopProbeProcess *process = &topProbeState.processList[i];
             if (!process->hasData) continue;
-            
-                
-            process->cpuUsagePercent = 0.0;
             
             // Calculate cpu usage percentage
             uint64_t usageTicksSincePrevious = process->cpuUsageTicks - process->previousCpuUsageTicks;
