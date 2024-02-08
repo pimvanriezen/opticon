@@ -53,7 +53,11 @@ API.Auth.setToken = function (token, cb) {
     });
 }
 
-API.Auth.login = function (username, password, cb) {
+API.Auth.login = function (username, password, totp, cb) {
+    if (!cb) {
+        cb = totp
+        totp = null
+    }
     var self = API.Auth;
     var svc;
     var path;
@@ -76,11 +80,19 @@ API.Auth.login = function (username, password, cb) {
             path = "/login";
             break;
     }
+    const credentials = {
+        "username": username,
+        "password": password
+    }
+    if (totp) {
+        credentials.totp = totp
+    }
     
-    API.post (svc,path,{username,password}, function (err, data) {
+    API.post (svc, path, credentials, function (err, data) {
         if (err) {
-            cb (false);
-            return;
+            const result = (data.status) ? data.status : false // return the status code in case it exists, otherwise false 
+            cb(result)
+            return
         }
         
         if (data.token) {
