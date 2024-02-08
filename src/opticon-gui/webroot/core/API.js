@@ -150,8 +150,8 @@ API.call = function(service,path,method,indata,cb,silent,retry) {
             cb (null, (dtype=="text")?xhr.responseText:xhr.responseJSON);
         }
         else {
-            console.log ("[API] error",xhr,status);
-            cb (status, {"error":status})
+            console.log ("[API] error",xhr,status)
+            cb (status, {"error":status,"status":xhr.status})
         }   
     }
 
