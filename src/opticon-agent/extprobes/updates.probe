@@ -42,7 +42,7 @@ elif [ "$pman" = "apt" ]; then
   done < <(apt upgrade --simulate 2>/dev/null | grep ^Inst)
   printf "]\n"
  
-  if [ -e /var/run/reboot-required]; then
+  if [ -e /var/run/reboot-required ]; then
     reboot=1
   fi
 
