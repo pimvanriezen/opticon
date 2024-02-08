@@ -12,7 +12,8 @@ LoginScreen.create = function() {
         username:"",
         password:"",
         error:"",
-        autofilled:false
+        autofilled:false,
+        requireAuthCode: false
     });
     self.isOpen = false;
 }
@@ -24,6 +25,7 @@ LoginScreen.open = function() {
     var self = LoginScreen;
     self.View.username = "";
     self.View.password = "";
+    self.View.authcode = "";
     self.View.error = "";
     
     console.log ("[Login] hash: " + window.location.hash)
@@ -70,20 +72,12 @@ LoginScreen.mockLogin = function (u, p, cb) {
 // --------------------------------------------------------------------------
 LoginScreen.submit = function() {
     var self = LoginScreen;
-    $("#LoginScreen-submit").prop ("disabled", true);
-
-
-    API.Auth.login (self.View.username, self.View.password, function(r) {
-        if (r) {
-             $("#LoginScreen-submit").prop ("disabled", false);
-             $(".uSideBar").fadeIn();
-            self.hide();
-            self.isOpen = false;
-            App.handleLogin();
-            App.activate ("/Server");
-        }
-        else {
+    $("#LoginScreen-submit").prop("disabled", true);
+    
+    API.Auth.login (self.View.username, self.View.password, self.View.authcode, function(r) {
+        if (false === r || 403 === r) {
             self.View.password = "";
+            self.View.authcode = "";
             self.View.error = "Authentication failed";
             $("#LoginScreen-error").show();
             $(self.Vidi.$el).shake(function() {
@@ -91,5 +85,29 @@ LoginScreen.submit = function() {
                 $("#LoginScreen-password").focus();
             });
         }
+        else {
+            // r can be true or a status code (e.g. 444)
+            if (444 === r) {
+                self.View.requireAuthCode = true
+                $("#LoginScreen-authcode").focus() // focus on auth code field
+                return
+            }
+            else {
+                self.handleSuccessfulLogin()
+            }
+        }
     });
+}
+
+// --------------------------------------------------------------------------
+// Handle successful login
+// --------------------------------------------------------------------------
+LoginScreen.handleSuccessfulLogin = function() {
+    const self = LoginScreen;
+    $("#LoginScreen-submit").prop ("disabled", false);
+    $(".uSideBar").fadeIn();
+    self.hide();
+    self.isOpen = false;
+    App.handleLogin();
+    App.activate ("/Server");
 }

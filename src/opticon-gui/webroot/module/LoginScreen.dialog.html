@@ -10,6 +10,10 @@
         <u-textinput ac="on" size="24" id="username">Username</u-textinput>
         <u-textinput ac="on" type="password"
                      size="24" id="password">Password</u-textinput>
+        <span v-if="requireAuthCode">
+          <u-textinput ac="on" type="authcode"
+                       size="30" id="authcode">Authentication Code</u-textinput>
+      </span>
       </form>
     </td>
   </tr>
