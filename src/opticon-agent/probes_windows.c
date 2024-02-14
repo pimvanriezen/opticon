@@ -1088,8 +1088,9 @@ static bool isTopProbeInitialized = false;
 
 static inline double calculateProcessInterestingness(const DTopProbeProcess *process) {
     // Interestingness is a weighted average represented by a number between 0 and 100
-    // Cpu usage has a weight of 2
-    double cpuWeight = 2.0;
+    // @todo with GetProcessIoCounters and the total iowait stats we gather in runprobe_io, we could calculate the iowait per process
+    // but we'd have to merge the 2 probes so they operate on the same time-slice
+    double cpuWeight = 6.0;
     double memoryWeight = 1.0;
     return ((process->cpuUsagePercent * cpuWeight) + (process->memoryUsagePercent * memoryWeight)) / (cpuWeight + memoryWeight);
 }
