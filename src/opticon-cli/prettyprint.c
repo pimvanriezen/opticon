@@ -8,6 +8,7 @@
 #include <ctype.h>
 
 #include <libopticon/datatypes.h>
+#include <libopticon/strnappend.h>
 #include <libopticon/util.h>
 #include <libopticon/var.h>
 
@@ -237,7 +238,7 @@ void print_array (const char *key, var *arr) {
     int cnt=0;
     var *crsr = arr->value.arr.first;
     while (crsr) {
-        if (cnt) strncat (out, ",", 4095);
+        if (cnt) strnappend (out, ",", 4095);
         switch (crsr->type) {
             case VAR_INT:
                 snprintf (out+strlen(out), 4095-strlen(out),
@@ -257,7 +258,7 @@ void print_array (const char *key, var *arr) {
                 break;
             
             default:
-                strncat (out, "?", 4095);
+                strnappend (out, "?", 4095);
                 break;
         }
         crsr = crsr->next;

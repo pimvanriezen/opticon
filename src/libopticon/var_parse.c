@@ -1,5 +1,6 @@
 #include <libopticon/var_parse.h>
 #include <libopticon/defaults.h>
+#include <libopticon/strnappend.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -491,7 +492,7 @@ int var_parse_json (var *into, const char *buf) {
         }
         snprintf (errbuf, 63, " (line %i)", LAST_PARSE_LINE);
         errbuf[63] = 0;
-        strncat (LAST_PARSE_ERROR, errbuf, 4095);
+        strnappend (LAST_PARSE_ERROR, errbuf, 4095);
         LAST_PARSE_ERROR[4095] = 0;
     }
     return res;

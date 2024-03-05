@@ -15,6 +15,7 @@
 #include <libopticon/var.h>
 #include <libopticon/var_dump.h>
 #include <libopticon/defaultmeters.h>
+#include <libopticon/strnappend.h>
 #include <libopticondb/db_local.h>
 #include <libhttp/http.h>
 #include "api.h"
@@ -61,8 +62,7 @@ var *api_call (const char *mth, var *data, const char *fmt, ...)
     if (tmpurl[len-1] == '/') tmpurl[len-1] = 0;
     
     /* Add path */
-    strncat (tmpurl, path, 1023);
-    tmpurl[1023] = 0;
+    strnappend (tmpurl, path, 1023);
     
     /* Dispatch call */
     var *res = http_call (mth, tmpurl, outhdr, data, errinfo, NULL);
@@ -135,8 +135,7 @@ var *api_get_raw (const char *path, int exiterror) {
     }
     
     if (tmpurl[len-1] == '/') tmpurl[len-1] = 0;
-    strncat (tmpurl, path, 1023);
-    tmpurl[1023] = 0;
+    strnappend (tmpurl, path, 1023);
     
     /* Dispatch http request */
     var *res = http_call ("GET", tmpurl, outhdr, data, errinfo, NULL);

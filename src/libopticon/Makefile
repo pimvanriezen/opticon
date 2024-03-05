@@ -41,7 +41,7 @@ OBJS_LIBOPTICON = rsrc.o adjust.o aes.o host.o tenant.o \
 				  var_dump.o var.o react.o var_parse.o \
 				  cliopt.o daemon.o log.o thread.o transport.o \
 				  transport_udp.o timestr.o packetqueue.o \
-				  defaultmeters.o uuid.o hash.o \
+				  defaultmeters.o uuid.o hash.o strnappend.o \
 				  popen.o summary.o notify.o timer.o
 all: ../../lib/libopticon.a
 
