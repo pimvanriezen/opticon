@@ -87,6 +87,7 @@ void collectorlist_start (collectorlist *self) {
         }
         else {
             if (c->bindaddr) {
+                log_info ("Binding to '%s'", c->bindaddr);
                 if (! outtransport_setlocal (c->transport, c->bindaddr)) {
                     log_error ("Error binding local address '%s'", c->bindaddr);
                     exit (1);
