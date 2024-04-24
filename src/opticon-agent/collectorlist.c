@@ -54,7 +54,7 @@ void collectorlist_add_host (collectorlist *self, var *data) {
     collector *c = collector_new (self);
     
     if (bind) {
-        c->bindaddr = strdup (addr);
+        c->bindaddr = strdup (bind);
     }
     else {
         c->bindaddr = NULL;
