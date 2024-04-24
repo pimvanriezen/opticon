@@ -211,6 +211,8 @@ var *runprobe_who (probe *self) {
     return res;
 }
 
+extern const char *COLLECTOR_BINDIP;
+
 var *runprobe_localip (probe *self) {
     char buf[1024];
     char addr[1024];
@@ -220,6 +222,13 @@ var *runprobe_localip (probe *self) {
     
     var *res = var_alloc();
     var *res_agent = var_get_dict_forkey (res, "agent");
+    
+    // If explicitly configured to bind to an IP use that one
+    if (COLLECTOR_BINDIP) {
+        var_set_str_forkey (res_agent, "ip", COLLECTOR_BINDIP);
+        return res;
+    }
+    
 #if defined(OS_LINUX)
     const char *cmd = "dev=$(ip route show | grep ^default | head -1 | "
                       "sed -e 's/.*dev //' | cut -f1 -d' '); "

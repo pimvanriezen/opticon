@@ -5,6 +5,8 @@
 #include <libopticon/log.h>
 #include "opticon-agent.h"
 
+const char *COLLECTOR_BINDIP = NULL;
+
 collector *collector_new (collectorlist *parent) {
     collector *self = malloc (sizeof (collector));
     self->next = self->prev = NULL;
@@ -55,6 +57,7 @@ void collectorlist_add_host (collectorlist *self, var *data) {
     
     if (bind) {
         c->bindaddr = strdup (bind);
+        COLLECTOR_BINDIP = c->bindaddr;
     }
     else {
         c->bindaddr = NULL;
