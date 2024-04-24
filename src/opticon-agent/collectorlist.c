@@ -87,7 +87,10 @@ void collectorlist_start (collectorlist *self) {
         }
         else {
             if (c->bindaddr) {
-                outtransport_setlocal (c->transport, c->bindaddr);
+                if (! outtransport_setlocal (c->transport, c->bindaddr)) {
+                    log_error ("Error binding local address '%s'", c->bindaddr);
+                    exit (1);
+                }
             }
             c->resender = authresender_create (c->transport);
         }

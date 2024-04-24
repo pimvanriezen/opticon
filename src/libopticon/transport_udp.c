@@ -11,8 +11,7 @@ int udp_outtransport_setremote (outtransport *t, const char *addr,
     struct addrinfo hints;
     char portstr[16];
     
-    if (self->peeraddr) free (self->peeraddr);
-    self->peeraddr = (struct addrinfo *) malloc (sizeof (struct addrinfo));
+    if (self->peeraddr) freeaddrinfo (self->peeraddr);
     
     memset (&hints, 0, sizeof (hints));
     hints.ai_family = PF_UNSPEC;
@@ -54,8 +53,7 @@ int udp_outtransport_setlocal (outtransport *t, const char *addr) {
     char portstr[4];
     int port = 0;
     
-    if (self->bindaddr) free (self->bindaddr);
-    self->bindaddr = (struct addrinfo *) malloc (sizeof (struct addrinfo));
+    if (self->bindaddr) freeaddrinfo (self->bindaddr);
 
     memset (&hints, 0, sizeof (hints));
     hints.ai_family = PF_UNSPEC;
@@ -81,9 +79,11 @@ int udp_outtransport_setlocal (outtransport *t, const char *addr) {
 #endif
     
     if (self->sock < 0) return 0;
-
-    bind (self->sock, (struct sockaddr *) self->bindaddr->ai_addr,
-          self->bindaddr->ai_addrlen);
+    
+    if (bind (self->sock, (struct sockaddr *) self->bindaddr->ai_addr,
+              self->bindaddr->ai_addrlen) != 0) {
+        return 0;
+    }
     
     return 1;
 }
@@ -137,8 +137,7 @@ int udp_intransport_setlistenport (intransport *t, const char *addr,
     struct addrinfo hints;
     char portstr[16];
     
-    if (self->listenaddr) free (self->listenaddr);
-    self->listenaddr = (struct addrinfo *) malloc (sizeof (struct addrinfo));
+    if (self->listenaddr) freeaddrinfo (self->listenaddr);
     
     memset (&hints, 0, sizeof (hints));
     hints.ai_family = PF_UNSPEC;
