@@ -383,6 +383,11 @@ void overviewthread_run (thread *self) {
                 log_info ("Notification triggered for tenant <%s>: %i",
                           uuidstr, var_get_count (n));
                 
+                ioport *tio = ioport_create_buffer (NULL, 4096);
+                var_write (n, tio);
+                log_info ("Notification buffer: %s", ioport_get_buffer (tio));
+                ioport_close (tio);
+                
                 var *vissues = var_get_dict_forkey (n, "issues");
                 var *crsr = var_first (vissues);
                 while (crsr) {
