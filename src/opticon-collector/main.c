@@ -330,6 +330,7 @@ void handle_auth_packet (ioport *pktbuf, uint32_t netid,
     if (S) {
         host *h = S->host;
         pthread_rwlock_wrlock (&h->lock);
+        h->lastmodified = time (NULL);
         
         char addrbuf[64];
         ip2str (&S->remote, addrbuf);
