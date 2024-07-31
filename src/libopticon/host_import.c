@@ -13,7 +13,7 @@ static bool dictarray_to_host (host *h, const char *prefix, var *v) {
     char tmpid[16];
     meterid_t mid;
     meter *m;
-    char *tstr;
+    const char *tstr;
     
     var *first = v;
     var *vv = first->value.arr.first;
