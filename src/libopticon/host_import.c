@@ -13,6 +13,7 @@ static bool dictarray_to_host (host *h, const char *prefix, var *v) {
     char tmpid[16];
     meterid_t mid;
     meter *m;
+    char *tstr;
     
     var *first = v;
     var *vv = first->value.arr.first;
@@ -60,7 +61,9 @@ static bool dictarray_to_host (host *h, const char *prefix, var *v) {
                 meter_set_uint (m, pos, var_get_int_forkey (crsr, vv->id));
             }
             else if (type == MTYPE_STR) {
-                meter_set_str (m, pos, var_get_str_forkey (crsr, vv->id));
+                tstr = var_get_str_forkey (crsr, vv->id);
+                if (tstr) meter_set_str (m, pos, tstr);
+                else meter_set_str (m, pos, "");
             }
             else {
                 meter_set_frac (m, pos, var_get_double_forkey (crsr, vv->id));
