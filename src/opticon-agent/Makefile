@@ -15,7 +15,7 @@ ifeq ($(findstring mingw64,$(OSNAME)),mingw64)
 endif
 OSREL?=$(shell uname -r)
 OSRELMAJOR?=$(shell uname -r | cut -f1 -d.)
-OSDEF?=$(shell uname -s | tr a-z A-Z)
+OSDEF?=$(shell echo $(OSNAME) | tr a-z A-Z)
 
 ifeq (freebsd,$(OSNAME))
   LDFLAGS+=-lkvm

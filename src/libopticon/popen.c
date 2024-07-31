@@ -12,7 +12,9 @@
 #include <sys/wait.h>
 #endif
 
+#if !defined (OS_WINDOWS)
 extern char **environ;
+#endif
 
 typedef struct popen_item {
     struct popen_item *next;
