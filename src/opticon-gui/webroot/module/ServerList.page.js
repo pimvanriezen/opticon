@@ -43,6 +43,12 @@ ServerList.setSort = function (label) {
     
     if (self.View.sort != label) {
         self.View.sort = label;
+        if (label == "status") {
+            self.View.sortorder = "descending";
+        }
+        else {
+            self.View.sortorder = "ascending";
+        }
         self.reSort();
         return;
     }
