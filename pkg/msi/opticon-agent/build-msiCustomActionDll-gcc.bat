@@ -33,6 +33,7 @@ gcc -std=c17 -Wall -Wextra -Wpedantic ^
 	../../../src/libopticon/hash.c ^
 	../../../src/libopticon/ioport.c ^
 	../../../src/libopticon/ioport_file.c ^
+	../../../src/libopticon/strnappend.c ^
 	../../../src/libopticon/util.c ^
 	../../../src/libopticon/uuid.c ^
 	../../../src/libopticon/var.c ^
