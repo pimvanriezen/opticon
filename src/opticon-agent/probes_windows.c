@@ -948,7 +948,10 @@ var *runprobe_df(probe *self) {
         ULARGE_INTEGER totalNumberOfBytesAvailableToCaller;
         //ULARGE_INTEGER totalNumberOfFreeBytes;
         if (GetDiskFreeSpaceExA(singleLogicalDriveString, &freeBytesAvailableToCaller, &totalNumberOfBytesAvailableToCaller, NULL) == false) {
-            log_error("Failed to get disk space: %" PRIx32, GetLastError());
+            DWORD e = GetLastError();
+            char *errorInfo = "unknown";
+            if (e == 0x80310000) errorInfo = "FVE_E_LOCKED_VOLUME";
+            log_error("Failed to get disk space: %s %" PRIx32 " (%s)", singleLogicalDriveString, e, errorInfo);
         }
         else {
             uint64_t size = totalNumberOfBytesAvailableToCaller.QuadPart / 1024 / 1024;
@@ -964,7 +967,10 @@ var *runprobe_df(probe *self) {
         char volumeName[256];
         char fileSystemName[256];
         if (GetVolumeInformationA(singleLogicalDriveString, volumeName, sizeof(volumeName), NULL, NULL, NULL, fileSystemName, sizeof(fileSystemName)) == false) {
-            log_error("Failed to get volume information: %" PRIx32, GetLastError());
+            DWORD e = GetLastError();
+            char *errorInfo = "unknown";
+            if (e == 0x80310000) errorInfo = "FVE_E_LOCKED_VOLUME";
+            log_error("Failed to get volume information: %s %" PRIx32 " (%s)", singleLogicalDriveString, e, errorInfo);
             // Simply use the singleLogicalDriveString as the volume name
             strcpy(volumeName, singleLogicalDriveString);
         }
@@ -1002,15 +1008,12 @@ var *runprobe_df(probe *self) {
         var_set_str_forkey(dfDict, "mount", volumeName);
         
         // Get the physical disks associated with the logical drive / volume
-        #define GET_MAX_NUMBER_OF_PHYSICAL_DISKS 16
         
         // Make a volume(?) path out of the drive letter that looks like this: "\\.\C:" (so prefixed with \\.\ and without a trailing backslash)
         //char driveVolumePath[7] = {'\\', '\\', '.', '\\', singleLogicalDriveString[0], ':', '\0'};
         char driveVolumePath[7] = "\\\\.\\C:";
         driveVolumePath[4] = singleLogicalDriveString[0];
         
-        // A single logical drive can span multiple physical disks (e.g. software RAID)
-        char physicalDisks[256] = "";
         // @note Apparently the FILE_SHARE_WRITE is needed to prevent access denied
         // @note the 0 instead of GENERIC_READ may prevent the need for administrator privileges
         HANDLE driveVolumeHandle = CreateFileA(driveVolumePath, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
@@ -1018,6 +1021,7 @@ var *runprobe_df(probe *self) {
             log_error("Failed to open volume: %" PRIx32, GetLastError());
         }
         else {
+            #define GET_MAX_NUMBER_OF_PHYSICAL_DISKS 16
             // Buffer of type VOLUME_DISK_EXTENTS plus extra capacity to hold GET_MAX_NUMBER_OF_PHYSICAL_DISKS of DISK_EXTENT structs
             uint8_t volumeDiskExtentsBuffer[sizeof(VOLUME_DISK_EXTENTS) + (sizeof(DISK_EXTENT) * GET_MAX_NUMBER_OF_PHYSICAL_DISKS)];
             
@@ -1026,6 +1030,9 @@ var *runprobe_df(probe *self) {
                 log_error("Failed to get physical disk info: %" PRIx32, GetLastError());
             }
             else {
+                // A single logical drive can span multiple physical disks (e.g. software RAID)
+                char physicalDisks[256] = "";
+                
                 VOLUME_DISK_EXTENTS *volumeDiskExtents = (VOLUME_DISK_EXTENTS *)volumeDiskExtentsBuffer;
                 for (size_t i = 0; i < volumeDiskExtents->NumberOfDiskExtents; ++i) {
                     // Concatenate "Disk diskNumber" into physicalDisks separated by a comma and a space
@@ -1038,11 +1045,11 @@ var *runprobe_df(probe *self) {
                         strcpy(physicalDisks, tmp);
                     }
                 }
+                
+                log_debug("probe_df/device: %s", physicalDisks);
+                var_set_str_forkey(dfDict, "device", physicalDisks);
             }
         }
-        
-        log_debug("probe_df/device: %s", physicalDisks);
-        var_set_str_forkey(dfDict, "device", physicalDisks);
     }
     
     return res;
