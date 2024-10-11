@@ -320,6 +320,11 @@ ServerView.onResize = function() {
     self.Vidi.render();
 }
 
+ServerView.changeTrigger = function(ev) {
+    console.log ("Trigger change", ev);
+    console.log ("Changed: " + ev.target.id);
+}
+
 ServerView.makeLayout = function(q, portWidth) {
     var objtable= {};
     var columnpositions = {};

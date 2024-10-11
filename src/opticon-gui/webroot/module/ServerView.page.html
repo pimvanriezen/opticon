@@ -958,7 +958,7 @@
           <input type="checkbox" v-model="t.custom">
         </td>
         <td width="120" align="right">
-          <span v-show="t.custom"><input v-model="t.val" class="trigger-input"></span>
+          <span v-show="t.custom"><input id="{{t.meter}}" v-on:input="changeTrigger" v-model="t.val" class="trigger-input"></span>
           <span v-show="!t.custom">{{t.val}}</span>
         </td>
         <td width="20">&nbsp;</td>

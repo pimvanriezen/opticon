@@ -98,6 +98,21 @@ API.Opticon.Host.listWatchers = function (tenant, host, cb) {
     });
 }
 
+API.Opticon.Host.setWatcher = function (tenant, host, watcher, data, cb) {
+    if (tenant == "any") {
+        API.Opticon.Host.resolveTenant (host, function(t) {
+            if (t) API.Opticon.Hoset.setWatcher (t, host, watcher, data, cb);
+            else cb (null);
+        })
+    }
+    
+    API.post ("opticon","/"+tenant+"/host/"+host+"/watcher/"+watcher,
+              data, function (err, res) {
+        if (err) cb (null);
+        else cb (res);
+    });
+}
+
 API.Opticon.Host.remove = function (tenant, host, cb) {
     if (tenant == "any") {
         API.Opticon.Host.resolveTenant (host, function(t) {
