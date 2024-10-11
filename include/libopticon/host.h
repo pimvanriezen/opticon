@@ -25,6 +25,7 @@ typedef struct host_s {
     time_t               lastmetasync; /**< Time of last metadata sync-in*/
     meter               *first; /**< first connected meter */
     meter               *last; /**< last connected meter */
+    meter               *trash; /**< Cleanup list for meters */
     
                          /** Number of active meters. The pktcodec
                            * uses this to keep a reasonable

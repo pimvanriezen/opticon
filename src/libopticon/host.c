@@ -14,6 +14,7 @@ host *host_alloc (void) {
     res->next = NULL;
     res->first = NULL;
     res->last = NULL;
+    res->trash = NULL;
     res->tenant = NULL;
     res->graphlist = NULL;
     res->status = 0;
@@ -204,9 +205,20 @@ meter *host_find_prefix (host *h, meterid_t prefix, meter *prev) {
     return NULL;
 }
 
+void host_empty_trash (host *self) {
+    meter *m, *mnext;
+    
+    m = self->trash;
+    while (m) {
+        mnext = m->next;
+        free (m);
+        m = mnext;
+    }
+    self->trash = NULL;
+}
 
 /*/ ======================================================================= /*/
-/** Remove a meter from a host list and deallocate it */
+/** Remove a meter from a host list and add it to the trash */
 /*/ ======================================================================= /*/
 void host_delete_meter (host *h, meter *m) {
     if (m->prev) {
@@ -234,7 +246,12 @@ void host_delete_meter (host *h, meter *m) {
     meter_set_empty (m);
     m->lastmodified = 0;
     m->prev = m->next = NULL;
-    free (m);
+    
+    if (h->trash) {
+        h->trash->prev = m;
+        m->next = h->trash;
+        h->trash = m;
+    }
 }
 
 /*/ ======================================================================= /*/
@@ -257,6 +274,9 @@ void host_end_update (host *h) {
     meter *m = h->first;
     meter *nm;
     fstring status;
+    
+    /* Remove previously trashed nodes */
+    host_empty_trash (h);
     
     /* Don't reap meters from STALE hosts */
     if (m_status) {
