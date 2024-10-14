@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <libopticon/uuid.h>
 #include <time.h>
+#include <pthread.h>
 
 /* =============================== TYPES =============================== */
 
@@ -21,6 +22,7 @@ typedef struct notification_s {
 typedef struct notifylist_s {
     notification        *first;
     notification        *last;
+    pthread_rwlock_t     lock;
 } notifylist;
 
 /* ============================= FUNCTIONS ============================= */
@@ -28,6 +30,9 @@ typedef struct notifylist_s {
 notification *notification_create (void);
 void          notification_delete (notification *);
 void          notifylist_init (notifylist *);
+void          notifylist_lockr (notifylist *);
+void          notifylist_lockw (notifylist *);
+void          notifylist_unlock (notifylist *);
 void          notifylist_clear (notifylist *);
 void          notifylist_remove (notifylist *, notification *);
 void          notifylist_link (notifylist *, notification *);

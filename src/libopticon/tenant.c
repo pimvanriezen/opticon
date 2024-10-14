@@ -82,7 +82,9 @@ void tenant_delete (tenant *t) {
     }
     watchlist_clear (&t->watch);
     summaryinfo_clear (&t->summ);
+    notifylist_lockw (&t->notify);
     notifylist_clear (&t->notify);
+    notifylist_unlock (&t->notify);
     pthread_rwlock_destroy (&t->lock);
     free (t);
 }
@@ -224,6 +226,8 @@ tenant *tenant_create (uuid tenantid, aeskey key) {
 void tenant_set_notification (tenant *self, bool isproblem,
                               const char *status, uuid hostid) {
     if (! self) return;
+    
+    notifylist_lockw (&self->notify);
     notification *n = notifylist_find (&self->notify, hostid);
     if (n) {
         strncpy (n->status, status, 15);
@@ -231,11 +235,15 @@ void tenant_set_notification (tenant *self, bool isproblem,
 
         /* Don't do anything else if we're still in the same amount of
            trouble */
-        if (n->isproblem == isproblem) return;
+        if (n->isproblem == isproblem) {
+            notifylist_unlock (&self->notify);
+            return;
+        }
 
         /* is it a problem that went away before notification? */
         if (n->isproblem && (! n->notified)) {
             notifylist_remove (&self->notify, n);
+            notifylist_unlock (&self->notify);
             return;
         }
         n->lastchange = time (NULL);
@@ -254,12 +262,15 @@ void tenant_set_notification (tenant *self, bool isproblem,
             notifylist_link (&self->notify, n);
         }
     }
+    notifylist_unlock (&self->notify);
 }
 
 /*/ ======================================================================= /*/
 /** Check and handle outstanding notifications for a tenant */
 /*/ ======================================================================= /*/
 var *tenant_check_notification (tenant *self) {
+    notifylist_lockw (&self->notify);
+    
     if (notifylist_check_actionable (&self->notify)) {
         var *env = var_alloc();
         var *nenv = var_get_dict_forkey (env, "issues");
@@ -271,10 +282,14 @@ var *tenant_check_notification (tenant *self) {
             var_set_str_forkey (v, "status", n->status);
             var_set_int_forkey (v, "isproblem", n->isproblem?1:0);
             n->notified = true;
+            
             n = notifylist_find_overdue (&self->notify, n);
         }
         
+        notifylist_unlock (&self->notify);
         return env;
     }
+    
+    notifylist_unlock (&self->notify);
     return NULL;
 }

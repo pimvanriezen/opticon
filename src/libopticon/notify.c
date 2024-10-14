@@ -31,6 +31,28 @@ void notification_delete (notification *self) {
 /*/ ======================================================================= /*/
 void notifylist_init (notifylist *self) {
     self->first = self->last = NULL;
+    pthread_rwlock_init (&self->lock, NULL);
+}
+
+/*/ ======================================================================= /*/
+/** Set a read lock. */
+/*/ ======================================================================= /*/
+void notifylist_lockr (notifylist *self) {
+    pthread_rwlock_rdlock (&self->lock);
+}
+
+/*/ ======================================================================= /*/
+/** Set a write lock. */
+/*/ ======================================================================= /*/
+void notifylist_lockw (notifylist *self) {
+    pthread_rwlock_wrlock (&self->lock);
+}
+
+/*/ ======================================================================= /*/
+/** Unlock. */
+/*/ ======================================================================= /*/
+void notifylist_unlock (notifylist *self) {
+    pthread_rwlock_unlock (&self->lock);
 }
 
 /*/ ======================================================================= /*/

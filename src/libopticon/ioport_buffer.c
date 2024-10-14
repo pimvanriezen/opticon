@@ -92,7 +92,7 @@ ioport *ioport_create_buffer (void *buf, size_t sz) {
     res->bitpos = 0;
     res->bitbuffer = 0;
     
-    bufferstorage *S = res->storage = malloc (sizeof (bufferstorage));
+    bufferstorage *S = res->storage = calloc (1, sizeof (bufferstorage));
     S->bufsz = sz;
     S->pos = 0;
     S->rpos = 0;
